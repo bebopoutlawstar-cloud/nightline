@@ -601,6 +601,62 @@ html,body{overscroll-behavior:none}
 #sIcon.sx-wink{animation:sxwink 1.3s ease}
 @keyframes sxwink{20%{transform:rotate(-10deg) scaleY(.2)}40%{transform:rotate(20deg) scale(1.2)}60%{transform:rotate(0) scale(1)}}
 @media (prefers-reduced-motion:reduce){#sfx *{animation-duration:.01s!important}}
+
+/* ===== secrets pack 2 ===== */
+.sx-ship{position:absolute;left:10%;top:70%;width:min(46vw,200px);animation:sxfly 5.2s cubic-bezier(.55,0,.8,.6) .4s both;filter:drop-shadow(0 0 12px rgba(0,240,255,.5))}
+@keyframes sxfly{0%{transform:translate(0,0) rotate(-24deg) scale(1.2);opacity:0}8%{opacity:1}100%{transform:translate(70vw,-70vh) rotate(-24deg) scale(.05);opacity:.8}}
+.sx-flame{animation:sxflicker .12s linear infinite alternate}
+@keyframes sxflicker{to{opacity:.55}}
+.sx-easycap{position:absolute;left:0;right:0;bottom:22%;text-align:center;color:#F4F7FF;font-weight:700;letter-spacing:2px;animation:sxflash 5.4s ease both}
+.sx-lumos{position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,rgba(255,255,255,.95) 0,rgba(210,235,255,.75) 25%,rgba(140,190,255,.35) 55%,rgba(40,80,160,0) 80%);mix-blend-mode:screen;animation:sxlumos 4.2s ease both}
+@keyframes sxlumos{0%{opacity:0;transform:scale(.3)}18%{opacity:1;transform:scale(1.05)}30%{transform:scale(1)}50%{opacity:.85}65%{opacity:1}100%{opacity:0}}
+.sx-spark{position:absolute;width:6px;height:6px;background:#fff;border-radius:50%;box-shadow:0 0 12px 4px rgba(170,215,255,.9);animation:sxsparkle 1.4s ease-in-out both}
+@keyframes sxsparkle{0%,100%{opacity:0;transform:scale(.2)}50%{opacity:1;transform:scale(1.2)}}
+#chat.sx-bright{animation:sxbright 4.2s ease both}
+@keyframes sxbright{20%,70%{filter:brightness(1.35) saturate(.6) hue-rotate(-10deg)}100%{filter:none}}
+.sx-d20{position:absolute;left:50%;top:42%;width:min(44vw,180px);transform:translate(-50%,-50%);animation:sxtumble .9s cubic-bezier(.3,1.4,.5,1) both}
+.sx-d20 svg{width:100%;filter:drop-shadow(7px 7px 0 var(--mag))}
+.sx-dnum{position:absolute;left:0;right:0;top:50%;transform:translateY(-58%);text-align:center;font-family:var(--num);font-size:clamp(40px,13vw,64px);color:var(--volt);text-shadow:3px 3px 0 #07041A}
+.sx-d20.landed{animation:sxland .4s cubic-bezier(.2,1.8,.4,1) both}
+@keyframes sxtumble{from{transform:translate(-50%,-160%) rotate(-540deg) scale(.4)}to{transform:translate(-50%,-50%) rotate(0) scale(1)}}
+@keyframes sxland{50%{transform:translate(-50%,-50%) scale(1.25)}100%{transform:translate(-50%,-50%) scale(1)}}
+.sx-dcap{position:absolute;left:0;right:0;top:62%;text-align:center;animation:sxflash 1.8s ease both}
+.d20chip{margin-top:6px;font-family:var(--tech);font-size:12px;display:inline-block;padding:3px 8px;background:rgba(0,0,0,.35);border:1.5px solid var(--cyan)}
+.d20chip.nat20{border-color:var(--volt);color:var(--volt)}
+.d20chip.nat1{border-color:var(--red);color:var(--red)}
+.face.sx-godly .fi{animation:sxgodly 1s ease-in-out 4;box-shadow:0 0 0 3px #FFD86B,0 0 28px 8px rgba(255,216,107,.8)}
+.face.sx-godly::after{content:"👑";position:absolute;left:50%;top:-.9em;transform:translateX(-50%);font-size:max(14px,.6em);filter:drop-shadow(0 0 6px #FFD86B);z-index:3}
+@keyframes sxgodly{50%{filter:brightness(1.6) saturate(1.4);box-shadow:0 0 0 4px #fff3c4,0 0 44px 14px rgba(255,216,107,.95)}}
+.sx-rays{position:absolute;inset:-50%;background:repeating-conic-gradient(from 0deg,rgba(255,216,107,.22) 0 6deg,transparent 6deg 18deg);animation:sxrays 3.2s ease both}
+@keyframes sxrays{0%{opacity:0;transform:rotate(0)}20%{opacity:1}80%{opacity:1}100%{opacity:0;transform:rotate(40deg)}}
+.toast.sx-crown{border-color:#FFD86B;box-shadow:5px 5px 0 #b8860b}
+.toast.sx-crown .ttitle{color:#FFD86B}
+.sx-zcap{position:absolute;left:0;right:0;top:16%;text-align:center;color:#b6ff8a;animation:sxflash 2.5s ease both}
+.sx-wendigo{position:absolute;inset:0;z-index:-1;pointer-events:none;animation:sxwendigo 2.4s steps(1,end) both}
+.sx-wendigo svg{width:100%;height:100%}
+.sx-wendigo .sx-eye{animation:sxeye .9s ease-in-out infinite alternate}
+@keyframes sxeye{to{r:3.4;fill:#ffeded}}
+@keyframes sxwendigo{0%{opacity:0}6%{opacity:.9}9%{opacity:0}13%{opacity:1}60%{opacity:1}63%{opacity:0}66%{opacity:1}69%{opacity:0}72%{opacity:.8}75%{opacity:0}100%{opacity:0}}
+.sx-redvig{position:absolute;inset:0;background:radial-gradient(circle,transparent 45%,rgba(255,20,40,.45));animation:sxpulse .75s ease-in-out infinite alternate}
+@keyframes sxpulse{from{opacity:.25}to{opacity:1}}
+.sx-emf{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%) rotate(-3deg);width:min(78vw,300px);background:#111317;border:4px solid #3a3f4a;border-radius:10px;box-shadow:8px 8px 0 #07041A;padding:14px;text-align:center;animation:sxfadein .3s ease both}
+.sx-emftitle{font-family:var(--tech);font-size:12px;color:#9aa3b5;letter-spacing:3px}
+.sx-leds{display:flex;gap:6px;justify-content:center;margin:12px 0}
+.sx-leds i{width:34px;height:18px;border-radius:3px;background:#222;border:2px solid #000}
+.sx-leds i.on.l1,.sx-leds i.on.l2{background:#39ff6a;box-shadow:0 0 10px #39ff6a}
+.sx-leds i.on.l3{background:#ffe34a;box-shadow:0 0 10px #ffe34a}
+.sx-leds i.on.l4{background:#ff9a2e;box-shadow:0 0 10px #ff9a2e}
+.sx-leds i.on.l5{background:#ff2a3a;box-shadow:0 0 14px #ff2a3a}
+.sx-emfread{font-family:var(--num);font-size:34px;color:#e9edf5}
+.sx-emfalert{font-family:var(--tech);font-weight:900;font-size:13px;color:#ff2a3a;margin-top:6px;opacity:0}
+.sx-emf.max{animation:sxjitter .06s linear 20}
+.sx-emf.max .sx-emfalert{opacity:1;animation:sxblink .3s steps(1) infinite}
+@keyframes sxblink{50%{opacity:.2}}
+
+.sx-wendigo{background:#020204}
+
+#chat.sx-see .feed,#chat.sx-see .typing{animation:sxsee 2.4s steps(1,end) both}
+@keyframes sxsee{0%{opacity:1}13%{opacity:.12}63%{opacity:1}66%{opacity:.12}69%{opacity:1}72%{opacity:.12}75%{opacity:1}}
 </style>
 </head>
 <body>
@@ -1662,7 +1718,8 @@ function buildMsg(m,index,noAnim){
   if(m.kind==="sticker"&&STICKERS[m.sticker]) bub.append(stickerEl(m.sticker));
   if(m.kind==="poll") bub.append(pollEl(m));
   else if(m.kind==="game") bub.append(gameCard(m));
-  else if(m.text){ const t=el("div"); renderText(t,m.text,m.mentions); bub.append(t); }
+  else if(m.text){ const t=el("div"); renderText(t,m.text,m.mentions); bub.append(t);
+    if(/(^|[^a-z])roll(s|ed|ing)? (a |the |me a )?d20([^a-z0-9]|$)/i.test(m.text)&&typeof m.id==="number"){ const n=d20For(m); bub.append(el("div","d20chip"+(n===20?" nat20":n===1?" nat1":""),`🎲 d20 → ${n}${n===20?" NAT 20!":n===1?" crit fail":""}`)); } }
   bub.onclick=e=>{ if(e.target.closest("a,video,.voice,.poll button,.gamecard button")) return; openMenu(m); };
   bub.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openMenu(m); } };
   col.append(tag,bub);
@@ -2932,6 +2989,8 @@ function celebrateMyBirthday(force){
 
 /* ================= SECRETS 🔓 ================= */
 const SECRETS_KEY="nl-secrets";
+/* Cole's accounts: saying "Cole" makes these usernames shine. Add more usernames here (lowercase). */
+const CREATOR_USERNAMES=["bebop"];
 const foundSecrets=()=>{ try{ return JSON.parse(localStorage.getItem(SECRETS_KEY)||"[]"); }catch(e){ return []; } };
 const hasSecret=id=>foundSecrets().includes(id);
 const reducedMotion=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -3025,7 +3084,7 @@ const SX=(()=>{   // secret effects layer
         step(ctx,box,s,t,k){
           const a=k<.1?k/.1:k>.8?(1-k)/.2:1; ctx.fillStyle=`rgba(3,8,6,${.78*a})`; ctx.fillRect(0,0,box.width,box.height);
           ctx.font="bold 14px ui-monospace,monospace";
-          s.drops.forEach((d,i)=>{ for(let j=0;j<16;j++){ const y=(d-j)*16; if(y<0||y>box.height) continue; ctx.fillStyle=j===0?`rgba(220,255,240,${a})`:`rgba(0,${200+Math.floor(55*Math.random())},${150+ (i%3)*30},${a*(1-j/16)})`; ctx.fillText("01ｱｲｳｴｵ#$%<>/"[Math.floor(Math.random()*15)],i*14,y); } s.drops[i]+=.55; if(d*16>box.height+260) s.drops[i]=R(-20,0); });
+          s.drops.forEach((d,i)=>{ for(let j=0;j<16;j++){ const y=(d-j)*16; if(y<0||y>box.height) continue; ctx.fillStyle=j===0?`rgba(240,255,255,${a})`:(i%4===0?`rgba(224,122,198,${a*(1-j/16)})`:`rgba(0,${200+Math.floor(55*Math.random())},255,${a*(1-j/16)})`); ctx.fillText("01ｱｲｳｴｵ#$%<>/"[Math.floor(Math.random()*15)],i*14,y); } s.drops[i]+=.55; if(d*16>box.height+260) s.drops[i]=R(-20,0); });
         }
       },3200);
       const cap=add("sx-caption sx-jackcap","JACKED IN ▮"); later(()=>cap.remove(),2600);
@@ -3041,6 +3100,123 @@ const SX=(()=>{   // secret effects layer
     blackwall(){
       const w=add("sx-blackwall","<span>BLACKWALL</span><small>ACCESS DENIED</small>"); chatClass("sx-glitch",900);
       later(()=>w.classList.add("out"),2200); later(()=>w.remove(),2700);
+    },
+    easycome(){
+      canvasFx(layer,{
+        init(box){ return {stars:[...Array(170)].map(()=>({x:R(0,box.width),y:R(0,box.height),r:R(.4,1.8),p:R(0,6),c:Math.random()<.12?"#00F0FF":Math.random()<.1?"#E07AC6":"#fff"}))}; },
+        step(ctx,box,s,t,k){
+          const a=k<.12?k/.12:k>.82?(1-k)/.18:1;
+          ctx.fillStyle=`rgba(3,2,12,${.88*a})`; ctx.fillRect(0,0,box.width,box.height);
+          for(const st of s.stars){ ctx.globalAlpha=a*(.35+.65*Math.abs(Math.sin(t/500+st.p))); ctx.fillStyle=st.c; ctx.beginPath(); ctx.arc(st.x,st.y,st.r,0,7); ctx.fill(); }
+          ctx.globalAlpha=1;
+        }
+      },5600);
+      const ship=add("sx-ship",`<svg viewBox="0 0 160 80"><defs><linearGradient id="sxhull" x1="0" x2="1"><stop offset="0" stop-color="#2a2f55"/><stop offset="1" stop-color="#9aa4c0"/></linearGradient><radialGradient id="sxflame"><stop offset="0" stop-color="#fff"/><stop offset=".4" stop-color="#00F0FF"/><stop offset="1" stop-color="rgba(0,240,255,0)"/></radialGradient></defs>
+        <ellipse cx="18" cy="42" rx="22" ry="10" fill="url(#sxflame)" class="sx-flame"/>
+        <polygon points="30,34 118,26 154,40 118,54 30,48" fill="url(#sxhull)" stroke="#07041A" stroke-width="3"/>
+        <polygon points="62,30 92,6 104,8 86,31" fill="#E07AC6" stroke="#07041A" stroke-width="3"/>
+        <polygon points="62,50 92,74 104,72 86,49" fill="#E07AC6" stroke="#07041A" stroke-width="3"/>
+        <polygon points="104,34 132,36 104,42" fill="#00F0FF" stroke="#07041A" stroke-width="2"/></svg>`);
+      const cap=add("sx-caption sx-easycap","easy come, easy go…");
+      later(()=>{ ship.remove(); cap.remove(); },5600);
+    },
+    lumos(){
+      const g=add("sx-lumos"); for(let i=0;i<26;i++){ const sp=add("sx-spark"); sp.style.left=R(10,90)+"%"; sp.style.top=R(15,85)+"%"; sp.style.animationDelay=R(0,2.2)+"s"; later(()=>sp.remove(),4200); }
+      chatClass("sx-bright",4200); later(()=>g.remove(),4200);
+    },
+    d20(m){
+      const n=d20For(m);
+      const die=add("sx-d20",`<svg viewBox="0 0 120 120"><polygon points="60,4 110,32 110,88 60,116 10,88 10,32" fill="#07041A" stroke="var(--cyan)" stroke-width="5"/><polygon points="60,4 88,70 32,70" fill="none" stroke="var(--mag)" stroke-width="3"/><polyline points="10,32 32,70 10,88 M110,32 88,70 110,88 M32,70 60,116 88,70" fill="none" stroke="var(--mag)" stroke-width="3"/></svg><b class="sx-dnum">?</b>`);
+      const num=die.querySelector(".sx-dnum"); let spins=0;
+      const iv=setInterval(()=>{ num.textContent=1+Math.floor(Math.random()*20); if(++spins>14){ clearInterval(iv); num.textContent=n; die.classList.add("landed");
+        const cap=add("sx-caption sx-dcap",n===20?"NAT 20! 🎉":n===1?"CRIT FAIL 💀":`rolled a ${n}`);
+        if(n===20&&typeof FX!=="undefined") FX.play("confetti"); if(n===1) chatClass("fx-shake",1000);
+        later(()=>cap.remove(),1800); } },70);
+      later(()=>die.remove(),2900);
+    },
+    creator(){
+      const ids=[...cache.values()].filter(p=>p&&CREATOR_USERNAMES.includes((p.username||"").toLowerCase())).map(p=>p.id);
+      const faces=[...document.querySelectorAll(".face")].filter(f=>ids.includes(f.dataset.uid)||(f.id==="openProfile2"||f.id==="meFace"||f.id==="profFace")&&ids.includes(user?.id));
+      faces.forEach(f=>{ f.classList.remove("sx-godly"); void f.offsetWidth; f.classList.add("sx-godly"); later(()=>f.classList.remove("sx-godly"),4200); });
+      const here=ids.some(id=>room&&members.has(id));
+      const rays=add("sx-rays"); later(()=>rays.remove(),3200);
+      const p=ids.map(id=>cache.get(id)).find(Boolean);
+      const t=el("div","toast mention sx-crown");
+      const f=el("span","face sx-godly"); if(p) paintFace(f,p); else f.append(el("span","fi","👑"));
+      const body=el("span","tbody"); body.append(el("div","ttitle","👑 THE CREATOR"), el("div","ttext",here?`${p?.username||"Cole"} built this place.`:"Cole isn't here… but he's watching."));
+      t.append(f,body); $("toasts").prepend(t); later(()=>{ t.classList.add("out"); later(()=>t.remove(),260); },4200);
+    },
+    matrix(){
+      canvasFx(layer,{
+        init(box){ const cols=Math.floor(box.width/16); return {drops:[...Array(cols)].map(()=>R(-30,0)),speed:[...Array(cols)].map(()=>R(.35,.9))}; },
+        step(ctx,box,s,t,k){
+          const a=k<.1?k/.1:k>.8?(1-k)/.2:1; ctx.fillStyle=`rgba(0,6,0,${.82*a})`; ctx.fillRect(0,0,box.width,box.height);
+          ctx.font="bold 16px ui-monospace,Menlo,monospace";
+          s.drops.forEach((dd,i)=>{ for(let q=0;q<22;q++){ const y=(dd-q)*17; if(y<0||y>box.height+17) continue;
+            ctx.fillStyle=q===0?`rgba(200,255,200,${a})`:`rgba(0,${170+Math.floor(85*Math.random())},60,${a*(1-q/22)})`;
+            ctx.fillText(String(Math.floor(Math.random()*10)),i*16+2,y); }
+            s.drops[i]+=s.speed[i]; if(dd*17>box.height+380) s.drops[i]=R(-25,0); });
+        }
+      },3800);
+    },
+    zombies(){
+      const wrap=document.createElement("div"); wrap.className="sx-city"; $("chat").prepend(wrap);
+      canvasFx(wrap,{
+        init(box){ return {z:[...Array(7)].map((_,i)=>({x:(i/7)*box.width+R(-20,20),s:R(.9,1.45),v:R(.25,.55),ph:R(0,6)}))}; },
+        step(ctx,box,s,t,k){
+          const a=k<.1?k/.1:k>.85?(1-k)/.15:1; ctx.globalAlpha=a;
+          const g=ctx.createLinearGradient(0,0,0,box.height); g.addColorStop(0,"#050b08"); g.addColorStop(.55,"#0f2418"); g.addColorStop(1,"#2d4a2a");
+          ctx.fillStyle=g; ctx.fillRect(0,0,box.width,box.height);
+          ctx.fillStyle="rgba(210,255,190,.9)"; ctx.beginPath(); ctx.arc(box.width*.78,box.height*.18,34,0,7); ctx.fill();
+          const ground=box.height*.74;
+          ctx.fillStyle="#040806"; ctx.fillRect(0,ground,box.width,box.height-ground);
+          for(let gx=10;gx<box.width;gx+=90){ ctx.fillRect(gx,ground-34,18,34); ctx.fillRect(gx-6,ground-26,30,7); }
+          for(const zz of s.z){
+            zz.x+=zz.v; if(zz.x>box.width+60) zz.x=-60;
+            const bob=Math.sin(t/260+zz.ph)*3, sc=zz.s, x=zz.x, y=ground+bob;
+            ctx.save(); ctx.translate(x,y); ctx.scale(sc,sc); ctx.rotate(Math.sin(t/500+zz.ph)*.08);
+            ctx.fillStyle="#020403"; ctx.strokeStyle="#020403"; ctx.lineCap="round";
+            ctx.lineWidth=7; ctx.beginPath(); ctx.moveTo(-6,0); ctx.lineTo(-3+Math.sin(t/260+zz.ph)*5,-34); ctx.moveTo(6,0); ctx.lineTo(3-Math.sin(t/260+zz.ph)*5,-34); ctx.stroke();
+            ctx.fillRect(-11,-74,22,42);
+            ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(-8,-68); ctx.lineTo(30,-64+Math.sin(t/300+zz.ph)*4); ctx.moveTo(8,-62); ctx.lineTo(34,-56+Math.cos(t/300+zz.ph)*4); ctx.stroke();
+            ctx.beginPath(); ctx.arc(4,-86,11,0,7); ctx.fill();
+            ctx.fillStyle="rgba(170,255,120,.9)"; ctx.fillRect(7,-89,3,2); ctx.fillRect(12,-89,3,2);
+            ctx.restore();
+          }
+          const fog=ctx.createLinearGradient(0,ground-80,0,box.height); fog.addColorStop(0,"rgba(140,200,140,0)"); fog.addColorStop(1,"rgba(140,200,140,.35)");
+          ctx.fillStyle=fog; ctx.fillRect(0,ground-80,box.width,box.height-ground+80);
+          ctx.globalAlpha=1;
+        }
+      },7000);
+      later(()=>wrap.remove(),7100);
+      const cap=add("sx-caption sx-zcap","🧟 THEY'RE COMING"); later(()=>cap.remove(),2500);
+    },
+    wendigo(){
+      const w=document.createElement("div"); w.className="sx-wendigo"; w.setAttribute("aria-hidden","true");
+      w.innerHTML=`<svg viewBox="0 0 200 300" preserveAspectRatio="xMidYMid meet">
+        <rect width="200" height="300" fill="#020204"/>
+        <g fill="#0b0b12">${[...Array(9)].map((_,i)=>`<polygon points="${i*24-10},300 ${i*24+8},${80+((i*37)%90)} ${i*24+26},300"/>`).join("")}</g>
+        <g stroke="#cfd2da" stroke-width="3.2" fill="none" stroke-linecap="round" opacity=".92">
+          <path d="M86 86 L70 50 L58 58 M70 50 L64 26 M70 50 L84 30 M64 26 L52 18"/>
+          <path d="M114 86 L130 50 L142 58 M130 50 L136 26 M130 50 L116 30 M136 26 L148 18"/></g>
+        <path d="M78 92 Q100 76 122 92 L118 132 Q100 150 82 132 Z" fill="#d9dbe2" stroke="#2a2a33" stroke-width="2"/>
+        <ellipse cx="90" cy="108" rx="7" ry="9" fill="#020204"/><ellipse cx="110" cy="108" rx="7" ry="9" fill="#020204"/>
+        <circle cx="90" cy="109" r="2.3" fill="#fff" class="sx-eye"/><circle cx="110" cy="109" r="2.3" fill="#fff" class="sx-eye"/>
+        <path d="M96 122 L100 130 L104 122" fill="#020204"/>
+        <path d="M84 138 Q100 150 116 138 L112 146 L106 140 L100 148 L94 140 L88 146 Z" fill="#020204"/>
+        <path d="M80 150 Q100 142 120 150 L132 300 L68 300 Z" fill="#050508"/>
+        <path d="M82 160 L52 250 M118 160 L148 250" stroke="#050508" stroke-width="10" stroke-linecap="round"/></svg>`;
+      $("chat").prepend(w); chatClass("sx-see",2400); if(navigator.vibrate) navigator.vibrate([10,80,10]);
+      later(()=>w.remove(),2400);
+    },
+    ghost(){
+      const vig=add("sx-redvig");
+      const m=add("sx-emf",`<div class="sx-emftitle">EMF METER</div><div class="sx-leds">${[1,2,3,4,5].map(i=>`<i class="l${i}"></i>`).join("")}</div><div class="sx-emfread">EMF <b>1</b></div><div class="sx-emfalert">⚠ PRESENCE DETECTED NEAR YOU</div>`);
+      const read=m.querySelector(".sx-emfread b"), leds=[...m.querySelectorAll(".sx-leds i")];
+      let lvl=1; const beep=()=>{ try{ const ac=window.__sxac||(window.__sxac=new (window.AudioContext||window.webkitAudioContext)()); const o=ac.createOscillator(), g=ac.createGain(); o.frequency.value=700+lvl*180; g.gain.value=.05; o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime+.07); }catch(e){} };
+      const iv=setInterval(()=>{ lvl=Math.min(5,lvl+(Math.random()<.7?1:0)); leds.forEach((l,i)=>l.classList.toggle("on",i<lvl)); read.textContent=lvl; beep(); if(navigator.vibrate) navigator.vibrate(30);
+        if(lvl===5){ clearInterval(iv); m.classList.add("max"); } },380);
+      later(()=>{ clearInterval(iv); m.remove(); vig.remove(); },3800);
     },
     phantomUnlock(){ const b=add("sx-banner sx-showtime","PHANTOM UNLOCKED"); const bg=add("sx-showtime-bg"); later(()=>{ b.remove(); bg.remove(); },2000); },
     scatter(){
@@ -3066,10 +3242,22 @@ const SECRET_LIST=[
   {id:"preem", name:"Preem", re:/(^|[^a-z])preem([^a-z]|$)/i, play:()=>SX.preem()},
   {id:"gonk", name:"Gonk", re:/(^|[^a-z])gonk([^a-z]|$)/i, play:()=>SX.gonk()},
   {id:"blackwall", name:"Blackwall", re:/(^|[^a-z])blackwall([^a-z]|$)/i, play:()=>SX.blackwall()},
+  {id:"easycome", name:"Easy come, easy go", re:/easy come,? easy go/i, play:()=>SX.easycome()},
+  {id:"lumos", name:"Lumos", re:/(^|[^a-z])lumos([^a-z]|$)/i, play:()=>SX.lumos()},
+  {id:"d20", name:"Roll a d20", re:/(^|[^a-z])roll(s|ed|ing)? (a |the |me a )?d20([^a-z0-9]|$)/i, play:m=>SX.d20(m)},
+  {id:"creator", name:"The creator", re:/(^|[^a-z])cole([^a-z]|$)/i, play:()=>SX.creator()},
+  {id:"matrix", name:"The Matrix", re:/(^|[^a-z])matrix([^a-z]|$)/i, play:()=>SX.matrix()},
+  {id:"zombies", name:"Zombies", re:/(^|[^a-z])zombie(s)?([^a-z]|$)/i, play:()=>SX.zombies()},
+  {id:"wendigo", name:"Wendigo", re:/(^|[^a-z])wendigo(s)?([^a-z]|$)/i, play:()=>SX.wendigo()},
+  {id:"ghost", name:"Ghost", re:/(^|[^a-z])ghost(s)?([^a-z]|$)/i, play:()=>SX.ghost()},
   {id:"konami", name:"Phantom code", gesture:true},
   {id:"moonwink", name:"Night owl", gesture:true},
   {id:"shake", name:"Shake it", gesture:true},
 ];
+function d20For(m){
+  let h=2166136261; for(const ch of String(m?.id)+"|"+(m?.created_at||"")){ h^=ch.charCodeAt(0); h=Math.imul(h,16777619)>>>0; }
+  return (h%20)+1;
+}
 function secretFor(text){
   if(!text) return null;
   const t=text.replace(/[’‘]/g,"'");
@@ -3089,8 +3277,8 @@ function discoverSecret(id){
 }
 const secretBannerShown=new Set();
 function playSecretFromMessage(m,s,force){
-  if(!force&&!reducedMotion()) s.play(); else if(force) s.play();
-  else if(s.id==="choom") s.play();          // text swap is fine with reduced motion
+  if(!force&&!reducedMotion()) s.play(m); else if(force) s.play(m);
+  else if(s.id==="choom") s.play(m);         // text swap is fine with reduced motion
   if(m.user_id===user.id) discoverSecret(s.id);
   else {
     const key=room+":"+s.id;
