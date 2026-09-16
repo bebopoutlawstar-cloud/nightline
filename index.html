@@ -597,7 +597,9 @@ let user=null, meProfile=null, room="", roomName=null, roomOwner=null, unsub=nul
 const cache=new Map();        // user id -> profile
 const msgs=[];                // current room, oldest first
 const byId=new Map();         // message id -> message
-const elById=new Map();       // message id -> element
+const elById=new Map();
+const claimed=new Set();       // message ids currently being added (prevents duplicates)
+const contextById=new Map();   // older messages fetched only to show a reply quote       // message id -> element
 const reactionsById=new Map();// message id -> Map(emoji -> Set(user ids))
 const members=new Map();      // user id -> last read (ms)
 const typers=new Map();       // user id -> {name,timer}
@@ -778,7 +780,7 @@ async function enterRoom(code,token){
   room=target; roomOwner=null; roomName=null;
   try{ localStorage.setItem("nl-room",room); }catch(e){}
   show($("front"),false); show($("chat")); $("roomLabel").textContent="# "+room; $("status").textContent="Connecting…";
-  msgs.length=0; byId.clear(); elById.clear(); reactionsById.clear(); members.clear();
+  msgs.length=0; byId.clear(); elById.clear(); claimed.clear(); contextById.clear(); reactionsById.clear(); members.clear();
   typers.forEach(v=>clearTimeout(v.timer)); typers.clear(); paintTyping(); clearReply(); feed.innerHTML="";
   try{
     const [latest,mem,info]=await Promise.all([api.loadLatest(room),api.members(room).catch(()=>[]),api.roomInfo(room).catch(()=>null)]);
@@ -822,13 +824,16 @@ function setReaction(r,added){
 }
 
 async function addMessages(list){
-  list=list.filter(m=>!byId.has(m.id)); if(!list.length) return;
-  const replyIds=list.map(m=>m.reply_to).filter(id=>id&&!byId.has(id));
+  const unique=new Map(); list.forEach(m=>{ if(!byId.has(m.id)&&!claimed.has(m.id)) unique.set(m.id,m); });
+  list=[...unique.values()]; if(!list.length) return;
+  list.forEach(m=>claimed.add(m.id));
+  const replyIds=list.map(m=>m.reply_to).filter(id=>id&&!byId.has(id)&&!contextById.has(id));
   await ensureProfiles(list.map(m=>m.user_id));
   (await api.reactions(list.map(m=>m.id)).catch(()=>[])).forEach(r=>setReaction(r,true));
-  for(const id of [...new Set(replyIds)]){ const r=await api.fetchMessage(id).catch(()=>null); if(r){ r._context=true; byId.set(r.id,r); await ensureProfiles([r.user_id]); } }
+  for(const id of [...new Set(replyIds)]){ const r=await api.fetchMessage(id).catch(()=>null); if(r){ contextById.set(r.id,r); await ensureProfiles([r.user_id]); } }
+  if(!list.every(m=>claimed.has(m.id))) return;   // room changed while loading
   const appendOnly = msgs.length===0 || list.every(m=>m.created_at>=msgs[msgs.length-1].created_at);
-  for(const m of list){ byId.set(m.id,m); msgs.push(m); }
+  for(const m of list){ claimed.delete(m.id); if(byId.has(m.id)) continue; byId.set(m.id,m); msgs.push(m); }
   msgs.sort((a,b)=>a.created_at<b.created_at?-1:a.created_at>b.created_at?1:0);
   if(appendOnly && feed.querySelector(".msg,.empty,.older")) list.forEach(appendEl);
   else renderAll();
@@ -904,7 +909,7 @@ function buildMsg(m,index,noAnim){
   tag.append(`${p.username} · ${timeOf(at)}`);
   const bub=el("div","bubble"); bub.tabIndex=0; bub.setAttribute("role","button"); bub.setAttribute("aria-label",`Message from ${p.username}. Open options`);
   if(m.reply_to){
-    const r=byId.get(m.reply_to), q=el("button","quote"); q.type="button";
+    const r=byId.get(m.reply_to)||contextById.get(m.reply_to), q=el("button","quote"); q.type="button";
     if(r){ q.append(el("b","",nameOf(r.user_id))); q.append(r.text||(r.image_url?"📷 Photo":"")); q.onclick=e=>{ e.stopPropagation(); jumpTo(r.id); }; }
     else q.append("Original message was deleted");
     bub.append(q);
