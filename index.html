@@ -395,6 +395,35 @@ html,body{overscroll-behavior:none}
 .swipe-hint{position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:22px;color:var(--muted);opacity:0;pointer-events:none;transition:color .15s,transform .15s}
 .swipe-hint.ready{color:var(--volt);transform:translateY(-50%) scale(1.25)}
 .msg.me .swipe-hint{left:auto;right:auto;left:4px}
+
+/* ===== v9: contacts, DMs, notifications ===== */
+.fronttabs{display:flex;gap:8px;margin-top:10px}
+.fronttabs .tab{flex:1}
+.addcontact{display:flex;gap:8px}
+.addcontact .field{flex:1;min-width:0}
+.addcontact .send{padding:10px 14px}
+.roomrow .face{flex:none;width:38px;height:38px;font-size:17px}
+.contactrow{display:flex;align-items:center;gap:10px;background:rgba(7,4,26,.85);border:2px solid #3b2d80;padding:8px 10px;min-width:0}
+.contactrow .cname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:17px}
+.contactrow .cname small{display:block;font-size:13px;color:var(--muted)}
+.contactrow .send{padding:8px 12px;font-size:12px}
+.contactrow .rm{background:none;border:2px solid var(--muted);color:var(--muted);padding:6px 8px;font-size:12px}
+.roomrow .muted{font-size:12px;margin-left:4px;opacity:.8}
+.segmented{display:flex;width:100%;border:2px solid var(--cyan)}
+.segmented button{flex:1;background:none;border:none;color:var(--cyan);font-family:var(--tech);font-size:11px;padding:9px 4px}
+.segmented button[aria-checked="true"]{background:var(--cyan);color:var(--night)}
+#roomOnly{display:grid;gap:14px;width:100%;justify-items:center}
+.toasts{position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top) + 8px);z-index:30;display:grid;gap:8px;justify-items:center;pointer-events:none;padding:0 10px}
+.toast{pointer-events:auto;display:flex;align-items:center;gap:10px;width:min(100%,480px);background:var(--night);border:2px solid var(--cyan);box-shadow:5px 5px 0 var(--mag);padding:8px 12px;color:var(--white);text-align:left;transform:rotate(-1deg);animation:toastin .3s cubic-bezier(.2,1.5,.4,1) both}
+.toast.mention{border-color:var(--volt)}
+.toast .face{flex:none;width:36px;height:36px;font-size:16px}
+.toast .tbody{flex:1;min-width:0}
+.toast .ttitle{font-family:var(--tech);font-size:11px;color:var(--cyan);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.toast.mention .ttitle{color:var(--volt)}
+.toast .ttext{font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.toast.out{animation:toastout .25s ease forwards}
+@keyframes toastin{from{opacity:0;transform:translateY(-30px) rotate(-4deg)}}
+@keyframes toastout{to{opacity:0;transform:translateY(-30px)}}
 </style>
 </head>
 <body>
@@ -443,7 +472,24 @@ html,body{overscroll-behavior:none}
     <input class="field" id="room" maxlength="30" placeholder="A room you're in, or a new code" required>
     <p class="msgline" id="roomMsg" role="status"></p>
     <button class="go" type="submit" id="jumpBtn">Jump in</button>
-    <div class="inbox hidden" id="inboxWrap"><h3>Your rooms</h3><div class="inbox" id="inbox"></div></div>
+    <div class="fronttabs" role="tablist">
+      <button type="button" class="tab" role="tab" id="tabChats" aria-selected="true">Chats</button>
+      <button type="button" class="tab" role="tab" id="tabContacts" aria-selected="false">Contacts</button>
+    </div>
+    <div id="chatsPane">
+      <div class="inbox hidden" id="inboxWrap"><div class="inbox" id="inbox"></div></div>
+      <p class="note hidden" id="inboxEmpty">No chats yet. Jump into a room or message a contact.</p>
+    </div>
+    <div id="contactsPane" class="hidden">
+      <div class="addcontact">
+        <label for="contactName" class="sr">Username</label>
+        <input class="field" id="contactName" maxlength="20" placeholder="Add by username" autocomplete="off">
+        <button type="button" class="send" id="contactAdd">Add</button>
+      </div>
+      <p class="msgline" id="contactMsg" role="status"></p>
+      <div class="inbox" id="contactList"></div>
+      <p class="note hidden" id="contactEmpty">No contacts yet. Add a friend by username, or tap Message next to someone in a room.</p>
+    </div>
   </form>
  </div>
 </section>
@@ -507,6 +553,7 @@ html,body{overscroll-behavior:none}
     <button class="go" type="button" id="changePhoto">Change photo</button>
     <button class="ghost" type="button" id="openTheme">Theme &amp; colors 🎨</button>
     <button class="ghost" type="button" id="notifBtn">Turn on notifications</button>
+    <button class="ghost hidden" type="button" id="notifTest">Send a test notification</button>
     <button class="ghost" type="button" id="fxBtn">Screen effects: On</button>
     <details class="fx-list"><summary>Words and emoji that trigger effects</summary><ul id="fxList"></ul></details>
     <p class="msgline" id="profMsg" role="status"></p>
@@ -523,6 +570,13 @@ html,body{overscroll-behavior:none}
   <div class="sheet">
     <h2 id="rsTitle"></h2>
     <p class="sub" id="rsCode"></p>
+    <h3>Notifications</h3>
+    <div class="segmented" id="notifyModes" role="radiogroup" aria-label="Notifications for this chat">
+      <button type="button" role="radio" data-mode="all">All</button>
+      <button type="button" role="radio" data-mode="mentions">@ Mentions</button>
+      <button type="button" role="radio" data-mode="off">Off</button>
+    </div>
+    <div id="roomOnly">
     <h3>Room name</h3>
     <form class="namerow" id="nameForm">
       <label for="roomName" class="sr">Room name</label>
@@ -536,6 +590,7 @@ html,body{overscroll-behavior:none}
     <button class="go" type="button" id="invCopy">Copy link</button>
     <button class="ghost hidden" type="button" id="invShare">Share</button>
     <button class="ghost hidden" type="button" id="invReset">Reset link (old link stops working)</button>
+    </div>
     <h3>Chat background</h3>
     <div class="bgtiles" id="bgTiles"></div>
     <label class="colorpick left"><span>Custom color</span><input type="color" id="bgCustom" value="#1a2b6b"></label>
@@ -556,6 +611,7 @@ html,body{overscroll-behavior:none}
     <div class="menu-preview" id="menuPreview"></div>
     <div class="emoji-row" id="emojiRow"></div>
     <button class="go" type="button" id="menuReply">Reply</button>
+    <button class="ghost hidden" type="button" id="menuDm">Message privately</button>
     <button class="ghost" type="button" id="menuPin">Pin message</button>
     <button class="ghost hidden" type="button" id="menuFx">Replay effect ✨</button>
     <button class="ghost hidden" type="button" id="menuCopy">Copy text</button>
@@ -616,6 +672,7 @@ html,body{overscroll-behavior:none}
   </form>
 </div>
 
+<div class="toasts" id="toasts" aria-live="polite"></div>
 <div class="overlay lightbox hidden" id="lightbox"><img id="lightImg" alt="Full size photo"></div>
 
 
@@ -735,12 +792,26 @@ const live = {
   },
   async setAvatar(uid,url){ must(await sb.from("profiles").update({avatar_url:url}).eq("id",uid)); },
   async myRooms(){ return must(await sb.rpc("my_rooms")); },
+  async contacts(){ const rows=must(await sb.from("contacts").select("contact,created_at")); return rows.map(r=>r.contact); },
+  async findUser(username){ return must(await sb.from("profiles").select("id,username,avatar_url,bubble_color").ilike("username",username).maybeSingle()); },
+  async addContact(uid){ must(await sb.from("contacts").upsert({contact:uid},{onConflict:"owner,contact",ignoreDuplicates:true})); },
+  async removeContact(uid){ must(await sb.from("contacts").delete().eq("contact",uid)); },
+  async startDm(uid){
+    const {data,error}=await sb.rpc("start_dm",{p_user:uid});
+    if(error) throw new Error(/not_connected/.test(error.message)?"not_connected":/cant_message/.test(error.message)?"cant_message":error.message);
+    return data;
+  },
+  async setNotify(room,mode){ must(await sb.from("room_members").update({notify:mode}).eq("room",room).eq("user_id",user.id)); },
+  subscribeAll(onMsg){
+    const ch=sb.channel("inbox-"+user.id).on("postgres_changes",{event:"INSERT",schema:"public",table:"messages"},p=>onMsg(p.new)).subscribe();
+    return ()=>sb.removeChannel(ch);
+  },
   async joinRoom(room,token){
     const {data,error}=await sb.rpc("join_room",{p_room:room,p_token:token||null});
     if(error) throw new Error(/private_room/.test(error.message)?"private":error.message);
     return data;
   },
-  async roomInfo(room){ return must(await sb.from("rooms").select("code,name,background,owner,invite_token").eq("code",room).maybeSingle()); },
+  async roomInfo(room){ return must(await sb.from("rooms").select("code,name,background,owner,invite_token,is_dm").eq("code",room).maybeSingle()); },
   async setBackground(room,bg){ must(await sb.rpc("set_room_background",{p_room:room,p_background:bg})); },
   async setNickname(room,uid,nick){ must(await sb.rpc("set_nickname",{p_room:room,p_user:uid,p_nickname:nick})); },
   async pins(room){ return must(await sb.from("pinned_messages").select("message_id,pinned_by,created_at").eq("room",room).order("created_at",{ascending:false})); },
@@ -757,7 +828,7 @@ const live = {
   async rotateInvite(room){ return must(await sb.rpc("rotate_invite",{p_room:room})); },
   async removeMember(room,uid){ must(await sb.rpc("remove_member",{p_room:room,p_user:uid})); },
   async leaveRoom(room){ must(await sb.rpc("leave_room",{p_room:room})); },
-  async members(room){ return must(await sb.from("room_members").select("user_id,last_read_at,last_joined,nickname").eq("room",room)); },
+  async members(room){ return must(await sb.from("room_members").select("user_id,last_read_at,last_joined,nickname,notify").eq("room",room)); },
   async markRead(room){ await sb.rpc("mark_read",{p_room:room}); },
   async loadLatest(room){ return must(await sb.from("messages").select("*").eq("room",room).order("created_at",{ascending:false}).limit(PAGE)).reverse(); },
   async loadBefore(room,iso){ return must(await sb.from("messages").select("*").eq("room",room).lt("created_at",iso).order("created_at",{ascending:false}).limit(PAGE)).reverse(); },
@@ -804,7 +875,8 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
   let user=null, listeners=[], H=null, nextId=100;
   const iso=(ago=0)=>new Date(Date.now()-ago).toISOString();
   const people={rook:{id:"rook",username:"Rook",avatar_url:null},vee:{id:"vee",username:"Vee",avatar_url:null}};
-  const rooms={}, reacts=[], blocked=new Set(), polls={}, votes=[], pins={};
+  const rooms={}, reacts=[], blocked=new Set(), polls={}, votes=[], pins={}, contacts=new Set(["vee"]); let ALL=null;
+  people.nix={id:"nix",username:"Nix",avatar_url:null};
   const lines=["No way. Tell me everything.","That is so you.","Check this: www.example.com","Meet at the usual spot?","LOL stop"];
   const seed=room=>rooms[room] ||= {owner:"me",token:"demo"+Math.random().toString(36).slice(2,8),members:{me:{read:iso()},rook:{read:iso(70000)},vee:{read:iso(50000)}},msgs:[
     {id:1,room,user_id:"rook",text:"Signal's clear. Who's online?",created_at:iso(26*3600e3)},
@@ -843,14 +915,28 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
       const remove=v=>{ votes.splice(votes.indexOf(v),1); setTimeout(()=>fire("vote",v,false),20); };
       if(had) remove(had); else { if(!p.multi) mine.forEach(remove); const v={message_id:id,user_id:"me",option_index:idx}; votes.push(v); setTimeout(()=>fire("vote",v,true),30); }
     },
-    async myRooms(){ seed("5959"); if(rooms["5959"].name===undefined) rooms["5959"].name="The Hideout"; return Object.entries(rooms).filter(([,r])=>r.members.me).map(([code,r])=>{ const m=r.msgs[r.msgs.length-1]; return {code,name:r.name||null,is_owner:r.owner==="me",last_text:m?.text,last_image:!!m?.image_url,last_kind:m?.kind||"text",last_at:m?.created_at||iso(),last_sender:m?people[m.user_id]?.username:null,unread:r.msgs.filter(x=>x.user_id!=="me"&&x.created_at>(r.members.me?.read||"")).length}; }); },
+    async contacts(){ return [...contacts]; },
+    async findUser(n){ return Object.values(people).find(p=>p.username.toLowerCase()===n.toLowerCase())||null; },
+    async addContact(uid){ contacts.add(uid); },
+    async removeContact(uid){ contacts.delete(uid); },
+    async startDm(uid){
+      const code="dm-"+[uid,"me"].sort().join("-");
+      if(!rooms[code]){ if(uid==="nix") throw new Error("not_connected");
+        rooms[code]={is_dm:true,owner:"me",token:"x",members:{me:{read:iso()},[uid]:{read:iso()}},msgs:[]}; }
+      rooms[code].members.me ||= {read:iso()};
+      setTimeout(()=>{ const r=rooms[code]; if(r.msgs.length) return; const m={id:nextId++,room:code,user_id:uid,kind:"text",text:"hey! private chat unlocked 🔒",mentions:[],created_at:iso()}; r.msgs.push(m); fire("msg",m); ALL&&ALL(m); },2500);
+      return code;
+    },
+    async setNotify(room,mode){ rooms[room].members.me.notify=mode; },
+    subscribeAll(onMsg){ ALL=onMsg; const t=setTimeout(()=>{ const r=seed("5959"); const m={id:nextId++,room:"5959",user_id:"rook",kind:"text",text:"@"+(people.me?.username||"you")+" you coming tonight?",mentions:["me"],created_at:iso()}; r.msgs.push(m); onMsg(m); },4000); return ()=>{ ALL=null; clearTimeout(t); }; },
+    async myRooms(){ seed("5959"); if(rooms["5959"].name===undefined) rooms["5959"].name="The Hideout"; return Object.entries(rooms).filter(([,r])=>r.members.me).map(([code,r])=>{ const m=r.msgs[r.msgs.length-1]; const other=r.is_dm?Object.keys(r.members).find(u=>u!=="me"):null; return {code,name:r.name||null,is_dm:!!r.is_dm,dm_user:other,dm_name:other?people[other].username:null,dm_avatar:null,notify:r.members.me.notify||"all",is_owner:r.owner==="me",last_text:m?.text,last_image:!!m?.image_url,last_kind:m?.kind||"text",last_at:m?.created_at||iso(),last_sender:m?people[m.user_id]?.username:null,unread:r.msgs.filter(x=>x.user_id!=="me"&&x.created_at>(r.members.me?.read||"")).length}; }); },
     async joinRoom(room){ const existed=!!rooms[room]; seed(room); if(!existed){ rooms[room].msgs=[]; rooms[room].members={me:{read:iso()}}; return "created"; } rooms[room].members.me ||= {read:iso()}; return "member"; },
-    async roomInfo(room){ const r=seed(room); if(room==="5959"&&r.name===undefined) r.name="The Hideout"; return {code:room,name:r.name||null,background:r.background||null,owner:r.owner,invite_token:r.token}; },
+    async roomInfo(room){ const r=seed(room); if(room==="5959"&&r.name===undefined) r.name="The Hideout"; return {code:room,name:r.name||null,background:r.background||null,owner:r.owner,invite_token:r.token,is_dm:!!r.is_dm}; },
     async renameRoom(room,name){ rooms[room].name=name||null; setTimeout(()=>fire("roomUpdated",{code:room,name:name||null,owner:rooms[room].owner}),40); },
     async rotateInvite(room){ return rooms[room].token="demo"+Math.random().toString(36).slice(2,8); },
     async removeMember(room,uid){ delete rooms[room].members[uid]; setTimeout(()=>fire("memberGone",uid),50); },
     async leaveRoom(room){ delete rooms[room].members.me; },
-    async members(room){ return Object.entries(seed(room).members).map(([user_id,v])=>({user_id,last_read_at:v.read,last_joined:v.read,nickname:v.nick||null})); },
+    async members(room){ return Object.entries(seed(room).members).map(([user_id,v])=>({user_id,last_read_at:v.read,last_joined:v.read,nickname:v.nick||null,notify:v.notify||"all"})); },
     async markRead(room){ if(rooms[room]?.members.me) rooms[room].members.me.read=iso(); },
     async loadLatest(room){ return seed(room).msgs.slice(-PAGE); },
     async loadBefore(){ return []; },
@@ -888,6 +974,7 @@ const reactionsById=new Map();// message id -> Map(emoji -> Set(user ids))
 const members=new Map();      // user id -> {read: ms, nick}
 const pollsById=new Map();    // message id -> {options, multi, votes: Map(index -> Set(user ids))}
 const pins=new Map();         // message id -> {pinned_by, created_at}
+let isDm=false, dmUser=null, myNotify="all", contactIds=[], inboxRows=[], unsubAll=null;
 let pinCursor=0, roomBg=null, pendingKind=null, pendingDuration=null, mentionPicks=new Map();
 const typers=new Map();       // user id -> {name,timer}
 let blocked=new Set();
@@ -920,7 +1007,7 @@ async function handleAuth(u){
   user=u;
   const q=new URLSearchParams(location.search);
   if(!u){
-    if(unsub){unsub();unsub=null;}
+    if(unsub){unsub();unsub=null;} if(unsubAll){unsubAll();unsubAll=null;}
     ["chat","profile","roomSheet","msgMenu"].forEach(id=>show($(id),false));
     show($("front")); show($("authCard")); show($("roomCard"),false);
     if(q.get("join")) say("authMsg",`You're invited to room ${q.get("join").slice(0,30)}. Log in or sign up to join.`);
@@ -931,7 +1018,10 @@ async function handleAuth(u){
   await ensureProfiles([...blocked]);
   show($("authCard"),false); show($("roomCard"));
   try{ $("room").value=localStorage.getItem("nl-room")||""; }catch(e){}
-  loadInbox();
+  loadInbox(); loadContacts();
+  if(unsubAll) unsubAll();
+  unsubAll=api.subscribeAll(onAnyMessage);
+  clearBadge();
   const linked=q.get("room"), joinCode=q.get("join"), joinToken=q.get("t");
   if(joinCode||linked) history.replaceState(null,"",location.pathname);
   if(joinCode){ $("room").value=joinCode; enterRoom(joinCode,joinToken); }
@@ -984,18 +1074,26 @@ $("recoverForm").addEventListener("submit",async e=>{
 async function loadInbox(){
   if(!user) return;
   let list=[]; try{ list=await api.myRooms(); }catch(e){}
+  inboxRows=list;
+  if(list.some(r=>r.dm_user)) await ensureProfiles(list.map(r=>r.dm_user).filter(Boolean));
   const box=$("inbox"); box.innerHTML="";
-  show($("inboxWrap"),list.length>0);
+  show($("inboxWrap"),list.length>0); show($("inboxEmpty"),!list.length);
   for(const r of list){
     const b=el("button","roomrow"); b.type="button";
-    const hash=el("span","hash","#");
-    const info=el("span","info"); const nm=el("div","name",r.name||"# "+r.code); if(r.name) nm.append(el("span","code","#"+r.code)); info.append(nm);
+    let hash;
+    if(r.is_dm){ hash=el("span","face"); paintFace(hash,cache.get(r.dm_user)||{username:r.dm_name,avatar_url:r.dm_avatar}); }
+    else hash=el("span","hash","#");
+    const info=el("span","info");
+    const nm=el("div","name",r.is_dm?(r.dm_name||"Private chat"):(r.name||"# "+r.code));
+    if(r.is_dm) nm.append(el("span","code","private")); else if(r.name) nm.append(el("span","code","#"+r.code));
+    if(r.notify==="off") nm.append(el("span","muted","🔕")); else if(r.notify==="mentions") nm.append(el("span","muted","@"));
+    info.append(nm);
     const pv=previewOf({kind:r.last_kind,text:r.last_text,image_url:r.last_image?"x":null,media_type:r.last_kind==="video"||r.last_kind==="audio"?r.last_kind:null,sticker:r.last_kind==="sticker"?"x":null})||"No messages yet";
     info.append(el("div","preview",r.last_sender?`${r.last_sender}: ${pv}`:pv));
     const when=el("span","when"); when.append(el("span","",shortWhen(r.last_at)));
     if(+r.unread>0) when.append(el("span","badge",r.unread>99?"99+":String(r.unread)));
     b.append(hash,info,when);
-    b.setAttribute("aria-label",`Room ${r.name||r.code}${+r.unread?`, ${r.unread} unread`:""}`);
+    b.setAttribute("aria-label",`${r.is_dm?"Private chat with "+(r.dm_name||"someone"):"Room "+(r.name||r.code)}${+r.unread?`, ${r.unread} unread`:""}`);
     b.onclick=()=>{ $("room").value=r.code; enterRoom(r.code); };
     box.append(b);
   }
@@ -1071,7 +1169,11 @@ async function enterRoom(code,token){
   typers.forEach(v=>clearTimeout(v.timer)); typers.clear(); paintTyping(); clearReply(); feed.innerHTML="";
   try{
     const [latest,mem,info,pinRows]=await Promise.all([api.loadLatest(room),api.members(room).catch(()=>[]),api.roomInfo(room).catch(()=>null),api.pins(room).catch(()=>[])]);
-    roomOwner=info?.owner||null; setRoomName(info?.name); setRoomBackground(info?.background);
+    roomOwner=info?.owner||null; isDm=!!info?.is_dm; dmUser=null;
+    if(isDm){ dmUser=(mem.find(x=>x.user_id!==user.id)||{}).user_id||null; await ensureProfiles([dmUser].filter(Boolean)); }
+    myNotify=(mem.find(x=>x.user_id===user.id)||{}).notify||"all";
+    setRoomName(info?.name); setRoomBackground(info?.background);
+    closeRoomNotifications(room);
     pinRows.forEach(p=>pins.set(p.message_id,p));
     mem.forEach(setMember);
     hasMore=latest.length>=PAGE;
@@ -1103,7 +1205,7 @@ function exitRoom(){
   sendTyping(false); if(unsub){unsub();unsub=null;}
   clearPending(); clearReply();
   ["chat","roomSheet","msgMenu"].forEach(id=>show($(id),false)); show($("front")); show($("roomCard"));
-  room=""; loadInbox();
+  room=""; isDm=false; dmUser=null; loadInbox();
 }
 $("back").onclick=exitRoom;
 
@@ -1272,9 +1374,11 @@ function openMenu(m){
   show($("menuDelete"),mine||roomOwner===user.id);
   $("menuDelete").textContent=mine?"Delete message":"Delete message (room owner)";
   show($("menuBlock"),!mine); $("menuBlock").textContent=`Block ${nameOf(m.user_id)}`;
+  show($("menuDm"),!mine&&!isDm); $("menuDm").textContent=`Message ${nameOf(m.user_id)} privately`;
   show($("msgMenu"));
 }
 $("menuClose").onclick=()=>show($("msgMenu"),false);
+$("menuDm").onclick=()=>{ show($("msgMenu"),false); openDm(menuMsg.user_id); };
 $("menuPin").onclick=async()=>{
   const m=menuMsg; show($("msgMenu"),false);
   try{
@@ -1338,11 +1442,15 @@ $("cancelReply").onclick=clearReply;
 /* ---------- room sheet ---------- */
 function setRoomName(name){
   roomName=(name||"").trim()||null;
-  $("roomLabel").textContent=roomName||"# "+room;
-  $("roomLabel").title=roomName?`${roomName} (#${room})`:"#"+room;
+  const label=isDm?(roomName||(dmUser?nameOf(dmUser):"Private chat")):(roomName||"# "+room);
+  $("roomLabel").textContent=(isDm?"🔒 ":"")+label;
+  $("roomLabel").title=isDm?"Private chat":(roomName?`${roomName} (#${room})`:"#"+room);
   paintRoomTitle();
 }
-function paintRoomTitle(){ $("rsTitle").textContent=roomName||"# "+room; $("rsCode").textContent=roomName?"#"+room:""; show($("rsCode"),!!roomName); }
+function paintRoomTitle(){
+  if(isDm){ $("rsTitle").textContent=roomName||(dmUser?nameOf(dmUser):"Private chat"); $("rsCode").textContent="Private chat · only you two can see this"; show($("rsCode")); return; }
+  $("rsTitle").textContent=roomName||"# "+room; $("rsCode").textContent=roomName?"#"+room:""; show($("rsCode"),!!roomName);
+}
 $("nameForm").addEventListener("submit",async e=>{
   e.preventDefault();
   const name=$("roomName").value.trim().replace(/\s+/g," ").slice(0,40);
@@ -1355,12 +1463,13 @@ $("nameForm").addEventListener("submit",async e=>{
 function inviteUrl(code,token){ return location.origin+location.pathname+"?join="+encodeURIComponent(code)+"&t="+encodeURIComponent(token); }
 $("roomBtn").onclick=async()=>{
   say("rsMsg",""); paintRoomTitle(); $("roomName").value=roomName||""; $("invLink").value="Loading…"; show($("roomSheet"));
-  paintMembers(); paintBgTiles(); paintPins();
+  show($("roomOnly"),!isDm); $("leaveRoom").textContent=isDm?"Hide this chat":"Leave this room";
+  paintMembers(); paintBgTiles(); paintPins(); paintNotifyModes();
   try{
     const info=await api.roomInfo(room); if(!info) throw new Error("Couldn't find this room.");
     roomOwner=info.owner; setRoomName(info.name); if(document.activeElement!==$("roomName")) $("roomName").value=roomName||""; paintMembers();
-    $("invLink").value=inviteUrl(info.code,info.invite_token);
-    show($("invReset"),info.owner===user.id); show($("invShare"),!!navigator.share);
+    if(!info.is_dm) $("invLink").value=inviteUrl(info.code,info.invite_token);
+    show($("invReset"),info.owner===user.id&&!info.is_dm); show($("invShare"),!!navigator.share);
   }catch(err){ $("invLink").value=""; say("rsMsg",err.message,true); }
 };
 async function paintMembers(){
@@ -1382,7 +1491,8 @@ async function paintMembers(){
       catch(err){ say("rsMsg","Couldn't set nickname: "+err.message,true); }
     };
     row.append(f,n,nb);
-    if(roomOwner===user.id && uid!==user.id){
+    if(uid!==user.id&&!isDm){ const mb=el("button","unblock","Message"); mb.type="button"; mb.onclick=()=>{ show($("roomSheet"),false); openDm(uid); }; row.append(mb); }
+    if(roomOwner===user.id && uid!==user.id && !isDm){
       const b=el("button","","Remove"); b.type="button";
       b.onclick=async()=>{
         if(!confirm(`Remove ${nameOf(uid)} from # ${room}? The invite link will also reset so they can't rejoin with it.`)) return;
@@ -1410,7 +1520,8 @@ $("invReset").onclick=async()=>{
 };
 $("leaveRoom").onclick=async()=>{
   const owner=roomOwner===user.id;
-  if(!confirm(`Leave ${roomName||"# "+room}?${owner?" You're the owner, so ownership passes to the next member.":""} You'll need a new invite link to come back.`)) return;
+  if(isDm){ if(!confirm("Hide this private chat? It comes back if either of you sends a new message.")) return; }
+  else if(!confirm(`Leave ${roomName||"# "+room}?${owner?" You're the owner, so ownership passes to the next member.":""} You'll need a new invite link to come back.`)) return;
   try{ const code=room; await api.leaveRoom(code); exitRoom(); say("roomMsg",`You left # ${code}.`); }
   catch(err){ say("rsMsg",err.message,true); }
 };
@@ -1852,7 +1963,8 @@ async function paintNotif(){
   if(isIOS&&!installed){ btn.disabled=true; btn.textContent="Add to Home Screen to get notifications"; return; }
   if(!swReg||!("PushManager" in window)){ btn.disabled=true; btn.textContent="Notifications not supported here"; return; }
   if(Notification.permission==="denied"){ btn.disabled=true; btn.textContent="Notifications blocked in settings"; return; }
-  btn.disabled=false; btn.textContent=(await currentSub())?"Turn off notifications":"Turn on notifications";
+  const subbed=!!(await currentSub());
+  btn.disabled=false; btn.textContent=subbed?"Turn off notifications":"Turn on notifications"; show($("notifTest"),subbed);
 }
 async function pushOn(){
   if(await Notification.requestPermission()!=="granted") throw new Error("Permission wasn't given.");
@@ -1994,6 +2106,116 @@ function playFx(m,force){
   vv.addEventListener("resize",fit); vv.addEventListener("scroll",fit); fit();
   $("box").addEventListener("focus",()=>setTimeout(()=>{ fit(); feed.scrollTop=feed.scrollHeight; },300));
 })();
+
+/* ================= CONTACTS & PRIVATE CHATS ================= */
+function setFrontTab(t){
+  $("tabChats").setAttribute("aria-selected",t==="chats"); $("tabContacts").setAttribute("aria-selected",t==="contacts");
+  show($("chatsPane"),t==="chats"); show($("contactsPane"),t==="contacts");
+  if(t==="contacts") loadContacts();
+}
+$("tabChats").onclick=()=>setFrontTab("chats"); $("tabContacts").onclick=()=>setFrontTab("contacts");
+async function loadContacts(){
+  if(!user) return;
+  contactIds=await api.contacts().catch(()=>[]);
+  await ensureProfiles(contactIds);
+  const box=$("contactList"); box.innerHTML="";
+  const ids=contactIds.filter(id=>cache.has(id)&&!blocked.has(id)).sort((a,b)=>cache.get(a).username.localeCompare(cache.get(b).username));
+  show($("contactEmpty"),!ids.length);
+  ids.forEach(uid=>{
+    const p=cache.get(uid), row=el("div","contactrow");
+    const f=el("span","face"); paintFace(f,p);
+    const n=el("span","cname",p.username);
+    const dm=inboxRows.find(r=>r.is_dm&&r.dm_user===uid); if(dm&&+dm.unread>0) n.append(el("small","",`${dm.unread} unread`));
+    const go=el("button","send","Message"); go.type="button"; go.onclick=()=>openDm(uid);
+    const rm=el("button","rm","✕"); rm.type="button"; rm.setAttribute("aria-label",`Remove ${p.username} from contacts`);
+    rm.onclick=async()=>{ if(!confirm(`Remove ${p.username} from your contacts?`)) return; try{ await api.removeContact(uid); loadContacts(); }catch(err){ say("contactMsg",err.message,true); } };
+    row.append(f,n,go,rm); box.append(row);
+  });
+}
+$("contactAdd").onclick=async()=>{
+  const name=$("contactName").value.trim().replace(/^@/,"");
+  if(!/^[A-Za-z0-9_]{3,20}$/.test(name)) return say("contactMsg","Type their exact username (3–20 letters, numbers, _).",true);
+  $("contactAdd").disabled=true;
+  try{
+    const p=await api.findUser(name);
+    if(!p) throw new Error(`No one is called ${name}. Check the spelling.`);
+    if(p.id===user.id) throw new Error("That's you!");
+    cache.set(p.id,{...cache.get(p.id),...p});
+    await api.addContact(p.id); $("contactName").value="";
+    say("contactMsg",`Added ${p.username}.`); loadContacts();
+  }catch(err){ say("contactMsg",err.message,true); }
+  finally{ $("contactAdd").disabled=false; }
+};
+$("contactName").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); $("contactAdd").click(); } });
+async function openDm(uid){
+  const name=nameOf(uid)||cache.get(uid)?.username||"them";
+  try{
+    if(!contactIds.includes(uid)){ await api.addContact(uid).catch(()=>{}); contactIds.push(uid); }
+    const code=await api.startDm(uid);
+    await enterRoom(code);
+  }catch(err){
+    const msg=err.message==="not_connected"?`You can message ${name} once you share a room, or after they add you as a contact too.`
+             :err.message==="cant_message"?`You can't message ${name}.`:"Couldn't open the chat: "+err.message;
+    if($("chat").classList.contains("hidden")) say("contactMsg",msg,true); else $("status").textContent=msg;
+  }
+}
+
+/* ================= NOTIFICATIONS ================= */
+function paintNotifyModes(){ $("notifyModes").querySelectorAll("button").forEach(b=>b.setAttribute("aria-checked",b.dataset.mode===myNotify)); }
+$("notifyModes").querySelectorAll("button").forEach(b=>b.onclick=async()=>{
+  const prev=myNotify; myNotify=b.dataset.mode; paintNotifyModes();
+  try{ await api.setNotify(room,myNotify); say("rsMsg",{all:"You'll be notified about every message here.",mentions:"You'll only be notified when someone @mentions you here.",off:"Notifications are off for this chat."}[myNotify]); }
+  catch(err){ myNotify=prev; paintNotifyModes(); say("rsMsg","Couldn't change notifications: "+err.message,true); }
+});
+
+// in-app banners for chats you're not looking at
+const toastSeen=new Set();
+async function onAnyMessage(m){
+  if(!user||!m||m.user_id===user.id||blocked.has(m.user_id)||toastSeen.has(m.id)) return;
+  toastSeen.add(m.id);
+  const viewingIt = m.room===room && !$("chat").classList.contains("hidden") && !document.hidden;
+  if(!$("front").classList.contains("hidden")) loadInboxSoon();
+  if(viewingIt) return;
+  const row=inboxRows.find(r=>r.code===m.room);
+  const mentioned=(m.mentions||[]).includes(user.id);
+  const mode=row?.notify||"all";
+  if(mode==="off"||(mode==="mentions"&&!mentioned)) return;
+  await ensureProfiles([m.user_id]);
+  if(document.hidden) return;   // the phone notification covers it
+  const p=cache.get(m.user_id)||{username:"Someone"};
+  const where=row?.is_dm?"private":(row?.name||"#"+m.room);
+  const t=el("button","toast"+(mentioned?" mention":"")); t.type="button";
+  const f=el("span","face"); paintFace(f,p);
+  const body=el("span","tbody");
+  body.append(el("div","ttitle",mentioned?`📣 ${p.username} mentioned you · ${where}`:`${p.username} · ${where}`));
+  body.append(el("div","ttext",previewOf(m)));
+  t.append(f,body);
+  t.onclick=()=>{ t.remove(); ["profile","roomSheet","msgMenu","pollSheet","themeSheet"].forEach(id=>show($(id),false)); enterRoom(m.room); };
+  const box=$("toasts"); box.prepend(t); while(box.children.length>3) box.lastChild.remove();
+  if(navigator.vibrate) navigator.vibrate(mentioned?[30,60,30]:25);
+  setTimeout(()=>{ t.classList.add("out"); setTimeout(()=>t.remove(),260); },5000);
+  if(row) { row.unread=(+row.unread||0)+1; }
+}
+let inboxTimer=null;
+function loadInboxSoon(){ clearTimeout(inboxTimer); inboxTimer=setTimeout(loadInbox,400); }
+
+function clearBadge(){ try{ navigator.clearAppBadge?.(); }catch(e){} }
+async function closeRoomNotifications(code){
+  clearBadge();
+  try{ const reg=swReg||await navigator.serviceWorker?.getRegistration(); (await reg?.getNotifications({tag:"room-"+code})||[]).forEach(n=>n.close()); }catch(e){}
+}
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ clearBadge(); if(room) closeRoomNotifications(room); } });
+// the service worker asks which chat is on screen, so it only skips notifications for that one
+navigator.serviceWorker?.addEventListener("message",e=>{
+  if(e.data?.type==="which-room"&&e.ports?.[0]) e.ports[0].postMessage({room: (!document.hidden&&!$("chat").classList.contains("hidden"))?room:null});
+});
+$("notifTest").onclick=async()=>{
+  try{
+    const reg=swReg||await navigator.serviceWorker.getRegistration();
+    await reg.showNotification("NightLine test 🌙",{body:"Notifications are working on this device.",icon:"icon-192.png",badge:"icon-192.png",tag:"test"});
+    say("profMsg","Test sent. If you didn't see it, check your phone's notification settings for this app.");
+  }catch(err){ say("profMsg","Couldn't show a test: "+err.message,true); }
+};
 
 /* ---------- boot ---------- */
 setMode("in");
