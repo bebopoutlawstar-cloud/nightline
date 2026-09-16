@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#07041A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>NightLine</title>
@@ -383,6 +383,18 @@ html,body{overflow-x:hidden}
 .member .face + .mname + button{margin-left:auto}
 #pinList .member .mname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .member button + button{margin-left:auto}
+
+/* keyboard-safe chat: sized to the visible part of the screen */
+#chat{position:fixed;left:0;right:0;margin:0 auto;top:var(--app-top,0px);height:var(--app-h,100dvh);width:100%}
+#chat .feed{overscroll-behavior:contain}
+html,body{overscroll-behavior:none}
+
+/* swipe to reply */
+.msg{position:relative}
+.msg .col{will-change:transform}
+.swipe-hint{position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:22px;color:var(--muted);opacity:0;pointer-events:none;transition:color .15s,transform .15s}
+.swipe-hint.ready{color:var(--volt);transform:translateY(-50%) scale(1.25)}
+.msg.me .swipe-hint{left:auto;right:auto;left:4px}
 </style>
 </head>
 <body>
@@ -605,6 +617,7 @@ html,body{overflow-x:hidden}
 </div>
 
 <div class="overlay lightbox hidden" id="lightbox"><img id="lightImg" alt="Full size photo"></div>
+
 
 
 <script>
@@ -1226,6 +1239,7 @@ function buildMsg(m,index,noAnim){
     col.append(row);
   }
   node.append(face,col);
+  attachSwipe(node,m);
   return node;
 }
 function jumpTo(id){
@@ -1270,10 +1284,41 @@ $("menuPin").onclick=async()=>{
   }catch(err){ $("status").textContent="Couldn't pin: "+err.message; }
 };
 $("menuFx").onclick=()=>{ show($("msgMenu"),false); setTimeout(()=>playFx(menuMsg,true),150); };
-$("menuReply").onclick=()=>{
-  replyTo=menuMsg; show($("msgMenu"),false);
-  $("replyText").textContent=`${nameOf(replyTo.user_id)}: ${previewOf(replyTo)}`; show($("replying")); $("box").focus();
-};
+function startReply(m,focus=true){
+  replyTo=m;
+  $("replyText").textContent=`${nameOf(m.user_id)}: ${previewOf(m)}`; show($("replying"));
+  if(focus) $("box").focus();
+}
+$("menuReply").onclick=()=>{ show($("msgMenu"),false); startReply(menuMsg); };
+
+/* swipe right on a message to reply */
+function attachSwipe(node,m){
+  let x0=0,y0=0,dx=0,mode=null,col=null,hint=null;
+  node.addEventListener("touchstart",e=>{
+    if(e.touches.length!==1||e.target.closest("video,.voice,.poll,input,textarea")) { mode="off"; return; }
+    x0=e.touches[0].clientX; y0=e.touches[0].clientY; dx=0; mode=null;
+    col=node.querySelector(".col");
+  },{passive:true});
+  node.addEventListener("touchmove",e=>{
+    if(mode==="off"||!col) return;
+    const mx=e.touches[0].clientX-x0, my=e.touches[0].clientY-y0;
+    if(mode===null){ if(Math.abs(mx)<8&&Math.abs(my)<8) return; mode=(mx>0&&Math.abs(mx)>Math.abs(my)*1.3)?"swipe":"off"; if(mode==="off") return;
+      hint=el("span","swipe-hint","↩"); node.prepend(hint); node.classList.add("swiping"); }
+    dx=Math.max(0,Math.min(90,mx));
+    col.style.transform=`translateX(${dx}px)`;
+    hint.style.opacity=Math.min(1,dx/60); hint.classList.toggle("ready",dx>=60);
+    if(dx>=60&&!node.dataset.buzzed){ node.dataset.buzzed="1"; if(navigator.vibrate) navigator.vibrate(15); }
+  },{passive:true});
+  const end=()=>{
+    if(mode==="swipe"){
+      col.style.transition="transform .2s ease"; col.style.transform="";
+      setTimeout(()=>{ if(col) col.style.transition=""; hint?.remove(); node.classList.remove("swiping"); },220);
+      if(dx>=60) startReply(m);
+    }
+    delete node.dataset.buzzed; mode=null; dx=0;
+  };
+  node.addEventListener("touchend",end); node.addEventListener("touchcancel",end);
+}
 $("menuCopy").onclick=async()=>{ show($("msgMenu"),false); try{ await navigator.clipboard.writeText(menuMsg.text); $("status").textContent="Copied."; }catch(e){} };
 $("menuDelete").onclick=async()=>{
   if(!confirm("Delete this message for everyone?")) return;
@@ -1483,8 +1528,9 @@ function sendTyping(on){
 function clearPending(){ pendingFile=null; pendingKind=null; pendingDuration=null; show($("pending"),false); show($("pendingImg")); show($("pendingVid"),false); $("pendingVid").removeAttribute("src"); }
 $("pickBtn").onclick=()=>{ closeTray(); $("picker").click(); };
 function videoDuration(file){ return new Promise(res=>{ const v=document.createElement("video"); v.preload="metadata"; v.onloadedmetadata=()=>{ res(v.duration); URL.revokeObjectURL(v.src); }; v.onerror=()=>res(NaN); v.src=URL.createObjectURL(file); }); }
-$("picker").onchange=async e=>{
-  const f=e.target.files[0]; e.target.value=""; if(!f) return;
+$("picker").onchange=e=>{ const f=e.target.files[0]; e.target.value=""; if(f) takeFile(f); };
+async function takeFile(f){
+  if(!f.type.startsWith("image/")&&!f.type.startsWith("video/")){ $("status").textContent="Only photos and videos can be attached."; return; }
   if(f.type.startsWith("video/")){
     if(f.size>MAX_VIDEO_BYTES){ $("status").textContent="Video is over 25 MB. Try a shorter clip."; return; }
     const d=await videoDuration(f);
@@ -1495,7 +1541,20 @@ $("picker").onchange=async e=>{
     if(f.size>15e6){ $("status").textContent="Photo is over 15 MB."; return; }
     pendingFile=f; pendingKind="image"; $("pendingImg").src=URL.createObjectURL(f); show($("pendingImg")); show($("pendingVid"),false); $("pendingLabel").textContent="Photo ready"; show($("pending"));
   }
-};
+}
+$("box").addEventListener("paste",e=>{
+  const items=[...(e.clipboardData?.items||[])];
+  const file=items.filter(i=>i.kind==="file").map(i=>i.getAsFile()).find(f=>f&&(f.type.startsWith("image/")||f.type.startsWith("video/")))
+          || [...(e.clipboardData?.files||[])].find(f=>f.type.startsWith("image/")||f.type.startsWith("video/"));
+  if(!file) return;
+  e.preventDefault();
+  takeFile(file.name?file:new File([file],"pasted."+(file.type.split("/")[1]||"png"),{type:file.type}));
+});
+["dragover","drop"].forEach(t=>$("chat").addEventListener(t,e=>{
+  if(![...(e.dataTransfer?.types||[])].includes("Files")) return;
+  e.preventDefault();
+  if(t==="drop"){ const f=[...e.dataTransfer.files].find(f=>f.type.startsWith("image/")||f.type.startsWith("video/")); if(f) takeFile(f); }
+}));
 $("unpick").onclick=clearPending;
 
 async function sendFields(fields){
@@ -1917,6 +1976,24 @@ function playFx(m,force){
   fxPlayed.add(m.id);
   FX.play(t.fx,{text:hypeText(m.text)});
 }
+
+/* ---------- keep the chat inside the visible area when the keyboard opens ---------- */
+(function(){
+  const vv=window.visualViewport; if(!vv) return;
+  const rootStyle=document.documentElement.style;
+  let raf=0;
+  function fit(){
+    cancelAnimationFrame(raf);
+    raf=requestAnimationFrame(()=>{
+      const nearBottom=feed.scrollHeight-feed.scrollTop-feed.clientHeight<120;
+      rootStyle.setProperty("--app-h",vv.height+"px");
+      rootStyle.setProperty("--app-top",vv.offsetTop+"px");
+      if(nearBottom) feed.scrollTop=feed.scrollHeight;
+    });
+  }
+  vv.addEventListener("resize",fit); vv.addEventListener("scroll",fit); fit();
+  $("box").addEventListener("focus",()=>setTimeout(()=>{ fit(); feed.scrollTop=feed.scrollHeight; },300));
+})();
 
 /* ---------- boot ---------- */
 setMode("in");
