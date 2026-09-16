@@ -765,6 +765,21 @@ html,body{overscroll-behavior:none}
 .msg.shiny .bubble{animation:pxshiny 2.4s linear infinite}
 .msg.shiny .bubble::after{content:"✨";position:absolute;right:-10px;top:-12px;font-size:18px;animation:sxsparkle 1.6s ease-in-out infinite}
 @keyframes pxshiny{0%,100%{filter:drop-shadow(0 0 4px #fff) drop-shadow(3px 3px 0 var(--volt))}50%{filter:drop-shadow(0 0 14px #fff6a8) drop-shadow(3px 3px 0 var(--mag))}}
+
+/* ===== cleaner photos ===== */
+.shot img{max-width:min(56vw,228px);max-height:260px;object-fit:cover;border-width:3px;transform:rotate(-1deg)}
+.bubble .shot{margin:2px 0 8px}
+.msg.photo-only .bubble{padding:0;filter:none}
+.msg.photo-only .bubble::before{display:none}
+.msg.photo-only .shot{margin:0}
+.msg.photo-only .shot img{max-width:min(60vw,240px);max-height:300px;border:3px solid var(--cyan);box-shadow:5px 5px 0 var(--mag);transform:rotate(-1.5deg)}
+.msg.me.photo-only .shot img{border-color:var(--mag);box-shadow:-5px 5px 0 var(--cyan);transform:rotate(1.5deg)}
+.msg.photo-only .reacts{margin-top:10px}
+/* ===== easier deleting ===== */
+.swipe-hint.del{left:auto;right:4px;color:var(--red)}
+.swipe-hint.del.ready{color:#fff;background:var(--red);border-radius:50%;width:34px;height:34px;display:grid;place-items:center;font-size:18px}
+.msg.me .swipe-hint.del{left:auto;right:4px}
+.bubble{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 </style>
 </head>
 <body>
@@ -988,13 +1003,13 @@ html,body{overscroll-behavior:none}
   <div class="sheet">
     <div class="menu-preview" id="menuPreview"></div>
     <div class="emoji-row" id="emojiRow"></div>
+    <button class="danger hidden" type="button" id="menuDelete">🗑 Delete message</button>
     <button class="go" type="button" id="menuReply">Reply</button>
     <button class="ghost hidden" type="button" id="menuDm">Message privately</button>
     <button class="ghost hidden" type="button" id="menuFriend">Add friend</button>
     <button class="ghost" type="button" id="menuPin">Pin message</button>
     <button class="ghost hidden" type="button" id="menuFx">Replay effect ✨</button>
     <button class="ghost hidden" type="button" id="menuCopy">Copy text</button>
-    <button class="danger hidden" type="button" id="menuDelete">Delete message</button>
     <button class="ghost hidden" type="button" id="menuBlock"></button>
     <button class="ghost" type="button" id="menuClose">Close</button>
   </div>
@@ -1848,7 +1863,8 @@ function buildMsg(m,index,noAnim){
     col.append(row);
   }
   node.append(face,col);
-  attachSwipe(node,m);
+  attachSwipe(node,m); attachLongPress(bub,m);
+  if(img&&!m.text&&!m.reply_to&&m.kind!=="sticker") node.classList.add("photo-only");
   return node;
 }
 function jumpTo(id){
@@ -1906,6 +1922,24 @@ function startReply(m,focus=true){
 $("menuReply").onclick=()=>{ show($("msgMenu"),false); startReply(menuMsg); };
 
 /* swipe right on a message to reply */
+let lpTimer=null, lpFired=false;
+function cancelLongPress(){ clearTimeout(lpTimer); lpTimer=null; }
+function attachLongPress(bub,m){
+  let sx=0,sy=0;
+  bub.addEventListener("pointerdown",e=>{ if(e.button>0||e.target.closest("video,.voice,.poll button,.gamecard button,a")) return;
+    sx=e.clientX; sy=e.clientY; lpFired=false; cancelLongPress();
+    lpTimer=setTimeout(()=>{ lpTimer=null; lpFired=true; if(navigator.vibrate) navigator.vibrate(25); openMenu(m); },450); });
+  bub.addEventListener("pointermove",e=>{ if(lpTimer&&Math.hypot(e.clientX-sx,e.clientY-sy)>10) cancelLongPress(); });
+  ["pointerup","pointercancel","pointerleave"].forEach(ev=>bub.addEventListener(ev,cancelLongPress));
+  bub.addEventListener("contextmenu",e=>e.preventDefault());
+  bub.addEventListener("click",e=>{ if(lpFired){ e.stopPropagation(); e.preventDefault(); lpFired=false; } },true);
+}
+async function deleteMessageFlow(m){
+  const mine=m.user_id===user.id;
+  if(!confirm(mine?"Delete this message for everyone?":`Delete ${nameOf(m.user_id)}'s message for everyone?`)) return;
+  try{ await api.deleteMessage(m.id); removeMessage(m.id); $("status").textContent="Message deleted."; }
+  catch(err){ $("status").textContent="Couldn't delete: "+err.message; }
+}
 function attachSwipe(node,m){
   let x0=0,y0=0,dx=0,mode=null,col=null,hint=null;
   node.addEventListener("touchstart",e=>{
@@ -1916,29 +1950,30 @@ function attachSwipe(node,m){
   node.addEventListener("touchmove",e=>{
     if(mode==="off"||!col) return;
     const mx=e.touches[0].clientX-x0, my=e.touches[0].clientY-y0;
-    if(mode===null){ if(Math.abs(mx)<8&&Math.abs(my)<8) return; mode=(mx>0&&Math.abs(mx)>Math.abs(my)*1.3)?"swipe":"off"; if(mode==="off") return;
-      hint=el("span","swipe-hint","↩"); node.prepend(hint); node.classList.add("swiping"); }
-    dx=Math.max(0,Math.min(90,mx));
+    if(mode===null){ if(Math.abs(mx)<8&&Math.abs(my)<8) return;
+      const horiz=Math.abs(mx)>Math.abs(my)*1.3, canDelete=m.user_id===user.id||roomOwner===user.id;
+      mode=!horiz?"off":mx>0?"swipe":(canDelete?"swipeDel":"off"); if(mode==="off") return;
+      cancelLongPress();
+      hint=el("span","swipe-hint"+(mode==="swipeDel"?" del":""),mode==="swipeDel"?"🗑":"↩"); node.prepend(hint); node.classList.add("swiping"); }
+    dx=mode==="swipe"?Math.max(0,Math.min(90,mx)):Math.min(0,Math.max(-90,mx));
     col.style.transform=`translateX(${dx}px)`;
-    hint.style.opacity=Math.min(1,dx/60); hint.classList.toggle("ready",dx>=60);
-    if(dx>=60&&!node.dataset.buzzed){ node.dataset.buzzed="1"; if(navigator.vibrate) navigator.vibrate(15); }
+    const far=Math.abs(dx)>=60;
+    hint.style.opacity=Math.min(1,Math.abs(dx)/60); hint.classList.toggle("ready",far);
+    if(far&&!node.dataset.buzzed){ node.dataset.buzzed="1"; if(navigator.vibrate) navigator.vibrate(15); }
   },{passive:true});
   const end=()=>{
-    if(mode==="swipe"){
+    if(mode==="swipe"||mode==="swipeDel"){
       col.style.transition="transform .2s ease"; col.style.transform="";
       setTimeout(()=>{ if(col) col.style.transition=""; hint?.remove(); node.classList.remove("swiping"); },220);
-      if(dx>=60) startReply(m);
+      if(mode==="swipe"&&dx>=60) startReply(m);
+      if(mode==="swipeDel"&&dx<=-60) setTimeout(()=>deleteMessageFlow(m),230);
     }
     delete node.dataset.buzzed; mode=null; dx=0;
   };
   node.addEventListener("touchend",end); node.addEventListener("touchcancel",end);
 }
 $("menuCopy").onclick=async()=>{ show($("msgMenu"),false); try{ await navigator.clipboard.writeText(menuMsg.text); $("status").textContent="Copied."; }catch(e){} };
-$("menuDelete").onclick=async()=>{
-  if(!confirm("Delete this message for everyone?")) return;
-  const id=menuMsg.id; show($("msgMenu"),false);
-  try{ await api.deleteMessage(id); removeMessage(id); }catch(err){ $("status").textContent="Couldn't delete: "+err.message; }
-};
+$("menuDelete").onclick=()=>{ const m=menuMsg; show($("msgMenu"),false); deleteMessageFlow(m); };
 $("menuBlock").onclick=async()=>{
   const uid=menuMsg.user_id, name=nameOf(uid);
   if(!confirm(`Block ${name}? You won't see their messages anywhere. You can unblock them from your profile.`)) return;
