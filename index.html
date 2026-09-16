@@ -441,6 +441,24 @@ html,body{overscroll-behavior:none}
 .bdayrow select{flex:1;min-width:0;padding:10px 8px;font-size:15px;appearance:auto;color:var(--white);background:var(--deep)}
 .bdayrow .send{padding:10px 12px}
 @media (prefers-reduced-motion:reduce){.cake{animation:none}}
+
+/* ===== install helper ===== */
+.installbar{display:flex;align-items:center;gap:8px;background:var(--night);border:2px solid var(--volt);box-shadow:4px 4px 0 var(--mag);padding:8px 10px;font-size:15px;color:var(--white);transform:rotate(-1deg)}
+.installbar span{flex:1;min-width:0}
+.installbar .send{padding:8px 12px;font-size:12px}
+.installbar .ib-x{background:none;border:none;color:var(--muted);font-size:18px;padding:4px}
+.installlink{justify-self:center;margin-top:2px}
+.steps{list-style:none;counter-reset:s;display:grid;gap:10px;width:100%;text-align:left}
+.steps li{counter-increment:s;display:flex;gap:10px;align-items:flex-start;font-size:17px;line-height:1.3}
+.steps li::before{content:counter(s);flex:none;width:26px;height:26px;display:grid;place-items:center;font-family:var(--tech);font-size:12px;color:var(--night);background:var(--cyan);clip-path:polygon(10% 0,100% 8%,90% 100%,0 92%)}
+.steps .ico{display:inline-grid;place-items:center;width:22px;height:22px;vertical-align:-5px;border:1.5px solid var(--cyan);color:var(--cyan);margin:0 2px}
+.steps .ico svg{width:14px;height:14px}
+.steps b{color:var(--volt)}
+.copyrow{display:flex;gap:8px;width:100%}
+.copyrow .field{flex:1;min-width:0;font-size:14px}
+.copyrow .send{padding:10px 14px}
+
+.steps li > span{flex:1;min-width:0;overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -449,6 +467,11 @@ html,body{overscroll-behavior:none}
 <!-- ============ FRONT ============ -->
 <section class="screen front" id="front">
  <div class="front-inner">
+  <div class="installbar hidden" id="installBar" role="status">
+    <span id="installBarText"></span>
+    <button type="button" class="send" id="installBarHow">How</button>
+    <button type="button" class="ib-x" id="installBarClose" aria-label="Dismiss">✕</button>
+  </div>
   <div class="stamp">
     <div class="glow"></div><div class="plate"></div>
     <div class="month" id="sMonth"></div><div class="slash"></div>
@@ -476,6 +499,7 @@ html,body{overscroll-behavior:none}
     <p class="msgline" id="authMsg" role="status"></p>
     <button class="go" type="submit" id="authBtn">Log in</button>
     <p class="note" id="modeNote"></p>
+    <button type="button" class="linkbtn installlink hidden" id="installLink1">📲 Install NightLine as an app</button>
   </form>
 
   <!-- logged in -->
@@ -489,6 +513,7 @@ html,body{overscroll-behavior:none}
     <input class="field" id="room" maxlength="30" placeholder="A room you're in, or a new code" required>
     <p class="msgline" id="roomMsg" role="status"></p>
     <button class="go" type="submit" id="jumpBtn">Jump in</button>
+    <button type="button" class="linkbtn installlink hidden" id="installLink2">📲 Install NightLine as an app</button>
     <div class="fronttabs" role="tablist">
       <button type="button" class="tab" role="tab" id="tabChats" aria-selected="true">Chats</button>
       <button type="button" class="tab" role="tab" id="tabContacts" aria-selected="false">Contacts</button>
@@ -696,6 +721,24 @@ html,body{overscroll-behavior:none}
     <button class="go" type="submit" id="pollCreate">Post poll</button>
     <button class="ghost" type="button" id="pollClose">Cancel</button>
   </form>
+</div>
+
+<!-- ============ INSTALL SHEET ============ -->
+<div class="overlay hidden" id="installSheet" role="dialog" aria-modal="true" aria-labelledby="installTitle">
+  <div class="sheet">
+    <h2 id="installTitle">Install NightLine</h2>
+    <p class="sub" id="installIntro"></p>
+    <button class="go hidden" type="button" id="installNow">Install now</button>
+    <ol class="steps" id="installSteps"></ol>
+    <div class="copyrow">
+      <label for="installUrl" class="sr">NightLine link</label>
+      <input class="field" id="installUrl" readonly>
+      <button type="button" class="send" id="installCopy">Copy</button>
+    </div>
+    <p class="sub left" id="installWhy">Installing gives you a home screen icon, full-screen chats, and notifications.</p>
+    <p class="msgline" id="installMsg" role="status"></p>
+    <button class="ghost" type="button" id="installClose">Close</button>
+  </div>
 </div>
 
 <div class="toasts" id="toasts" aria-live="polite"></div>
@@ -2004,7 +2047,8 @@ async function currentSub(){ return swReg ? swReg.pushManager.getSubscription() 
 async function paintNotif(){
   const btn=$("notifBtn");
   if(!sb||!VAPID_PUBLIC_KEY){ btn.disabled=true; btn.textContent="Notifications: not set up yet"; return; }
-  if(isIOS&&!installed){ btn.disabled=true; btn.textContent="Add to Home Screen to get notifications"; return; }
+  if(isIOS&&!installed){ btn.disabled=false; btn.textContent="📲 Install the app to get notifications"; btn.dataset.install="1"; return; }
+  delete btn.dataset.install;
   if(!swReg||!("PushManager" in window)){ btn.disabled=true; btn.textContent="Notifications not supported here"; return; }
   if(Notification.permission==="denied"){ btn.disabled=true; btn.textContent="Notifications blocked in settings"; return; }
   const subbed=!!(await currentSub());
@@ -2017,6 +2061,7 @@ async function pushOn(){
 }
 async function pushOff(){ const sub=await currentSub(); if(!sub) return; await api.deletePush(sub.endpoint); await sub.unsubscribe(); }
 $("notifBtn").onclick=async()=>{
+  if($("notifBtn").dataset.install){ show($("profile"),false); openInstallSheet(); return; }
   $("notifBtn").disabled=true;
   try{
     if(await currentSub()){ await pushOff(); say("profMsg","Notifications off."); }
@@ -2260,6 +2305,114 @@ $("notifTest").onclick=async()=>{
     say("profMsg","Test sent. If you didn't see it, check your phone's notification settings for this app.");
   }catch(err){ say("profMsg","Couldn't show a test: "+err.message,true); }
 };
+
+/* ================= INSTALL HELPER ================= */
+const SHARE_ICON='<span class="ico" aria-label="Share icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 15V3M7 8l5-5 5 5M5 12v8h14v-8"/></svg></span>';
+const DOTS_ICON='<span class="ico" aria-label="menu icon">⋮</span>';
+let deferredInstall=null;
+addEventListener("beforeinstallprompt",e=>{ e.preventDefault(); deferredInstall=e; paintInstallEntry(); });
+addEventListener("appinstalled",()=>{ deferredInstall=null; paintInstallEntry(); say("installMsg","Installed! Open NightLine from your home screen."); });
+
+function detectBrowser(ua=navigator.userAgent){
+  const ios=/iPad|iPhone|iPod/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);
+  const android=/Android/i.test(ua);
+  const inApp=/FBAN|FBAV|Instagram|Snapchat|musical_ly|TikTok|Line\/|Twitter|LinkedInApp|Pinterest|GSA\//i.test(ua);
+  const iosVer=(ua.match(/OS (\d+)_(\d+)/)||[]).slice(1).map(Number);
+  const iosNew=iosVer.length&&(iosVer[0]>16||(iosVer[0]===16&&iosVer[1]>=4));
+  let name="other", canInstall=false;
+  if(ios){
+    if(inApp){ name="inapp"; }
+    else if(/CriOS/.test(ua)){ name="chrome-ios"; canInstall=iosNew; }
+    else if(/EdgiOS/.test(ua)){ name="edge-ios"; canInstall=iosNew; }
+    else if(/FxiOS/.test(ua)){ name="firefox-ios"; canInstall=iosNew; }
+    else if(/Version\/[\d.]+.*Safari\//.test(ua)&&!/OPiOS|DuckDuckGo|Brave/i.test(ua)){ name="safari"; canInstall=true; }
+    else { name="ios-other"; }            // Lion and other app browsers
+  } else if(android){
+    if(inApp||/; wv\)/.test(ua)) name="inapp";
+    else if(/SamsungBrowser/.test(ua)){ name="samsung"; canInstall=true; }
+    else if(/EdgA/.test(ua)){ name="edge-android"; canInstall=true; }
+    else if(/Firefox/.test(ua)){ name="firefox-android"; canInstall=true; }
+    else if(/Chrome\//.test(ua)){ name="chrome-android"; canInstall=true; }
+    else name="android-other";
+  } else {
+    name=/Edg\//.test(ua)?"edge-desktop":/Chrome\//.test(ua)?"chrome-desktop":"desktop-other";
+    canInstall=name!=="desktop-other";
+  }
+  return {ios,android,name,canInstall,iosNew};
+}
+const BROWSER=detectBrowser();
+const isStandalone=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+
+function paintInstallEntry(){
+  const notInstalled=!isStandalone();
+  [$("installLink1"),$("installLink2")].forEach(x=>show(x,notInstalled));
+  let dismissed=false; try{ dismissed=localStorage.getItem("nl-install-bar")==="off"; }catch(e){}
+  const stuck=notInstalled && !BROWSER.canInstall && (BROWSER.ios||BROWSER.android);
+  if(stuck&&!dismissed){
+    $("installBarText").textContent = BROWSER.ios
+      ? "This browser can't add NightLine to your home screen, so notifications won't work here."
+      : "This browser can't install NightLine. Open it in Chrome to get the app.";
+    show($("installBar"));
+  } else show($("installBar"),false);
+}
+function openInstallSheet(){
+  const url=location.origin+location.pathname; $("installUrl").value=url; say("installMsg","");
+  const steps=$("installSteps"); steps.innerHTML="";
+  const add=h=>{ const li=document.createElement("li"); const s=document.createElement("span"); s.innerHTML=h; li.append(s); steps.append(li); };
+  show($("installNow"),!!deferredInstall);
+  const B=BROWSER.name;
+  if(B==="safari"){
+    $("installIntro").textContent="You're in Safari, so you're all set.";
+    add(`Tap the <b>Share</b> button ${SHARE_ICON} at the bottom (or top) of Safari.`);
+    add(`Scroll down and tap <b>Add to Home Screen</b>.`);
+    add(`Tap <b>Add</b>, then open NightLine from your home screen.`);
+    add(`Log in, tap your picture, and turn on <b>notifications</b>.`);
+  } else if(["chrome-ios","edge-ios","firefox-ios"].includes(B)&&BROWSER.canInstall){
+    $("installIntro").textContent="Your browser can add NightLine to your home screen.";
+    add(`Tap the <b>Share</b> button ${SHARE_ICON} (in Chrome it's next to the address bar; in Firefox and Edge it may be in the ${DOTS_ICON} menu).`);
+    add(`Tap <b>Add to Home Screen</b>, then <b>Add</b>.`);
+    add(`Open NightLine from your home screen, log in, and turn on <b>notifications</b> in your profile.`);
+  } else if(BROWSER.ios){
+    $("installIntro").textContent = B==="inapp"
+      ? "You opened NightLine inside another app, which can't install it."
+      : "This browser can't add apps to your home screen. Safari can.";
+    add(`Tap <b>Copy</b> below to copy the NightLine link.`);
+    add(`Open <b>Safari</b> and paste the link into the address bar.${BROWSER.iosNew?" (Chrome, Edge, or Firefox work too.)":""}`);
+    add(`Tap <b>Share</b> ${SHARE_ICON} → <b>Add to Home Screen</b> → <b>Add</b>.`);
+    add(`If Safari is turned off in Screen Time, ask whoever manages it. You can still chat here, just without notifications.`);
+  } else if(BROWSER.android&&BROWSER.canInstall){
+    $("installIntro").textContent = deferredInstall ? "Tap Install now, or use your browser menu." : "Install from your browser menu.";
+    add(`Tap the ${DOTS_ICON} menu in the corner of your browser.`);
+    add(`Tap <b>Install app</b> or <b>Add to Home screen</b>.`);
+    add(`Open NightLine from your home screen, log in, and turn on <b>notifications</b> in your profile.`);
+  } else if(BROWSER.android){
+    $("installIntro").textContent="This browser can't install NightLine. Chrome can.";
+    add(`Tap <b>Copy</b> below to copy the NightLine link.`);
+    add(`Open <b>Chrome</b> (or Samsung Internet) and paste the link.`);
+    add(`Tap ${DOTS_ICON} → <b>Install app</b> or <b>Add to Home screen</b>.`);
+  } else {
+    $("installIntro").textContent = BROWSER.canInstall ? "You can install NightLine on this computer." : "On a computer, Chrome or Edge can install NightLine.";
+    if(BROWSER.canInstall) add(`Click the <b>install</b> icon at the right end of the address bar, or use the browser menu → <b>Install NightLine</b>.`);
+    add(`On your phone, open the link below in <b>Safari</b> (iPhone) or <b>Chrome</b> (Android) and add it to your home screen.`);
+  }
+  show($("installSheet"));
+}
+$("installNow").onclick=async()=>{
+  if(!deferredInstall) return;
+  deferredInstall.prompt();
+  const {outcome}=await deferredInstall.userChoice.catch(()=>({outcome:"dismissed"}));
+  if(outcome==="accepted"){ say("installMsg","Installing… Open NightLine from your home screen."); deferredInstall=null; show($("installNow"),false); }
+};
+$("installCopy").onclick=async()=>{
+  const v=$("installUrl").value;
+  try{ await navigator.clipboard.writeText(v); say("installMsg","Link copied. Paste it into Safari or Chrome."); }
+  catch(e){ $("installUrl").select(); say("installMsg","Press and hold the link above, then tap Copy."); }
+};
+$("installClose").onclick=()=>show($("installSheet"),false);
+$("installSheet").addEventListener("click",e=>{ if(e.target.id==="installSheet") show($("installSheet"),false); });
+[$("installLink1"),$("installLink2"),$("installBarHow")].forEach(x=>x.onclick=openInstallSheet);
+$("installBarClose").onclick=()=>{ show($("installBar"),false); try{ localStorage.setItem("nl-install-bar","off"); }catch(e){} };
+paintInstallEntry();
 
 /* ================= BIRTHDAYS ================= */
 const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
