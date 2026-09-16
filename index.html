@@ -6,6 +6,14 @@
 <meta name="theme-color" content="#07041A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>NightLine</title>
+<meta name="description" content="Tap to join the chat on NightLine 🌙">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="NightLine">
+<meta property="og:title" content="Join me on NightLine 🌙">
+<meta property="og:description" content="Private rooms, voice messages, games and more. Tap to jump in.">
+<meta property="og:image" content="https://bebopoutlawstar-cloud.github.io/nightline/icon-512.png">
+<meta property="og:url" content="https://bebopoutlawstar-cloud.github.io/nightline/">
+<meta name="twitter:card" content="summary">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -1105,6 +1113,9 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
       return code;
     },
     async setNotify(room,mode){ rooms[room].members.me.notify=mode; },
+    _injectMissed(room,text,who="vee"){ const m={id:nextId++,room,user_id:who,kind:"text",text,mentions:[],created_at:iso()}; seed(room).msgs.push(m); return m; },
+    _deleteSilently(room,id){ rooms[room].msgs=rooms[room].msgs.filter(m=>m.id!==id); },
+    _status(s){ H&&H.status(s); },
     subscribeAll(onMsg){ ALL=onMsg; const t=setTimeout(()=>{ const r=seed("5959"); const m={id:nextId++,room:"5959",user_id:"rook",kind:"text",text:"@"+(people.me?.username||"you")+" you coming tonight?",mentions:["me"],created_at:iso()}; r.msgs.push(m); onMsg(m); },4000); return ()=>{ ALL=null; clearTimeout(t); }; },
     async myRooms(){ seed("5959"); if(rooms["5959"].name===undefined) rooms["5959"].name="The Hideout"; return Object.entries(rooms).filter(([,r])=>r.members.me).map(([code,r])=>{ const m=r.msgs[r.msgs.length-1]; const other=r.is_dm?Object.keys(r.members).find(u=>u!=="me"):null; return {code,name:r.name||null,is_dm:!!r.is_dm,dm_user:other,dm_name:other?people[other].username:null,dm_avatar:null,notify:r.members.me.notify||"all",is_owner:r.owner==="me",last_text:m?.text,last_image:!!m?.image_url,last_kind:m?.kind||"text",last_at:m?.created_at||iso(),last_sender:m?people[m.user_id]?.username:null,unread:r.msgs.filter(x=>x.user_id!=="me"&&x.created_at>(r.members.me?.read||"")).length}; }); },
     async joinRoom(room){ const existed=!!rooms[room]; seed(room); if(!existed){ rooms[room].msgs=[]; rooms[room].members={me:{read:iso()}}; return "created"; } rooms[room].members.me ||= {read:iso()}; return "member"; },
@@ -1201,7 +1212,10 @@ async function handleAuth(u){
     if(unsub){unsub();unsub=null;} if(unsubAll){unsubAll();unsubAll=null;}
     ["chat","profile","roomSheet","msgMenu"].forEach(id=>show($(id),false));
     show($("front")); show($("authCard")); show($("roomCard"),false);
-    if(q.get("join")) say("authMsg",`You're invited to room ${q.get("join").slice(0,30)}. Log in or sign up to join.`);
+    if(q.get("join")){
+      say("authMsg",`You're invited to room ${q.get("join").slice(0,30)}. Log in or sign up to join.`);
+      try{ localStorage.setItem("nl-pending-join",JSON.stringify({code:q.get("join"),t:q.get("t")||null,at:Date.now()})); }catch(e){}
+    }
     return;
   }
   await refreshMe();
@@ -1214,8 +1228,13 @@ async function handleAuth(u){
   if(unsubAll) unsubAll();
   unsubAll=api.subscribeAll(onAnyMessage);
   clearBadge();
-  const linked=q.get("room"), joinCode=q.get("join"), joinToken=q.get("t");
+  let linked=q.get("room"), joinCode=q.get("join"), joinToken=q.get("t");
   if(joinCode||linked) history.replaceState(null,"",location.pathname);
+  if(!joinCode&&!linked){
+    try{ const p=JSON.parse(localStorage.getItem("nl-pending-join")||"null");
+      if(p&&Date.now()-p.at<3*864e5){ joinCode=p.code; joinToken=p.t; } }catch(e){}
+  }
+  try{ localStorage.removeItem("nl-pending-join"); }catch(e){}
   if(joinCode){ $("room").value=joinCode; enterRoom(joinCode,joinToken); }
   else if(linked) enterRoom(linked);
 }
@@ -1388,7 +1407,7 @@ async function enterRoom(code,token){
       },
       reaction:(r,added)=>{ if(!byId.has(r.message_id)) return; setReaction(r,added); refreshMsg(r.message_id); },
       typing:onTyping,
-      status:s=>$("status").textContent=s
+      status:s=>{ const was=liveStatus; liveStatus=s; $("status").textContent=navigator.onLine===false?"Offline · will reconnect":s; if(s==="Live"&&was&&was!=="Live") catchUp("reconnected"); }
     });
   }catch(err){ $("status").textContent="Can't load messages. Check your Supabase setup."; }
 }
@@ -2691,6 +2710,43 @@ function celebrateMyBirthday(force){
     setTimeout(()=>{ t.classList.add("out"); setTimeout(()=>t.remove(),260); },6000);
   },600);
 }
+
+/* ================= STAYING CONNECTED ================= */
+let liveStatus=null, catchingUp=false, lastCatchUp=0;
+async function catchUp(reason){
+  if(!room||!user||catchingUp) return;
+  const code=room; catchingUp=true; lastCatchUp=Date.now();
+  try{
+    const [latest,mem,pinRows]=await Promise.all([api.loadLatest(code),api.members(code).catch(()=>null),api.pins(code).catch(()=>null)]);
+    if(room!==code) return;
+    await addMessages(latest);
+    // drop anything deleted while we were away (only within the loaded window)
+    { const ids=new Set(latest.map(m=>m.id));
+      const whole=latest.length<PAGE, oldest=latest[0]?.created_at;   // fewer than a page = we got the whole room
+      msgs.filter(m=>!ids.has(m.id)&&(whole||(oldest&&m.created_at>=oldest))).map(m=>m.id).forEach(removeMessage); }
+    if(mem) mem.forEach(setMember);
+    if(pinRows){ pins.clear(); pinRows.forEach(p=>pins.set(p.message_id,p)); await loadPinnedContext(); paintPinBar(); }
+    const gids=[...gamesById.keys()];
+    if(gids.length){ (await api.games(gids).catch(()=>[])).forEach(g=>{ const prev=gamesById.get(g.message_id); if(JSON.stringify(prev)!==JSON.stringify(g)){ gamesById.set(g.message_id,g); refreshMsg(g.message_id); if(openGameId===g.message_id) paintGame(prev); } }); }
+    markReadSoon();
+  }catch(e){ /* still offline: the next reconnect tries again */ }
+  finally{ catchingUp=false; }
+}
+addEventListener("offline",()=>{ if(room) $("status").textContent="Offline · will reconnect"; });
+addEventListener("online",()=>{ if(room){ $("status").textContent="Reconnecting…"; catchUp("online"); } else if(user) loadInbox(); });
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden&&room&&Date.now()-lastCatchUp>4000) catchUp("resume"); });
+
+/* invite and room links posted inside NightLine open right here instead of a new tab */
+feed.addEventListener("click",e=>{
+  const a=e.target.closest("a"); if(!a) return;
+  let u; try{ u=new URL(a.href); }catch(err){ return; }
+  if(u.origin+u.pathname!==location.origin+location.pathname) return;
+  const join=u.searchParams.get("join"), linked=u.searchParams.get("room");
+  if(!join&&!linked) return;
+  e.preventDefault();
+  if((join||linked).toLowerCase()===room){ $("status").textContent="You're already in this room."; return; }
+  enterRoom(join||linked, u.searchParams.get("t"));
+});
 
 /* ================= BACK BUTTON (Android / browser back) ================= */
 // Each chat or sheet you open adds a history step, so Back closes the top one instead of leaving the app.
