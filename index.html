@@ -515,6 +515,19 @@ html,body{overscroll-behavior:none}
 .cell .x::after{transform:rotate(-45deg)}
 .cell .o{border:clamp(8px,4vw,14px) solid var(--mag);border-radius:50%;box-shadow:3px 3px 0 var(--night)}
 @keyframes markpop{from{transform:scale(.2) rotate(-40deg);opacity:0}}
+
+/* ===== rooms / DMs / friends ===== */
+.fronttabs .tab{position:relative;padding:9px 4px}
+.tabbadge{position:absolute;top:-8px;right:-4px;min-width:20px;padding:1px 6px;font-family:var(--tech);font-size:10px;background:var(--volt);color:var(--night);border:2px solid var(--night);transform:rotate(6deg)}
+#contactsPane h3,#dmsPane h3{font-family:var(--tech);font-size:12px;color:var(--cyan);margin-top:6px}
+.contactrow .tagline{display:block;font-size:12px;color:var(--volt)}
+.contactrow .ghostbtn{background:none;border:2px solid var(--cyan);color:var(--cyan);font-family:var(--tech);font-size:11px;padding:7px 9px}
+.friendtag{font-family:var(--tech);font-size:12px;color:var(--volt);margin-top:-6px}
+.msg .face{cursor:pointer}
+.member .friendbtn{border-color:var(--volt)!important;color:var(--volt)!important}
+.member .friendbtn.on{border-color:var(--muted)!important;color:var(--muted)!important}
+
+.contactrow .tagline{white-space:normal}
 </style>
 </head>
 <body>
@@ -571,22 +584,30 @@ html,body{overscroll-behavior:none}
     <button class="go" type="submit" id="jumpBtn">Jump in</button>
     <button type="button" class="linkbtn installlink hidden" id="installLink2">📲 Install NightLine as an app</button>
     <div class="fronttabs" role="tablist">
-      <button type="button" class="tab" role="tab" id="tabChats" aria-selected="true">Chats</button>
-      <button type="button" class="tab" role="tab" id="tabContacts" aria-selected="false">Contacts</button>
+      <button type="button" class="tab" role="tab" id="tabChats" aria-selected="true">Rooms<span class="tabbadge hidden" id="badgeRooms"></span></button>
+      <button type="button" class="tab" role="tab" id="tabDms" aria-selected="false">DMs<span class="tabbadge hidden" id="badgeDms"></span></button>
+      <button type="button" class="tab" role="tab" id="tabContacts" aria-selected="false">Friends<span class="tabbadge hidden" id="badgeFriends"></span></button>
     </div>
     <div id="chatsPane">
       <div class="inbox hidden" id="inboxWrap"><div class="inbox" id="inbox"></div></div>
-      <p class="note hidden" id="inboxEmpty">No chats yet. Jump into a room or message a contact.</p>
+      <p class="note hidden" id="inboxEmpty">No rooms yet. Make a new room above or open an invite link.</p>
+    </div>
+    <div id="dmsPane" class="hidden">
+      <div class="inbox" id="dmList"></div>
+      <p class="note hidden" id="dmEmpty">No private messages yet. Go to Friends and tap Message, or tap someone's picture in a room.</p>
     </div>
     <div id="contactsPane" class="hidden">
       <div class="addcontact">
         <label for="contactName" class="sr">Username</label>
-        <input class="field" id="contactName" maxlength="20" placeholder="Add by username" autocomplete="off">
+        <input class="field" id="contactName" maxlength="20" placeholder="Add a friend by username" autocomplete="off">
         <button type="button" class="send" id="contactAdd">Add</button>
       </div>
       <p class="msgline" id="contactMsg" role="status"></p>
+      <h3 class="hidden" id="requestsTitle">Added you</h3>
+      <div class="inbox" id="requestList"></div>
+      <h3 class="hidden" id="friendsTitle">Your friends</h3>
       <div class="inbox" id="contactList"></div>
-      <p class="note hidden" id="contactEmpty">No contacts yet. Add a friend by username, or tap Message next to someone in a room.</p>
+      <p class="note hidden" id="contactEmpty">No friends yet. Tap someone's picture in a room and hit Add friend, or add them by username.</p>
     </div>
   </form>
  </div>
@@ -727,6 +748,7 @@ html,body{overscroll-behavior:none}
     <div class="emoji-row" id="emojiRow"></div>
     <button class="go" type="button" id="menuReply">Reply</button>
     <button class="ghost hidden" type="button" id="menuDm">Message privately</button>
+    <button class="ghost hidden" type="button" id="menuFriend">Add friend</button>
     <button class="ghost" type="button" id="menuPin">Pin message</button>
     <button class="ghost hidden" type="button" id="menuFx">Replay effect ✨</button>
     <button class="ghost hidden" type="button" id="menuCopy">Copy text</button>
@@ -820,6 +842,20 @@ html,body{overscroll-behavior:none}
     <button class="go hidden" type="button" id="gameRematch">Rematch 🔁</button>
     <p class="msgline" id="gameMsg" role="status"></p>
     <button class="ghost" type="button" id="gameClose">Back to chat</button>
+  </div>
+</div>
+
+<!-- ============ PERSON CARD ============ -->
+<div class="overlay hidden" id="personSheet" role="dialog" aria-modal="true" aria-labelledby="personName">
+  <div class="sheet">
+    <div class="face lg" id="personFace"></div>
+    <h2 id="personName"></h2>
+    <p class="sub" id="personSub"></p>
+    <p class="friendtag hidden" id="personTag"></p>
+    <button class="go" type="button" id="personFriend">Add friend</button>
+    <button class="ghost" type="button" id="personDm">Message privately</button>
+    <p class="msgline" id="personMsg" role="status"></p>
+    <button class="ghost" type="button" id="personClose">Close</button>
   </div>
 </div>
 
@@ -946,7 +982,8 @@ const live = {
   },
   async setAvatar(uid,url){ must(await sb.from("profiles").update({avatar_url:url}).eq("id",uid)); },
   async myRooms(){ return must(await sb.rpc("my_rooms")); },
-  async contacts(){ const rows=must(await sb.from("contacts").select("contact,created_at")); return rows.map(r=>r.contact); },
+  async contacts(){ const rows=must(await sb.from("contacts").select("contact,created_at").eq("owner",user.id)); return rows.map(r=>r.contact); },
+  async addedMe(){ const rows=must(await sb.from("contacts").select("owner,created_at").eq("contact",user.id)); return rows.map(r=>r.owner); },
   async findUser(username){ return must(await sb.from("profiles").select("id,username,avatar_url,bubble_color").ilike("username",username).maybeSingle()); },
   async addContact(uid){ must(await sb.from("contacts").upsert({contact:uid},{onConflict:"owner,contact",ignoreDuplicates:true})); },
   async removeContact(uid){ must(await sb.from("contacts").delete().eq("contact",uid)); },
@@ -956,8 +993,11 @@ const live = {
     return data;
   },
   async setNotify(room,mode){ must(await sb.from("room_members").update({notify:mode}).eq("room",room).eq("user_id",user.id)); },
-  subscribeAll(onMsg){
-    const ch=sb.channel("inbox-"+user.id).on("postgres_changes",{event:"INSERT",schema:"public",table:"messages"},p=>onMsg(p.new)).subscribe();
+  subscribeAll(onMsg,onFriend){
+    const ch=sb.channel("inbox-"+user.id)
+      .on("postgres_changes",{event:"INSERT",schema:"public",table:"messages"},p=>onMsg(p.new))
+      .on("postgres_changes",{event:"INSERT",schema:"public",table:"contacts",filter:`contact=eq.${user.id}`},p=>onFriend&&onFriend(p.new.owner))
+      .subscribe();
     return ()=>sb.removeChannel(ch);
   },
   async joinRoom(room,token){
@@ -1038,7 +1078,7 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
   const games={};
   function demoBot(id){ const g=games[id]; if(!g||g.status!=="active") return; const mark=g.player_x==="me"?"o":"x"; if(g.state.turn!==mark) return;
     const cell=tttBotMove(g.state.board,mark); applyTTT(g,cell,mark); fire("game",JSON.parse(JSON.stringify(g))); }
-  const rooms={}, reacts=[], blocked=new Set(), polls={}, votes=[], pins={}, contacts=new Set(["vee"]); let ALL=null;
+  const rooms={}, reacts=[], blocked=new Set(), polls={}, votes=[], pins={}, contacts=new Set(["vee"]); let ALL=null, FRIEND=null;
   people.nix={id:"nix",username:"Nix",avatar_url:null};
   const lines=["No way. Tell me everything.","That is so you.","Check this: www.example.com","Meet at the usual spot?","LOL stop"];
   const seed=room=>rooms[room] ||= {owner:"me",token:"demo"+Math.random().toString(36).slice(2,8),members:{me:{read:iso()},rook:{read:iso(70000)},vee:{read:iso(50000)}},msgs:[
@@ -1101,6 +1141,7 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
       if(had) remove(had); else { if(!p.multi) mine.forEach(remove); const v={message_id:id,user_id:"me",option_index:idx}; votes.push(v); setTimeout(()=>fire("vote",v,true),30); }
     },
     async contacts(){ return [...contacts]; },
+    async addedMe(){ return ["rook","vee"]; },
     async findUser(n){ return Object.values(people).find(p=>p.username.toLowerCase()===n.toLowerCase())||null; },
     async addContact(uid){ contacts.add(uid); },
     async removeContact(uid){ contacts.delete(uid); },
@@ -1116,7 +1157,8 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     _injectMissed(room,text,who="vee"){ const m={id:nextId++,room,user_id:who,kind:"text",text,mentions:[],created_at:iso()}; seed(room).msgs.push(m); return m; },
     _deleteSilently(room,id){ rooms[room].msgs=rooms[room].msgs.filter(m=>m.id!==id); },
     _status(s){ H&&H.status(s); },
-    subscribeAll(onMsg){ ALL=onMsg; const t=setTimeout(()=>{ const r=seed("5959"); const m={id:nextId++,room:"5959",user_id:"rook",kind:"text",text:"@"+(people.me?.username||"you")+" you coming tonight?",mentions:["me"],created_at:iso()}; r.msgs.push(m); onMsg(m); },4000); return ()=>{ ALL=null; clearTimeout(t); }; },
+    _friendAdd(uid){ FRIEND&&FRIEND(uid); },
+    subscribeAll(onMsg,onFriend){ ALL=onMsg; FRIEND=onFriend; const t=setTimeout(()=>{ const r=seed("5959"); const m={id:nextId++,room:"5959",user_id:"rook",kind:"text",text:"@"+(people.me?.username||"you")+" you coming tonight?",mentions:["me"],created_at:iso()}; r.msgs.push(m); onMsg(m); },4000); return ()=>{ ALL=null; clearTimeout(t); }; },
     async myRooms(){ seed("5959"); if(rooms["5959"].name===undefined) rooms["5959"].name="The Hideout"; return Object.entries(rooms).filter(([,r])=>r.members.me).map(([code,r])=>{ const m=r.msgs[r.msgs.length-1]; const other=r.is_dm?Object.keys(r.members).find(u=>u!=="me"):null; return {code,name:r.name||null,is_dm:!!r.is_dm,dm_user:other,dm_name:other?people[other].username:null,dm_avatar:null,notify:r.members.me.notify||"all",is_owner:r.owner==="me",last_text:m?.text,last_image:!!m?.image_url,last_kind:m?.kind||"text",last_at:m?.created_at||iso(),last_sender:m?people[m.user_id]?.username:null,unread:r.msgs.filter(x=>x.user_id!=="me"&&x.created_at>(r.members.me?.read||"")).length}; }); },
     async joinRoom(room){ const existed=!!rooms[room]; seed(room); if(!existed){ rooms[room].msgs=[]; rooms[room].members={me:{read:iso()}}; return "created"; } rooms[room].members.me ||= {read:iso()}; return "member"; },
     async roomInfo(room){ const r=seed(room); if(room==="5959"&&r.name===undefined) r.name="The Hideout"; return {code:room,name:r.name||null,background:r.background||null,owner:r.owner,invite_token:r.token,is_dm:!!r.is_dm}; },
@@ -1163,7 +1205,7 @@ const members=new Map();      // user id -> {read: ms, nick}
 const pollsById=new Map();    // message id -> {options, multi, votes: Map(index -> Set(user ids))}
 const pins=new Map();         // message id -> {pinned_by, created_at}
 const gamesById=new Map();    // message id -> game row
-let isDm=false, dmUser=null, myNotify="all", contactIds=[], inboxRows=[], unsubAll=null;
+let isDm=false, dmUser=null, myNotify="all", contactIds=[], addedMeIds=[], inboxRows=[], unsubAll=null;
 let pinCursor=0, roomBg=null, pendingKind=null, pendingDuration=null, mentionPicks=new Map();
 const typers=new Map();       // user id -> {name,timer}
 let blocked=new Set();
@@ -1223,10 +1265,11 @@ async function handleAuth(u){
   await ensureProfiles([...blocked]);
   show($("authCard"),false); show($("roomCard"));
   try{ $("room").value=localStorage.getItem("nl-room")||""; }catch(e){}
-  loadInbox(); loadContacts();
+  await loadContacts(); loadInbox();
+  try{ const t=localStorage.getItem("nl-front-tab"); if(["chats","dms","contacts"].includes(t)) setFrontTab(t); }catch(e){}
   celebrateMyBirthday();
   if(unsubAll) unsubAll();
-  unsubAll=api.subscribeAll(onAnyMessage);
+  unsubAll=api.subscribeAll(onAnyMessage,onFriendAdded);
   clearBadge();
   let linked=q.get("room"), joinCode=q.get("join"), joinToken=q.get("t");
   if(joinCode||linked) history.replaceState(null,"",location.pathname);
@@ -1287,16 +1330,20 @@ async function loadInbox(){
   let list=[]; try{ list=await api.myRooms(); }catch(e){}
   inboxRows=list;
   if(list.some(r=>r.dm_user)) await ensureProfiles(list.map(r=>r.dm_user).filter(Boolean));
-  const box=$("inbox"); box.innerHTML="";
-  show($("inboxWrap"),list.length>0); show($("inboxEmpty"),!list.length);
+  const roomsBox=$("inbox"), dmBox=$("dmList"); roomsBox.innerHTML=""; dmBox.innerHTML="";
+  const roomRows=list.filter(r=>!r.is_dm), dmRows=list.filter(r=>r.is_dm);
+  show($("inboxWrap"),roomRows.length>0); show($("inboxEmpty"),!roomRows.length); show($("dmEmpty"),!dmRows.length);
+  const unreadOf=rows=>rows.filter(r=>r.notify!=="off").reduce((n,r)=>n+(+r.unread||0),0);
+  setTabBadge("badgeRooms",unreadOf(roomRows)); setTabBadge("badgeDms",unreadOf(dmRows));
   for(const r of list){
+    const box=r.is_dm?dmBox:roomsBox;
     const b=el("button","roomrow"); b.type="button";
     let hash;
     if(r.is_dm){ hash=el("span","face"); paintFace(hash,cache.get(r.dm_user)||{username:r.dm_name,avatar_url:r.dm_avatar}); }
     else hash=el("span","hash","#");
     const info=el("span","info");
     const nm=el("div","name",r.is_dm?(r.dm_name||"Private chat"):(r.name||"# "+r.code));
-    if(r.is_dm) nm.append(el("span","code","private")); else if(r.name) nm.append(el("span","code","#"+r.code));
+    if(r.is_dm){ if(contactIds.includes(r.dm_user)) nm.append(el("span","code","friend")); } else if(r.name) nm.append(el("span","code","#"+r.code));
     if(r.notify==="off") nm.append(el("span","muted","🔕")); else if(r.notify==="mentions") nm.append(el("span","muted","@"));
     info.append(nm);
     const pv=previewOf({kind:r.last_kind,text:r.last_text,image_url:r.last_image?"x":null,media_type:r.last_kind==="video"||r.last_kind==="audio"?r.last_kind:null,sticker:r.last_kind==="sticker"?"x":null})||"No messages yet";
@@ -1512,7 +1559,7 @@ function buildMsg(m,index,noAnim){
   const bc=validHex(p.bubble_color); if(bc&&m.kind!=="sticker"){ node.classList.add("custom"); node.style.setProperty("--bub",bc); node.style.setProperty("--bubtext",textOn(bc)); }
   if(!mine&&(m.mentions||[]).includes(user.id)) node.classList.add("mentioned");
   if(noAnim) node.style.animation="none";
-  const face=el("div","face"); face.dataset.uid=m.user_id; face.setAttribute("aria-hidden","true"); paintFace(face,p);
+  const face=el("div","face"); face.dataset.uid=m.user_id; face.setAttribute("role","button"); face.setAttribute("aria-label",`${nameOf(m.user_id)}'s profile`); face.tabIndex=-1; paintFace(face,p);
   const col=el("div","col");
   const tag=el("div","tag");
   if(fresh&&!noAnim) tag.append(el("b","","NEW"));
@@ -1588,10 +1635,13 @@ function openMenu(m){
   $("menuDelete").textContent=mine?"Delete message":"Delete message (room owner)";
   show($("menuBlock"),!mine); $("menuBlock").textContent=`Block ${nameOf(m.user_id)}`;
   show($("menuDm"),!mine&&!isDm); $("menuDm").textContent=`Message ${nameOf(m.user_id)} privately`;
+  show($("menuFriend"),!mine&&!isFriend(m.user_id)); $("menuFriend").textContent=addedMe(m.user_id)?`Add ${nameOf(m.user_id)} back as a friend 🤝`:`Add ${nameOf(m.user_id)} as a friend`;
   show($("msgMenu"));
 }
 $("menuClose").onclick=()=>show($("msgMenu"),false);
 $("menuDm").onclick=()=>{ show($("msgMenu"),false); openDm(menuMsg.user_id); };
+$("menuFriend").onclick=async()=>{ const uid=menuMsg.user_id, name=nameOf(uid), back=addedMe(uid); show($("msgMenu"),false);
+  try{ await addFriend(uid); $("status").textContent=back?`You and ${name} are friends now 🤝`:`Added ${name} as a friend.`; }catch(err){ $("status").textContent="Couldn't add friend: "+err.message; } };
 $("menuPin").onclick=async()=>{
   const m=menuMsg; show($("msgMenu"),false);
   try{
@@ -1705,6 +1755,9 @@ async function paintMembers(){
     };
     row.append(f,n,nb);
     if(uid!==user.id&&!isDm){ const mb=el("button","unblock","Message"); mb.type="button"; mb.onclick=()=>{ show($("roomSheet"),false); openDm(uid); }; row.append(mb); }
+    if(uid!==user.id){ const fb=el("button","unblock friendbtn"+(isFriend(uid)?" on":""),isFriend(uid)?"Friend ✓":"Add friend"); fb.type="button";
+      fb.onclick=async()=>{ if(isFriend(uid)) { show($("roomSheet"),false); openPerson(uid); return; } try{ await addFriend(uid); say("rsMsg",`Added ${nameOf(uid)} as a friend.`); }catch(err){ say("rsMsg",err.message,true); } };
+      row.append(fb); }
     if(roomOwner===user.id && uid!==user.id && !isDm){
       const b=el("button","","Remove"); b.type="button";
       b.onclick=async()=>{
@@ -2333,26 +2386,63 @@ function playFx(m,force){
 
 /* ================= CONTACTS & PRIVATE CHATS ================= */
 function setFrontTab(t){
-  $("tabChats").setAttribute("aria-selected",t==="chats"); $("tabContacts").setAttribute("aria-selected",t==="contacts");
-  show($("chatsPane"),t==="chats"); show($("contactsPane"),t==="contacts");
+  $("tabChats").setAttribute("aria-selected",t==="chats"); $("tabDms").setAttribute("aria-selected",t==="dms"); $("tabContacts").setAttribute("aria-selected",t==="contacts");
+  show($("chatsPane"),t==="chats"); show($("dmsPane"),t==="dms"); show($("contactsPane"),t==="contacts");
   if(t==="contacts") loadContacts();
+  try{ localStorage.setItem("nl-front-tab",t); }catch(e){}
 }
-$("tabChats").onclick=()=>setFrontTab("chats"); $("tabContacts").onclick=()=>setFrontTab("contacts");
+$("tabChats").onclick=()=>setFrontTab("chats"); $("tabDms").onclick=()=>setFrontTab("dms"); $("tabContacts").onclick=()=>setFrontTab("contacts");
+function setTabBadge(id,n){ const bdg=$(id); bdg.textContent=n>99?"99+":String(n); show(bdg,n>0); }
+const isFriend=uid=>contactIds.includes(uid);
+const addedMe=uid=>addedMeIds.includes(uid);
+async function addFriend(uid){
+  if(isFriend(uid)) return;
+  await api.addContact(uid); contactIds.push(uid);
+  refreshFriendUI();
+}
+async function removeFriend(uid){
+  await api.removeContact(uid); contactIds=contactIds.filter(x=>x!==uid);
+  refreshFriendUI();
+}
+function refreshFriendUI(){
+  if(!$("contactsPane").classList.contains("hidden")) loadContacts(); else paintFriendBadge();
+  if(!$("roomSheet").classList.contains("hidden")) paintMembers();
+  if(personUid&&!$("personSheet").classList.contains("hidden")) paintPerson();
+  if(!$("front").classList.contains("hidden")) loadInbox();
+}
+function dismissedRequests(){ try{ return JSON.parse(localStorage.getItem("nl-dismissed-req")||"[]"); }catch(e){ return []; } }
+function pendingRequests(){ const d=dismissedRequests(); return addedMeIds.filter(id=>!isFriend(id)&&!blocked.has(id)&&!d.includes(id)&&cache.has(id)); }
+function paintFriendBadge(){ setTabBadge("badgeFriends",pendingRequests().length); }
 async function loadContacts(){
   if(!user) return;
-  contactIds=await api.contacts().catch(()=>[]);
-  await ensureProfiles(contactIds);
-  const box=$("contactList"); box.innerHTML="";
-  const ids=contactIds.filter(id=>cache.has(id)&&!blocked.has(id)).sort((a,b)=>cache.get(a).username.localeCompare(cache.get(b).username));
-  show($("contactEmpty"),!ids.length);
-  ids.forEach(uid=>{
+  [contactIds,addedMeIds]=await Promise.all([api.contacts().catch(()=>contactIds),api.addedMe().catch(()=>addedMeIds)]);
+  await ensureProfiles([...contactIds,...addedMeIds]);
+  // people who added you, that you haven't added back
+  const reqBox=$("requestList"); reqBox.innerHTML="";
+  const reqs=pendingRequests();
+  show($("requestsTitle"),reqs.length>0); paintFriendBadge();
+  reqs.forEach(uid=>{
     const p=cache.get(uid), row=el("div","contactrow");
     const f=el("span","face"); paintFace(f,p);
+    const n=el("span","cname",p.username); n.append(el("span","tagline","added you as a friend"));
+    const add=el("button","send","Add back"); add.type="button";
+    add.onclick=async()=>{ try{ await addFriend(uid); say("contactMsg",`You and ${p.username} are friends now 🤝`); }catch(err){ say("contactMsg",err.message,true); } };
+    const x=el("button","rm","✕"); x.type="button"; x.setAttribute("aria-label",`Dismiss ${p.username}`);
+    x.onclick=()=>{ const d=dismissedRequests(); d.push(uid); try{ localStorage.setItem("nl-dismissed-req",JSON.stringify(d)); }catch(e){} loadContacts(); };
+    row.append(f,n,add,x); reqBox.append(row);
+  });
+  const box=$("contactList"); box.innerHTML="";
+  const ids=contactIds.filter(id=>cache.has(id)&&!blocked.has(id)).sort((a,b)=>cache.get(a).username.localeCompare(cache.get(b).username));
+  show($("contactEmpty"),!ids.length); show($("friendsTitle"),ids.length>0);
+  ids.forEach(uid=>{
+    const p=cache.get(uid), row=el("div","contactrow");
+    const f=el("span","face"); paintFace(f,p); f.style.cursor="pointer"; f.onclick=()=>openPerson(uid);
     const n=el("span","cname",p.username);
+    if(addedMe(uid)) n.append(el("span","tagline","🤝 mutual friends"));
     const dm=inboxRows.find(r=>r.is_dm&&r.dm_user===uid); if(dm&&+dm.unread>0) n.append(el("small","",`${dm.unread} unread`));
     const go=el("button","send","Message"); go.type="button"; go.onclick=()=>openDm(uid);
-    const rm=el("button","rm","✕"); rm.type="button"; rm.setAttribute("aria-label",`Remove ${p.username} from contacts`);
-    rm.onclick=async()=>{ if(!confirm(`Remove ${p.username} from your contacts?`)) return; try{ await api.removeContact(uid); loadContacts(); }catch(err){ say("contactMsg",err.message,true); } };
+    const rm=el("button","rm","✕"); rm.type="button"; rm.setAttribute("aria-label",`Remove ${p.username} from friends`);
+    rm.onclick=async()=>{ if(!confirm(`Remove ${p.username} from your friends?`)) return; try{ await removeFriend(uid); }catch(err){ say("contactMsg",err.message,true); } };
     row.append(f,n,go,rm); box.append(row);
   });
 }
@@ -2365,8 +2455,9 @@ $("contactAdd").onclick=async()=>{
     if(!p) throw new Error(`No one is called ${name}. Check the spelling.`);
     if(p.id===user.id) throw new Error("That's you!");
     cache.set(p.id,{...cache.get(p.id),...p});
-    await api.addContact(p.id); $("contactName").value="";
-    say("contactMsg",`Added ${p.username}.`); loadContacts();
+    if(isFriend(p.id)) throw new Error(`${p.username} is already your friend.`);
+    await addFriend(p.id); $("contactName").value="";
+    say("contactMsg",addedMe(p.id)?`You and ${p.username} are friends now 🤝`:`Added ${p.username} as a friend.`); loadContacts();
   }catch(err){ say("contactMsg",err.message,true); }
   finally{ $("contactAdd").disabled=false; }
 };
@@ -2374,14 +2465,61 @@ $("contactName").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventD
 async function openDm(uid){
   const name=nameOf(uid)||cache.get(uid)?.username||"them";
   try{
-    if(!contactIds.includes(uid)){ await api.addContact(uid).catch(()=>{}); contactIds.push(uid); }
     const code=await api.startDm(uid);
     await enterRoom(code);
   }catch(err){
-    const msg=err.message==="not_connected"?`You can message ${name} once you share a room, or after they add you as a contact too.`
+    const msg=err.message==="not_connected"?`You can message ${name} once you share a room, or after they add you as a friend.`
              :err.message==="cant_message"?`You can't message ${name}.`:"Couldn't open the chat: "+err.message;
-    if($("chat").classList.contains("hidden")) say("contactMsg",msg,true); else $("status").textContent=msg;
+    if(!$("personSheet").classList.contains("hidden")) say("personMsg",msg,true);
+    else if($("chat").classList.contains("hidden")) say("contactMsg",msg,true); else $("status").textContent=msg;
   }
+}
+
+/* ---------- person card (tap someone's picture) ---------- */
+let personUid=null;
+function openPerson(uid){
+  if(!uid||uid===user.id){ if(uid===user.id) openProfile(); return; }
+  personUid=uid; say("personMsg",""); paintPerson(); show($("personSheet"));
+}
+function paintPerson(){
+  const uid=personUid, p=cache.get(uid)||{username:"Someone"}, nick=room?members.get(uid)?.nick:null;
+  paintFace($("personFace"),p);
+  $("personName").textContent=nick||p.username;
+  $("personSub").textContent=(nick&&nick!==p.username?`@${p.username} · `:"@"+p.username+" · ")+(isBirthdayToday(p.birthday)?"🎂 birthday today!":(roomName&&!isDm?`in ${roomName}`:"NightLine"));
+  const f=isFriend(uid), back=addedMe(uid);
+  $("personTag").textContent = f&&back?"🤝 You're friends": f?"✓ On your friends list": back?"👋 Added you as a friend":"";
+  show($("personTag"),f||back);
+  $("personFriend").textContent = f?"Remove friend": back?"Add back 🤝":"Add friend";
+  $("personFriend").className = f?"ghost":"go";
+  show($("personDm"),!(isDm&&dmUser===uid));
+  $("personDm").textContent=`Message ${p.username} privately`;
+}
+$("personFriend").onclick=async()=>{
+  const uid=personUid, name=cache.get(uid)?.username||"them";
+  $("personFriend").disabled=true;
+  try{
+    if(isFriend(uid)){ if(!confirm(`Remove ${name} from your friends?`)) return; await removeFriend(uid); say("personMsg",`Removed ${name}.`); }
+    else { const back=addedMe(uid); await addFriend(uid); say("personMsg",back?`You and ${name} are friends now 🤝`:`Added ${name} as a friend.`); if(navigator.vibrate) navigator.vibrate(20); }
+  }catch(err){ say("personMsg",err.message,true); }
+  finally{ $("personFriend").disabled=false; }
+};
+$("personDm").onclick=()=>{ const uid=personUid; show($("personSheet"),false); openDm(uid); };
+$("personClose").onclick=()=>show($("personSheet"),false);
+$("personSheet").addEventListener("click",e=>{ if(e.target.id==="personSheet") show($("personSheet"),false); });
+feed.addEventListener("click",e=>{ const f=e.target.closest(".msg .face"); if(f&&f.dataset.uid) openPerson(f.dataset.uid); });
+
+async function onFriendAdded(uid){
+  if(!uid||blocked.has(uid)) return;
+  if(!addedMeIds.includes(uid)) addedMeIds.push(uid);
+  await ensureProfiles([uid]);
+  const p=cache.get(uid); if(!p) return;
+  refreshFriendUI(); paintFriendBadge();
+  if(isFriend(uid)) return;
+  const t=el("button","toast"); t.type="button";
+  const f=el("span","face"); paintFace(f,p);
+  const body=el("span","tbody"); body.append(el("div","ttitle","👋 New friend"), el("div","ttext",`${p.username} added you. Tap to add back.`));
+  t.append(f,body); t.onclick=()=>{ t.remove(); openPerson(uid); };
+  $("toasts").prepend(t); setTimeout(()=>{ t.classList.add("out"); setTimeout(()=>t.remove(),260); },6000);
 }
 
 /* ================= NOTIFICATIONS ================= */
@@ -2751,7 +2889,7 @@ feed.addEventListener("click",e=>{
 /* ================= BACK BUTTON (Android / browser back) ================= */
 // Each chat or sheet you open adds a history step, so Back closes the top one instead of leaving the app.
 (function(){
-  const LAYERS=["chat","profile","roomSheet","msgMenu","themeSheet","pollSheet","installSheet","gameSheet","lightbox"];
+  const LAYERS=["chat","profile","roomSheet","msgMenu","themeSheet","pollSheet","installSheet","gameSheet","personSheet","lightbox"];
   const stack=[]; let popping=false, ignorePops=0, pendingBack=0, flushQueued=false;
   const isOpen=id=>!$(id).classList.contains("hidden");
   function queueBack(){
