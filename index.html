@@ -92,7 +92,7 @@ button:disabled{opacity:.5;cursor:default}
 .feed{flex:1;overflow-y:auto;padding:18px 10px;display:flex;flex-direction:column;gap:16px}
 .empty{margin:auto;text-align:center;color:var(--muted);font-size:17px;max-width:24ch}
 .msg{display:flex;align-items:flex-start;max-width:92%;transform:rotate(var(--tilt,0));animation:snap .26s cubic-bezier(.2,1.6,.4,1) both}
-.msg:nth-child(3n+1){--tilt:-1.5deg}.msg:nth-child(3n+2){--tilt:1deg}
+.msg.t1{--tilt:-1.5deg}.msg.t2{--tilt:1deg}
 .msg.me{align-self:flex-end;flex-direction:row-reverse;animation-name:snapR}
 @keyframes snap{from{opacity:0;transform:translateX(-36px) rotate(-8deg)}}
 @keyframes snapR{from{opacity:0;transform:translateX(36px) rotate(8deg)}}
@@ -150,6 +150,86 @@ button:disabled{opacity:.5;cursor:default}
 .danger{background:none;border:2px solid var(--red);color:var(--red);width:100%;padding:10px;font-family:var(--tech);font-size:13px}
 .lightbox img{max-width:100%;max-height:90dvh;border:3px solid var(--cyan);box-shadow:8px 8px 0 var(--mag)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+
+/* ===== v3 additions ===== */
+.sheet{max-height:calc(100dvh - 40px);overflow-y:auto}
+.sheet .field{text-align:left;font-size:15px}
+.sheet .left{justify-self:stretch;text-align:left;width:100%}
+.sheet h3{font-family:var(--tech);font-size:13px;color:var(--cyan);justify-self:start;margin-top:4px}
+.sub{color:var(--muted);font-size:15px;margin-top:-6px}
+
+/* inbox */
+.inbox{display:grid;gap:10px;margin-top:6px}
+.inbox h3{font-family:var(--tech);font-size:12px;color:var(--cyan);letter-spacing:.5px}
+.roomrow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:rgba(7,4,26,.85);border:2px solid #3b2d80;color:var(--white);padding:10px 12px;clip-path:polygon(0 0,98% 0,100% 30%,100% 100%,2% 100%,0 70%)}
+.roomrow:hover{border-color:var(--cyan)}
+.roomrow .hash{flex:none;width:38px;height:38px;display:grid;place-items:center;font-family:var(--tech);font-weight:900;font-size:18px;color:var(--night);background:var(--cyan);clip-path:polygon(10% 0,100% 8%,90% 100%,0 92%)}
+.roomrow .info{flex:1;min-width:0}
+.roomrow .name{font-family:var(--tech);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.roomrow .preview{font-size:16px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.roomrow .when{flex:none;display:grid;justify-items:end;gap:4px;font-size:13px;color:var(--muted)}
+.badge{font-family:var(--tech);font-size:11px;background:var(--volt);color:var(--night);padding:1px 7px;min-width:22px;text-align:center}
+
+/* feed extras */
+.daybreak{align-self:center;font-family:var(--tech);font-size:11px;color:var(--night);background:var(--cyan);padding:3px 12px;transform:rotate(-2deg);margin:6px 0;clip-path:polygon(4% 0,100% 0,96% 100%,0 100%)}
+.older{align-self:center;background:none;border:2px solid var(--cyan);color:var(--cyan);font-family:var(--tech);font-size:11px;padding:6px 12px}
+.bubble{cursor:pointer}
+.quote{display:block;border-left:3px solid var(--cyan);padding:2px 0 2px 8px;margin-bottom:6px;font-size:15px;font-weight:600;color:var(--muted);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:none;border-top:none;border-right:none;border-bottom:none;text-align:left}
+.quote b{color:var(--cyan);font-family:var(--tech);font-size:11px;margin-right:6px}
+.me .quote{border-left-color:var(--volt)}
+.reacts{display:flex;flex-wrap:wrap;gap:6px;margin:4px 8px 0}
+.me .reacts{justify-content:flex-end}
+.react{font:inherit;font-size:15px;background:var(--night);color:var(--white);border:2px solid #3b2d80;padding:1px 8px;transform:rotate(-2deg);animation:pop .2s cubic-bezier(.2,1.6,.4,1) both}
+.react.mine{border-color:var(--volt)}
+.react span{font-family:var(--tech);font-size:11px;margin-left:4px}
+.flash .bubble{animation:flash .9s ease}
+@keyframes flash{30%{filter:drop-shadow(0 0 14px var(--volt))}}
+
+/* composer reply chip */
+.replying{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:15px;color:var(--muted);border-left:3px solid var(--volt);padding-left:8px}
+.replying span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.replying b{color:var(--volt);font-family:var(--tech);font-size:11px}
+.replying button{background:none;border:2px solid var(--muted);color:var(--muted);padding:2px 8px}
+
+/* message menu */
+.emoji-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.emoji-row button{font-size:26px;width:50px;height:50px;background:var(--deep);border:2px solid #3b2d80;transform:rotate(-3deg)}
+.emoji-row button:nth-child(even){transform:rotate(3deg)}
+.emoji-row button.on{border-color:var(--volt);box-shadow:3px 3px 0 var(--mag)}
+.menu-preview{font-size:16px;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* members */
+.members{display:grid;gap:8px;width:100%}
+.member{display:flex;align-items:center;gap:10px;text-align:left}
+.member .face{width:34px;height:34px;font-size:15px}
+.member .mname{flex:1;min-width:0;font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.member .role{font-family:var(--tech);font-size:10px;color:var(--volt);margin-left:6px}
+.member button{background:none;border:2px solid var(--red);color:var(--red);font-family:var(--tech);font-size:10px;padding:4px 8px}
+.member button.unblock{border-color:var(--cyan);color:var(--cyan)}
+.linkbtn{background:none;border:none;color:var(--cyan);text-decoration:underline;text-underline-offset:3px;justify-self:start;font-size:16px;padding:0}
+.roomcard-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.top .ghost{margin-left:0;padding:6px 8px}
+.top #roomBtn{margin-left:auto}
+@media (max-width:420px){.mini{display:none}}
+
+.typing{height:auto;padding:0 14px}
+.typing .pill{position:static;display:inline-flex;margin:0 0 8px}
+.emoji-row{gap:6px;flex-wrap:nowrap}
+.emoji-row button{font-size:22px;width:42px;height:42px;padding:0}
+
+/* ===== full-screen effects ===== */
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:20}
+#fxText{position:fixed;inset:0;pointer-events:none;z-index:21;display:grid;place-items:center;overflow:hidden}
+.fx-banner{font-family:var(--num);font-size:clamp(64px,22vw,150px);line-height:.9;color:var(--white);background:var(--night);padding:6px 26px 0;border:5px solid var(--cyan);transform:rotate(-8deg) skewX(-8deg);text-shadow:-4px 0 var(--cyan),6px 6px var(--mag);box-shadow:10px 10px 0 var(--mag);clip-path:polygon(0 8%,100% 0,97% 100%,3% 92%);animation:slam 1.8s cubic-bezier(.2,1.4,.4,1) both;white-space:nowrap}
+@keyframes slam{0%{opacity:0;transform:rotate(-8deg) skewX(-8deg) scale(3)}14%{opacity:1;transform:rotate(-8deg) skewX(-8deg) scale(.92)}22%{transform:rotate(-8deg) skewX(-8deg) scale(1)}80%{opacity:1}100%{opacity:0;transform:rotate(-8deg) skewX(-8deg) scale(1.08) translateX(40px)}}
+.fx-stamp{position:absolute;font-family:var(--num);font-size:clamp(40px,14vw,90px);color:var(--volt);-webkit-text-stroke:2px var(--night);text-shadow:4px 4px 0 var(--night),6px 6px 0 var(--mag);animation:stamp 1.6s cubic-bezier(.2,1.8,.4,1) both}
+@keyframes stamp{0%{opacity:0;transform:rotate(var(--r)) scale(2.4)}18%{opacity:1;transform:rotate(var(--r)) scale(1)}75%{opacity:1}100%{opacity:0;transform:rotate(var(--r)) scale(.9)}}
+.fx-shake{animation:fxshake .5s linear 2}
+@keyframes fxshake{0%,100%{transform:translate(0)}20%{transform:translate(-6px,3px)}40%{transform:translate(5px,-4px)}60%{transform:translate(-4px,-2px)}80%{transform:translate(4px,4px)}}
+.fx-list{justify-self:stretch;text-align:left;font-size:15px;color:var(--muted)}
+.fx-list summary{font-family:var(--tech);font-size:12px;color:var(--cyan);cursor:pointer}
+.fx-list ul{list-style:none;display:grid;gap:4px;margin-top:8px}
+.fx-list b{color:var(--white)}
 </style>
 </head>
 <body>
@@ -198,6 +278,7 @@ button:disabled{opacity:.5;cursor:default}
     <input class="field" id="room" maxlength="30" placeholder="A room you're in, or a new code" required>
     <p class="msgline" id="roomMsg" role="status"></p>
     <button class="go" type="submit" id="jumpBtn">Jump in</button>
+    <div class="inbox hidden" id="inboxWrap"><h3>Your rooms</h3><div class="inbox" id="inbox"></div></div>
   </form>
  </div>
 </section>
@@ -208,12 +289,13 @@ button:disabled{opacity:.5;cursor:default}
     <button class="face sm" id="openProfile2" aria-label="Your profile"></button>
     <div class="mini" id="miniDate"></div>
     <div class="roombox"><div class="roomname" id="roomLabel"></div><div class="status" id="status"></div></div>
-    <button class="ghost" id="inviteBtn" type="button">Invite</button>
-    <button class="ghost" id="leave" type="button">Leave</button>
+    <button class="ghost" id="roomBtn" type="button">Room</button>
+    <button class="ghost" id="back" type="button">Back</button>
   </div>
   <main class="feed" id="feed" aria-live="polite"></main>
   <div class="typing" id="typing" aria-live="polite"></div>
   <form class="compose" id="sendForm">
+    <div class="replying hidden" id="replying"><b>Reply</b><span id="replyText"></span><button type="button" id="cancelReply">Cancel</button></div>
     <div class="pending hidden" id="pending"><img id="pendingImg" alt="Photo to send"><span>Photo ready</span><button type="button" id="unpick">Remove</button></div>
     <div class="row">
       <button type="button" class="clip" id="pickBtn" aria-label="Add a photo">
@@ -237,24 +319,47 @@ button:disabled{opacity:.5;cursor:default}
     <input type="file" id="avatarPicker" accept="image/*" class="sr">
     <button class="go" type="button" id="changePhoto">Change photo</button>
     <button class="ghost" type="button" id="notifBtn">Turn on notifications</button>
+    <button class="ghost" type="button" id="fxBtn">Screen effects: On</button>
+    <details class="fx-list"><summary>Words and emoji that trigger effects</summary><ul id="fxList"></ul></details>
     <p class="msgline" id="profMsg" role="status"></p>
+    <h3 class="hidden" id="blockedTitle">Blocked people</h3>
+    <div class="members" id="blockedList"></div>
     <button class="danger" type="button" id="logout">Log out</button>
     <button class="ghost" type="button" id="closeProfile">Close</button>
+    <button class="linkbtn" type="button" id="deleteAccount" style="justify-self:center;color:var(--red)">Delete my account</button>
   </div>
 </div>
 
-<!-- ============ INVITE SHEET ============ -->
-<div class="overlay hidden" id="invite" role="dialog" aria-modal="true" aria-labelledby="invTitle">
+<!-- ============ ROOM SHEET ============ -->
+<div class="overlay hidden" id="roomSheet" role="dialog" aria-modal="true" aria-labelledby="rsTitle">
   <div class="sheet">
-    <h2 id="invTitle">Invite to <span id="invRoom"></span></h2>
-    <p class="email" style="margin:0">Anyone with this link can join the room. Only share it with people you trust.</p>
+    <h2 id="rsTitle"></h2>
+    <h3>Invite link</h3>
+    <p class="sub left">Anyone with this link can join. Only share it with people you trust.</p>
     <label for="invLink" class="sr">Invite link</label>
     <input class="field" id="invLink" readonly>
     <button class="go" type="button" id="invCopy">Copy link</button>
-    <button class="ghost" type="button" id="invShare">Share</button>
-    <button class="danger hidden" type="button" id="invReset">Reset link (old link stops working)</button>
-    <p class="msgline" id="invMsg" role="status"></p>
-    <button class="ghost" type="button" id="invClose">Close</button>
+    <button class="ghost hidden" type="button" id="invShare">Share</button>
+    <button class="ghost hidden" type="button" id="invReset">Reset link (old link stops working)</button>
+    <h3 id="memTitle">Members</h3>
+    <div class="members" id="memberList"></div>
+    <p class="msgline" id="rsMsg" role="status"></p>
+    <button class="danger" type="button" id="leaveRoom">Leave this room</button>
+    <button class="ghost" type="button" id="rsClose">Close</button>
+  </div>
+</div>
+
+<!-- ============ MESSAGE MENU ============ -->
+<div class="overlay hidden" id="msgMenu" role="dialog" aria-modal="true" aria-label="Message options">
+  <div class="sheet">
+    <div class="menu-preview" id="menuPreview"></div>
+    <div class="emoji-row" id="emojiRow"></div>
+    <button class="go" type="button" id="menuReply">Reply</button>
+    <button class="ghost hidden" type="button" id="menuFx">Replay effect ✨</button>
+    <button class="ghost hidden" type="button" id="menuCopy">Copy text</button>
+    <button class="danger hidden" type="button" id="menuDelete">Delete message</button>
+    <button class="ghost hidden" type="button" id="menuBlock"></button>
+    <button class="ghost" type="button" id="menuClose">Close</button>
   </div>
 </div>
 
@@ -282,7 +387,11 @@ const $ = id => document.getElementById(id);
 const show = (el, on=true) => el.classList.toggle("hidden", !on);
 const DAYS=["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"];
 const COLORS=["#00F0FF","#E07AC6","#F3FF3A","#7CFF6B","#FF8A3D","#B18CFF"];
+const EMOJIS=["🔥","😂","😮","😢","👍","❤️"];
+const PAGE=50;
 const colorFor = s => COLORS[[...(s||"?")].reduce((a,c)=>a+c.charCodeAt(0),0)%COLORS.length];
+const say = (id,text,bad) => { $(id).textContent=text; $(id).classList.toggle("bad",!!bad); };
+const timeOf = t => new Date(t).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
 
 /* ---------- date stamp ---------- */
 const sun='<svg viewBox="0 0 100 100"><g fill="#07041A"><circle cx="50" cy="50" r="22"/>'+[...Array(8)].map((_,i)=>`<polygon points="50,2 58,20 42,20" transform="rotate(${i*45} 50 50)"/>`).join("")+'</g></svg>';
@@ -309,10 +418,10 @@ paintDate(); setInterval(paintDate,60000);
   size(); addEventListener("resize",size); requestAnimationFrame(draw);
 })();
 
-/* ---------- image helpers ---------- */
+/* ---------- helpers ---------- */
 function loadImg(file){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=()=>rej(new Error("That file isn't an image we can read."));i.src=URL.createObjectURL(file)})}
 async function shrink(file,max,square){
-  if(file.type==="image/gif" && !square && file.size<5e6) return file;       // keep GIFs animated
+  if(file.type==="image/gif" && !square && file.size<5e6) return file;
   const img=await loadImg(file); let sw=img.width, sh=img.height, sx=0, sy=0;
   if(square){const m=Math.min(sw,sh); sx=(sw-m)/2; sy=(sh-m)/2; sw=sh=m;}
   const k=Math.min(1,max/Math.max(sw,sh)), c=document.createElement("canvas");
@@ -321,124 +430,180 @@ async function shrink(file,max,square){
   return new Promise(r=>c.toBlob(r,"image/jpeg",.85));
 }
 const safeImg = u => typeof u==="string" && (u.startsWith("https://")||u.startsWith("blob:")) ? u : null;
-
-/* ---------- links ---------- */
 function linkify(el,text){
   const re=/((?:https?:\/\/|www\.)[^\s<]+[^\s<.,:;"')\]!?])/gi; let last=0, m;
   while((m=re.exec(text))){
     el.append(text.slice(last,m.index));
-    const a=document.createElement("a"); const href=m[0].startsWith("www.")?"https://"+m[0]:m[0];
-    a.href=href; a.textContent=m[0]; a.target="_blank"; a.rel="noopener noreferrer";
+    const a=document.createElement("a"); a.href=m[0].startsWith("www.")?"https://"+m[0]:m[0];
+    a.textContent=m[0]; a.target="_blank"; a.rel="noopener noreferrer";
     el.append(a); last=m.index+m[0].length;
   }
   el.append(text.slice(last));
 }
+function dayKey(t){ const d=new Date(t); return d.getFullYear()+"-"+d.getMonth()+"-"+d.getDate(); }
+function dayLabel(t){
+  const d=new Date(t), now=new Date(), y=new Date(); y.setDate(now.getDate()-1);
+  if(dayKey(d)===dayKey(now)) return "Today";
+  if(dayKey(d)===dayKey(y)) return "Yesterday";
+  return `${d.getMonth()+1}/${d.getDate()} ${DAYS[d.getDay()].slice(0,3)}`;
+}
+function shortWhen(t){ return dayKey(t)===dayKey(Date.now()) ? timeOf(t) : dayLabel(t); }
+function el(tag,cls,text){ const e=document.createElement(tag); if(cls) e.className=cls; if(text!=null) e.textContent=text; return e; }
 
 /* ================= BACKEND ================= */
 let sb=null;
 try{ if(SUPABASE_URL&&SUPABASE_ANON_KEY&&window.supabase) sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY); }catch(e){}
+const must = ({data,error}) => { if(error) throw error; return data; };
 
 const live = {
   async session(){ const {data}=await sb.auth.getSession(); return data.session?.user||null; },
   onAuth(cb){ sb.auth.onAuthStateChange((e,s)=>cb(s?.user||null,e)); },
-  async resetPassword(email){ const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname}); if(error) throw error; },
-  async updatePassword(pw){ const {error}=await sb.auth.updateUser({password:pw}); if(error) throw error; },
   async signUp(username,email,password){
     const {data:taken}=await sb.from("profiles").select("id").ilike("username",username).maybeSingle();
     if(taken) throw new Error("That username is taken.");
-    const {data,error}=await sb.auth.signUp({email,password,options:{data:{username},emailRedirectTo:location.origin+location.pathname}});
-    if(error) throw error;
+    const data=must(await sb.auth.signUp({email,password,options:{data:{username},emailRedirectTo:location.origin+location.pathname}}));
     return data.session ? "in" : "confirm";
   },
-  async signIn(email,password){ const {error}=await sb.auth.signInWithPassword({email,password}); if(error) throw error; },
+  async signIn(email,password){ must(await sb.auth.signInWithPassword({email,password})); },
   async signOut(){ await sb.auth.signOut(); },
-  async profiles(ids){ const {data,error}=await sb.from("profiles").select("id,username,avatar_url").in("id",ids); if(error) throw error; return data; },
+  async resetPassword(email){ must(await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname})); },
+  async updatePassword(pw){ must(await sb.auth.updateUser({password:pw})); },
+  async deleteAccount(){ must(await sb.rpc("delete_my_account")); await sb.auth.signOut(); },
+  async profiles(ids){ return must(await sb.from("profiles").select("id,username,avatar_url").in("id",ids)); },
   async upload(bucket,uid,blob){
     const ext=blob.type==="image/gif"?"gif":"jpg", path=`${uid}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
-    const {error}=await sb.storage.from(bucket).upload(path,blob,{contentType:blob.type||"image/jpeg"});
-    if(error) throw error;
+    must(await sb.storage.from(bucket).upload(path,blob,{contentType:blob.type||"image/jpeg"}));
     return sb.storage.from(bucket).getPublicUrl(path).data.publicUrl;
   },
-  async setAvatar(uid,url){ const {error}=await sb.from("profiles").update({avatar_url:url}).eq("id",uid); if(error) throw error; },
-  async load(room){ const {data,error}=await sb.from("messages").select("*").eq("room",room).order("created_at",{ascending:true}).limit(200); if(error) throw error; return data; },
-  async send(room,text,image_url){ const {data,error}=await sb.from("messages").insert({room,text:text||null,image_url:image_url||null}).select().single(); if(error) throw error; return data; },
+  async setAvatar(uid,url){ must(await sb.from("profiles").update({avatar_url:url}).eq("id",uid)); },
+  async myRooms(){ return must(await sb.rpc("my_rooms")); },
   async joinRoom(room,token){
     const {data,error}=await sb.rpc("join_room",{p_room:room,p_token:token||null});
     if(error) throw new Error(/private_room/.test(error.message)?"private":error.message);
     return data;
   },
-  async roomInfo(room){ const {data,error}=await sb.from("rooms").select("code,owner,invite_token").eq("code",room).maybeSingle(); if(error) throw error; return data; },
-  async rotateInvite(room){ const {data,error}=await sb.rpc("rotate_invite",{p_room:room}); if(error) throw error; return data; },
-  async savePush(json){ const {error}=await sb.from("push_subscriptions").upsert({endpoint:json.endpoint,p256dh:json.keys.p256dh,auth:json.keys.auth},{onConflict:"endpoint"}); if(error) throw error; },
-  async deletePush(endpoint){ await sb.from("push_subscriptions").delete().eq("endpoint",endpoint); },
-  async members(room){ const {data,error}=await sb.from("room_members").select("user_id,last_read_at").eq("room",room); if(error) throw error; return data; },
+  async roomInfo(room){ return must(await sb.from("rooms").select("code,owner,invite_token").eq("code",room).maybeSingle()); },
+  async rotateInvite(room){ return must(await sb.rpc("rotate_invite",{p_room:room})); },
+  async removeMember(room,uid){ must(await sb.rpc("remove_member",{p_room:room,p_user:uid})); },
+  async leaveRoom(room){ must(await sb.rpc("leave_room",{p_room:room})); },
+  async members(room){ return must(await sb.from("room_members").select("user_id,last_read_at,last_joined").eq("room",room)); },
   async markRead(room){ await sb.rpc("mark_read",{p_room:room}); },
+  async loadLatest(room){ return must(await sb.from("messages").select("*").eq("room",room).order("created_at",{ascending:false}).limit(PAGE)).reverse(); },
+  async loadBefore(room,iso){ return must(await sb.from("messages").select("*").eq("room",room).lt("created_at",iso).order("created_at",{ascending:false}).limit(PAGE)).reverse(); },
+  async fetchMessage(id){ return must(await sb.from("messages").select("*").eq("id",id).maybeSingle()); },
+  async send(room,text,image_url,reply_to){ return must(await sb.from("messages").insert({room,text:text||null,image_url:image_url||null,reply_to:reply_to||null}).select().single()); },
+  async deleteMessage(id){ must(await sb.from("messages").delete().eq("id",id)); },
+  async reactions(ids){ return ids.length ? must(await sb.from("message_reactions").select("message_id,user_id,emoji").in("message_id",ids)) : []; },
+  async react(message_id,room,emoji){ must(await sb.from("message_reactions").insert({message_id,room,emoji})); },
+  async unreact(message_id,uid,emoji){ must(await sb.from("message_reactions").delete().eq("message_id",message_id).eq("user_id",uid).eq("emoji",emoji)); },
+  async blocks(){ return must(await sb.from("blocks").select("blocked")).map(r=>r.blocked); },
+  async block(uid){ must(await sb.from("blocks").insert({blocked:uid})); },
+  async unblock(uid){ must(await sb.from("blocks").delete().eq("blocked",uid)); },
+  async savePush(json){ must(await sb.from("push_subscriptions").upsert({endpoint:json.endpoint,p256dh:json.keys.p256dh,auth:json.keys.auth},{onConflict:"endpoint"})); },
+  async deletePush(endpoint){ await sb.from("push_subscriptions").delete().eq("endpoint",endpoint); },
   subscribe(room,h){
-    const ch=sb.channel("room-"+room,{config:{broadcast:{self:false}}})
+    const pub=sb.channel("room-"+room)
       .on("postgres_changes",{event:"INSERT",schema:"public",table:"messages",filter:`room=eq.${room}`},p=>h.msg(p.new))
+      .on("postgres_changes",{event:"DELETE",schema:"public",table:"messages"},p=>p.old?.id!=null&&h.msgGone(p.old.id))
       .on("postgres_changes",{event:"UPDATE",schema:"public",table:"profiles"},p=>h.profile(p.new))
-      .on("postgres_changes",{event:"*",schema:"public",table:"room_members",filter:`room=eq.${room}`},p=>p.new&&h.member(p.new))
-      .on("broadcast",{event:"typing"},({payload})=>h.typing(payload))
+      .on("postgres_changes",{event:"INSERT",schema:"public",table:"room_members",filter:`room=eq.${room}`},p=>h.member(p.new))
+      .on("postgres_changes",{event:"UPDATE",schema:"public",table:"room_members",filter:`room=eq.${room}`},p=>h.member(p.new))
+      .on("postgres_changes",{event:"DELETE",schema:"public",table:"room_members"},p=>p.old?.room===room&&h.memberGone(p.old.user_id))
+      .on("postgres_changes",{event:"INSERT",schema:"public",table:"message_reactions",filter:`room=eq.${room}`},p=>h.reaction(p.new,true))
+      .on("postgres_changes",{event:"DELETE",schema:"public",table:"message_reactions"},p=>p.old&&h.reaction(p.old,false))
       .subscribe(s=>h.status(s==="SUBSCRIBED"?"Live":"Reconnecting…"));
-    const stop=()=>sb.removeChannel(ch);
-    stop.typing=payload=>ch.send({type:"broadcast",event:"typing",payload});
+    const priv=sb.channel("typing:"+room,{config:{private:true,broadcast:{self:false}}})
+      .on("broadcast",{event:"typing"},({payload})=>h.typing(payload))
+      .subscribe();
+    const stop=()=>{ sb.removeChannel(pub); sb.removeChannel(priv); };
+    stop.typing=payload=>priv.send({type:"broadcast",event:"typing",payload});
     return stop;
   }
 };
 
 const demo = (()=>{ // in-memory stand-in so the preview works without a server
-  let user=null, listeners=[], rooms={};
+  let user=null, listeners=[], H=null, nextId=100;
+  const iso=(ago=0)=>new Date(Date.now()-ago).toISOString();
   const people={rook:{id:"rook",username:"Rook",avatar_url:null},vee:{id:"vee",username:"Vee",avatar_url:null}};
+  const rooms={}, reacts=[], blocked=new Set();
   const lines=["No way. Tell me everything.","That is so you.","Check this: www.example.com","Meet at the usual spot?","LOL stop"];
-  let H=null; const iso=()=>new Date().toISOString();
+  const seed=room=>rooms[room] ||= {owner:"me",token:"demo"+Math.random().toString(36).slice(2,8),members:{me:{read:iso()},rook:{read:iso(70000)},vee:{read:iso(50000)}},msgs:[
+    {id:1,room,user_id:"rook",text:"Signal's clear. Who's online?",created_at:iso(26*3600e3)},
+    {id:2,room,user_id:"vee",text:"Here. Bring snacks.",created_at:iso(25*3600e3)},
+    {id:3,room,user_id:"rook",text:"Morning crew.",created_at:iso(90000)},
+    {id:4,room,user_id:"vee",text:"Who's up for the arcade later?",reply_to:3,created_at:iso(60000)}]};
+  reacts.push({message_id:2,user_id:"rook",emoji:"😂"});
+  const fire=(f,...a)=>H&&H[f](...a);
   return {
     async session(){ return user; },
     onAuth(cb){ listeners.push(cb); },
-    async signUp(username,email){ user={id:"me",email,user_metadata:{username}}; people.me={id:"me",username,avatar_url:null}; listeners.forEach(f=>f(user)); return "in"; },
-    async signIn(email){ const n=email.split("@")[0]||"you"; user={id:"me",email,user_metadata:{username:n}}; people.me=people.me||{id:"me",username:n,avatar_url:null}; listeners.forEach(f=>f(user)); },
-    async signOut(){ user=null; listeners.forEach(f=>f(null)); },
-    async profiles(ids){ return ids.map(i=>people[i]).filter(Boolean); },
-    async upload(_b,_u,blob){ await new Promise(r=>setTimeout(r,400)); return URL.createObjectURL(blob); },
-    async setAvatar(uid,url){ people[uid].avatar_url=url; },
-    async load(room){ return rooms[room] ||= [
-      {id:"d1",room,user_id:"rook",text:"Signal's clear. Who's online?",created_at:new Date(Date.now()-90000).toISOString()},
-      {id:"d2",room,user_id:"vee",text:"Here. Bring snacks.",created_at:new Date(Date.now()-60000).toISOString()}]; },
-    async send(room,text,image_url){
-      const m={id:"m"+Math.random(),room,user_id:"me",text,image_url,created_at:new Date().toISOString()}; rooms[room].push(m);
-      const who=Math.random()<.5?"rook":"vee";
-      setTimeout(()=>H&&H.member({user_id:who,last_read_at:iso()}),700);
-      setTimeout(()=>H&&H.typing({uid:who,name:people[who].username,typing:true}),1100);
-      setTimeout(()=>{ const r={id:"r"+Math.random(),room,user_id:who,text:lines[Math.floor(Math.random()*lines.length)],created_at:iso()}; rooms[room].push(r); H&&H.msg(r); },3200);
-      return m; },
-    async joinRoom(){ return "member"; }, async savePush(){}, async deletePush(){},
-    async roomInfo(room){ return {code:room,owner:"me",invite_token:"demo"+Math.random().toString(36).slice(2,8)}; },
-    async rotateInvite(){ return "demo"+Math.random().toString(36).slice(2,8); },
+    async signUp(username,email){ user={id:"me",email,user_metadata:{username}}; people.me={id:"me",username,avatar_url:null}; listeners.forEach(f=>f(user,"SIGNED_IN")); return "in"; },
+    async signIn(email){ const n=email.split("@")[0]||"you"; user={id:"me",email,user_metadata:{username:n}}; people.me=people.me||{id:"me",username:n,avatar_url:null}; listeners.forEach(f=>f(user,"SIGNED_IN")); },
+    async signOut(){ user=null; listeners.forEach(f=>f(null,"SIGNED_OUT")); },
     async resetPassword(){}, async updatePassword(){},
-    async members(){ return [{user_id:"rook",last_read_at:new Date(Date.now()-70000).toISOString()},{user_id:"vee",last_read_at:new Date(Date.now()-50000).toISOString()}]; },
-    async markRead(){},
+    async deleteAccount(){ user=null; listeners.forEach(f=>f(null,"SIGNED_OUT")); },
+    async profiles(ids){ return ids.map(i=>people[i]).filter(Boolean); },
+    async upload(_b,_u,blob){ await new Promise(r=>setTimeout(r,300)); return URL.createObjectURL(blob); },
+    async setAvatar(uid,url){ people[uid].avatar_url=url; },
+    async myRooms(){ seed("5959"); return Object.entries(rooms).filter(([,r])=>r.members.me).map(([code,r])=>{ const m=r.msgs[r.msgs.length-1]; return {code,is_owner:r.owner==="me",last_text:m?.text,last_image:!!m?.image_url,last_at:m?.created_at||iso(),last_sender:m?people[m.user_id]?.username:null,unread:r.msgs.filter(x=>x.user_id!=="me"&&x.created_at>(r.members.me?.read||"")).length}; }); },
+    async joinRoom(room){ const existed=!!rooms[room]; seed(room); if(!existed){ rooms[room].msgs=[]; rooms[room].members={me:{read:iso()}}; return "created"; } rooms[room].members.me ||= {read:iso()}; return "member"; },
+    async roomInfo(room){ const r=seed(room); return {code:room,owner:r.owner,invite_token:r.token}; },
+    async rotateInvite(room){ return rooms[room].token="demo"+Math.random().toString(36).slice(2,8); },
+    async removeMember(room,uid){ delete rooms[room].members[uid]; setTimeout(()=>fire("memberGone",uid),50); },
+    async leaveRoom(room){ delete rooms[room].members.me; },
+    async members(room){ return Object.entries(seed(room).members).map(([user_id,v])=>({user_id,last_read_at:v.read,last_joined:v.read})); },
+    async markRead(room){ if(rooms[room]?.members.me) rooms[room].members.me.read=iso(); },
+    async loadLatest(room){ return seed(room).msgs.slice(-PAGE); },
+    async loadBefore(){ return []; },
+    async fetchMessage(id){ return Object.values(rooms).flatMap(r=>r.msgs).find(m=>m.id===id)||null; },
+    async send(room,text,image_url,reply_to){
+      const m={id:nextId++,room,user_id:"me",text,image_url,reply_to:reply_to||null,created_at:iso()}; rooms[room].msgs.push(m);
+      const others=Object.keys(rooms[room].members).filter(u=>u!=="me"); if(!others.length) return m;
+      const who=others[Math.floor(Math.random()*others.length)];
+      setTimeout(()=>{ rooms[room].members[who].read=iso(); fire("member",{user_id:who,last_read_at:iso()}); },700);
+      setTimeout(()=>fire("typing",{uid:who,name:people[who].username,typing:true}),1100);
+      setTimeout(()=>fire("reaction",{message_id:m.id,user_id:who,emoji:"🔥"},true),1500);
+      setTimeout(()=>{ const r={id:nextId++,room,user_id:who,text:lines[Math.floor(Math.random()*lines.length)],reply_to:null,created_at:iso()}; rooms[room].msgs.push(r); fire("msg",r); },3000);
+      return m; },
+    async deleteMessage(id){ for(const r of Object.values(rooms)) r.msgs=r.msgs.filter(m=>m.id!==id); setTimeout(()=>fire("msgGone",id),50); },
+    async reactions(ids){ return reacts.filter(r=>ids.includes(r.message_id)); },
+    async react(message_id,_room,emoji){ const r={message_id,user_id:"me",emoji}; reacts.push(r); setTimeout(()=>fire("reaction",r,true),30); },
+    async unreact(message_id,uid,emoji){ const i=reacts.findIndex(r=>r.message_id===message_id&&r.user_id===uid&&r.emoji===emoji); if(i>=0) reacts.splice(i,1); setTimeout(()=>fire("reaction",{message_id,user_id:uid,emoji},false),30); },
+    async blocks(){ return [...blocked]; }, async block(uid){ blocked.add(uid); }, async unblock(uid){ blocked.delete(uid); },
+    async savePush(){}, async deletePush(){},
     subscribe(_room,h){ H=h; h.status("Demo mode"); const stop=()=>{H=null}; stop.typing=()=>{}; return stop; }
   };
 })();
 const api = sb ? live : demo;
 $("modeNote").textContent = sb ? "" : "Demo mode: no server connected, so accounts and friends are simulated.";
 
-/* ================= APP STATE ================= */
-let user=null, meProfile=null, room="", unsub=null, pendingFile=null;
-const cache=new Map(); const seen=new Set();
-const members=new Map();            // user_id -> last_read_at (ms)
-const typers=new Map();             // user_id -> {name, timer}
+/* ================= STATE ================= */
+let user=null, meProfile=null, room="", roomOwner=null, unsub=null, pendingFile=null, replyTo=null, hasMore=false, menuMsg=null;
+const cache=new Map();        // user id -> profile
+const msgs=[];                // current room, oldest first
+const byId=new Map();         // message id -> message
+const elById=new Map();       // message id -> element
+const reactionsById=new Map();// message id -> Map(emoji -> Set(user ids))
+const members=new Map();      // user id -> last read (ms)
+const typers=new Map();       // user id -> {name,timer}
+let blocked=new Set();
 const feed=$("feed");
 
-function paintFace(el,p){
-  el.style.setProperty("--c",colorFor(p?.username));
-  el.textContent=""; const url=safeImg(p?.avatar_url);
-  if(url){ const i=document.createElement("img"); i.src=url; i.alt=""; el.append(i); }
-  else el.textContent=(p?.username||"?")[0].toUpperCase();
+function paintFace(node,p){
+  node.style.setProperty("--c",colorFor(p?.username));
+  node.textContent=""; const url=safeImg(p?.avatar_url);
+  if(url){ const i=document.createElement("img"); i.src=url; i.alt=""; node.append(i); }
+  else node.textContent=(p?.username||"?")[0].toUpperCase();
 }
 function paintMe(){
   ["meFace","openProfile2","profFace"].forEach(id=>paintFace($(id),meProfile));
   $("meName").textContent=meProfile?.username||""; $("profName").textContent=meProfile?.username||""; $("profEmail").textContent=user?.email||"";
 }
+async function ensureProfiles(ids){
+  const need=[...new Set(ids)].filter(i=>i&&!cache.has(i)); if(!need.length) return;
+  (await api.profiles(need).catch(()=>[])).forEach(p=>cache.set(p.id,p));
+}
+const nameOf = uid => cache.get(uid)?.username || "Someone";
 
 async function refreshMe(){
   const [p]=await api.profiles([user.id]).catch(()=>[]);
@@ -446,22 +611,29 @@ async function refreshMe(){
   cache.set(user.id,meProfile); paintMe();
 }
 
+/* ================= AUTH ================= */
 async function handleAuth(u){
   user=u;
   const q=new URLSearchParams(location.search);
-  if(!u){ if(unsub){unsub();unsub=null;} show($("chat"),false); show($("profile"),false); show($("invite"),false); show($("front")); show($("authCard")); show($("roomCard"),false);
+  if(!u){
+    if(unsub){unsub();unsub=null;}
+    ["chat","profile","roomSheet","msgMenu"].forEach(id=>show($(id),false));
+    show($("front")); show($("authCard")); show($("roomCard"),false);
     if(q.get("join")) say("authMsg",`You're invited to room ${q.get("join").slice(0,30)}. Log in or sign up to join.`);
-    return; }
+    return;
+  }
   await refreshMe();
+  blocked=new Set(await api.blocks().catch(()=>[]));
+  await ensureProfiles([...blocked]);
   show($("authCard"),false); show($("roomCard"));
   try{ $("room").value=localStorage.getItem("nl-room")||""; }catch(e){}
+  loadInbox();
   const linked=q.get("room"), joinCode=q.get("join"), joinToken=q.get("t");
   if(joinCode||linked) history.replaceState(null,"",location.pathname);
   if(joinCode){ $("room").value=joinCode; enterRoom(joinCode,joinToken); }
   else if(linked) enterRoom(linked);
 }
 
-/* ---------- auth form ---------- */
 let mode="in";
 function setMode(m){
   mode=m; $("tabIn").setAttribute("aria-selected",m==="in"); $("tabUp").setAttribute("aria-selected",m==="up");
@@ -470,7 +642,6 @@ function setMode(m){
   if(!new URLSearchParams(location.search).get("join")) say("authMsg","");
 }
 $("tabIn").onclick=()=>setMode("in"); $("tabUp").onclick=()=>setMode("up");
-function say(id,text,bad){ $(id).textContent=text; $(id).classList.toggle("bad",!!bad); }
 
 $("authCard").addEventListener("submit",async e=>{
   e.preventDefault();
@@ -481,15 +652,13 @@ $("authCard").addEventListener("submit",async e=>{
   $("authBtn").disabled=true; say("authMsg",mode==="in"?"Logging in…":"Creating account…");
   try{
     if(mode==="in") await api.signIn(email,pass);
-    else { const r=await api.signUp(uname,email,pass); if(r==="confirm"){ say("authMsg","Check your email to confirm, then log in."); setTimeout(()=>setMode("in"),50); } }
+    else { const r=await api.signUp(uname,email,pass); if(r==="confirm"){ setMode("in"); say("authMsg","Check your email to confirm, then log in."); } }
     $("pass").value="";
   }catch(err){
-    const m=/invalid login/i.test(err.message)?"Wrong email or password.":/already registered/i.test(err.message)?"That email already has an account. Log in instead.":err.message;
-    say("authMsg",m,true);
+    say("authMsg",/invalid login/i.test(err.message)?"Wrong email or password.":/already registered/i.test(err.message)?"That email already has an account. Log in instead.":err.message,true);
   }finally{ $("authBtn").disabled=false; }
 });
 
-/* ---------- forgot password ---------- */
 $("forgot").onclick=async()=>{
   const email=$("email").value.trim();
   if(!/^\S+@\S+\.\S+$/.test(email)) return say("authMsg","Type your email above first, then tap Forgot password.",true);
@@ -507,90 +676,356 @@ $("recoverForm").addEventListener("submit",async e=>{
   finally{ $("savePass").disabled=false; }
 });
 
-/* ---------- rooms & invites ---------- */
-$("randomRoom").onclick=()=>{
-  const a=new Uint8Array(6); crypto.getRandomValues(a);
-  $("room").value="room-"+[...a].map(b=>"abcdefghjkmnpqrstuvwxyz23456789"[b%31]).join("");
-  say("roomMsg","New room code ready. Tap Jump in, then Invite your friends."); $("room").focus();
-};
-function inviteUrl(code,token){ return location.origin+location.pathname+"?join="+encodeURIComponent(code)+"&t="+encodeURIComponent(token); }
-$("inviteBtn").onclick=async()=>{
-  say("invMsg",""); $("invRoom").textContent=room; $("invLink").value="Loading…"; show($("invite"));
-  try{
-    const info=await api.roomInfo(room); if(!info) throw new Error("Couldn't find this room.");
-    $("invLink").value=inviteUrl(info.code,info.invite_token);
-    show($("invReset"),info.owner===user.id);
-    $("invShare").classList.toggle("hidden",!navigator.share);
-  }catch(err){ $("invLink").value=""; say("invMsg",err.message,true); }
-};
-$("invCopy").onclick=async()=>{
-  const v=$("invLink").value; if(!v.startsWith("http")) return;
-  try{ await navigator.clipboard.writeText(v); say("invMsg","Link copied."); }
-  catch(e){ $("invLink").select(); say("invMsg","Press Ctrl+C (or long-press) to copy."); }
-};
-$("invShare").onclick=async()=>{ try{ await navigator.share({title:"Join me on NightLine",url:$("invLink").value}); }catch(e){} };
-$("invReset").onclick=async()=>{
-  $("invReset").disabled=true;
-  try{ const t=await api.rotateInvite(room); $("invLink").value=inviteUrl(room,t); say("invMsg","New link made. The old link no longer works."); }
-  catch(err){ say("invMsg",err.message,true); }
-  finally{ $("invReset").disabled=false; }
-};
-$("invClose").onclick=()=>show($("invite"),false);
-$("invite").addEventListener("click",e=>{ if(e.target.id==="invite") show($("invite"),false); });
+/* ================= INBOX ================= */
+async function loadInbox(){
+  if(!user) return;
+  let list=[]; try{ list=await api.myRooms(); }catch(e){}
+  const box=$("inbox"); box.innerHTML="";
+  show($("inboxWrap"),list.length>0);
+  for(const r of list){
+    const b=el("button","roomrow"); b.type="button";
+    const hash=el("span","hash","#");
+    const info=el("span","info"); info.append(el("div","name",r.code));
+    const pv=r.last_image&&!r.last_text?"📷 Photo":(r.last_text||"No messages yet");
+    info.append(el("div","preview",r.last_sender?`${r.last_sender}: ${pv}`:pv));
+    const when=el("span","when"); when.append(el("span","",shortWhen(r.last_at)));
+    if(+r.unread>0) when.append(el("span","badge",r.unread>99?"99+":String(r.unread)));
+    b.append(hash,info,when);
+    b.setAttribute("aria-label",`Room ${r.code}${+r.unread?`, ${r.unread} unread`:""}`);
+    b.onclick=()=>{ $("room").value=r.code; enterRoom(r.code); };
+    box.append(b);
+  }
+}
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ if(room) markReadSoon(); else loadInbox(); } });
 
-/* ---------- profile ---------- */
-const openProfile=()=>{ say("profMsg",""); paintNotif(); show($("profile")); $("closeProfile").focus(); };
+/* ================= PROFILE ================= */
+function paintFxSettings(){
+  $("fxBtn").textContent="Screen effects: "+(fxEnabled()?"On":"Off");
+  const ul=$("fxList"); if(ul.children.length) return;
+  FX_TRIGGERS.forEach(t=>{ const li=el("li"); li.append(el("b","",t.label+": ")); li.append([...t.words.map(w=>`"${w}"`),...t.emoji].join(", ")); ul.append(li); });
+}
+$("fxBtn").onclick=()=>{ try{ localStorage.setItem("nl-fx",fxEnabled()?"off":"on"); }catch(e){} paintFxSettings(); if(fxEnabled()) FX.play("confetti"); };
+const openProfile=()=>{ say("profMsg",""); paintNotif(); paintBlocked(); paintFxSettings(); show($("profile")); $("closeProfile").focus(); };
 $("openProfile1").onclick=openProfile; $("openProfile2").onclick=openProfile;
 $("closeProfile").onclick=()=>show($("profile"),false);
-$("profile").addEventListener("click",e=>{ if(e.target.id==="profile") show($("profile"),false); });
 $("changePhoto").onclick=()=>$("avatarPicker").click();
 $("avatarPicker").onchange=async e=>{
   const f=e.target.files[0]; e.target.value=""; if(!f) return;
   if(f.size>15e6) return say("profMsg","That photo is over 15 MB. Pick a smaller one.",true);
   $("changePhoto").disabled=true; say("profMsg","Uploading…");
   try{
-    const blob=await shrink(f,400,true);
-    const url=await api.upload("avatars",user.id,blob);
+    const url=await api.upload("avatars",user.id,await shrink(f,400,true));
     await api.setAvatar(user.id,url);
     meProfile={...meProfile,avatar_url:url}; cache.set(user.id,meProfile); paintMe(); repaintFaces(user.id);
     say("profMsg","Photo saved.");
   }catch(err){ say("profMsg","Upload failed: "+err.message,true); }
   finally{ $("changePhoto").disabled=false; }
 };
-$("logout").onclick=async()=>{ $("logout").disabled=true; await pushOff(true).catch(()=>{}); await api.signOut(); $("logout").disabled=false; };
-
-/* ---------- chat ---------- */
-function repaintFaces(uid){ feed.querySelectorAll(`.face[data-uid="${CSS.escape(uid)}"]`).forEach(el=>paintFace(el,cache.get(uid))); }
-
-async function ensureProfiles(ids){
-  const need=[...new Set(ids)].filter(i=>i&&!cache.has(i)); if(!need.length) return;
-  (await api.profiles(need).catch(()=>[])).forEach(p=>cache.set(p.id,p));
+$("logout").onclick=async()=>{ $("logout").disabled=true; await pushOff().catch(()=>{}); await api.signOut(); $("logout").disabled=false; };
+$("deleteAccount").onclick=async()=>{
+  const typed=prompt("This permanently deletes your account, profile, and every message you've sent. Type DELETE to confirm.");
+  if(typed!=="DELETE") return say("profMsg","Account not deleted.");
+  say("profMsg","Deleting…");
+  try{ await pushOff().catch(()=>{}); await api.deleteAccount(); }
+  catch(err){ say("profMsg","Couldn't delete: "+err.message,true); }
+};
+function paintBlocked(){
+  const list=$("blockedList"); list.innerHTML="";
+  show($("blockedTitle"),blocked.size>0);
+  for(const uid of blocked){
+    const row=el("div","member"); const f=el("span","face"); paintFace(f,cache.get(uid));
+    const n=el("span","mname",nameOf(uid)); const b=el("button","unblock","Unblock"); b.type="button";
+    b.onclick=async()=>{ try{ await api.unblock(uid); blocked.delete(uid); paintBlocked(); if(room) renderAll(); }catch(err){ say("profMsg",err.message,true); } };
+    row.append(f,n,b); list.append(row);
+  }
 }
 
-async function render(m){
-  if(seen.has(m.id)) return; seen.add(m.id);
-  await ensureProfiles([m.user_id]);
+/* ================= ROOMS ================= */
+$("roomCard").addEventListener("submit",e=>{ e.preventDefault(); enterRoom($("room").value); });
+$("randomRoom").onclick=()=>{
+  const a=new Uint8Array(6); crypto.getRandomValues(a);
+  $("room").value="room-"+[...a].map(b=>"abcdefghjkmnpqrstuvwxyz23456789"[b%31]).join("");
+  say("roomMsg","New room code ready. Tap Jump in, then use Room to invite friends."); $("room").focus();
+};
+
+async function enterRoom(code,token){
+  const target=(code||"").trim().toLowerCase(); if(!target||!user) return;
+  $("jumpBtn").disabled=true; say("roomMsg","Checking the room…");
+  let result;
+  try{ result=await api.joinRoom(target,token); }
+  catch(err){
+    ["chat","roomSheet","msgMenu"].forEach(id=>show($(id),false)); show($("front")); show($("roomCard"));
+    say("roomMsg", err.message==="private" ? "That room is private. Ask someone inside for an invite link." : "Couldn't join: "+err.message, true);
+    $("jumpBtn").disabled=false; return;
+  }
+  $("jumpBtn").disabled=false; say("roomMsg","");
+  if(unsub){unsub();unsub=null;}
+  room=target; roomOwner=null;
+  try{ localStorage.setItem("nl-room",room); }catch(e){}
+  show($("front"),false); show($("chat")); $("roomLabel").textContent="# "+room; $("status").textContent="Connecting…";
+  msgs.length=0; byId.clear(); elById.clear(); reactionsById.clear(); members.clear();
+  typers.forEach(v=>clearTimeout(v.timer)); typers.clear(); paintTyping(); clearReply(); feed.innerHTML="";
+  try{
+    const [latest,mem,info]=await Promise.all([api.loadLatest(room),api.members(room).catch(()=>[]),api.roomInfo(room).catch(()=>null)]);
+    roomOwner=info?.owner||null;
+    mem.forEach(setMember);
+    hasMore=latest.length>=PAGE;
+    await addMessages(latest);
+    if(result==="created"&&!latest.length) feed.innerHTML='<p class="empty">You made a new private room. Tap Room to invite friends.</p>';
+    markReadSoon();
+    unsub=api.subscribe(room,{
+      msg:m=>{ stopTyping(m.user_id); addMessages([m]).then(()=>{ if(m.user_id!==user.id) markReadSoon(); }); },
+      msgGone:removeMessage,
+      profile:p=>{ cache.set(p.id,p); repaintFaces(p.id); if(p.id===user.id){meProfile=p;paintMe();} paintReceipts(); },
+      member:setMember,
+      memberGone:uid=>{
+        if(uid===user.id){ exitRoom(); say("roomMsg",`You're no longer in # ${room||"that room"}.`,true); return; }
+        members.delete(uid); paintReceipts(); if(!$("roomSheet").classList.contains("hidden")) paintMembers();
+      },
+      reaction:(r,added)=>{ if(!byId.has(r.message_id)) return; setReaction(r,added); refreshMsg(r.message_id); },
+      typing:onTyping,
+      status:s=>$("status").textContent=s
+    });
+  }catch(err){ $("status").textContent="Can't load messages. Check your Supabase setup."; }
+}
+
+function exitRoom(){
+  sendTyping(false); if(unsub){unsub();unsub=null;}
+  clearPending(); clearReply();
+  ["chat","roomSheet","msgMenu"].forEach(id=>show($(id),false)); show($("front")); show($("roomCard"));
+  room=""; loadInbox();
+}
+$("back").onclick=exitRoom;
+
+/* ---------- messages ---------- */
+function setReaction(r,added){
+  let map=reactionsById.get(r.message_id); if(!map) reactionsById.set(r.message_id,map=new Map());
+  let set=map.get(r.emoji); if(!set) map.set(r.emoji,set=new Set());
+  added?set.add(r.user_id):set.delete(r.user_id);
+  if(!set.size) map.delete(r.emoji);
+}
+
+async function addMessages(list){
+  list=list.filter(m=>!byId.has(m.id)); if(!list.length) return;
+  const replyIds=list.map(m=>m.reply_to).filter(id=>id&&!byId.has(id));
+  await ensureProfiles(list.map(m=>m.user_id));
+  (await api.reactions(list.map(m=>m.id)).catch(()=>[])).forEach(r=>setReaction(r,true));
+  for(const id of [...new Set(replyIds)]){ const r=await api.fetchMessage(id).catch(()=>null); if(r){ r._context=true; byId.set(r.id,r); await ensureProfiles([r.user_id]); } }
+  const appendOnly = msgs.length===0 || list.every(m=>m.created_at>=msgs[msgs.length-1].created_at);
+  for(const m of list){ byId.set(m.id,m); msgs.push(m); }
+  msgs.sort((a,b)=>a.created_at<b.created_at?-1:a.created_at>b.created_at?1:0);
+  if(appendOnly && feed.querySelector(".msg,.empty,.older")) list.forEach(appendEl);
+  else renderAll();
+}
+
+function visible(m){ return !blocked.has(m.user_id); }
+
+function renderAll(keepBottom=true){
+  const prevH=feed.scrollHeight, prevTop=feed.scrollTop;
+  feed.innerHTML=""; elById.clear();
+  if(hasMore){ const b=el("button","older","Load older messages"); b.type="button"; b.onclick=loadOlder; feed.append(b); }
+  let lastDay=null, n=0;
+  for(const m of msgs){
+    if(!visible(m)) continue;
+    const k=dayKey(m.created_at);
+    if(k!==lastDay){ feed.append(el("div","daybreak",dayLabel(m.created_at))); lastDay=k; }
+    const node=buildMsg(m,n++); elById.set(m.id,node); feed.append(node);
+  }
+  if(!n && !hasMore) feed.append(el("p","empty","Nobody has said anything here yet. Start it off."));
+  paintReceipts();
+  feed.scrollTop = keepBottom ? feed.scrollHeight : feed.scrollHeight-prevH+prevTop;
+}
+
+function appendEl(m){
+  if(!visible(m)) return;
   feed.querySelector(".empty")?.remove();
+  const prev=[...elById.keys()].map(id=>byId.get(id)).filter(Boolean).pop();
+  if(!prev || dayKey(prev.created_at)!==dayKey(m.created_at)) feed.append(el("div","daybreak",dayLabel(m.created_at)));
+  const node=buildMsg(m,elById.size); elById.set(m.id,node); feed.append(node);
+  paintReceipts(); feed.scrollTop=feed.scrollHeight;
+  playFx(m);
+  if(m.user_id!==user.id && Date.now()-new Date(m.created_at)<15000 && navigator.vibrate) navigator.vibrate(30);
+}
+
+async function loadOlder(){
+  if(!msgs.length) return;
+  const btn=feed.querySelector(".older"); if(btn){ btn.disabled=true; btn.textContent="Loading…"; }
+  try{
+    const older=await api.loadBefore(room,msgs[0].created_at);
+    hasMore=older.length>=PAGE;
+    const fresh=older.filter(m=>!byId.has(m.id));
+    await ensureProfiles(fresh.map(m=>m.user_id));
+    (await api.reactions(fresh.map(m=>m.id)).catch(()=>[])).forEach(r=>setReaction(r,true));
+    fresh.forEach(m=>{ byId.set(m.id,m); msgs.push(m); });
+    msgs.sort((a,b)=>a.created_at<b.created_at?-1:1);
+    renderAll(false);
+  }catch(e){ if(btn){ btn.disabled=false; btn.textContent="Couldn't load. Try again"; } }
+}
+
+function refreshMsg(id){
+  const old=elById.get(id), m=byId.get(id); if(!old||!m) return;
+  const node=buildMsg(m,old.classList.contains("t1")?0:old.classList.contains("t2")?1:2, true);
+  old.replaceWith(node); elById.set(id,node); paintReceipts();
+}
+function removeMessage(id){
+  if(!byId.has(id)) return;
+  const i=msgs.findIndex(m=>m.id===id); if(i>=0) msgs.splice(i,1);
+  byId.delete(id); reactionsById.delete(id);
+  if(replyTo?.id===id) clearReply();
+  if(menuMsg?.id===id) show($("msgMenu"),false);
+  renderAll(false);
+}
+
+function buildMsg(m,index,noAnim){
   const p=cache.get(m.user_id)||{username:"Unknown"}, mine=m.user_id===user.id;
   const at=new Date(m.created_at), fresh=!mine&&Date.now()-at<15000;
-  const el=document.createElement("div"); el.className="msg"+(mine?" me":""); el.dataset.t=at.getTime();
-  if(!mine) stopTyping(m.user_id);
-  const face=document.createElement("div"); face.className="face"; face.dataset.uid=m.user_id; face.setAttribute("aria-hidden","true"); paintFace(face,p);
-  const col=document.createElement("div"); col.className="col";
-  const tag=document.createElement("div"); tag.className="tag";
-  if(fresh){ const b=document.createElement("b"); b.textContent="NEW"; tag.append(b); }
-  tag.append(`${p.username} · ${at.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}`);
-  const bub=document.createElement("div"); bub.className="bubble";
+  const node=el("div","msg t"+(index%3)+(mine?" me":"")); node.dataset.t=at.getTime(); node.dataset.id=m.id;
+  if(noAnim) node.style.animation="none";
+  const face=el("div","face"); face.dataset.uid=m.user_id; face.setAttribute("aria-hidden","true"); paintFace(face,p);
+  const col=el("div","col");
+  const tag=el("div","tag");
+  if(fresh&&!noAnim) tag.append(el("b","","NEW"));
+  tag.append(`${p.username} · ${timeOf(at)}`);
+  const bub=el("div","bubble"); bub.tabIndex=0; bub.setAttribute("role","button"); bub.setAttribute("aria-label",`Message from ${p.username}. Open options`);
+  if(m.reply_to){
+    const r=byId.get(m.reply_to), q=el("button","quote"); q.type="button";
+    if(r){ q.append(el("b","",nameOf(r.user_id))); q.append(r.text||(r.image_url?"📷 Photo":"")); q.onclick=e=>{ e.stopPropagation(); jumpTo(r.id); }; }
+    else q.append("Original message was deleted");
+    bub.append(q);
+  }
   const img=safeImg(m.image_url);
-  if(img){ const btn=document.createElement("button"); btn.type="button"; btn.className="shot"; btn.setAttribute("aria-label","Open photo");
-    const i=document.createElement("img"); i.src=img; i.alt="Photo from "+p.username; i.loading="lazy"; i.onload=()=>feed.scrollTop=feed.scrollHeight;
-    btn.append(i); btn.onclick=()=>{ $("lightImg").src=img; show($("lightbox")); }; bub.append(btn); }
-  if(m.text){ const t=document.createElement("div"); linkify(t,m.text); bub.append(t); }
-  col.append(tag,bub); el.append(face,col); feed.append(el); feed.scrollTop=feed.scrollHeight;
-  if(fresh&&navigator.vibrate) navigator.vibrate(30);
-  paintReceipts();
-  if(!mine) markReadSoon();
+  if(img){ const b=el("button","shot"); b.type="button"; b.setAttribute("aria-label","Open photo");
+    const i=document.createElement("img"); i.src=img; i.alt="Photo from "+p.username; i.loading="lazy";
+    i.onload=()=>{ if(feed.scrollHeight-feed.scrollTop-feed.clientHeight<400) feed.scrollTop=feed.scrollHeight; };
+    b.append(i); b.onclick=e=>{ e.stopPropagation(); $("lightImg").src=img; show($("lightbox")); }; bub.append(b); }
+  if(m.text){ const t=el("div"); linkify(t,m.text); bub.append(t); }
+  bub.onclick=e=>{ if(e.target.closest("a")) return; openMenu(m); };
+  bub.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openMenu(m); } };
+  col.append(tag,bub);
+  const map=reactionsById.get(m.id);
+  if(map&&map.size){
+    const row=el("div","reacts");
+    for(const [emoji,set] of map){
+      const r=el("button","react"+(set.has(user.id)?" mine":"")); r.type="button";
+      r.append(emoji, el("span","",String(set.size)));
+      r.setAttribute("aria-label",`${emoji} ${set.size}, ${set.has(user.id)?"remove your reaction":"add reaction"}`);
+      r.title=[...set].map(nameOf).join(", ");
+      r.onclick=()=>toggleReaction(m,emoji);
+      row.append(r);
+    }
+    col.append(row);
+  }
+  node.append(face,col);
+  return node;
 }
+function jumpTo(id){
+  const node=elById.get(id); if(!node) return;
+  node.scrollIntoView({behavior:"smooth",block:"center"});
+  node.classList.remove("flash"); void node.offsetWidth; node.classList.add("flash");
+}
+function repaintFaces(uid){ feed.querySelectorAll(`.face[data-uid="${CSS.escape(uid)}"]`).forEach(n=>paintFace(n,cache.get(uid))); }
+
+async function toggleReaction(m,emoji){
+  const has=reactionsById.get(m.id)?.get(emoji)?.has(user.id);
+  setReaction({message_id:m.id,user_id:user.id,emoji},!has); refreshMsg(m.id);   // instant feedback
+  try{ has ? await api.unreact(m.id,user.id,emoji) : await api.react(m.id,room,emoji); }
+  catch(err){ setReaction({message_id:m.id,user_id:user.id,emoji},has); refreshMsg(m.id); $("status").textContent="Reaction didn't save."; }
+}
+
+/* ---------- message menu ---------- */
+function openMenu(m){
+  menuMsg=m; const mine=m.user_id===user.id;
+  $("menuPreview").textContent=`${nameOf(m.user_id)}: ${m.text||"📷 Photo"}`;
+  const row=$("emojiRow"); row.innerHTML="";
+  EMOJIS.forEach(emoji=>{
+    const b=el("button",reactionsById.get(m.id)?.get(emoji)?.has(user.id)?"on":"",emoji); b.type="button"; b.setAttribute("aria-label","React "+emoji);
+    b.onclick=()=>{ show($("msgMenu"),false); toggleReaction(m,emoji); };
+    row.append(b);
+  });
+  show($("menuCopy"),!!m.text);
+  show($("menuFx"),!!fxFor(m.text));
+  show($("menuDelete"),mine||roomOwner===user.id);
+  $("menuDelete").textContent=mine?"Delete message":"Delete message (room owner)";
+  show($("menuBlock"),!mine); $("menuBlock").textContent=`Block ${nameOf(m.user_id)}`;
+  show($("msgMenu"));
+}
+$("menuClose").onclick=()=>show($("msgMenu"),false);
+$("menuFx").onclick=()=>{ show($("msgMenu"),false); setTimeout(()=>playFx(menuMsg,true),150); };
+$("menuReply").onclick=()=>{
+  replyTo=menuMsg; show($("msgMenu"),false);
+  $("replyText").textContent=`${nameOf(replyTo.user_id)}: ${replyTo.text||"📷 Photo"}`; show($("replying")); $("box").focus();
+};
+$("menuCopy").onclick=async()=>{ show($("msgMenu"),false); try{ await navigator.clipboard.writeText(menuMsg.text); $("status").textContent="Copied."; }catch(e){} };
+$("menuDelete").onclick=async()=>{
+  if(!confirm("Delete this message for everyone?")) return;
+  const id=menuMsg.id; show($("msgMenu"),false);
+  try{ await api.deleteMessage(id); removeMessage(id); }catch(err){ $("status").textContent="Couldn't delete: "+err.message; }
+};
+$("menuBlock").onclick=async()=>{
+  const uid=menuMsg.user_id, name=nameOf(uid);
+  if(!confirm(`Block ${name}? You won't see their messages anywhere. You can unblock them from your profile.`)) return;
+  show($("msgMenu"),false);
+  try{ await api.block(uid); blocked.add(uid); renderAll(); $("status").textContent=`Blocked ${name}.`; }
+  catch(err){ $("status").textContent="Couldn't block: "+err.message; }
+};
+function clearReply(){ replyTo=null; show($("replying"),false); }
+$("cancelReply").onclick=clearReply;
+
+/* ---------- room sheet ---------- */
+function inviteUrl(code,token){ return location.origin+location.pathname+"?join="+encodeURIComponent(code)+"&t="+encodeURIComponent(token); }
+$("roomBtn").onclick=async()=>{
+  say("rsMsg",""); $("rsTitle").textContent="# "+room; $("invLink").value="Loading…"; show($("roomSheet"));
+  paintMembers();
+  try{
+    const info=await api.roomInfo(room); if(!info) throw new Error("Couldn't find this room.");
+    roomOwner=info.owner; paintMembers();
+    $("invLink").value=inviteUrl(info.code,info.invite_token);
+    show($("invReset"),info.owner===user.id); show($("invShare"),!!navigator.share);
+  }catch(err){ $("invLink").value=""; say("rsMsg",err.message,true); }
+};
+async function paintMembers(){
+  await ensureProfiles([...members.keys()]);
+  const list=$("memberList"); list.innerHTML="";
+  $("memTitle").textContent=`Members (${members.size})`;
+  const ids=[...members.keys()].sort((a,b)=>(b===roomOwner)-(a===roomOwner)||nameOf(a).localeCompare(nameOf(b)));
+  for(const uid of ids){
+    const row=el("div","member"); const f=el("span","face"); paintFace(f,cache.get(uid));
+    const n=el("span","mname",nameOf(uid)+(uid===user.id?" (you)":""));
+    if(uid===roomOwner) n.append(el("span","role","OWNER"));
+    row.append(f,n);
+    if(roomOwner===user.id && uid!==user.id){
+      const b=el("button","","Remove"); b.type="button";
+      b.onclick=async()=>{
+        if(!confirm(`Remove ${nameOf(uid)} from # ${room}? The invite link will also reset so they can't rejoin with it.`)) return;
+        try{ await api.removeMember(room,uid); members.delete(uid); paintMembers(); paintReceipts();
+          const info=await api.roomInfo(room).catch(()=>null); if(info) $("invLink").value=inviteUrl(info.code,info.invite_token);
+          say("rsMsg",`Removed ${nameOf(uid)}. New invite link made.`); }
+        catch(err){ say("rsMsg",err.message,true); }
+      };
+      row.append(b);
+    }
+    list.append(row);
+  }
+}
+$("invCopy").onclick=async()=>{
+  const v=$("invLink").value; if(!v.startsWith("http")&&!v.startsWith("file")) return;
+  try{ await navigator.clipboard.writeText(v); say("rsMsg","Link copied."); }
+  catch(e){ $("invLink").select(); say("rsMsg","Press Ctrl+C (or long-press) to copy."); }
+};
+$("invShare").onclick=async()=>{ try{ await navigator.share({title:"Join me on NightLine",url:$("invLink").value}); }catch(e){} };
+$("invReset").onclick=async()=>{
+  $("invReset").disabled=true;
+  try{ const t=await api.rotateInvite(room); $("invLink").value=inviteUrl(room,t); say("rsMsg","New link made. The old link no longer works."); }
+  catch(err){ say("rsMsg",err.message,true); }
+  finally{ $("invReset").disabled=false; }
+};
+$("leaveRoom").onclick=async()=>{
+  const owner=roomOwner===user.id;
+  if(!confirm(`Leave # ${room}?${owner?" You're the owner, so ownership passes to the next member.":""} You'll need a new invite link to come back.`)) return;
+  try{ const code=room; await api.leaveRoom(code); exitRoom(); say("roomMsg",`You left # ${code}.`); }
+  catch(err){ say("rsMsg",err.message,true); }
+};
+$("rsClose").onclick=()=>show($("roomSheet"),false);
 
 /* ---------- read receipts ---------- */
 let readTimer=null;
@@ -598,7 +1033,6 @@ function markReadSoon(){
   if(!room||document.hidden||$("chat").classList.contains("hidden")) return;
   clearTimeout(readTimer); readTimer=setTimeout(()=>api.markRead(room).catch(()=>{}),700);
 }
-document.addEventListener("visibilitychange",()=>{ if(!document.hidden) markReadSoon(); });
 function setMember(r){
   if(!r?.user_id) return;
   members.set(r.user_id, r.last_read_at?new Date(r.last_read_at).getTime():0);
@@ -608,29 +1042,28 @@ function paintReceipts(){
   feed.querySelectorAll(".receipt").forEach(n=>n.remove());
   const mineEls=feed.querySelectorAll(".msg.me"); const last=mineEls[mineEls.length-1]; if(!last) return;
   const t=+last.dataset.t;
-  const readers=[...members].filter(([uid,at])=>uid!==user.id&&at>=t).map(([uid])=>cache.get(uid)).filter(Boolean);
-  const r=document.createElement("div"); r.className="receipt"+(readers.length?" read":"");
+  const readers=[...members].filter(([uid,at])=>uid!==user.id&&at>=t&&!blocked.has(uid)).map(([uid])=>cache.get(uid)).filter(Boolean);
+  const r=el("div","receipt"+(readers.length?" read":""));
   if(readers.length){
-    const faces=document.createElement("span"); faces.className="mini-faces";
-    readers.slice(0,4).forEach(p=>{ const f=document.createElement("span"); f.className="face"; paintFace(f,p); faces.append(f); });
-    const names=readers.length<=2?readers.map(p=>p.username).join(" & "):`${readers.length} people`;
-    r.append(faces,`Read by ${names}`);
+    const faces=el("span","mini-faces");
+    readers.slice(0,4).forEach(p=>{ const f=el("span","face"); paintFace(f,p); faces.append(f); });
+    r.append(faces,`Read by ${readers.length<=2?readers.map(p=>p.username).join(" & "):readers.length+" people"}`);
   } else r.textContent="Sent";
   last.after(r);
 }
 
-/* ---------- typing indicator ---------- */
+/* ---------- typing ---------- */
 let lastTypingSent=0;
 function paintTyping(){
   const box=$("typing"); const names=[...typers.values()].map(v=>v.name);
   if(!names.length){ box.innerHTML=""; return; }
   const label=names.length===1?`${names[0]} is typing`:names.length===2?`${names[0]} & ${names[1]} are typing`:"Several people are typing";
   let pill=box.querySelector(".pill");
-  if(!pill){ pill=document.createElement("div"); pill.className="pill"; pill.innerHTML='<span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span></span>'; box.append(pill); }
+  if(!pill){ pill=el("div","pill"); pill.innerHTML='<span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span></span>'; box.append(pill); }
   pill.lastChild.textContent=label;
 }
 function onTyping(p){
-  if(!p?.uid||p.uid===user?.id) return;
+  if(!p?.uid||p.uid===user?.id||blocked.has(p.uid)) return;
   if(!p.typing) return stopTyping(p.uid);
   clearTimeout(typers.get(p.uid)?.timer);
   typers.set(p.uid,{name:String(p.name||"Someone").slice(0,20),timer:setTimeout(()=>stopTyping(p.uid),4000)});
@@ -639,49 +1072,12 @@ function onTyping(p){
 function stopTyping(uid){ const v=typers.get(uid); if(!v) return; clearTimeout(v.timer); typers.delete(uid); paintTyping(); }
 function sendTyping(on){
   if(!unsub?.typing||!user) return;
-  const now=Date.now();
-  if(on&&now-lastTypingSent<2000) return;
+  const now=Date.now(); if(on&&now-lastTypingSent<2000) return;
   lastTypingSent=on?now:0;
-  unsub.typing({uid:user.id,name:meProfile?.username,typing:on});
+  try{ unsub.typing({uid:user.id,name:meProfile?.username,typing:on}); }catch(e){}
 }
 
-$("roomCard").addEventListener("submit",e=>{ e.preventDefault(); enterRoom($("room").value); });
-async function enterRoom(code,token){
-  const target=(code||"").trim().toLowerCase(); if(!target||!user) return;
-  $("jumpBtn").disabled=true; say("roomMsg","Checking the room…");
-  let result;
-  try{ result=await api.joinRoom(target,token); }
-  catch(err){
-    show($("chat"),false); show($("front")); show($("roomCard"));
-    say("roomMsg", err.message==="private" ? "That room is private. Ask someone inside for an invite link." : "Couldn't join: "+err.message, true);
-    $("jumpBtn").disabled=false; return;
-  }
-  $("jumpBtn").disabled=false; say("roomMsg","");
-  if(unsub){unsub();unsub=null;}
-  room=target;
-  try{ localStorage.setItem("nl-room",room); }catch(e){}
-  show($("front"),false); show($("chat")); $("roomLabel").textContent="# "+room; $("status").textContent="Connecting…";
-  feed.innerHTML=""; seen.clear(); members.clear(); typers.forEach(v=>clearTimeout(v.timer)); typers.clear(); paintTyping();
-  try{
-    const msgs=await api.load(room);
-    await ensureProfiles(msgs.map(m=>m.user_id));
-    (await api.members(room).catch(()=>[])).forEach(setMember);
-    for(const m of msgs) await render(m);
-    markReadSoon();
-    if(!msgs.length) feed.innerHTML = result==="created"
-      ? '<p class="empty">You made a new private room. Tap Invite to bring friends in.</p>'
-      : '<p class="empty">Nobody has said anything here yet. Start it off.</p>';
-    unsub=api.subscribe(room,{
-      msg:render,
-      profile:p=>{ cache.set(p.id,p); repaintFaces(p.id); if(p.id===user.id){meProfile=p;paintMe();} paintReceipts(); },
-      member:setMember,
-      typing:onTyping,
-      status:s=>$("status").textContent=s
-    });
-  }catch(err){ $("status").textContent="Can't load messages. Check your Supabase setup."; }
-}
-$("leave").onclick=()=>{ sendTyping(false); if(unsub){unsub();unsub=null;} clearPending(); show($("chat"),false); show($("front")); };
-
+/* ---------- composer ---------- */
 function clearPending(){ pendingFile=null; show($("pending"),false); }
 $("pickBtn").onclick=()=>$("picker").click();
 $("picker").onchange=e=>{
@@ -690,7 +1086,6 @@ $("picker").onchange=e=>{
   pendingFile=f; $("pendingImg").src=URL.createObjectURL(f); show($("pending"));
 };
 $("unpick").onclick=clearPending;
-
 $("sendForm").addEventListener("submit",async e=>{
   e.preventDefault();
   const text=$("box").value.trim(); if(!text&&!pendingFile) return;
@@ -699,18 +1094,20 @@ $("sendForm").addEventListener("submit",async e=>{
     let url=null;
     if(pendingFile){ $("status").textContent="Uploading photo…"; url=await api.upload("chat-images",user.id,await shrink(pendingFile,1280,false)); }
     sendTyping(false);
-    const m=await api.send(room,text,url);
-    $("box").value=""; $("box").style.height=""; clearPending(); $("status").textContent=sb?"Live":"Demo mode";
-    render(m);
+    const m=await api.send(room,text,url,replyTo?.id);
+    $("box").value=""; $("box").style.height=""; clearPending(); clearReply(); $("status").textContent=sb?"Live":"Demo mode";
+    await addMessages([m]);
   }catch(err){ $("status").textContent="Didn't send: "+err.message; }
   finally{ $("sendBtn").disabled=false; }
 });
 $("box").addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.shiftKey&&!matchMedia("(pointer: coarse)").matches){e.preventDefault();$("sendForm").requestSubmit();} });
 $("box").addEventListener("input",function(){ this.style.height="auto"; this.style.height=this.scrollHeight+"px"; sendTyping(this.value.trim().length>0); });
 $("box").addEventListener("blur",()=>sendTyping(false));
-$("lightbox").onclick=()=>show($("lightbox"),false);
-addEventListener("keydown",e=>{ if(e.key==="Escape"){ show($("lightbox"),false); show($("profile"),false); show($("invite"),false); } });
 
+/* ---------- overlays ---------- */
+$("lightbox").onclick=()=>show($("lightbox"),false);
+["profile","roomSheet","msgMenu"].forEach(id=>$(id).addEventListener("click",e=>{ if(e.target.id===id) show($(id),false); }));
+addEventListener("keydown",e=>{ if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu"].forEach(id=>show($(id),false)); });
 
 /* ================= PUSH NOTIFICATIONS ================= */
 let swReg=null;
@@ -718,11 +1115,10 @@ const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform===
 const installed=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
 if("serviceWorker" in navigator && (location.protocol==="https:"||location.hostname==="localhost")){
   navigator.serviceWorker.register("sw.js").then(r=>swReg=r).catch(()=>{});
-  navigator.serviceWorker.addEventListener("message",e=>{ if(e.data?.room && user){ show($("profile"),false); enterRoom(e.data.room); } });
+  navigator.serviceWorker.addEventListener("message",e=>{ if(e.data?.room && user){ ["profile","roomSheet","msgMenu"].forEach(id=>show($(id),false)); enterRoom(e.data.room); } });
 }
 function b64ToBytes(b){ const p="=".repeat((4-b.length%4)%4), s=atob((b+p).replace(/-/g,"+").replace(/_/g,"/")); return Uint8Array.from(s,c=>c.charCodeAt(0)); }
 async function currentSub(){ return swReg ? swReg.pushManager.getSubscription() : null; }
-
 async function paintNotif(){
   const btn=$("notifBtn");
   if(!sb||!VAPID_PUBLIC_KEY){ btn.disabled=true; btn.textContent="Notifications: not set up yet"; return; }
@@ -736,10 +1132,7 @@ async function pushOn(){
   const sub=await swReg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToBytes(VAPID_PUBLIC_KEY)});
   await api.savePush(sub.toJSON());
 }
-async function pushOff(){
-  const sub=await currentSub(); if(!sub) return;
-  await api.deletePush(sub.endpoint); await sub.unsubscribe();
-}
+async function pushOff(){ const sub=await currentSub(); if(!sub) return; await api.deletePush(sub.endpoint); await sub.unsubscribe(); }
 $("notifBtn").onclick=async()=>{
   $("notifBtn").disabled=true;
   try{
@@ -748,6 +1141,114 @@ $("notifBtn").onclick=async()=>{
   }catch(err){ say("profMsg",err.message,true); }
   paintNotif();
 };
+
+
+/* ================= FULL-SCREEN EFFECTS ================= */
+const FX_TRIGGERS=[
+  {fx:"confetti", label:"Confetti",       words:["happy birthday","hbd","congrats","congratulations"], emoji:["🎉","🎂","🥳"]},
+  {fx:"hearts",   label:"Neon hearts",    words:["love you","ily","luv u","love u"], emoji:["❤️","💖","😍","🥰","💕"]},
+  {fx:"hype",     label:"Hype banner",    words:["let's go","lets go","gg","hype"], emoji:["🏆"]},
+  {fx:"embers",   label:"Embers",         words:["lit"], emoji:["🔥"]},
+  {fx:"laugh",    label:"Laugh stamps",   words:["lol","lmao","lmfao"], emoji:["😂","🤣"]},
+  {fx:"rain",     label:"Rain",           words:["rip"], emoji:["😭","😢","💔"]},
+  {fx:"night",    label:"Shooting stars", words:["good night","goodnight","gn"], emoji:["🌙","😴","🌠"]},
+  {fx:"boom",     label:"Shockwave",      words:["boom","mind blown"], emoji:["💥","🤯"]},
+];
+const esc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+FX_TRIGGERS.forEach(t=>t.re=new RegExp("(^|[^a-z0-9'])("+t.words.map(esc).join("|")+")(?=$|[^a-z0-9])","i"));
+function fxFor(text){
+  if(!text) return null;
+  const norm=text.replace(/[’‘]/g,"'");
+  let best=null, bestAt=Infinity;              // first trigger in the message wins
+  for(const t of FX_TRIGGERS){
+    const m=norm.match(t.re); if(m&&m.index<bestAt){ best=t; bestAt=m.index; }
+    for(const e of t.emoji){ const i=norm.indexOf(e); if(i>=0&&i<bestAt){ best=t; bestAt=i; } }
+  }
+  return best;
+}
+const fxEnabled=()=>{ try{ return localStorage.getItem("nl-fx")!=="off"; }catch(e){ return true; } };
+const fxPlayed=new Set();
+
+const FX=(()=>{
+  const canvas=document.createElement("canvas"); canvas.id="fx"; canvas.setAttribute("aria-hidden","true");
+  const layer=document.createElement("div"); layer.id="fxText"; layer.setAttribute("aria-hidden","true");
+  document.body.append(canvas,layer);
+  const ctx=canvas.getContext("2d");
+  const C=["#00F0FF","#F3FF3A","#E07AC6","#F4F7FF","#B18CFF"];
+  const R=(a,b)=>a+Math.random()*(b-a), pick=a=>a[Math.floor(Math.random()*a.length)];
+  let W=0,H=0,dpr=1,raf=0,run=null;
+  function size(){ dpr=Math.min(devicePixelRatio||1,2); W=innerWidth; H=innerHeight; canvas.width=W*dpr; canvas.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
+  addEventListener("resize",size); size();
+  function shake(){ const c=$("chat"); c.classList.remove("fx-shake"); void c.offsetWidth; c.classList.add("fx-shake"); setTimeout(()=>c.classList.remove("fx-shake"),1000); }
+  function banner(text){ const b=el("div","fx-banner",text); layer.append(b); setTimeout(()=>b.remove(),1900); }
+  function heart(x,y,s){ ctx.beginPath(); ctx.moveTo(x,y+s*.3); ctx.bezierCurveTo(x,y,x-s*.5,y,x-s*.5,y+s*.3); ctx.bezierCurveTo(x-s*.5,y+s*.6,x,y+s*.8,x,y+s); ctx.bezierCurveTo(x,y+s*.8,x+s*.5,y+s*.6,x+s*.5,y+s*.3); ctx.bezierCurveTo(x+s*.5,y,x,y,x,y+s*.3); ctx.closePath(); }
+
+  const effects={
+    confetti:{dur:3200,init:()=>[...Array(170)].map(()=>({x:R(0,W),y:R(-H*.6,-10),vx:R(-1.5,1.5),vy:R(2,5),w:R(7,15),h:R(4,8),r:R(0,6.3),vr:R(-.2,.2),c:pick(C),ph:R(0,6)})),
+      step:(ps,t)=>{ for(const p of ps){ p.vy+=.04; p.x+=p.vx+Math.sin(t/300+p.ph)*.8; p.y+=p.vy; p.r+=p.vr;
+        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r); ctx.fillStyle=p.c; ctx.beginPath(); ctx.moveTo(-p.w/2,-p.h/2); ctx.lineTo(p.w/2,-p.h/2+2); ctx.lineTo(p.w/2-2,p.h/2); ctx.lineTo(-p.w/2+1,p.h/2-1); ctx.fill(); ctx.restore(); } }},
+    hearts:{dur:3200,init:()=>[...Array(38)].map(()=>({x:R(0,W),y:H+R(0,H*.6),vy:R(2,4.5),s:R(16,40),ph:R(0,6),c:pick(["#E07AC6","#00F0FF","#F3FF3A"])})),
+      step:(ps,t)=>{ for(const p of ps){ p.y-=p.vy; const x=p.x+Math.sin(t/400+p.ph)*14; ctx.globalAlpha=Math.max(0,Math.min(1,p.y/(H*.35)));
+        heart(x,p.y,p.s); ctx.fillStyle="rgba(7,4,26,.7)"; ctx.fill(); ctx.lineWidth=3; ctx.strokeStyle=p.c; ctx.shadowColor=p.c; ctx.shadowBlur=12; ctx.stroke(); ctx.shadowBlur=0; } ctx.globalAlpha=1; }},
+    embers:{dur:2800,init:()=>[...Array(170)].map(()=>({x:R(0,W),y:R(H*.35,H*1.3),vy:R(2.5,7),vx:R(-.6,.6),s:R(1.5,4.5),c:pick(["#FF8A3D","#F3FF3A","#E07AC6","#FF5A5A"]),ph:R(0,6)})),
+      step:(ps,t)=>{ ctx.globalCompositeOperation="lighter"; for(const p of ps){ p.y-=p.vy; p.x+=p.vx+Math.sin(t/200+p.ph)*.6;
+        ctx.globalAlpha=.5+.5*Math.abs(Math.sin(t/90+p.ph)); ctx.fillStyle=p.c; ctx.shadowColor=p.c; ctx.shadowBlur=10; ctx.beginPath(); ctx.arc(p.x,p.y,p.s,0,7); ctx.fill(); }
+        ctx.shadowBlur=0; ctx.globalAlpha=1; ctx.globalCompositeOperation="source-over"; }},
+    hype:{dur:1900,init:(txt)=>{ banner(txt); return [...Array(60)].map(()=>({a:R(0,6.3),len:R(.3,.7),w:R(1,4),c:pick(C)})); },
+      step:(ps,t,k)=>{ const cx=W/2, cy=H/2, rMax=Math.hypot(W,H)/2; ctx.globalAlpha=(1-k)*.8;
+        for(const p of ps){ if(Math.random()<.5) continue; const r0=rMax*(1-p.len)*(.6+.4*Math.random()); ctx.strokeStyle=p.c; ctx.lineWidth=p.w;
+          ctx.beginPath(); ctx.moveTo(cx+Math.cos(p.a)*r0,cy+Math.sin(p.a)*r0); ctx.lineTo(cx+Math.cos(p.a)*rMax,cy+Math.sin(p.a)*rMax); ctx.stroke(); } ctx.globalAlpha=1; }},
+    laugh:{dur:1900,init:()=>{ shake(); const words=["LOL","HA","LMAO","HA!","LOL"];
+        words.forEach((w,i)=>setTimeout(()=>{ const s=el("span","fx-stamp",w); s.style.left=(i%2?R(45,65):R(5,25))+"%"; s.style.top=(12+i*15+R(-4,4))+"%"; s.style.setProperty("--r",R(-18,18)+"deg"); layer.append(s); setTimeout(()=>s.remove(),1700); },i*160));
+        return []; }, step:()=>{} },
+    rain:{dur:3000,init:()=>[...Array(220)].map(()=>({x:R(-W*.2,W*1.1),y:R(-H,0),v:R(12,22),l:R(12,30)})),
+      step:(ps,t,k)=>{ ctx.fillStyle=`rgba(7,4,26,${.35*Math.sin(Math.PI*k)})`; ctx.fillRect(0,0,W,H);
+        ctx.strokeStyle="rgba(0,240,255,.55)"; ctx.lineWidth=1.5; ctx.beginPath();
+        for(const p of ps){ p.y+=p.v; p.x-=p.v*.18; if(p.y>H&&k<.7){ p.y=R(-60,0); p.x=R(0,W*1.2); } ctx.moveTo(p.x,p.y); ctx.lineTo(p.x+p.l*.18,p.y-p.l); }
+        ctx.stroke(); }},
+    night:{dur:3200,init:()=>[...Array(26)].map((_,i)=>({x:R(W*.1,W*1.3),y:R(-H*.3,H*.6),v:R(10,16),delay:i*90,len:R(100,220),c:pick(["#F4F7FF","#00F0FF","#F3FF3A"])})),
+      step:(ps,t,k)=>{ ctx.fillStyle=`rgba(7,4,26,${.3*Math.sin(Math.PI*k)})`; ctx.fillRect(0,0,W,H);
+        for(const p of ps){ if(t<p.delay) continue; const d=(t-p.delay)/16*p.v, x=p.x-d, y=p.y+d*.55;
+          const g=ctx.createLinearGradient(x,y,x+p.len,y-p.len*.55); g.addColorStop(0,p.c); g.addColorStop(1,"rgba(0,0,0,0)");
+          ctx.strokeStyle=g; ctx.lineWidth=2.5; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+p.len,y-p.len*.55); ctx.stroke();
+          ctx.fillStyle=p.c; ctx.shadowColor=p.c; ctx.shadowBlur=12; ctx.beginPath(); ctx.arc(x,y,2.5,0,7); ctx.fill(); ctx.shadowBlur=0; } }},
+    boom:{dur:1700,init:()=>{ shake(); return {shards:[...Array(46)].map(()=>({a:R(0,6.3),v:R(6,16),s:R(6,16),r:R(0,6),c:pick(C)})),d:0}; },
+      step:(st,t,k)=>{ const cx=W/2, cy=H/2;
+        if(k<.25){ ctx.fillStyle=`rgba(243,255,58,${(.25-k)*2.6})`; ctx.fillRect(0,0,W,H); }
+        ["#F3FF3A","#00F0FF","#E07AC6"].forEach((c,i)=>{ const kk=Math.max(0,k*1.4-i*.12); if(kk<=0||kk>1) return;
+          ctx.strokeStyle=c; ctx.globalAlpha=1-kk; ctx.lineWidth=10*(1-kk)+2; ctx.beginPath(); ctx.arc(cx,cy,kk*Math.hypot(W,H)*.6,0,7); ctx.stroke(); });
+        ctx.globalAlpha=1-k;
+        for(const p of st.shards){ const d=p.v*t/16; ctx.save(); ctx.translate(cx+Math.cos(p.a)*d,cy+Math.sin(p.a)*d); ctx.rotate(p.r+t/200); ctx.fillStyle=p.c;
+          ctx.beginPath(); ctx.moveTo(0,-p.s/2); ctx.lineTo(p.s/2,p.s/3); ctx.lineTo(-p.s/2,p.s/2); ctx.fill(); ctx.restore(); }
+        ctx.globalAlpha=1; }},
+  };
+  function play(name,opts={}){
+    if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const e=effects[name]; if(!e) return;
+    cancelAnimationFrame(raf); layer.innerHTML=""; ctx.clearRect(0,0,W,H);
+    const state=e.init(opts.text); const start=performance.now();
+    const frame=now=>{ const t=now-start, k=Math.min(1,t/e.dur);
+      ctx.clearRect(0,0,W,H); e.step(state,t,k);
+      if(k<1) raf=requestAnimationFrame(frame); else ctx.clearRect(0,0,W,H); };
+    raf=requestAnimationFrame(frame);
+  }
+  return {play};
+})();
+
+function hypeText(text){
+  const n=(text||"").toLowerCase().replace(/[’‘]/g,"'");
+  if(/(^|[^a-z0-9])gg([^a-z0-9]|$)/.test(n)) return "GG!";
+  if(/hype/.test(n)) return "HYPE!";
+  if(n.includes("🏆")) return "WINNER!";
+  return "LET'S GO!";
+}
+function playFx(m,force){
+  if(!m?.text) return;
+  const t=fxFor(m.text); if(!t) return;
+  if(!force){ if(!fxEnabled()||document.hidden||fxPlayed.has(m.id)) return; if(Date.now()-new Date(m.created_at)>15000) return; }
+  fxPlayed.add(m.id);
+  FX.play(t.fx,{text:hypeText(m.text)});
+}
 
 /* ---------- boot ---------- */
 setMode("in");
