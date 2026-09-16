@@ -243,6 +243,146 @@ html,body{overflow-x:hidden}
 .roomrow{min-width:0;max-width:100%;overflow:hidden}
 .roomrow .info,.roomrow .name,.roomrow .preview{min-width:0}
 .whoami .who-text{min-width:0;overflow:hidden;text-overflow:ellipsis}
+
+/* ===== v7: media, stickers, polls, pins, mentions, themes, backgrounds ===== */
+.clip{color:var(--mag)}
+.row{gap:6px}
+.row .clip{width:40px;height:46px}
+.row .clip svg{width:22px;height:22px}
+.clip[aria-expanded="true"]{background:var(--mag);color:var(--night)}
+@media (max-width:360px){.row .clip{width:36px}.send{padding:13px 10px}}
+
+/* pinned bar */
+.pinbar{background:rgba(7,4,26,.85);border-bottom:2px solid var(--volt);backdrop-filter:blur(6px)}
+.pinmain{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;color:var(--white);padding:8px 14px;text-align:left}
+.pinicon{flex:none}
+.pintext{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:16px}
+.pintext b{font-family:var(--tech);font-size:11px;color:var(--volt);margin-right:6px}
+.pincount{flex:none;font-family:var(--tech);font-size:10px;color:var(--muted)}
+
+/* media */
+.vid{display:block;max-width:min(62vw,260px);max-height:340px;border:3px solid var(--cyan);background:#000;margin:2px 0 6px}
+.voice{display:flex;align-items:center;gap:10px;min-width:190px;max-width:240px;padding:2px 0}
+.voice .play{flex:none;width:38px;height:38px;border:none;background:var(--cyan);color:var(--night);display:grid;place-items:center;clip-path:polygon(8% 0,100% 10%,92% 100%,0 90%)}
+.voice .play svg{width:18px;height:18px}
+.voice .wave{flex:1;display:flex;align-items:center;gap:2px;height:30px;cursor:pointer}
+.voice .wave i{flex:1;background:currentColor;opacity:.35;border-radius:1px;min-width:2px}
+.voice .wave i.on{opacity:1;background:var(--volt)}
+.voice .dur{flex:none;font-family:var(--tech);font-size:11px;opacity:.8}
+.pending video{width:56px;height:56px;object-fit:cover;border:2px solid var(--mag)}
+
+/* recording */
+.recbar{display:flex;align-items:center;gap:10px;min-height:46px}
+.recdot{width:14px;height:14px;background:var(--red);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);animation:recpulse 1s infinite}
+@keyframes recpulse{50%{opacity:.3;transform:scale(.8)}}
+.rectime{font-family:var(--tech);font-size:16px;color:var(--white);min-width:44px}
+.reclabel{flex:1;color:var(--muted);font-size:15px}
+.recbar .ghost{margin:0;padding:10px}
+
+/* tray + stickers */
+.tray{margin-bottom:8px;border:2px solid #3b2d80;background:rgba(20,10,58,.95);padding:8px}
+.tray-tabs{display:flex;gap:6px;margin-bottom:8px}
+.tray-tabs .ghost{margin:0;flex:1;padding:8px}
+.tray-tabs .ghost[aria-pressed="true"]{background:var(--cyan);color:var(--night)}
+.stickers{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;max-height:200px;overflow-y:auto}
+.stickers button{background:none;border:2px solid transparent;padding:2px;aspect-ratio:1}
+.stickers button:hover,.stickers button:focus-visible{border-color:var(--volt)}
+.stk{display:block;width:100%;height:100%}
+.stk svg{width:100%;height:100%;display:block;overflow:visible}
+.msg.sticker-msg .bubble{padding:0;filter:none}
+.msg.sticker-msg .bubble::before{display:none}
+.msg.sticker-msg .stk{width:120px;height:120px;animation:stickerpop .35s cubic-bezier(.2,1.8,.4,1) both}
+@keyframes stickerpop{from{transform:scale(.3) rotate(-20deg);opacity:0}}
+
+/* polls */
+.poll{min-width:210px;max-width:260px}
+.poll h4{font-family:var(--tech);font-size:14px;margin-bottom:8px;line-height:1.3}
+.poll h4::before{content:"📊 "}
+.popt{position:relative;display:flex;justify-content:space-between;gap:8px;width:100%;text-align:left;background:rgba(7,4,26,.6);color:var(--white);border:2px solid #3b2d80;padding:8px 10px;margin-bottom:6px;overflow:hidden;font-size:16px;font-weight:600}
+.popt .fill{position:absolute;inset:0 auto 0 0;background:var(--cyan);opacity:.22;transition:width .35s ease}
+.popt.mine{border-color:var(--volt)}
+.popt.mine .fill{background:var(--volt);opacity:.28}
+.popt span{position:relative}
+.popt .n{font-family:var(--tech);font-size:11px;flex:none}
+.pollfoot{font-family:var(--tech);font-size:10px;opacity:.75}
+.pollopts{display:grid;gap:8px;width:100%}
+.pollopts .optrow{display:flex;gap:6px}
+.pollopts .optrow .field{flex:1;min-width:0}
+.pollopts .optrow button{background:none;border:2px solid var(--muted);color:var(--muted);padding:0 10px}
+.check{display:flex;gap:10px;align-items:center;font-size:16px;color:var(--white)}
+.check input{width:20px;height:20px;accent-color:var(--cyan)}
+
+/* mentions */
+.mention{font-weight:700;color:var(--volt);background:rgba(243,255,58,.12);padding:0 3px}
+.me .mention{color:inherit;background:rgba(0,0,0,.25)}
+.msg.mentioned .bubble{filter:drop-shadow(3px 3px 0 var(--volt)) drop-shadow(0 0 10px rgba(243,255,58,.45))}
+.mentions{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.mentions button{display:flex;align-items:center;gap:6px;background:var(--deep);border:2px solid var(--cyan);color:var(--white);padding:4px 10px 4px 4px;font-size:16px}
+.mentions .face{width:26px;height:26px;font-size:12px}
+
+/* custom bubble colors */
+.msg.custom .bubble::before{background:var(--bub)!important}
+.msg.custom .bubble{color:var(--bubtext)}
+.msg.custom .bubble a{color:inherit}
+.msg.custom .quote{color:inherit;opacity:.85}
+
+/* themes sheet */
+.presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:100%}
+.preset{background:var(--deep);border:2px solid #3b2d80;color:var(--white);padding:8px 4px;display:grid;justify-items:center;gap:6px;font-family:var(--tech);font-size:10px}
+.preset[aria-pressed="true"]{border-color:var(--volt);box-shadow:3px 3px 0 var(--mag)}
+.preset .dots{display:flex;gap:4px}
+.preset .dots i{width:16px;height:16px;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+.colorrow{display:flex;gap:10px;width:100%;justify-content:space-between}
+.colorpick{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:14px;color:var(--muted)}
+.colorpick.left{flex-direction:row;justify-self:start;gap:10px}
+.colorpick input{width:52px;height:38px;border:2px solid #3b2d80;background:none;padding:2px;cursor:pointer}
+.swatches{display:flex;flex-wrap:wrap;gap:8px;width:100%;justify-content:center}
+.swatches button{width:38px;height:38px;border:2px solid #3b2d80;transform:rotate(-4deg)}
+.swatches button:nth-child(even){transform:rotate(4deg)}
+.swatches button[aria-pressed="true"]{border-color:var(--volt);box-shadow:3px 3px 0 var(--mag)}
+.swatches .reset{background:repeating-linear-gradient(45deg,#2A1B4A 0 6px,#07041A 6px 12px)}
+.theme-preview{width:100%;display:flex;justify-content:flex-end;padding:8px 0}
+.theme-preview .msg{max-width:100%}
+
+/* room backgrounds */
+.bgtiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;width:100%}
+.bgtile{height:56px;border:2px solid #3b2d80;font-family:var(--tech);font-size:9px;color:var(--white);display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;text-shadow:0 1px 2px #000}
+.bgtile[aria-pressed="true"]{border-color:var(--volt);box-shadow:3px 3px 0 var(--mag)}
+#chat{isolation:isolate}
+#chat::before,#chat::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+#chat[data-bg="grid"]::before,.bgtile[data-bg="grid"]{background:linear-gradient(180deg,#07041A 0%,#170a3a 55%,#35105a 100%)}
+#chat[data-bg="grid"]::after{top:55%;background:
+  repeating-linear-gradient(90deg,rgba(0,240,255,.35) 0 2px,transparent 2px 48px),
+  repeating-linear-gradient(0deg,rgba(198,90,174,.45) 0 2px,transparent 2px 36px);
+  transform:perspective(260px) rotateX(58deg);transform-origin:top;animation:gridmove 3s linear infinite;
+  -webkit-mask:linear-gradient(180deg,transparent,#000 40%);mask:linear-gradient(180deg,transparent,#000 40%)}
+@keyframes gridmove{to{background-position:0 0,0 36px}}
+#chat[data-bg="rain"]::before,.bgtile[data-bg="rain"]{background:linear-gradient(180deg,#040a1c,#0b1d3a 70%,#10284a)}
+#chat[data-bg="rain"]::after{background:repeating-linear-gradient(100deg,transparent 0 22px,rgba(0,240,255,.18) 22px 23px,transparent 23px 60px);background-size:120px 120px;animation:rainfall .7s linear infinite}
+@keyframes rainfall{to{background-position:-24px 120px}}
+#chat[data-bg="sunset"]::before,.bgtile[data-bg="sunset"]{background:linear-gradient(180deg,#1b0633 0%,#5a1460 45%,#c0396f 75%,#ff8a3d 100%)}
+#chat[data-bg="sunset"]::after{inset:auto 0 12% 0;margin:auto;width:240px;height:240px;border-radius:50%;background:linear-gradient(180deg,#F3FF3A,#FF3D8B);
+  -webkit-mask:repeating-linear-gradient(180deg,#000 0 18px,transparent 18px 26px);mask:repeating-linear-gradient(180deg,#000 0 18px,transparent 18px 26px);opacity:.55}
+#chat[data-bg="aurora"]::before,.bgtile[data-bg="aurora"]{background:linear-gradient(120deg,#051a2a,#0b3a3a,#2a1060,#07041A);background-size:300% 300%}
+#chat[data-bg="aurora"]::before{animation:aurora 14s ease-in-out infinite}
+@keyframes aurora{50%{background-position:100% 50%}}
+#chat[data-bg="void"]::before,.bgtile[data-bg="void"]{background:#000}
+#chat[data-bg="stars"]::before,.bgtile[data-bg="stars"]{background:none}
+.bgtile[data-bg="stars"]{background:radial-gradient(circle at 30% 30%,#fff 0 1px,transparent 2px),radial-gradient(circle at 70% 60%,#00F0FF 0 1px,transparent 2px),linear-gradient(#07041A,#140A3A)}
+#chat[data-bg="custom"]::before{background:linear-gradient(180deg,var(--roombg),#07041A 85%)}
+@media (prefers-reduced-motion:reduce){#chat::before,#chat::after{animation:none!important}}
+
+/* sheet fit fixes at narrow widths */
+.sheet{min-width:0}
+.sheet > *{max-width:100%;min-width:0}
+.bgtiles{grid-template-columns:repeat(3,minmax(0,1fr))}
+.members{min-width:0}
+.member{flex-wrap:wrap;row-gap:6px;min-width:0}
+.member .mname{flex:1 1 120px;min-width:0;white-space:normal;overflow-wrap:anywhere}
+.member button{padding:4px 7px;font-size:10px;flex:none}
+.member .face + .mname + button{margin-left:auto}
+#pinList .member .mname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.member button + button{margin-left:auto}
 </style>
 </head>
 <body>
@@ -305,16 +445,38 @@ html,body{overflow-x:hidden}
     <button class="ghost" id="roomBtn" type="button">Room</button>
     <button class="ghost" id="back" type="button">Back</button>
   </div>
+  <div class="pinbar hidden" id="pinBar">
+    <button type="button" class="pinmain" id="pinJump"><span class="pinicon" aria-hidden="true">📌</span><span class="pintext" id="pinText"></span><span class="pincount" id="pinCount"></span></button>
+  </div>
   <main class="feed" id="feed" aria-live="polite"></main>
   <div class="typing" id="typing" aria-live="polite"></div>
   <form class="compose" id="sendForm">
     <div class="replying hidden" id="replying"><b>Reply</b><span id="replyText"></span><button type="button" id="cancelReply">Cancel</button></div>
-    <div class="pending hidden" id="pending"><img id="pendingImg" alt="Photo to send"><span>Photo ready</span><button type="button" id="unpick">Remove</button></div>
-    <div class="row">
-      <button type="button" class="clip" id="pickBtn" aria-label="Add a photo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#C65AAE" stroke-width="2.4"><rect x="3" y="5" width="18" height="14"/><circle cx="12" cy="12" r="3.5"/><path d="M8 5l1.5-2h5L16 5"/></svg>
+    <div class="pending hidden" id="pending"><img id="pendingImg" alt="Photo to send"><video id="pendingVid" muted playsinline class="hidden"></video><span id="pendingLabel">Photo ready</span><button type="button" id="unpick">Remove</button></div>
+    <div class="mentions hidden" id="mentionList" role="listbox" aria-label="Mention someone"></div>
+    <div class="tray hidden" id="tray">
+      <div class="tray-tabs">
+        <button type="button" class="ghost" id="traySticker" aria-pressed="true">Stickers</button>
+        <button type="button" class="ghost" id="trayPoll">Make a poll</button>
+      </div>
+      <div class="stickers" id="stickerGrid"></div>
+    </div>
+    <div class="recbar hidden" id="recBar" role="status">
+      <span class="recdot" aria-hidden="true"></span><span class="rectime" id="recTime">0:00</span><span class="reclabel">Recording…</span>
+      <button type="button" class="ghost" id="recCancel">Cancel</button>
+      <button type="button" class="send" id="recSend">Send</button>
+    </div>
+    <div class="row" id="composeRow">
+      <button type="button" class="clip" id="plusBtn" aria-label="Stickers and polls" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M12 4v16M4 12h16"/></svg>
       </button>
-      <input type="file" id="picker" accept="image/*" class="sr">
+      <button type="button" class="clip" id="pickBtn" aria-label="Add a photo or video">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="3" y="5" width="18" height="14"/><circle cx="12" cy="12" r="3.5"/><path d="M8 5l1.5-2h5L16 5"/></svg>
+      </button>
+      <button type="button" class="clip" id="micBtn" aria-label="Record a voice message">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></svg>
+      </button>
+      <input type="file" id="picker" accept="image/*,video/*" class="sr">
       <label for="box" class="sr">Message</label>
       <textarea id="box" rows="1" placeholder="Transmit…"></textarea>
       <button class="send" type="submit" id="sendBtn">Send</button>
@@ -331,6 +493,7 @@ html,body{overflow-x:hidden}
     <div class="email" id="profEmail"></div>
     <input type="file" id="avatarPicker" accept="image/*" class="sr">
     <button class="go" type="button" id="changePhoto">Change photo</button>
+    <button class="ghost" type="button" id="openTheme">Theme &amp; colors 🎨</button>
     <button class="ghost" type="button" id="notifBtn">Turn on notifications</button>
     <button class="ghost" type="button" id="fxBtn">Screen effects: On</button>
     <details class="fx-list"><summary>Words and emoji that trigger effects</summary><ul id="fxList"></ul></details>
@@ -361,7 +524,13 @@ html,body{overflow-x:hidden}
     <button class="go" type="button" id="invCopy">Copy link</button>
     <button class="ghost hidden" type="button" id="invShare">Share</button>
     <button class="ghost hidden" type="button" id="invReset">Reset link (old link stops working)</button>
+    <h3>Chat background</h3>
+    <div class="bgtiles" id="bgTiles"></div>
+    <label class="colorpick left"><span>Custom color</span><input type="color" id="bgCustom" value="#1a2b6b"></label>
+    <h3 id="pinTitle" class="hidden">Pinned</h3>
+    <div class="members" id="pinList"></div>
     <h3 id="memTitle">Members</h3>
+    <p class="sub left">Tap Nickname to set what someone is called in this room.</p>
     <div class="members" id="memberList"></div>
     <p class="msgline" id="rsMsg" role="status"></p>
     <button class="danger" type="button" id="leaveRoom">Leave this room</button>
@@ -375,6 +544,7 @@ html,body{overflow-x:hidden}
     <div class="menu-preview" id="menuPreview"></div>
     <div class="emoji-row" id="emojiRow"></div>
     <button class="go" type="button" id="menuReply">Reply</button>
+    <button class="ghost" type="button" id="menuPin">Pin message</button>
     <button class="ghost hidden" type="button" id="menuFx">Replay effect ✨</button>
     <button class="ghost hidden" type="button" id="menuCopy">Copy text</button>
     <button class="danger hidden" type="button" id="menuDelete">Delete message</button>
@@ -394,7 +564,48 @@ html,body{overflow-x:hidden}
   </form>
 </div>
 
+<!-- ============ THEME SHEET ============ -->
+<div class="overlay hidden" id="themeSheet" role="dialog" aria-modal="true" aria-labelledby="themeTitle">
+  <div class="sheet">
+    <h2 id="themeTitle">Theme &amp; colors</h2>
+    <p class="sub">Only you see your app theme. Everyone sees your bubble color.</p>
+    <h3>Theme style</h3>
+    <div class="presets" id="presetGrid"></div>
+    <h3>Icon &amp; button colors</h3>
+    <div class="colorrow">
+      <label class="colorpick"><span>Main</span><input type="color" id="colMain"></label>
+      <label class="colorpick"><span>Accent</span><input type="color" id="colAccent"></label>
+      <label class="colorpick"><span>Highlight</span><input type="color" id="colHi"></label>
+    </div>
+    <h3>Your bubble color</h3>
+    <div class="swatches" id="bubbleSwatches"></div>
+    <label class="colorpick left"><span>Custom bubble</span><input type="color" id="colBubble" value="#2A1B4A"></label>
+    <div class="theme-preview" aria-hidden="true">
+      <div class="msg me t1" style="animation:none" id="themePreviewMsg"><div class="face sm" id="themePreviewFace"></div><div class="col"><div class="tag">You · now</div><div class="bubble">This is how I look ✨</div></div></div>
+    </div>
+    <p class="msgline" id="themeMsg" role="status"></p>
+    <button class="go" type="button" id="themeSave">Save theme</button>
+    <button class="ghost" type="button" id="themeClose">Cancel</button>
+  </div>
+</div>
+
+<!-- ============ POLL SHEET ============ -->
+<div class="overlay hidden" id="pollSheet" role="dialog" aria-modal="true" aria-labelledby="pollTitle">
+  <form class="sheet" id="pollForm">
+    <h2 id="pollTitle">Make a poll</h2>
+    <label for="pollQ" class="sr">Question</label>
+    <input class="field" id="pollQ" maxlength="200" placeholder="Ask something…">
+    <div class="pollopts" id="pollOpts"></div>
+    <button type="button" class="linkbtn" id="pollAdd">+ Add option</button>
+    <label class="check left"><input type="checkbox" id="pollMulti"> Let people pick more than one</label>
+    <p class="msgline" id="pollMsg" role="status"></p>
+    <button class="go" type="submit" id="pollCreate">Post poll</button>
+    <button class="ghost" type="button" id="pollClose">Cancel</button>
+  </form>
+</div>
+
 <div class="overlay lightbox hidden" id="lightbox"><img id="lightImg" alt="Full size photo"></div>
+
 
 <script>
 /* ===== SETUP: paste your Supabase project info (Project Settings → API) =====
@@ -409,6 +620,17 @@ const DAYS=["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDA
 const COLORS=["#00F0FF","#E07AC6","#F3FF3A","#7CFF6B","#FF8A3D","#B18CFF"];
 const EMOJIS=["🔥","😂","😮","😢","👍","❤️"];
 const PAGE=50;
+const MAX_VIDEO_SECONDS=30, MAX_VIDEO_BYTES=25e6, MAX_VOICE_SECONDS=120;
+const BACKGROUNDS=[["stars","Stars"],["grid","Grid"],["rain","Rain"],["sunset","Sunset"],["aurora","Aurora"],["void","Void"]];
+const THEMES={
+  night:  {label:"Night Signal", main:"#00F0FF", accent:"#C65AAE", hi:"#F3FF3A"},
+  crimson:{label:"Crimson",      main:"#FF4D6D", accent:"#FFB347", hi:"#FFF1A8"},
+  toxic:  {label:"Toxic",        main:"#7CFF6B", accent:"#B18CFF", hi:"#F3FF3A"},
+  ice:    {label:"Ice",          main:"#7FDBFF", accent:"#9FA8FF", hi:"#FFFFFF"},
+  sunset: {label:"Sunset",       main:"#FF9A3D", accent:"#FF4FA3", hi:"#FFE45C"},
+  mono:   {label:"Mono",         main:"#E8E8F0", accent:"#8A8AA8", hi:"#F3FF3A"},
+};
+const BUBBLES=["#2A1B4A","#0E3B4A","#4A1330","#123D22","#3D2A08","#1B2A6B","#5A1E5A","#262630"];
 const colorFor = s => COLORS[[...(s||"?")].reduce((a,c)=>a+c.charCodeAt(0),0)%COLORS.length];
 const say = (id,text,bad) => { $(id).textContent=text; $(id).classList.toggle("bad",!!bad); };
 const timeOf = t => new Date(t).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
@@ -489,10 +711,13 @@ const live = {
   async resetPassword(email){ must(await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname})); },
   async updatePassword(pw){ must(await sb.auth.updateUser({password:pw})); },
   async deleteAccount(){ must(await sb.rpc("delete_my_account")); await sb.auth.signOut(); },
-  async profiles(ids){ return must(await sb.from("profiles").select("id,username,avatar_url").in("id",ids)); },
+  async profiles(ids){ return must(await sb.from("profiles").select("id,username,avatar_url,theme,bubble_color").in("id",ids)); },
+  async saveStyle(uid,style){ must(await sb.from("profiles").update(style).eq("id",uid)); },
   async upload(bucket,uid,blob){
-    const ext=blob.type==="image/gif"?"gif":"jpg", path=`${uid}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
-    must(await sb.storage.from(bucket).upload(path,blob,{contentType:blob.type||"image/jpeg"}));
+    const t=(blob.type||"image/jpeg").split(";")[0];
+    const ext={"image/gif":"gif","image/jpeg":"jpg","image/png":"png","image/webp":"webp","video/mp4":"mp4","video/webm":"webm","video/quicktime":"mov","audio/mp4":"m4a","audio/webm":"webm","audio/ogg":"ogg","audio/mpeg":"mp3","audio/aac":"aac"}[t]||"bin";
+    const path=`${uid}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+    must(await sb.storage.from(bucket).upload(path,blob,{contentType:t}));
     return sb.storage.from(bucket).getPublicUrl(path).data.publicUrl;
   },
   async setAvatar(uid,url){ must(await sb.from("profiles").update({avatar_url:url}).eq("id",uid)); },
@@ -502,17 +727,32 @@ const live = {
     if(error) throw new Error(/private_room/.test(error.message)?"private":error.message);
     return data;
   },
-  async roomInfo(room){ return must(await sb.from("rooms").select("code,name,owner,invite_token").eq("code",room).maybeSingle()); },
+  async roomInfo(room){ return must(await sb.from("rooms").select("code,name,background,owner,invite_token").eq("code",room).maybeSingle()); },
+  async setBackground(room,bg){ must(await sb.rpc("set_room_background",{p_room:room,p_background:bg})); },
+  async setNickname(room,uid,nick){ must(await sb.rpc("set_nickname",{p_room:room,p_user:uid,p_nickname:nick})); },
+  async pins(room){ return must(await sb.from("pinned_messages").select("message_id,pinned_by,created_at").eq("room",room).order("created_at",{ascending:false})); },
+  async pin(room,id){ must(await sb.from("pinned_messages").insert({room,message_id:id})); },
+  async unpin(id){ must(await sb.from("pinned_messages").delete().eq("message_id",id)); },
+  async polls(ids){
+    if(!ids.length) return {polls:[],votes:[]};
+    const [p,v]=await Promise.all([sb.from("polls").select("message_id,options,multi").in("message_id",ids),sb.from("poll_votes").select("message_id,user_id,option_index").in("message_id",ids)]);
+    return {polls:must(p),votes:must(v)};
+  },
+  async createPoll(room,question,options,multi){ return must(await sb.rpc("create_poll",{p_room:room,p_question:question,p_options:options,p_multi:multi})); },
+  async vote(id,idx){ must(await sb.rpc("vote_poll",{p_message:id,p_option:idx})); },
   async renameRoom(room,name){ must(await sb.rpc("rename_room",{p_room:room,p_name:name})); },
   async rotateInvite(room){ return must(await sb.rpc("rotate_invite",{p_room:room})); },
   async removeMember(room,uid){ must(await sb.rpc("remove_member",{p_room:room,p_user:uid})); },
   async leaveRoom(room){ must(await sb.rpc("leave_room",{p_room:room})); },
-  async members(room){ return must(await sb.from("room_members").select("user_id,last_read_at,last_joined").eq("room",room)); },
+  async members(room){ return must(await sb.from("room_members").select("user_id,last_read_at,last_joined,nickname").eq("room",room)); },
   async markRead(room){ await sb.rpc("mark_read",{p_room:room}); },
   async loadLatest(room){ return must(await sb.from("messages").select("*").eq("room",room).order("created_at",{ascending:false}).limit(PAGE)).reverse(); },
   async loadBefore(room,iso){ return must(await sb.from("messages").select("*").eq("room",room).lt("created_at",iso).order("created_at",{ascending:false}).limit(PAGE)).reverse(); },
   async fetchMessage(id){ return must(await sb.from("messages").select("*").eq("id",id).maybeSingle()); },
-  async send(room,text,image_url,reply_to){ return must(await sb.from("messages").insert({room,text:text||null,image_url:image_url||null,reply_to:reply_to||null}).select().single()); },
+  async send(room,f){
+    const row={room,kind:f.kind||"text",text:f.text||null,image_url:f.image_url||null,media_url:f.media_url||null,media_type:f.media_type||null,media_duration:f.media_duration||null,sticker:f.sticker||null,reply_to:f.reply_to||null,mentions:f.mentions||[]};
+    return must(await sb.from("messages").insert(row).select().single());
+  },
   async deleteMessage(id){ must(await sb.from("messages").delete().eq("id",id)); },
   async reactions(ids){ return ids.length ? must(await sb.from("message_reactions").select("message_id,user_id,emoji").in("message_id",ids)) : []; },
   async react(message_id,room,emoji){ must(await sb.from("message_reactions").insert({message_id,room,emoji})); },
@@ -533,6 +773,10 @@ const live = {
       .on("postgres_changes",{event:"UPDATE",schema:"public",table:"rooms",filter:`code=eq.${room}`},p=>h.roomUpdated(p.new))
       .on("postgres_changes",{event:"INSERT",schema:"public",table:"message_reactions",filter:`room=eq.${room}`},p=>h.reaction(p.new,true))
       .on("postgres_changes",{event:"DELETE",schema:"public",table:"message_reactions"},p=>p.old&&h.reaction(p.old,false))
+      .on("postgres_changes",{event:"INSERT",schema:"public",table:"poll_votes",filter:`room=eq.${room}`},p=>h.vote(p.new,true))
+      .on("postgres_changes",{event:"DELETE",schema:"public",table:"poll_votes"},p=>p.old&&h.vote(p.old,false))
+      .on("postgres_changes",{event:"INSERT",schema:"public",table:"pinned_messages",filter:`room=eq.${room}`},p=>h.pin(p.new,true))
+      .on("postgres_changes",{event:"DELETE",schema:"public",table:"pinned_messages"},p=>p.old&&h.pin(p.old,false))
       .subscribe(s=>h.status(s==="SUBSCRIBED"?"Live":"Reconnecting…"));
     const priv=sb.channel("typing:"+room,{config:{private:true,broadcast:{self:false}}})
       .on("broadcast",{event:"typing"},({payload})=>h.typing(payload))
@@ -547,13 +791,17 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
   let user=null, listeners=[], H=null, nextId=100;
   const iso=(ago=0)=>new Date(Date.now()-ago).toISOString();
   const people={rook:{id:"rook",username:"Rook",avatar_url:null},vee:{id:"vee",username:"Vee",avatar_url:null}};
-  const rooms={}, reacts=[], blocked=new Set();
+  const rooms={}, reacts=[], blocked=new Set(), polls={}, votes=[], pins={};
   const lines=["No way. Tell me everything.","That is so you.","Check this: www.example.com","Meet at the usual spot?","LOL stop"];
   const seed=room=>rooms[room] ||= {owner:"me",token:"demo"+Math.random().toString(36).slice(2,8),members:{me:{read:iso()},rook:{read:iso(70000)},vee:{read:iso(50000)}},msgs:[
     {id:1,room,user_id:"rook",text:"Signal's clear. Who's online?",created_at:iso(26*3600e3)},
     {id:2,room,user_id:"vee",text:"Here. Bring snacks.",created_at:iso(25*3600e3)},
     {id:3,room,user_id:"rook",text:"Morning crew.",created_at:iso(90000)},
-    {id:4,room,user_id:"vee",text:"Who's up for the arcade later?",reply_to:3,created_at:iso(60000)}]};
+    {id:4,room,user_id:"vee",text:"Who's up for the arcade later?",reply_to:3,created_at:iso(60000)},
+    {id:5,room,user_id:"rook",kind:"poll",text:"Arcade or movies tonight?",created_at:iso(45000)},
+    {id:6,room,user_id:"vee",kind:"sticker",sticker:"omw",created_at:iso(30000)}]};
+  polls[5]={message_id:5,options:["Arcade","Movies","Both 😎"],multi:false}; votes.push({message_id:5,user_id:"vee",option_index:0});
+  people.vee.bubble_color="#0E3B4A";
   reacts.push({message_id:2,user_id:"rook",emoji:"😂"});
   const fire=(f,...a)=>H&&H[f](...a);
   return {
@@ -567,20 +815,35 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     async profiles(ids){ return ids.map(i=>people[i]).filter(Boolean); },
     async upload(_b,_u,blob){ await new Promise(r=>setTimeout(r,300)); return URL.createObjectURL(blob); },
     async setAvatar(uid,url){ people[uid].avatar_url=url; },
-    async myRooms(){ seed("5959"); if(rooms["5959"].name===undefined) rooms["5959"].name="The Hideout"; return Object.entries(rooms).filter(([,r])=>r.members.me).map(([code,r])=>{ const m=r.msgs[r.msgs.length-1]; return {code,name:r.name||null,is_owner:r.owner==="me",last_text:m?.text,last_image:!!m?.image_url,last_at:m?.created_at||iso(),last_sender:m?people[m.user_id]?.username:null,unread:r.msgs.filter(x=>x.user_id!=="me"&&x.created_at>(r.members.me?.read||"")).length}; }); },
+    async saveStyle(uid,style){ Object.assign(people[uid],style); setTimeout(()=>fire("profile",{...people[uid]}),30); },
+    async setBackground(room,bg){ rooms[room].background=bg; setTimeout(()=>fire("roomUpdated",{code:room,name:rooms[room].name||null,background:bg,owner:rooms[room].owner}),30); },
+    async setNickname(room,uid,nick){ rooms[room].members[uid].nick=nick||null; setTimeout(()=>fire("member",{user_id:uid,last_read_at:rooms[room].members[uid].read,nickname:nick||null}),30); },
+    async pins(room){ return Object.values(pins).filter(p=>p.room===room).sort((a,b)=>a.created_at<b.created_at?1:-1); },
+    async pin(room,id){ pins[id]={room,message_id:id,pinned_by:"me",created_at:iso()}; setTimeout(()=>fire("pin",pins[id],true),30); },
+    async unpin(id){ const p=pins[id]; delete pins[id]; setTimeout(()=>fire("pin",{message_id:id},false),30); },
+    async polls(ids){ return {polls:ids.map(i=>polls[i]).filter(Boolean),votes:votes.filter(v=>ids.includes(v.message_id))}; },
+    async createPoll(room,question,options,multi){ const m={id:nextId++,room,user_id:"me",kind:"poll",text:question,created_at:iso()}; polls[m.id]={message_id:m.id,options,multi}; rooms[room].msgs.push(m);
+      setTimeout(()=>{ const v={message_id:m.id,user_id:"rook",option_index:0}; votes.push(v); fire("vote",v,true); },1200); return m; },
+    async vote(id,idx){
+      const p=polls[id], mine=votes.filter(v=>v.message_id===id&&v.user_id==="me");
+      const had=mine.find(v=>v.option_index===idx);
+      const remove=v=>{ votes.splice(votes.indexOf(v),1); setTimeout(()=>fire("vote",v,false),20); };
+      if(had) remove(had); else { if(!p.multi) mine.forEach(remove); const v={message_id:id,user_id:"me",option_index:idx}; votes.push(v); setTimeout(()=>fire("vote",v,true),30); }
+    },
+    async myRooms(){ seed("5959"); if(rooms["5959"].name===undefined) rooms["5959"].name="The Hideout"; return Object.entries(rooms).filter(([,r])=>r.members.me).map(([code,r])=>{ const m=r.msgs[r.msgs.length-1]; return {code,name:r.name||null,is_owner:r.owner==="me",last_text:m?.text,last_image:!!m?.image_url,last_kind:m?.kind||"text",last_at:m?.created_at||iso(),last_sender:m?people[m.user_id]?.username:null,unread:r.msgs.filter(x=>x.user_id!=="me"&&x.created_at>(r.members.me?.read||"")).length}; }); },
     async joinRoom(room){ const existed=!!rooms[room]; seed(room); if(!existed){ rooms[room].msgs=[]; rooms[room].members={me:{read:iso()}}; return "created"; } rooms[room].members.me ||= {read:iso()}; return "member"; },
-    async roomInfo(room){ const r=seed(room); if(room==="5959"&&r.name===undefined) r.name="The Hideout"; return {code:room,name:r.name||null,owner:r.owner,invite_token:r.token}; },
+    async roomInfo(room){ const r=seed(room); if(room==="5959"&&r.name===undefined) r.name="The Hideout"; return {code:room,name:r.name||null,background:r.background||null,owner:r.owner,invite_token:r.token}; },
     async renameRoom(room,name){ rooms[room].name=name||null; setTimeout(()=>fire("roomUpdated",{code:room,name:name||null,owner:rooms[room].owner}),40); },
     async rotateInvite(room){ return rooms[room].token="demo"+Math.random().toString(36).slice(2,8); },
     async removeMember(room,uid){ delete rooms[room].members[uid]; setTimeout(()=>fire("memberGone",uid),50); },
     async leaveRoom(room){ delete rooms[room].members.me; },
-    async members(room){ return Object.entries(seed(room).members).map(([user_id,v])=>({user_id,last_read_at:v.read,last_joined:v.read})); },
+    async members(room){ return Object.entries(seed(room).members).map(([user_id,v])=>({user_id,last_read_at:v.read,last_joined:v.read,nickname:v.nick||null})); },
     async markRead(room){ if(rooms[room]?.members.me) rooms[room].members.me.read=iso(); },
     async loadLatest(room){ return seed(room).msgs.slice(-PAGE); },
     async loadBefore(){ return []; },
     async fetchMessage(id){ return Object.values(rooms).flatMap(r=>r.msgs).find(m=>m.id===id)||null; },
-    async send(room,text,image_url,reply_to){
-      const m={id:nextId++,room,user_id:"me",text,image_url,reply_to:reply_to||null,created_at:iso()}; rooms[room].msgs.push(m);
+    async send(room,f){
+      const m={id:nextId++,room,user_id:"me",kind:f.kind||"text",text:f.text||null,image_url:f.image_url||null,media_url:f.media_url||null,media_type:f.media_type||null,media_duration:f.media_duration||null,sticker:f.sticker||null,reply_to:f.reply_to||null,mentions:f.mentions||[],created_at:iso()}; rooms[room].msgs.push(m);
       const others=Object.keys(rooms[room].members).filter(u=>u!=="me"); if(!others.length) return m;
       const who=others[Math.floor(Math.random()*others.length)];
       setTimeout(()=>{ rooms[room].members[who].read=iso(); fire("member",{user_id:who,last_read_at:iso()}); },700);
@@ -609,7 +872,10 @@ const elById=new Map();
 const claimed=new Set();       // message ids currently being added (prevents duplicates)
 const contextById=new Map();   // older messages fetched only to show a reply quote       // message id -> element
 const reactionsById=new Map();// message id -> Map(emoji -> Set(user ids))
-const members=new Map();      // user id -> last read (ms)
+const members=new Map();      // user id -> {read: ms, nick}
+const pollsById=new Map();    // message id -> {options, multi, votes: Map(index -> Set(user ids))}
+const pins=new Map();         // message id -> {pinned_by, created_at}
+let pinCursor=0, roomBg=null, pendingKind=null, pendingDuration=null, mentionPicks=new Map();
 const typers=new Map();       // user id -> {name,timer}
 let blocked=new Set();
 const feed=$("feed");
@@ -628,12 +894,12 @@ async function ensureProfiles(ids){
   const need=[...new Set(ids)].filter(i=>i&&!cache.has(i)); if(!need.length) return;
   (await api.profiles(need).catch(()=>[])).forEach(p=>cache.set(p.id,p));
 }
-const nameOf = uid => cache.get(uid)?.username || "Someone";
+const nameOf = uid => (room && members.get(uid)?.nick) || cache.get(uid)?.username || "Someone";
 
 async function refreshMe(){
   const [p]=await api.profiles([user.id]).catch(()=>[]);
   meProfile=p||{id:user.id,username:user.user_metadata?.username||"you",avatar_url:null};
-  cache.set(user.id,meProfile); paintMe();
+  cache.set(user.id,meProfile); paintMe(); applyTheme(meProfile.theme||savedTheme());
 }
 
 /* ================= AUTH ================= */
@@ -711,7 +977,7 @@ async function loadInbox(){
     const b=el("button","roomrow"); b.type="button";
     const hash=el("span","hash","#");
     const info=el("span","info"); const nm=el("div","name",r.name||"# "+r.code); if(r.name) nm.append(el("span","code","#"+r.code)); info.append(nm);
-    const pv=r.last_image&&!r.last_text?"📷 Photo":(r.last_text||"No messages yet");
+    const pv=previewOf({kind:r.last_kind,text:r.last_text,image_url:r.last_image?"x":null,media_type:r.last_kind==="video"||r.last_kind==="audio"?r.last_kind:null,sticker:r.last_kind==="sticker"?"x":null})||"No messages yet";
     info.append(el("div","preview",r.last_sender?`${r.last_sender}: ${pv}`:pv));
     const when=el("span","when"); when.append(el("span","",shortWhen(r.last_at)));
     if(+r.unread>0) when.append(el("span","badge",r.unread>99?"99+":String(r.unread)));
@@ -788,22 +1054,26 @@ async function enterRoom(code,token){
   room=target; roomOwner=null; roomName=null;
   try{ localStorage.setItem("nl-room",room); }catch(e){}
   show($("front"),false); show($("chat")); $("roomLabel").textContent="# "+room; $("status").textContent="Connecting…";
-  msgs.length=0; byId.clear(); elById.clear(); claimed.clear(); contextById.clear(); reactionsById.clear(); members.clear();
+  msgs.length=0; byId.clear(); elById.clear(); claimed.clear(); contextById.clear(); reactionsById.clear(); members.clear(); pollsById.clear(); pins.clear(); pinCursor=0; paintPinBar(); setRoomBackground(null); closeTray(); hideMentions();
   typers.forEach(v=>clearTimeout(v.timer)); typers.clear(); paintTyping(); clearReply(); feed.innerHTML="";
   try{
-    const [latest,mem,info]=await Promise.all([api.loadLatest(room),api.members(room).catch(()=>[]),api.roomInfo(room).catch(()=>null)]);
-    roomOwner=info?.owner||null; setRoomName(info?.name);
+    const [latest,mem,info,pinRows]=await Promise.all([api.loadLatest(room),api.members(room).catch(()=>[]),api.roomInfo(room).catch(()=>null),api.pins(room).catch(()=>[])]);
+    roomOwner=info?.owner||null; setRoomName(info?.name); setRoomBackground(info?.background);
+    pinRows.forEach(p=>pins.set(p.message_id,p));
     mem.forEach(setMember);
     hasMore=latest.length>=PAGE;
     await addMessages(latest);
+    await loadPinnedContext(); paintPinBar();
     if(result==="created"&&!latest.length) feed.innerHTML='<p class="empty">You made a new private room. Tap Room to name it and invite friends.</p>';
     markReadSoon();
     unsub=api.subscribe(room,{
       msg:m=>{ stopTyping(m.user_id); addMessages([m]).then(()=>{ if(m.user_id!==user.id) markReadSoon(); }); },
       msgGone:removeMessage,
-      profile:p=>{ cache.set(p.id,p); repaintFaces(p.id); if(p.id===user.id){meProfile=p;paintMe();} paintReceipts(); },
+      profile:p=>{ const old=cache.get(p.id); cache.set(p.id,p); repaintFaces(p.id); if(p.id===user.id){meProfile=p;paintMe();} if(old?.bubble_color!==p.bubble_color) renderAll(false); paintReceipts(); },
       member:setMember,
-      roomUpdated:r=>{ if(r.code!==room) return; setRoomName(r.name); if(r.owner!==undefined) roomOwner=r.owner; },
+      roomUpdated:r=>{ if(r.code!==room) return; setRoomName(r.name); if(r.background!==undefined) setRoomBackground(r.background); if(r.owner!==undefined) roomOwner=r.owner; },
+      vote:(v,added)=>{ const p=pollsById.get(v.message_id); if(!p) return; setVote(p,v,added); refreshMsg(v.message_id); },
+      pin:async(p,added)=>{ if(added){ if(p.room&&p.room!==room) return; pins.set(p.message_id,p); await loadPinnedContext(); } else { if(!pins.has(p.message_id)) return; pins.delete(p.message_id); } pinCursor=0; paintPinBar(); if(!$("roomSheet").classList.contains("hidden")) paintPins(); },
       memberGone:uid=>{
         if(uid===user.id){ exitRoom(); say("roomMsg",`You're no longer in # ${room||"that room"}.`,true); return; }
         members.delete(uid); paintReceipts(); if(!$("roomSheet").classList.contains("hidden")) paintMembers();
@@ -816,6 +1086,7 @@ async function enterRoom(code,token){
 }
 
 function exitRoom(){
+  if(rec) finishRecording(false); closeTray(); hideMentions();
   sendTyping(false); if(unsub){unsub();unsub=null;}
   clearPending(); clearReply();
   ["chat","roomSheet","msgMenu"].forEach(id=>show($(id),false)); show($("front")); show($("roomCard"));
@@ -838,6 +1109,7 @@ async function addMessages(list){
   const replyIds=list.map(m=>m.reply_to).filter(id=>id&&!byId.has(id)&&!contextById.has(id));
   await ensureProfiles(list.map(m=>m.user_id));
   (await api.reactions(list.map(m=>m.id)).catch(()=>[])).forEach(r=>setReaction(r,true));
+  await loadPolls(list);
   for(const id of [...new Set(replyIds)]){ const r=await api.fetchMessage(id).catch(()=>null); if(r){ contextById.set(r.id,r); await ensureProfiles([r.user_id]); } }
   if(!list.every(m=>claimed.has(m.id))) return;   // room changed while loading
   const appendOnly = msgs.length===0 || list.every(m=>m.created_at>=msgs[msgs.length-1].created_at);
@@ -885,6 +1157,7 @@ async function loadOlder(){
     const fresh=older.filter(m=>!byId.has(m.id));
     await ensureProfiles(fresh.map(m=>m.user_id));
     (await api.reactions(fresh.map(m=>m.id)).catch(()=>[])).forEach(r=>setReaction(r,true));
+    await loadPolls(fresh);
     fresh.forEach(m=>{ byId.set(m.id,m); msgs.push(m); });
     msgs.sort((a,b)=>a.created_at<b.created_at?-1:1);
     renderAll(false);
@@ -908,17 +1181,20 @@ function removeMessage(id){
 function buildMsg(m,index,noAnim){
   const p=cache.get(m.user_id)||{username:"Unknown"}, mine=m.user_id===user.id;
   const at=new Date(m.created_at), fresh=!mine&&Date.now()-at<15000;
-  const node=el("div","msg t"+(index%3)+(mine?" me":"")); node.dataset.t=at.getTime(); node.dataset.id=m.id;
+  const node=el("div","msg t"+(index%3)+(mine?" me":"")+(m.kind==="sticker"?" sticker-msg":"")); node.dataset.t=at.getTime(); node.dataset.id=m.id;
+  const bc=validHex(p.bubble_color); if(bc&&m.kind!=="sticker"){ node.classList.add("custom"); node.style.setProperty("--bub",bc); node.style.setProperty("--bubtext",textOn(bc)); }
+  if(!mine&&(m.mentions||[]).includes(user.id)) node.classList.add("mentioned");
   if(noAnim) node.style.animation="none";
   const face=el("div","face"); face.dataset.uid=m.user_id; face.setAttribute("aria-hidden","true"); paintFace(face,p);
   const col=el("div","col");
   const tag=el("div","tag");
   if(fresh&&!noAnim) tag.append(el("b","","NEW"));
-  tag.append(`${p.username} · ${timeOf(at)}`);
-  const bub=el("div","bubble"); bub.tabIndex=0; bub.setAttribute("role","button"); bub.setAttribute("aria-label",`Message from ${p.username}. Open options`);
+  if(pins.has(m.id)) tag.append("📌 ");
+  tag.append(`${nameOf(m.user_id)} · ${timeOf(at)}`);
+  const bub=el("div","bubble"); bub.tabIndex=0; bub.setAttribute("role","button"); bub.setAttribute("aria-label",`Message from ${nameOf(m.user_id)}. Open options`);
   if(m.reply_to){
     const r=byId.get(m.reply_to)||contextById.get(m.reply_to), q=el("button","quote"); q.type="button";
-    if(r){ q.append(el("b","",nameOf(r.user_id))); q.append(r.text||(r.image_url?"📷 Photo":"")); q.onclick=e=>{ e.stopPropagation(); jumpTo(r.id); }; }
+    if(r){ q.append(el("b","",nameOf(r.user_id))); q.append(previewOf(r)); q.onclick=e=>{ e.stopPropagation(); jumpTo(r.id); }; }
     else q.append("Original message was deleted");
     bub.append(q);
   }
@@ -927,8 +1203,13 @@ function buildMsg(m,index,noAnim){
     const i=document.createElement("img"); i.src=img; i.alt="Photo from "+p.username; i.loading="lazy";
     i.onload=()=>{ if(feed.scrollHeight-feed.scrollTop-feed.clientHeight<400) feed.scrollTop=feed.scrollHeight; };
     b.append(i); b.onclick=e=>{ e.stopPropagation(); $("lightImg").src=img; show($("lightbox")); }; bub.append(b); }
-  if(m.text){ const t=el("div"); linkify(t,m.text); bub.append(t); }
-  bub.onclick=e=>{ if(e.target.closest("a")) return; openMenu(m); };
+  const media=safeImg(m.media_url);
+  if(media&&m.media_type==="video"){ const v=document.createElement("video"); v.className="vid"; v.src=media; v.controls=true; v.playsInline=true; v.preload="metadata"; bub.append(v); }
+  if(media&&m.media_type==="audio") bub.append(voicePlayer(media,m.media_duration));
+  if(m.kind==="sticker"&&STICKERS[m.sticker]) bub.append(stickerEl(m.sticker));
+  if(m.kind==="poll") bub.append(pollEl(m));
+  else if(m.text){ const t=el("div"); renderText(t,m.text,m.mentions); bub.append(t); }
+  bub.onclick=e=>{ if(e.target.closest("a,video,.voice,.poll button")) return; openMenu(m); };
   bub.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openMenu(m); } };
   col.append(tag,bub);
   const map=reactionsById.get(m.id);
@@ -964,14 +1245,15 @@ async function toggleReaction(m,emoji){
 /* ---------- message menu ---------- */
 function openMenu(m){
   menuMsg=m; const mine=m.user_id===user.id;
-  $("menuPreview").textContent=`${nameOf(m.user_id)}: ${m.text||"📷 Photo"}`;
+  $("menuPreview").textContent=`${nameOf(m.user_id)}: ${previewOf(m)}`;
+  $("menuPin").textContent=pins.has(m.id)?"Unpin message":"Pin message 📌";
   const row=$("emojiRow"); row.innerHTML="";
   EMOJIS.forEach(emoji=>{
     const b=el("button",reactionsById.get(m.id)?.get(emoji)?.has(user.id)?"on":"",emoji); b.type="button"; b.setAttribute("aria-label","React "+emoji);
     b.onclick=()=>{ show($("msgMenu"),false); toggleReaction(m,emoji); };
     row.append(b);
   });
-  show($("menuCopy"),!!m.text);
+  show($("menuCopy"),!!m.text&&m.kind!=="sticker");
   show($("menuFx"),!!fxFor(m.text));
   show($("menuDelete"),mine||roomOwner===user.id);
   $("menuDelete").textContent=mine?"Delete message":"Delete message (room owner)";
@@ -979,10 +1261,18 @@ function openMenu(m){
   show($("msgMenu"));
 }
 $("menuClose").onclick=()=>show($("msgMenu"),false);
+$("menuPin").onclick=async()=>{
+  const m=menuMsg; show($("msgMenu"),false);
+  try{
+    if(pins.has(m.id)){ await api.unpin(m.id); pins.delete(m.id); $("status").textContent="Unpinned."; }
+    else { await api.pin(room,m.id); pins.set(m.id,{message_id:m.id,pinned_by:user.id,created_at:new Date().toISOString()}); $("status").textContent="Pinned to the top."; }
+    pinCursor=0; paintPinBar(); refreshMsg(m.id);
+  }catch(err){ $("status").textContent="Couldn't pin: "+err.message; }
+};
 $("menuFx").onclick=()=>{ show($("msgMenu"),false); setTimeout(()=>playFx(menuMsg,true),150); };
 $("menuReply").onclick=()=>{
   replyTo=menuMsg; show($("msgMenu"),false);
-  $("replyText").textContent=`${nameOf(replyTo.user_id)}: ${replyTo.text||"📷 Photo"}`; show($("replying")); $("box").focus();
+  $("replyText").textContent=`${nameOf(replyTo.user_id)}: ${previewOf(replyTo)}`; show($("replying")); $("box").focus();
 };
 $("menuCopy").onclick=async()=>{ show($("msgMenu"),false); try{ await navigator.clipboard.writeText(menuMsg.text); $("status").textContent="Copied."; }catch(e){} };
 $("menuDelete").onclick=async()=>{
@@ -1020,7 +1310,7 @@ $("nameForm").addEventListener("submit",async e=>{
 function inviteUrl(code,token){ return location.origin+location.pathname+"?join="+encodeURIComponent(code)+"&t="+encodeURIComponent(token); }
 $("roomBtn").onclick=async()=>{
   say("rsMsg",""); paintRoomTitle(); $("roomName").value=roomName||""; $("invLink").value="Loading…"; show($("roomSheet"));
-  paintMembers();
+  paintMembers(); paintBgTiles(); paintPins();
   try{
     const info=await api.roomInfo(room); if(!info) throw new Error("Couldn't find this room.");
     roomOwner=info.owner; setRoomName(info.name); if(document.activeElement!==$("roomName")) $("roomName").value=roomName||""; paintMembers();
@@ -1035,9 +1325,18 @@ async function paintMembers(){
   const ids=[...members.keys()].sort((a,b)=>(b===roomOwner)-(a===roomOwner)||nameOf(a).localeCompare(nameOf(b)));
   for(const uid of ids){
     const row=el("div","member"); const f=el("span","face"); paintFace(f,cache.get(uid));
+    const nick=members.get(uid)?.nick, uname=cache.get(uid)?.username||"";
     const n=el("span","mname",nameOf(uid)+(uid===user.id?" (you)":""));
+    if(nick&&nick!==uname) n.append(el("span","role",uname));
     if(uid===roomOwner) n.append(el("span","role","OWNER"));
-    row.append(f,n);
+    const nb=el("button","unblock","Nickname"); nb.type="button";
+    nb.onclick=async()=>{
+      const v=prompt(`Nickname for ${uname} in this room (leave empty to clear):`, nick||""); if(v===null) return;
+      const clean=v.trim().replace(/\s+/g," ").slice(0,30);
+      try{ await api.setNickname(room,uid,clean); setMember({user_id:uid,nickname:clean||null}); say("rsMsg",clean?`${uname} is now “${clean}” here.`:`Cleared ${uname}'s nickname.`); }
+      catch(err){ say("rsMsg","Couldn't set nickname: "+err.message,true); }
+    };
+    row.append(f,n,nb);
     if(roomOwner===user.id && uid!==user.id){
       const b=el("button","","Remove"); b.type="button";
       b.onclick=async()=>{
@@ -1072,6 +1371,60 @@ $("leaveRoom").onclick=async()=>{
 };
 $("rsClose").onclick=()=>show($("roomSheet"),false);
 
+/* ---------- room background ---------- */
+function setRoomBackground(bg){
+  roomBg=bg||null;
+  const c=$("chat");
+  if(bg&&/^#[0-9a-f]{6}$/i.test(bg)){ c.dataset.bg="custom"; c.style.setProperty("--roombg",bg); }
+  else { c.dataset.bg=bg||"stars"; c.style.removeProperty("--roombg"); }
+}
+function paintBgTiles(){
+  const box=$("bgTiles"); box.innerHTML="";
+  BACKGROUNDS.forEach(([id,label])=>{
+    const t=el("button","bgtile",label); t.type="button"; t.dataset.bg=id; t.setAttribute("aria-pressed",(roomBg||"stars")===id);
+    t.onclick=()=>chooseBackground(id==="stars"?null:id); box.append(t);
+  });
+  if(roomBg&&roomBg.startsWith("#")) $("bgCustom").value=roomBg;
+}
+async function chooseBackground(bg){
+  const prev=roomBg; setRoomBackground(bg); paintBgTiles();
+  try{ await api.setBackground(room,bg); say("rsMsg","Background updated for everyone."); }
+  catch(err){ setRoomBackground(prev); paintBgTiles(); say("rsMsg","Couldn't change background: "+err.message,true); }
+}
+$("bgCustom").addEventListener("change",e=>chooseBackground(e.target.value));
+
+/* ---------- pinned messages ---------- */
+async function loadPinnedContext(){
+  const missing=[...pins.keys()].filter(id=>!byId.has(id)&&!contextById.has(id));
+  for(const id of missing){ const m=await api.fetchMessage(id).catch(()=>null); if(m){ contextById.set(id,m); await ensureProfiles([m.user_id]); } else pins.delete(id); }
+}
+function pinnedList(){ return [...pins.values()].sort((a,b)=>a.created_at<b.created_at?1:-1).map(p=>byId.get(p.message_id)||contextById.get(p.message_id)).filter(m=>m&&!blocked.has(m.user_id)); }
+function paintPinBar(){
+  const list=pinnedList(); show($("pinBar"),list.length>0); if(!list.length) return;
+  if(pinCursor>=list.length) pinCursor=0;
+  const m=list[pinCursor]; const t=$("pinText"); t.textContent="";
+  t.append(el("b","",nameOf(m.user_id))); t.append(previewOf(m));
+  $("pinCount").textContent=list.length>1?`${pinCursor+1}/${list.length}`:"";
+  $("pinJump").setAttribute("aria-label",`Pinned message from ${nameOf(m.user_id)}. Tap to jump to it`);
+}
+$("pinJump").onclick=async()=>{
+  const list=pinnedList(); if(!list.length) return;
+  const m=list[pinCursor%list.length];
+  let tries=0; while(!elById.has(m.id)&&hasMore&&tries++<6) await loadOlder();
+  if(elById.has(m.id)) jumpTo(m.id); else $("status").textContent="That pinned message is too far back to show.";
+  if(list.length>1){ pinCursor=(pinCursor+1)%list.length; paintPinBar(); }
+};
+function paintPins(){
+  const list=pinnedList(), box=$("pinList"); box.innerHTML=""; show($("pinTitle"),list.length>0);
+  $("pinTitle").textContent=`Pinned (${list.length})`;
+  list.forEach(m=>{
+    const row=el("div","member"); const txt=el("span","mname",`${nameOf(m.user_id)}: ${previewOf(m)}`);
+    const b=el("button","","Unpin"); b.type="button";
+    b.onclick=async()=>{ try{ await api.unpin(m.id); pins.delete(m.id); paintPins(); paintPinBar(); refreshMsg(m.id); }catch(err){ say("rsMsg",err.message,true); } };
+    row.append(txt,b); box.append(row);
+  });
+}
+
 /* ---------- read receipts ---------- */
 let readTimer=null;
 function markReadSoon(){
@@ -1080,19 +1433,23 @@ function markReadSoon(){
 }
 function setMember(r){
   if(!r?.user_id) return;
-  members.set(r.user_id, r.last_read_at?new Date(r.last_read_at).getTime():0);
+  const prev=members.get(r.user_id)||{read:0,nick:null};
+  const next={read: r.last_read_at!==undefined ? (r.last_read_at?new Date(r.last_read_at).getTime():0) : prev.read,
+              nick: r.nickname!==undefined ? (r.nickname||null) : prev.nick};
+  members.set(r.user_id,next);
+  if(next.nick!==prev.nick && room){ renderAll(false); paintPinBar(); if(!$("roomSheet").classList.contains("hidden")) paintMembers(); }
   ensureProfiles([r.user_id]).then(paintReceipts);
 }
 function paintReceipts(){
   feed.querySelectorAll(".receipt").forEach(n=>n.remove());
   const mineEls=feed.querySelectorAll(".msg.me"); const last=mineEls[mineEls.length-1]; if(!last) return;
   const t=+last.dataset.t;
-  const readers=[...members].filter(([uid,at])=>uid!==user.id&&at>=t&&!blocked.has(uid)).map(([uid])=>cache.get(uid)).filter(Boolean);
+  const readers=[...members].filter(([uid,v])=>uid!==user.id&&v.read>=t&&!blocked.has(uid)).map(([uid])=>cache.get(uid)).filter(Boolean);
   const r=el("div","receipt"+(readers.length?" read":""));
   if(readers.length){
     const faces=el("span","mini-faces");
     readers.slice(0,4).forEach(p=>{ const f=el("span","face"); paintFace(f,p); faces.append(f); });
-    r.append(faces,`Read by ${readers.length<=2?readers.map(p=>p.username).join(" & "):readers.length+" people"}`);
+    r.append(faces,`Read by ${readers.length<=2?readers.map(p=>nameOf(p.id)).join(" & "):readers.length+" people"}`);
   } else r.textContent="Sent";
   last.after(r);
 }
@@ -1111,7 +1468,7 @@ function onTyping(p){
   if(!p?.uid||p.uid===user?.id||blocked.has(p.uid)) return;
   if(!p.typing) return stopTyping(p.uid);
   clearTimeout(typers.get(p.uid)?.timer);
-  typers.set(p.uid,{name:String(p.name||"Someone").slice(0,20),timer:setTimeout(()=>stopTyping(p.uid),4000)});
+  typers.set(p.uid,{name:(members.get(p.uid)?.nick||String(p.name||"Someone")).slice(0,30),timer:setTimeout(()=>stopTyping(p.uid),4000)});
   paintTyping();
 }
 function stopTyping(uid){ const v=typers.get(uid); if(!v) return; clearTimeout(v.timer); typers.delete(uid); paintTyping(); }
@@ -1119,40 +1476,306 @@ function sendTyping(on){
   if(!unsub?.typing||!user) return;
   const now=Date.now(); if(on&&now-lastTypingSent<2000) return;
   lastTypingSent=on?now:0;
-  try{ unsub.typing({uid:user.id,name:meProfile?.username,typing:on}); }catch(e){}
+  try{ unsub.typing({uid:user.id,name:nameOf(user.id),typing:on}); }catch(e){}
 }
 
 /* ---------- composer ---------- */
-function clearPending(){ pendingFile=null; show($("pending"),false); }
-$("pickBtn").onclick=()=>$("picker").click();
-$("picker").onchange=e=>{
+function clearPending(){ pendingFile=null; pendingKind=null; pendingDuration=null; show($("pending"),false); show($("pendingImg")); show($("pendingVid"),false); $("pendingVid").removeAttribute("src"); }
+$("pickBtn").onclick=()=>{ closeTray(); $("picker").click(); };
+function videoDuration(file){ return new Promise(res=>{ const v=document.createElement("video"); v.preload="metadata"; v.onloadedmetadata=()=>{ res(v.duration); URL.revokeObjectURL(v.src); }; v.onerror=()=>res(NaN); v.src=URL.createObjectURL(file); }); }
+$("picker").onchange=async e=>{
   const f=e.target.files[0]; e.target.value=""; if(!f) return;
-  if(f.size>15e6){ $("status").textContent="Photo is over 15 MB."; return; }
-  pendingFile=f; $("pendingImg").src=URL.createObjectURL(f); show($("pending"));
+  if(f.type.startsWith("video/")){
+    if(f.size>MAX_VIDEO_BYTES){ $("status").textContent="Video is over 25 MB. Try a shorter clip."; return; }
+    const d=await videoDuration(f);
+    if(isFinite(d)&&d>MAX_VIDEO_SECONDS+0.5){ $("status").textContent=`Videos can be up to ${MAX_VIDEO_SECONDS} seconds. That one is ${Math.round(d)}.`; return; }
+    pendingFile=f; pendingKind="video"; pendingDuration=isFinite(d)?Math.round(d*10)/10:null;
+    $("pendingVid").src=URL.createObjectURL(f); show($("pendingVid")); show($("pendingImg"),false); $("pendingLabel").textContent="Video ready"; show($("pending"));
+  } else {
+    if(f.size>15e6){ $("status").textContent="Photo is over 15 MB."; return; }
+    pendingFile=f; pendingKind="image"; $("pendingImg").src=URL.createObjectURL(f); show($("pendingImg")); show($("pendingVid"),false); $("pendingLabel").textContent="Photo ready"; show($("pending"));
+  }
 };
 $("unpick").onclick=clearPending;
+
+async function sendFields(fields){
+  sendTyping(false);
+  const m = fields.kind==="poll" ? await api.createPoll(room,fields.question,fields.options,fields.multi)
+                                 : await api.send(room,{...fields,reply_to:fields.reply_to||replyTo?.id});
+  clearReply(); $("status").textContent=sb?"Live":"Demo mode";
+  await addMessages([m]);
+  return m;
+}
 $("sendForm").addEventListener("submit",async e=>{
   e.preventDefault();
   const text=$("box").value.trim(); if(!text&&!pendingFile) return;
-  $("sendBtn").disabled=true;
+  $("sendBtn").disabled=true; hideMentions();
   try{
-    let url=null;
-    if(pendingFile){ $("status").textContent="Uploading photo…"; url=await api.upload("chat-images",user.id,await shrink(pendingFile,1280,false)); }
-    sendTyping(false);
-    const m=await api.send(room,text,url,replyTo?.id);
-    $("box").value=""; $("box").style.height=""; clearPending(); clearReply(); $("status").textContent=sb?"Live":"Demo mode";
-    await addMessages([m]);
+    const f={kind:"text",text,mentions:mentionsIn(text)};
+    if(pendingFile&&pendingKind==="video"){ $("status").textContent="Uploading video…"; f.media_url=await api.upload("chat-media",user.id,pendingFile); f.media_type="video"; f.media_duration=pendingDuration; f.kind="video"; }
+    else if(pendingFile){ $("status").textContent="Uploading photo…"; f.image_url=await api.upload("chat-images",user.id,await shrink(pendingFile,1280,false)); f.kind="image"; }
+    await sendFields(f);
+    $("box").value=""; $("box").style.height=""; clearPending(); mentionPicks.clear();
   }catch(err){ $("status").textContent="Didn't send: "+err.message; }
   finally{ $("sendBtn").disabled=false; }
 });
-$("box").addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.shiftKey&&!matchMedia("(pointer: coarse)").matches){e.preventDefault();$("sendForm").requestSubmit();} });
-$("box").addEventListener("input",function(){ this.style.height="auto"; this.style.height=this.scrollHeight+"px"; sendTyping(this.value.trim().length>0); });
-$("box").addEventListener("blur",()=>sendTyping(false));
+$("box").addEventListener("keydown",e=>{
+  if(e.key==="Escape"){ hideMentions(); return; }
+  if(e.key==="Enter"&&!e.shiftKey&&!matchMedia("(pointer: coarse)").matches){e.preventDefault();$("sendForm").requestSubmit();}
+});
+$("box").addEventListener("input",function(){ this.style.height="auto"; this.style.height=this.scrollHeight+"px"; sendTyping(this.value.trim().length>0); updateMentions(); });
+$("box").addEventListener("blur",()=>{ sendTyping(false); setTimeout(hideMentions,200); });
+
+/* ---------- mentions ---------- */
+function mentionQuery(){
+  const box=$("box"), upto=box.value.slice(0,box.selectionStart);
+  const m=upto.match(/(^|\s)@([^\s@]{0,20})$/); return m?{q:m[2].toLowerCase(),start:upto.length-m[2].length-1}:null;
+}
+function updateMentions(){
+  const q=mentionQuery(); if(!q||!room){ hideMentions(); return; }
+  const list=[...members.keys()].filter(uid=>uid!==user.id&&!blocked.has(uid))
+    .filter(uid=>nameOf(uid).toLowerCase().startsWith(q.q)||(cache.get(uid)?.username||"").toLowerCase().startsWith(q.q)).slice(0,6);
+  const box=$("mentionList"); box.innerHTML=""; if(!list.length){ hideMentions(); return; }
+  list.forEach(uid=>{
+    const b=el("button"); b.type="button"; b.setAttribute("role","option");
+    const f=el("span","face"); paintFace(f,cache.get(uid)); b.append(f,nameOf(uid));
+    b.onmousedown=ev=>ev.preventDefault();
+    b.onclick=()=>{
+      const bx=$("box"), cur=mentionQuery(); if(!cur) return;
+      const name=nameOf(uid), before=bx.value.slice(0,cur.start), after=bx.value.slice(bx.selectionStart);
+      bx.value=`${before}@${name} ${after}`; const pos=before.length+name.length+2; bx.setSelectionRange(pos,pos);
+      mentionPicks.set(name,uid); hideMentions(); bx.focus();
+    };
+    box.append(b);
+  });
+  show(box);
+}
+function hideMentions(){ show($("mentionList"),false); }
+function mentionsIn(text){
+  const ids=new Set();
+  for(const [name,uid] of mentionPicks) if(text.includes("@"+name)) ids.add(uid);
+  for(const uid of members.keys()){ if(uid===user.id) continue;
+    const names=[nameOf(uid),cache.get(uid)?.username].filter(Boolean);
+    if(names.some(n=>new RegExp("(^|\\s)@"+n.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"(?=$|[^\\w])","i").test(text))) ids.add(uid); }
+  return [...ids];
+}
+function renderText(node,text,mentionIds){
+  const tokens=[];
+  (mentionIds||[]).forEach(uid=>{ [nameOf(uid),cache.get(uid)?.username].filter(Boolean).forEach(n=>tokens.push("@"+n)); });
+  if(!tokens.length){ linkify(node,text); return; }
+  tokens.sort((a,b)=>b.length-a.length);
+  const re=new RegExp("("+tokens.map(t=>t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|")+")","gi");
+  let last=0, m;
+  while((m=re.exec(text))){ const s=el("span"); linkify(s,text.slice(last,m.index)); node.append(s); node.append(el("span","mention",m[0])); last=m.index+m[0].length; }
+  const s=el("span"); linkify(s,text.slice(last)); node.append(s);
+}
+
+/* ---------- voice messages ---------- */
+let rec=null;
+function fmtDur(s){ s=Math.max(0,Math.round(s||0)); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
+$("micBtn").onclick=async()=>{
+  closeTray();
+  if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){ $("status").textContent="Voice messages aren't supported in this browser."; return; }
+  let stream;
+  try{ stream=await navigator.mediaDevices.getUserMedia({audio:true}); }
+  catch(e){ $("status").textContent="Microphone permission was blocked. Allow it in your browser settings to record."; return; }
+  const type=["audio/mp4","audio/webm;codecs=opus","audio/webm","audio/ogg"].find(t=>MediaRecorder.isTypeSupported(t))||"";
+  const mr=new MediaRecorder(stream,type?{mimeType:type}:undefined), chunks=[];
+  mr.ondataavailable=e=>{ if(e.data.size) chunks.push(e.data); };
+  rec={mr,stream,chunks,start:Date.now(),cancelled:false,timer:setInterval(()=>{
+    const s=(Date.now()-rec.start)/1000; $("recTime").textContent=fmtDur(s);
+    if(s>=MAX_VOICE_SECONDS) finishRecording(true);
+  },250)};
+  mr.start(250);
+  $("recTime").textContent="0:00"; show($("composeRow"),false); show($("recBar"));
+};
+function finishRecording(send){
+  if(!rec) return; const r=rec; rec=null;
+  clearInterval(r.timer); show($("recBar"),false); show($("composeRow"));
+  const seconds=(Date.now()-r.start)/1000;
+  r.mr.onstop=async()=>{
+    r.stream.getTracks().forEach(t=>t.stop());
+    if(!send) { $("status").textContent="Recording discarded."; return; }
+    if(seconds<0.8){ $("status").textContent="That was too short to send."; return; }
+    const blob=new Blob(r.chunks,{type:(r.mr.mimeType||"audio/webm").split(";")[0]});
+    try{
+      $("status").textContent="Sending voice message…";
+      const url=await api.upload("chat-media",user.id,blob);
+      await sendFields({kind:"audio",media_url:url,media_type:"audio",media_duration:Math.round(seconds*10)/10});
+    }catch(err){ $("status").textContent="Voice message didn't send: "+err.message; }
+  };
+  try{ r.mr.stop(); }catch(e){ r.stream.getTracks().forEach(t=>t.stop()); }
+}
+$("recSend").onclick=()=>finishRecording(true);
+$("recCancel").onclick=()=>finishRecording(false);
+
+let playingAudio=null;
+function voicePlayer(url,duration){
+  const wrap=el("div","voice"); const btn=el("button","play"); btn.type="button"; btn.setAttribute("aria-label","Play voice message");
+  const playIcon='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg>', pauseIcon='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>';
+  btn.innerHTML=playIcon;
+  const wave=el("div","wave"); let seed=0; for(const c of url) seed=(seed*31+c.charCodeAt(0))>>>0;
+  const bars=[...Array(28)].map((_,i)=>{ seed=(seed*1103515245+12345)>>>0; const b=el("i"); b.style.height=(25+(seed%70))+"%"; wave.append(b); return b; });
+  const dur=el("span","dur",fmtDur(duration));
+  const audio=new Audio(); audio.preload="none"; audio.src=url;
+  const paint=()=>{ const k=audio.duration&&isFinite(audio.duration)?audio.currentTime/audio.duration:(duration?audio.currentTime/duration:0); const on=Math.round(k*bars.length); bars.forEach((b,i)=>b.classList.toggle("on",i<on)); dur.textContent=fmtDur(audio.paused&&!audio.currentTime?duration:audio.currentTime); };
+  audio.ontimeupdate=paint;
+  audio.onended=()=>{ btn.innerHTML=playIcon; btn.setAttribute("aria-label","Play voice message"); audio.currentTime=0; paint(); };
+  audio.onerror=()=>{ dur.textContent="Can't play"; };
+  btn.onclick=e=>{ e.stopPropagation();
+    if(audio.paused){ if(playingAudio&&playingAudio!==audio) playingAudio.pause(); playingAudio=audio; audio.play().catch(()=>{ dur.textContent="Can't play"; }); btn.innerHTML=pauseIcon; btn.setAttribute("aria-label","Pause voice message"); }
+    else { audio.pause(); btn.innerHTML=playIcon; btn.setAttribute("aria-label","Play voice message"); } };
+  audio.onpause=()=>{ btn.innerHTML=playIcon; };
+  wave.onclick=e=>{ e.stopPropagation(); const d=audio.duration&&isFinite(audio.duration)?audio.duration:duration; if(!d) return; const r=wave.getBoundingClientRect(); audio.currentTime=Math.max(0,Math.min(d,(e.clientX-r.left)/r.width*d)); paint(); };
+  wrap.append(btn,wave,dur); return wrap;
+}
+
+/* ---------- stickers ---------- */
+const STK=(body,rot=-6)=>`<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><g transform="rotate(${rot} 60 60)">${body}</g></svg>`;
+const STAMP=(txt,bg,fg,size=34,extra="")=>STK(`<polygon points="10,34 108,24 112,86 14,96" fill="#07041A" transform="translate(5 5)"/><polygon points="10,34 108,24 112,86 14,96" fill="${bg}" stroke="#07041A" stroke-width="4"/>${extra}<text x="61" y="${66+size*.33}" text-anchor="middle" font-family="Anton,Impact,sans-serif" font-size="${size}" fill="${fg}" stroke="#07041A" stroke-width="1.5" paint-order="stroke">${txt}</text>`);
+const STICKERS={
+  nice:{label:"NICE!",svg:STAMP("NICE!","#F3FF3A","#07041A",36)},
+  gg:{label:"GG",svg:STAMP("GG","#00F0FF","#07041A",50)},
+  lol:{label:"LOL",svg:STAMP("LOL","#E07AC6","#F4F7FF",46,"") },
+  omw:{label:"OMW",svg:STAMP("OMW","#7CFF6B","#07041A",44)},
+  brb:{label:"BRB",svg:STAMP("BRB","#FF8A3D","#07041A",44)},
+  noway:{label:"NO WAY",svg:STAMP("NO WAY","#FF5A5A","#F4F7FF",28)},
+  what:{label:"?!",svg:STK(`<polygon points="60,6 74,40 112,34 84,62 104,98 64,82 30,110 36,72 6,52 44,42" fill="#07041A" transform="translate(4 4)"/><polygon points="60,6 74,40 112,34 84,62 104,98 64,82 30,110 36,72 6,52 44,42" fill="#F3FF3A" stroke="#07041A" stroke-width="4"/><text x="60" y="76" text-anchor="middle" font-family="Anton,Impact,sans-serif" font-size="40" fill="#07041A">?!</text>`,8)},
+  moon:{label:"Winking moon",svg:STK(`<path d="M70 12a48 48 0 1 0 40 70a38 38 0 0 1-40-70z" fill="#07041A" transform="translate(4 4)"/><path d="M70 12a48 48 0 1 0 40 70a38 38 0 0 1-40-70z" fill="#F3FF3A" stroke="#07041A" stroke-width="4"/><circle cx="42" cy="54" r="5" fill="#07041A"/><path d="M58 52q7-6 13 0" stroke="#07041A" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M40 76q12 12 26 2" stroke="#07041A" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="34" cy="68" r="5" fill="#E07AC6" opacity=".7"/>`,-10)},
+  heart:{label:"Heart",svg:STK(`<path d="M60 102C20 74 8 52 18 34c10-18 32-18 42 0c10-18 32-18 42 0c10 18-2 40-42 68z" fill="#07041A" transform="translate(4 4)"/><path d="M60 102C20 74 8 52 18 34c10-18 32-18 42 0c10-18 32-18 42 0c10 18-2 40-42 68z" fill="#E07AC6" stroke="#07041A" stroke-width="4"/><path d="M30 42q6-10 16-8" stroke="#F4F7FF" stroke-width="5" fill="none" stroke-linecap="round"/>`,6)},
+  fire:{label:"Fire",svg:STK(`<path d="M60 8c8 22 34 30 34 60a34 34 0 0 1-68 0c0-16 8-24 14-32c2 12 8 16 12 16c-4-16 0-32 8-44z" fill="#07041A" transform="translate(4 4)"/><path d="M60 8c8 22 34 30 34 60a34 34 0 0 1-68 0c0-16 8-24 14-32c2 12 8 16 12 16c-4-16 0-32 8-44z" fill="#FF8A3D" stroke="#07041A" stroke-width="4"/><path d="M60 58c6 10 16 14 16 28a16 16 0 0 1-32 0c0-8 6-12 8-18c2 6 4 8 6 8c-2-6 0-12 2-18z" fill="#F3FF3A"/>`,-4)},
+  crown:{label:"Crown",svg:STK(`<polygon points="12,86 18,32 42,58 60,22 78,58 102,32 108,86" fill="#07041A" transform="translate(4 4)"/><polygon points="12,86 18,32 42,58 60,22 78,58 102,32 108,86" fill="#F3FF3A" stroke="#07041A" stroke-width="4"/><rect x="12" y="86" width="96" height="14" fill="#00F0FF" stroke="#07041A" stroke-width="4"/><circle cx="60" cy="66" r="7" fill="#E07AC6" stroke="#07041A" stroke-width="3"/>`,-8)},
+  zzz:{label:"Sleepy",svg:STK(`<text x="20" y="96" font-family="Anton,Impact,sans-serif" font-size="56" fill="#00F0FF" stroke="#07041A" stroke-width="5" paint-order="stroke">Z</text><text x="56" y="70" font-family="Anton,Impact,sans-serif" font-size="42" fill="#E07AC6" stroke="#07041A" stroke-width="5" paint-order="stroke">Z</text><text x="84" y="44" font-family="Anton,Impact,sans-serif" font-size="30" fill="#F3FF3A" stroke="#07041A" stroke-width="5" paint-order="stroke">Z</text>`,-8)},
+};
+function stickerEl(id){ const s=el("span","stk"); s.innerHTML=STICKERS[id].svg; s.setAttribute("role","img"); s.setAttribute("aria-label",STICKERS[id].label+" sticker"); return s; }
+function paintStickers(){
+  const g=$("stickerGrid"); if(g.children.length) return;
+  Object.keys(STICKERS).forEach(id=>{ const b=el("button"); b.type="button"; b.setAttribute("aria-label","Send "+STICKERS[id].label+" sticker"); b.append(stickerEl(id));
+    b.onclick=async()=>{ closeTray(); try{ await sendFields({kind:"sticker",sticker:id}); }catch(err){ $("status").textContent="Sticker didn't send: "+err.message; } };
+    g.append(b); });
+}
+function closeTray(){ show($("tray"),false); $("plusBtn").setAttribute("aria-expanded","false"); }
+$("plusBtn").onclick=()=>{ const open=$("tray").classList.contains("hidden"); if(open){ paintStickers(); show($("tray")); } else show($("tray"),false); $("plusBtn").setAttribute("aria-expanded",String(open)); };
+$("traySticker").onclick=()=>{};
+$("trayPoll").onclick=()=>{ closeTray(); openPollSheet(); };
+
+/* ---------- polls ---------- */
+async function loadPolls(list){
+  const ids=list.filter(m=>m.kind==="poll"&&!pollsById.has(m.id)).map(m=>m.id); if(!ids.length) return;
+  const {polls,votes}=await api.polls(ids).catch(()=>({polls:[],votes:[]}));
+  polls.forEach(p=>pollsById.set(p.message_id,{options:p.options,multi:p.multi,votes:new Map()}));
+  votes.forEach(v=>{ const p=pollsById.get(v.message_id); if(p) setVote(p,v,true); });
+}
+function setVote(p,v,added){ let s=p.votes.get(v.option_index); if(!s) p.votes.set(v.option_index,s=new Set()); added?s.add(v.user_id):s.delete(v.user_id); }
+function pollEl(m){
+  const p=pollsById.get(m.id), box=el("div","poll");
+  box.append(el("h4","",m.text||"Poll"));
+  if(!p){ box.append(el("div","pollfoot","Loading poll…")); return box; }
+  const voters=new Set(); p.votes.forEach(s=>s.forEach(u=>voters.add(u)));
+  const total=[...p.votes.values()].reduce((a,s)=>a+s.size,0);
+  p.options.forEach((opt,i)=>{
+    const s=p.votes.get(i)||new Set(), mine=s.has(user.id), pct=total?Math.round(s.size/total*100):0;
+    const b=el("button","popt"+(mine?" mine":"")); b.type="button";
+    const fill=el("span","fill"); fill.style.width=pct+"%";
+    b.append(fill, el("span","",(mine?"✓ ":"")+opt), el("span","n",total?`${s.size} · ${pct}%`:""));
+    b.title=[...s].map(nameOf).join(", ");
+    b.setAttribute("aria-label",`${opt}: ${s.size} vote${s.size===1?"":"s"}${mine?", your pick":""}`);
+    b.onclick=async e=>{ e.stopPropagation();
+      const had=mine; if(!p.multi&&!had) p.options.forEach((_,k)=>p.votes.get(k)?.delete(user.id));
+      setVote(p,{option_index:i,user_id:user.id},!had); refreshMsg(m.id);
+      try{ await api.vote(m.id,i); }catch(err){ $("status").textContent="Vote didn't save: "+err.message; } };
+    box.append(b);
+  });
+  box.append(el("div","pollfoot",`${voters.size} ${voters.size===1?"person":"people"} voted${p.multi?" · pick any":""}`));
+  return box;
+}
+function openPollSheet(){
+  $("pollQ").value=""; $("pollMulti").checked=false; say("pollMsg",""); $("pollOpts").innerHTML=""; addPollOption(); addPollOption(); show($("pollSheet")); setTimeout(()=>$("pollQ").focus(),50);
+}
+function addPollOption(){
+  const box=$("pollOpts"); if(box.children.length>=6) return;
+  const row=el("div","optrow"); const inp=el("input","field"); inp.maxLength=80; inp.placeholder=`Option ${box.children.length+1}`; inp.setAttribute("aria-label",inp.placeholder);
+  const rm=el("button","","✕"); rm.type="button"; rm.setAttribute("aria-label","Remove option");
+  rm.onclick=()=>{ if(box.children.length>2){ row.remove(); [...box.children].forEach((r,k)=>{ r.firstChild.placeholder=`Option ${k+1}`; }); } };
+  row.append(inp,rm); box.append(row); show($("pollAdd"),box.children.length<6);
+}
+$("pollAdd").onclick=()=>{ addPollOption(); $("pollOpts").lastChild.firstChild.focus(); };
+$("pollClose").onclick=()=>show($("pollSheet"),false);
+$("pollForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const q=$("pollQ").value.trim(), opts=[...$("pollOpts").querySelectorAll("input")].map(i=>i.value.trim()).filter(Boolean);
+  if(!q) return say("pollMsg","Add a question.",true);
+  if(opts.length<2) return say("pollMsg","Add at least two options.",true);
+  if(new Set(opts.map(o=>o.toLowerCase())).size!==opts.length) return say("pollMsg","Options need to be different.",true);
+  $("pollCreate").disabled=true;
+  try{ await sendFields({kind:"poll",question:q,options:opts,multi:$("pollMulti").checked}); show($("pollSheet"),false); }
+  catch(err){ say("pollMsg","Couldn't post poll: "+err.message,true); }
+  finally{ $("pollCreate").disabled=false; }
+});
+
+/* ---------- themes ---------- */
+function validHex(c){ return typeof c==="string"&&/^#[0-9a-f]{6}$/i.test(c)?c:null; }
+function textOn(hex){ const n=parseInt(hex.slice(1),16), r=n>>16&255, g=n>>8&255, b=n&255; return (0.299*r+0.587*g+0.114*b)>150?"#07041A":"#F4F7FF"; }
+function savedTheme(){ try{ return JSON.parse(localStorage.getItem("nl-theme")); }catch(e){ return null; } }
+function themeColors(t){ if(!t) return THEMES.night; if(t.preset&&t.preset!=="custom"&&THEMES[t.preset]) return THEMES[t.preset]; return {main:validHex(t.main)||THEMES.night.main,accent:validHex(t.accent)||THEMES.night.accent,hi:validHex(t.hi)||THEMES.night.hi}; }
+function applyTheme(t){
+  const c=themeColors(t), r=document.documentElement.style;
+  r.setProperty("--cyan",c.main); r.setProperty("--mag",c.accent); r.setProperty("--volt",c.hi);
+  try{ localStorage.setItem("nl-theme",JSON.stringify(t||{preset:"night"})); }catch(e){}
+}
+applyTheme(savedTheme());
+let draftTheme=null, draftBubble=null;
+function paintThemeSheet(){
+  const grid=$("presetGrid"); grid.innerHTML="";
+  const cur=draftTheme.preset||"custom";
+  Object.entries(THEMES).forEach(([id,t])=>{
+    const b=el("button","preset"); b.type="button"; b.setAttribute("aria-pressed",cur===id);
+    const dots=el("span","dots"); [t.main,t.accent,t.hi].forEach(c=>{ const i=el("i"); i.style.background=c; dots.append(i); });
+    b.append(dots,t.label); b.onclick=()=>{ draftTheme={preset:id}; previewTheme(); }; grid.append(b);
+  });
+  const cb=el("button","preset"); cb.type="button"; cb.setAttribute("aria-pressed",cur==="custom");
+  const cd=el("span","dots"); const cc=themeColors(draftTheme); [cc.main,cc.accent,cc.hi].forEach(c=>{ const i=el("i"); i.style.background=c; cd.append(i); });
+  cb.append(cd,"Custom"); cb.onclick=()=>{ const c=themeColors(draftTheme); draftTheme={preset:"custom",...c}; previewTheme(); }; grid.append(cb);
+  const c=themeColors(draftTheme); $("colMain").value=c.main; $("colAccent").value=c.accent; $("colHi").value=c.hi;
+  const sw=$("bubbleSwatches"); sw.innerHTML="";
+  const reset=el("button","reset"); reset.type="button"; reset.setAttribute("aria-label","Default bubble"); reset.setAttribute("aria-pressed",!draftBubble); reset.onclick=()=>{ draftBubble=null; previewTheme(); }; sw.append(reset);
+  BUBBLES.forEach(h=>{ const b=el("button"); b.type="button"; b.style.background=h; b.setAttribute("aria-label","Bubble color "+h); b.setAttribute("aria-pressed",draftBubble&&draftBubble.toLowerCase()===h.toLowerCase()); b.onclick=()=>{ draftBubble=h; previewTheme(); }; sw.append(b); });
+  if(draftBubble) $("colBubble").value=draftBubble;
+  const pm=$("themePreviewMsg"); paintFace($("themePreviewFace"),meProfile);
+  if(draftBubble){ pm.classList.add("custom"); pm.style.setProperty("--bub",draftBubble); pm.style.setProperty("--bubtext",textOn(draftBubble)); } else { pm.classList.remove("custom"); }
+}
+function previewTheme(){ applyTheme(draftTheme); paintThemeSheet(); }
+["colMain","colAccent","colHi"].forEach(id=>$(id).addEventListener("input",()=>{ draftTheme={preset:"custom",main:$("colMain").value,accent:$("colAccent").value,hi:$("colHi").value}; applyTheme(draftTheme); paintThemeSheet(); }));
+$("colBubble").addEventListener("input",e=>{ draftBubble=e.target.value; paintThemeSheet(); });
+$("openTheme").onclick=()=>{ draftTheme=meProfile?.theme||savedTheme()||{preset:"night"}; draftBubble=validHex(meProfile?.bubble_color); say("themeMsg",""); show($("profile"),false); paintThemeSheet(); show($("themeSheet")); };
+$("themeClose").onclick=()=>{ applyTheme(meProfile?.theme||savedTheme()); show($("themeSheet"),false); };
+$("themeSave").onclick=async()=>{
+  $("themeSave").disabled=true;
+  try{
+    const style={theme:draftTheme,bubble_color:draftBubble};
+    await api.saveStyle(user.id,style);
+    meProfile={...meProfile,...style}; cache.set(user.id,meProfile); applyTheme(draftTheme);
+    if(room) renderAll(false);
+    say("themeMsg","Saved."); setTimeout(()=>show($("themeSheet"),false),500);
+  }catch(err){ say("themeMsg","Couldn't save: "+err.message,true); }
+  finally{ $("themeSave").disabled=false; }
+};
+
+/* ---------- previews for replies, pins, inbox ---------- */
+function previewOf(m){
+  if(!m) return "";
+  if(m.kind==="poll") return "📊 "+(m.text||"Poll");
+  if(m.kind==="sticker"||m.sticker) return "Sticker "+(STICKERS[m.sticker]?.label?`(${STICKERS[m.sticker].label})`:"");
+  if(m.media_type==="audio"||m.kind==="audio") return "🎤 Voice message";
+  if(m.media_type==="video"||m.kind==="video") return "🎬 Video"+(m.text?": "+m.text:"");
+  if(m.image_url&&!m.text) return "📷 Photo";
+  return m.text||"";
+}
 
 /* ---------- overlays ---------- */
 $("lightbox").onclick=()=>show($("lightbox"),false);
-["profile","roomSheet","msgMenu"].forEach(id=>$(id).addEventListener("click",e=>{ if(e.target.id===id) show($(id),false); }));
-addEventListener("keydown",e=>{ if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu"].forEach(id=>show($(id),false)); });
+["profile","roomSheet","msgMenu","pollSheet"].forEach(id=>$(id).addEventListener("click",e=>{ if(e.target.id===id) show($(id),false); }));
+addEventListener("keydown",e=>{ if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu","pollSheet","tray"].forEach(id=>show($(id),false)); });
 
 /* ================= PUSH NOTIFICATIONS ================= */
 let swReg=null;
