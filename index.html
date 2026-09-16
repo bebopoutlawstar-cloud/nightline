@@ -2089,11 +2089,12 @@ function validHex(c){ return typeof c==="string"&&/^#[0-9a-f]{6}$/i.test(c)?c:nu
 function textOn(hex){ const n=parseInt(hex.slice(1),16), r=n>>16&255, g=n>>8&255, b=n&255; return (0.299*r+0.587*g+0.114*b)>150?"#07041A":"#F4F7FF"; }
 function savedTheme(){ try{ return JSON.parse(localStorage.getItem("nl-theme")); }catch(e){ return null; } }
 function themeColors(t){ if(!t) return THEMES.night; if(t.preset&&t.preset!=="custom"&&THEMES[t.preset]) return THEMES[t.preset]; return {main:validHex(t.main)||THEMES.night.main,accent:validHex(t.accent)||THEMES.night.accent,hi:validHex(t.hi)||THEMES.night.hi}; }
-function applyTheme(t){
+function applyTheme(t,persist=true){
   const c=themeColors(t), r=document.documentElement.style;
   r.setProperty("--cyan",c.main); r.setProperty("--mag",c.accent); r.setProperty("--volt",c.hi);
-  try{ localStorage.setItem("nl-theme",JSON.stringify(t||{preset:"night"})); }catch(e){}
+  if(persist) try{ localStorage.setItem("nl-theme",JSON.stringify(t||{preset:"night"})); }catch(e){}
 }
+let themeAtOpen=null;
 applyTheme(savedTheme());
 let draftTheme=null, draftBubble=null;
 function paintThemeSheet(){
@@ -2115,11 +2116,11 @@ function paintThemeSheet(){
   const pm=$("themePreviewMsg"); paintFace($("themePreviewFace"),meProfile);
   if(draftBubble){ pm.classList.add("custom"); pm.style.setProperty("--bub",draftBubble); pm.style.setProperty("--bubtext",textOn(draftBubble)); } else { pm.classList.remove("custom"); }
 }
-function previewTheme(){ applyTheme(draftTheme); paintThemeSheet(); }
-["colMain","colAccent","colHi"].forEach(id=>$(id).addEventListener("input",()=>{ draftTheme={preset:"custom",main:$("colMain").value,accent:$("colAccent").value,hi:$("colHi").value}; applyTheme(draftTheme); paintThemeSheet(); }));
+function previewTheme(){ applyTheme(draftTheme,false); paintThemeSheet(); }
+["colMain","colAccent","colHi"].forEach(id=>$(id).addEventListener("input",()=>{ draftTheme={preset:"custom",main:$("colMain").value,accent:$("colAccent").value,hi:$("colHi").value}; applyTheme(draftTheme,false); paintThemeSheet(); }));
 $("colBubble").addEventListener("input",e=>{ draftBubble=e.target.value; paintThemeSheet(); });
-$("openTheme").onclick=()=>{ draftTheme=meProfile?.theme||savedTheme()||{preset:"night"}; draftBubble=validHex(meProfile?.bubble_color); say("themeMsg",""); show($("profile"),false); paintThemeSheet(); show($("themeSheet")); };
-$("themeClose").onclick=()=>{ applyTheme(meProfile?.theme||savedTheme()); show($("themeSheet"),false); };
+$("openTheme").onclick=()=>{ themeAtOpen=meProfile?.theme||savedTheme()||{preset:"night"}; draftTheme=themeAtOpen; draftBubble=validHex(meProfile?.bubble_color); say("themeMsg",""); show($("profile"),false); paintThemeSheet(); show($("themeSheet")); };
+$("themeClose").onclick=()=>{ applyTheme(themeAtOpen||meProfile?.theme||savedTheme()); show($("themeSheet"),false); };
 $("themeSave").onclick=async()=>{
   $("themeSave").disabled=true;
   try{
@@ -2690,6 +2691,40 @@ function celebrateMyBirthday(force){
     setTimeout(()=>{ t.classList.add("out"); setTimeout(()=>t.remove(),260); },6000);
   },600);
 }
+
+/* ================= BACK BUTTON (Android / browser back) ================= */
+// Each chat or sheet you open adds a history step, so Back closes the top one instead of leaving the app.
+(function(){
+  const LAYERS=["chat","profile","roomSheet","msgMenu","themeSheet","pollSheet","installSheet","gameSheet","lightbox"];
+  const stack=[]; let popping=false, ignorePops=0, pendingBack=0, flushQueued=false;
+  const isOpen=id=>!$(id).classList.contains("hidden");
+  function queueBack(){
+    pendingBack++;
+    if(flushQueued) return; flushQueued=true;
+    setTimeout(()=>{ flushQueued=false; if(pendingBack>0){ ignorePops++; history.go(-pendingBack); pendingBack=0; } },0);
+  }
+  function watch(id){
+    new MutationObserver(()=>{
+      const open=isOpen(id), i=stack.indexOf(id);
+      if(open&&i<0){ stack.push(id); history.pushState({nl:id},""); }
+      else if(!open&&i>=0){ stack.splice(i,1); if(!popping) queueBack(); }
+    }).observe($(id),{attributes:true,attributeFilter:["class"]});
+  }
+  LAYERS.forEach(watch);
+  function closeLayer(id){
+    if(id==="chat") exitRoom();
+    else if(id==="gameSheet") closeGame();
+    else if(id==="themeSheet") $("themeClose").click();
+    else show($(id),false);
+  }
+  addEventListener("popstate",()=>{
+    if(ignorePops>0){ ignorePops--; return; }
+    const top=[...stack].reverse().find(isOpen);
+    if(!top) return;                       // nothing open: let the browser leave the app as normal
+    popping=true; closeLayer(top);
+    setTimeout(()=>{ popping=false; },0);
+  });
+})();
 
 /* ---------- boot ---------- */
 setMode("in");
