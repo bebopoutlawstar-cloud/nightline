@@ -459,6 +459,54 @@ html,body{overscroll-behavior:none}
 .copyrow .send{padding:10px 14px}
 
 .steps li > span{flex:1;min-width:0;overflow-wrap:anywhere}
+
+/* ===== games ===== */
+.tray-tabs .ghost{font-size:11px;padding:8px 4px}
+.gamelist{display:grid;gap:8px}
+.gamepick{display:flex;align-items:center;gap:12px;width:100%;background:var(--night);border:2px solid var(--cyan);color:var(--white);padding:10px;text-align:left}
+.gamepick:hover,.gamepick:focus-visible{border-color:var(--volt)}
+.gp-icon{flex:none;display:grid;grid-template-columns:repeat(3,14px);gap:2px;padding:4px;background:var(--deep);transform:rotate(-6deg)}
+.gp-icon i{width:14px;height:14px;background:#1c1450;position:relative}
+.gp-icon i.x::before,.gp-icon i.x::after{content:"";position:absolute;left:6px;top:1px;width:2px;height:12px;background:var(--cyan);transform:rotate(45deg)}
+.gp-icon i.x::after{transform:rotate(-45deg)}
+.gp-icon i.o::before{content:"";position:absolute;inset:2px;border:2px solid var(--mag);border-radius:50%}
+.gp-text b{display:block;font-family:var(--tech);font-size:14px}
+.gp-text small{color:var(--muted);font-size:14px}
+.gamecard{display:grid;gap:8px;min-width:210px;max-width:250px}
+.gamecard .gc-top{display:flex;align-items:center;gap:10px}
+.gamecard .gc-title{font-family:var(--tech);font-size:13px}
+.gamecard .gc-status{font-size:16px;font-weight:700}
+.gamecard .gc-status.turn{color:var(--volt)}
+.msg.custom .gamecard .gc-status.turn,.me .gamecard .gc-status.turn{color:inherit;text-decoration:underline;text-decoration-color:var(--volt);text-decoration-thickness:3px}
+.minigrid{flex:none;display:grid;grid-template-columns:repeat(3,18px);gap:2px;padding:3px;background:rgba(0,0,0,.35);transform:rotate(-4deg)}
+.minigrid i{width:18px;height:18px;background:rgba(255,255,255,.08);position:relative}
+.minigrid i.win{background:rgba(243,255,58,.35)}
+.minigrid i.x::before,.minigrid i.x::after{content:"";position:absolute;left:8px;top:2px;width:2px;height:14px;background:var(--cyan);transform:rotate(45deg)}
+.minigrid i.x::after{transform:rotate(-45deg)}
+.minigrid i.o::before{content:"";position:absolute;inset:3px;border:2px solid var(--mag);border-radius:50%}
+.gamecard .play{font-family:var(--tech);font-weight:900;font-size:14px;background:var(--cyan);color:var(--night);border:none;padding:10px;clip-path:polygon(0 8%,100% 0,98% 92%,2% 100%)}
+.gamecard .play.big{background:var(--volt)}
+.gamesheet{gap:12px}
+.versus{display:flex;align-items:center;justify-content:space-between;width:100%;gap:8px}
+.player{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 4px;border:2px solid #3b2d80;transform:rotate(-2deg)}
+.player:last-child{transform:rotate(2deg)}
+.player.active{border-color:var(--volt);box-shadow:4px 4px 0 var(--mag)}
+.player .pname{font-size:15px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.player .mark{font-family:var(--num);font-size:28px;line-height:1}
+.player .mark.x{color:var(--cyan)} .player .mark.o{color:var(--mag)}
+.vs{font-family:var(--num);font-size:26px;color:var(--volt);transform:rotate(-10deg)}
+.gstatus{font-family:var(--tech);font-size:15px;color:var(--white);min-height:20px}
+.gstatus.good{color:var(--volt)}
+.board{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:8px;width:min(100%,300px);aspect-ratio:1;transform:rotate(-1.5deg)}
+.cell{position:relative;background:var(--deep);border:3px solid #3b2d80;clip-path:polygon(4% 0,100% 4%,96% 100%,0 96%);padding:0;min-height:0}
+.cell:not(:disabled):hover{border-color:var(--cyan)}
+.cell:disabled{cursor:default;opacity:1}
+.cell.win{background:rgba(243,255,58,.18);border-color:var(--volt)}
+.cell .x,.cell .o{position:absolute;inset:18%;animation:markpop .28s cubic-bezier(.2,1.8,.4,1) both}
+.cell .x::before,.cell .x::after{content:"";position:absolute;left:50%;top:-8%;width:16%;height:116%;margin-left:-8%;background:var(--cyan);transform:rotate(45deg);box-shadow:3px 3px 0 var(--night)}
+.cell .x::after{transform:rotate(-45deg)}
+.cell .o{border:clamp(8px,4vw,14px) solid var(--mag);border-radius:50%;box-shadow:3px 3px 0 var(--night)}
+@keyframes markpop{from{transform:scale(.2) rotate(-40deg);opacity:0}}
 </style>
 </head>
 <body>
@@ -557,9 +605,17 @@ html,body{overscroll-behavior:none}
     <div class="tray hidden" id="tray">
       <div class="tray-tabs">
         <button type="button" class="ghost" id="traySticker" aria-pressed="true">Stickers</button>
-        <button type="button" class="ghost" id="trayPoll">Make a poll</button>
+        <button type="button" class="ghost" id="trayGames" aria-pressed="false">Games</button>
+        <button type="button" class="ghost" id="trayPoll">Poll</button>
       </div>
       <div class="stickers" id="stickerGrid"></div>
+      <div class="gamelist hidden" id="gameList">
+        <button type="button" class="gamepick" data-game="tictactoe">
+          <span class="gp-icon" aria-hidden="true"><i class="x"></i><i class="o"></i><i></i><i></i><i class="x"></i><i></i><i class="o"></i><i></i><i class="x"></i></span>
+          <span class="gp-text"><b>Tic-tac-toe</b><small id="gpHint">Challenge the room</small></span>
+        </button>
+        <p class="note">More games coming soon 👀</p>
+      </div>
     </div>
     <div class="recbar hidden" id="recBar" role="status">
       <span class="recdot" aria-hidden="true"></span><span class="rectime" id="recTime">0:00</span><span class="reclabel">Recording…</span>
@@ -741,6 +797,24 @@ html,body{overscroll-behavior:none}
   </div>
 </div>
 
+<!-- ============ GAME SCREEN ============ -->
+<div class="overlay hidden" id="gameSheet" role="dialog" aria-modal="true" aria-labelledby="gameTitle">
+  <div class="sheet gamesheet">
+    <h2 id="gameTitle">Tic-tac-toe</h2>
+    <div class="versus">
+      <div class="player" id="gpX"></div>
+      <span class="vs">VS</span>
+      <div class="player" id="gpO"></div>
+    </div>
+    <p class="gstatus" id="gameStatus" role="status"></p>
+    <div class="board" id="board" role="grid" aria-label="Tic-tac-toe board"></div>
+    <button class="go hidden" type="button" id="gameJoin">Join game</button>
+    <button class="go hidden" type="button" id="gameRematch">Rematch 🔁</button>
+    <p class="msgline" id="gameMsg" role="status"></p>
+    <button class="ghost" type="button" id="gameClose">Back to chat</button>
+  </div>
+</div>
+
 <div class="toasts" id="toasts" aria-live="polite"></div>
 <div class="overlay lightbox hidden" id="lightbox"><img id="lightImg" alt="Full size photo"></div>
 
@@ -894,6 +968,11 @@ const live = {
     const [p,v]=await Promise.all([sb.from("polls").select("message_id,options,multi").in("message_id",ids),sb.from("poll_votes").select("message_id,user_id,option_index").in("message_id",ids)]);
     return {polls:must(p),votes:must(v)};
   },
+  async games(ids){ return ids.length?must(await sb.from("games").select("*").in("message_id",ids)):[]; },
+  async createGame(room,type){ return must(await sb.rpc("create_game",{p_room:room,p_type:type})); },
+  async joinGame(id){ must(await sb.rpc("join_game",{p_message:id})); },
+  async playTicTacToe(id,cell){ must(await sb.rpc("play_tictactoe",{p_message:id,p_cell:cell})); },
+  async rematch(id){ return must(await sb.rpc("rematch_game",{p_message:id})); },
   async createPoll(room,question,options,multi){ return must(await sb.rpc("create_poll",{p_room:room,p_question:question,p_options:options,p_multi:multi})); },
   async vote(id,idx){ must(await sb.rpc("vote_poll",{p_message:id,p_option:idx})); },
   async renameRoom(room,name){ must(await sb.rpc("rename_room",{p_room:room,p_name:name})); },
@@ -932,6 +1011,7 @@ const live = {
       .on("postgres_changes",{event:"INSERT",schema:"public",table:"poll_votes",filter:`room=eq.${room}`},p=>h.vote(p.new,true))
       .on("postgres_changes",{event:"DELETE",schema:"public",table:"poll_votes"},p=>p.old&&h.vote(p.old,false))
       .on("postgres_changes",{event:"INSERT",schema:"public",table:"pinned_messages",filter:`room=eq.${room}`},p=>h.pin(p.new,true))
+      .on("postgres_changes",{event:"UPDATE",schema:"public",table:"games",filter:`room=eq.${room}`},p=>h.game(p.new))
       .on("postgres_changes",{event:"DELETE",schema:"public",table:"pinned_messages"},p=>p.old&&h.pin(p.old,false))
       .subscribe(s=>h.status(s==="SUBSCRIBED"?"Live":"Reconnecting…"));
     const priv=sb.channel("typing:"+room,{config:{private:true,broadcast:{self:false}}})
@@ -947,6 +1027,9 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
   let user=null, listeners=[], H=null, nextId=100;
   const iso=(ago=0)=>new Date(Date.now()-ago).toISOString();
   const people={rook:{id:"rook",username:"Rook",avatar_url:null},vee:{id:"vee",username:"Vee",avatar_url:null}};
+  const games={};
+  function demoBot(id){ const g=games[id]; if(!g||g.status!=="active") return; const mark=g.player_x==="me"?"o":"x"; if(g.state.turn!==mark) return;
+    const cell=tttBotMove(g.state.board,mark); applyTTT(g,cell,mark); fire("game",JSON.parse(JSON.stringify(g))); }
   const rooms={}, reacts=[], blocked=new Set(), polls={}, votes=[], pins={}, contacts=new Set(["vee"]); let ALL=null;
   people.nix={id:"nix",username:"Nix",avatar_url:null};
   const lines=["No way. Tell me everything.","That is so you.","Check this: www.example.com","Meet at the usual spot?","LOL stop"];
@@ -979,6 +1062,27 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     async pins(room){ return Object.values(pins).filter(p=>p.room===room).sort((a,b)=>a.created_at<b.created_at?1:-1); },
     async pin(room,id){ pins[id]={room,message_id:id,pinned_by:"me",created_at:iso()}; setTimeout(()=>fire("pin",pins[id],true),30); },
     async unpin(id){ const p=pins[id]; delete pins[id]; setTimeout(()=>fire("pin",{message_id:id},false),30); },
+    async games(ids){ return ids.map(i=>games[i]).filter(Boolean).map(g=>JSON.parse(JSON.stringify(g))); },
+    async createGame(room,type){
+      const r=rooms[room], m={id:nextId++,room,user_id:"me",kind:"game",text:"Tic-tac-toe",created_at:iso()}; r.msgs.push(m);
+      const other=r.is_dm?Object.keys(r.members).find(u=>u!=="me"):null;
+      games[m.id]={message_id:m.id,room,type,player_x:"me",player_o:other,status:other?"active":"waiting",state:{board:Array(9).fill(""),turn:"x",winner:null,line:[]},moves:0};
+      if(!other) setTimeout(()=>{ const g=games[m.id]; if(g.status!=="waiting") return; g.player_o=Object.keys(r.members).find(u=>u!=="me")||"rook"; g.status="active"; fire("game",JSON.parse(JSON.stringify(g))); },1500);
+      return m;
+    },
+    async joinGame(id){ const g=games[id]; g.player_o="me"; g.status="active"; setTimeout(()=>fire("game",JSON.parse(JSON.stringify(g))),30); setTimeout(()=>demoBot(id),900); },
+    async playTicTacToe(id,cell){
+      const g=games[id], mark=g.player_x==="me"?"x":"o";
+      if(g.status!=="active"||g.state.turn!==mark||g.state.board[cell]) throw new Error("Not your turn.");
+      applyTTT(g,cell,mark); setTimeout(()=>fire("game",JSON.parse(JSON.stringify(g))),30);
+      if(g.status==="active") setTimeout(()=>demoBot(id),900);
+    },
+    async rematch(id){
+      const old=games[id], r=rooms[old.room], m={id:nextId++,room:old.room,user_id:"me",kind:"game",text:"Tic-tac-toe",created_at:iso()}; r.msgs.push(m);
+      games[m.id]={message_id:m.id,room:old.room,type:old.type,player_x:old.player_o,player_o:old.player_x,status:"active",state:{board:Array(9).fill(""),turn:"x",winner:null,line:[]},moves:0};
+      if(games[m.id].player_x!=="me") setTimeout(()=>demoBot(m.id),900);
+      return m;
+    },
     async polls(ids){ return {polls:ids.map(i=>polls[i]).filter(Boolean),votes:votes.filter(v=>ids.includes(v.message_id))}; },
     async createPoll(room,question,options,multi){ const m={id:nextId++,room,user_id:"me",kind:"poll",text:question,created_at:iso()}; polls[m.id]={message_id:m.id,options,multi}; rooms[room].msgs.push(m);
       setTimeout(()=>{ const v={message_id:m.id,user_id:"rook",option_index:0}; votes.push(v); fire("vote",v,true); },1200); return m; },
@@ -1047,6 +1151,7 @@ const reactionsById=new Map();// message id -> Map(emoji -> Set(user ids))
 const members=new Map();      // user id -> {read: ms, nick}
 const pollsById=new Map();    // message id -> {options, multi, votes: Map(index -> Set(user ids))}
 const pins=new Map();         // message id -> {pinned_by, created_at}
+const gamesById=new Map();    // message id -> game row
 let isDm=false, dmUser=null, myNotify="all", contactIds=[], inboxRows=[], unsubAll=null;
 let pinCursor=0, roomBg=null, pendingKind=null, pendingDuration=null, mentionPicks=new Map();
 const typers=new Map();       // user id -> {name,timer}
@@ -1252,7 +1357,7 @@ async function enterRoom(code,token){
   room=target; roomOwner=null; roomName=null;
   try{ localStorage.setItem("nl-room",room); }catch(e){}
   show($("front"),false); show($("chat")); $("roomLabel").textContent="# "+room; $("status").textContent="Connecting…";
-  msgs.length=0; byId.clear(); elById.clear(); claimed.clear(); contextById.clear(); reactionsById.clear(); members.clear(); pollsById.clear(); pins.clear(); pinCursor=0; paintPinBar(); setRoomBackground(null); closeTray(); hideMentions();
+  msgs.length=0; byId.clear(); elById.clear(); claimed.clear(); contextById.clear(); reactionsById.clear(); members.clear(); pollsById.clear(); pins.clear(); gamesById.clear(); closeGame(); pinCursor=0; paintPinBar(); setRoomBackground(null); closeTray(); hideMentions();
   typers.forEach(v=>clearTimeout(v.timer)); typers.clear(); paintTyping(); clearReply(); feed.innerHTML="";
   try{
     const [latest,mem,info,pinRows]=await Promise.all([api.loadLatest(room),api.members(room).catch(()=>[]),api.roomInfo(room).catch(()=>null),api.pins(room).catch(()=>[])]);
@@ -1274,6 +1379,7 @@ async function enterRoom(code,token){
       profile:p=>{ const old=cache.get(p.id); cache.set(p.id,p); repaintFaces(p.id); if(p.id===user.id){meProfile=p;paintMe();} if(old?.bubble_color!==p.bubble_color) renderAll(false); paintReceipts(); },
       member:setMember,
       roomUpdated:r=>{ if(r.code!==room) return; setRoomName(r.name); if(r.background!==undefined) setRoomBackground(r.background); if(r.owner!==undefined) roomOwner=r.owner; },
+      game:g=>{ const prev=gamesById.get(g.message_id); gamesById.set(g.message_id,g); refreshMsg(g.message_id); if(openGameId===g.message_id) paintGame(prev); },
       vote:(v,added)=>{ const p=pollsById.get(v.message_id); if(!p) return; setVote(p,v,added); refreshMsg(v.message_id); },
       pin:async(p,added)=>{ if(added){ if(p.room&&p.room!==room) return; pins.set(p.message_id,p); await loadPinnedContext(); } else { if(!pins.has(p.message_id)) return; pins.delete(p.message_id); } pinCursor=0; paintPinBar(); if(!$("roomSheet").classList.contains("hidden")) paintPins(); },
       memberGone:uid=>{
@@ -1311,7 +1417,7 @@ async function addMessages(list){
   const replyIds=list.map(m=>m.reply_to).filter(id=>id&&!byId.has(id)&&!contextById.has(id));
   await ensureProfiles(list.map(m=>m.user_id));
   (await api.reactions(list.map(m=>m.id)).catch(()=>[])).forEach(r=>setReaction(r,true));
-  await loadPolls(list);
+  await loadPolls(list); await loadGames(list);
   for(const id of [...new Set(replyIds)]){ const r=await api.fetchMessage(id).catch(()=>null); if(r){ contextById.set(r.id,r); await ensureProfiles([r.user_id]); } }
   if(!list.every(m=>claimed.has(m.id))) return;   // room changed while loading
   const appendOnly = msgs.length===0 || list.every(m=>m.created_at>=msgs[msgs.length-1].created_at);
@@ -1359,7 +1465,7 @@ async function loadOlder(){
     const fresh=older.filter(m=>!byId.has(m.id));
     await ensureProfiles(fresh.map(m=>m.user_id));
     (await api.reactions(fresh.map(m=>m.id)).catch(()=>[])).forEach(r=>setReaction(r,true));
-    await loadPolls(fresh);
+    await loadPolls(fresh); await loadGames(fresh);
     fresh.forEach(m=>{ byId.set(m.id,m); msgs.push(m); });
     msgs.sort((a,b)=>a.created_at<b.created_at?-1:1);
     renderAll(false);
@@ -1410,8 +1516,9 @@ function buildMsg(m,index,noAnim){
   if(media&&m.media_type==="audio") bub.append(voicePlayer(media,m.media_duration));
   if(m.kind==="sticker"&&STICKERS[m.sticker]) bub.append(stickerEl(m.sticker));
   if(m.kind==="poll") bub.append(pollEl(m));
+  else if(m.kind==="game") bub.append(gameCard(m));
   else if(m.text){ const t=el("div"); renderText(t,m.text,m.mentions); bub.append(t); }
-  bub.onclick=e=>{ if(e.target.closest("a,video,.voice,.poll button")) return; openMenu(m); };
+  bub.onclick=e=>{ if(e.target.closest("a,video,.voice,.poll button,.gamecard button")) return; openMenu(m); };
   bub.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openMenu(m); } };
   col.append(tag,bub);
   const map=reactionsById.get(m.id);
@@ -1486,7 +1593,7 @@ $("menuReply").onclick=()=>{ show($("msgMenu"),false); startReply(menuMsg); };
 function attachSwipe(node,m){
   let x0=0,y0=0,dx=0,mode=null,col=null,hint=null;
   node.addEventListener("touchstart",e=>{
-    if(e.touches.length!==1||e.target.closest("video,.voice,.poll,input,textarea")) { mode="off"; return; }
+    if(e.touches.length!==1||e.target.closest("video,.voice,.poll,.gamecard,input,textarea")) { mode="off"; return; }
     x0=e.touches[0].clientX; y0=e.touches[0].clientY; dx=0; mode=null;
     col=node.querySelector(".col");
   },{passive:true});
@@ -1913,7 +2020,14 @@ function paintStickers(){
 }
 function closeTray(){ show($("tray"),false); $("plusBtn").setAttribute("aria-expanded","false"); }
 $("plusBtn").onclick=()=>{ const open=$("tray").classList.contains("hidden"); if(open){ paintStickers(); show($("tray")); } else show($("tray"),false); $("plusBtn").setAttribute("aria-expanded",String(open)); };
-$("traySticker").onclick=()=>{};
+function trayTab(t){ $("traySticker").setAttribute("aria-pressed",t==="stickers"); $("trayGames").setAttribute("aria-pressed",t==="games"); show($("stickerGrid"),t==="stickers"); show($("gameList"),t==="games"); }
+$("traySticker").onclick=()=>trayTab("stickers");
+$("trayGames").onclick=()=>{ $("gpHint").textContent=isDm&&dmUser?`Challenge ${nameOf(dmUser)}`:"Challenge the room"; trayTab("games"); };
+$("gameList").querySelectorAll(".gamepick").forEach(bt=>bt.onclick=async()=>{
+  closeTray(); trayTab("stickers");
+  try{ const m=await api.createGame(room,bt.dataset.game); await addMessages([m]); openGame(m.id); }
+  catch(err){ $("status").textContent="Couldn't start a game: "+err.message; }
+});
 $("trayPoll").onclick=()=>{ closeTray(); openPollSheet(); };
 
 /* ---------- polls ---------- */
@@ -2022,6 +2136,7 @@ $("themeSave").onclick=async()=>{
 function previewOf(m){
   if(!m) return "";
   if(m.kind==="poll") return "📊 "+(m.text||"Poll");
+  if(m.kind==="game") return "🎮 "+(m.text||"Game");
   if(m.kind==="sticker"||m.sticker) return "Sticker "+(STICKERS[m.sticker]?.label?`(${STICKERS[m.sticker].label})`:"");
   if(m.media_type==="audio"||m.kind==="audio") return "🎤 Voice message";
   if(m.media_type==="video"||m.kind==="video") return "🎬 Video"+(m.text?": "+m.text:"");
@@ -2304,6 +2419,117 @@ $("notifTest").onclick=async()=>{
     await reg.showNotification("NightLine test 🌙",{body:"Notifications are working on this device.",icon:"icon-192.png",badge:"icon-192.png",tag:"test"});
     say("profMsg","Test sent. If you didn't see it, check your phone's notification settings for this app.");
   }catch(err){ say("profMsg","Couldn't show a test: "+err.message,true); }
+};
+
+/* ================= GAMES ================= */
+const TTT_LINES=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+function tttResult(board){
+  for(const l of TTT_LINES){ const [a,b2,c]=l; if(board[a]&&board[a]===board[b2]&&board[a]===board[c]) return {winner:board[a],line:l}; }
+  return board.every(Boolean)?{winner:"draw",line:[]}:{winner:null,line:[]};
+}
+function applyTTT(g,cell,mark){
+  g.state.board[cell]=mark; g.moves=(g.moves||0)+1;
+  const r=tttResult(g.state.board); g.state.winner=r.winner; g.state.line=r.line;
+  if(r.winner){ g.status="done"; } else g.state.turn=mark==="x"?"o":"x";
+}
+function tttBotMove(board,mark){
+  const foe=mark==="x"?"o":"x", open=board.map((v,i)=>v?null:i).filter(i=>i!==null);
+  const wins=m=>open.find(i=>{ const b2=[...board]; b2[i]=m; return tttResult(b2).winner===m; });
+  return wins(mark)??wins(foe)??(open.includes(4)?4:open[Math.floor(Math.random()*open.length)]);
+}
+async function loadGames(list){
+  const ids=list.filter(m=>m.kind==="game"&&!gamesById.has(m.id)).map(m=>m.id); if(!ids.length) return;
+  const rows=await api.games(ids).catch(()=>[]);
+  rows.forEach(g=>gamesById.set(g.message_id,g));
+  await ensureProfiles(rows.flatMap(g=>[g.player_x,g.player_o]).filter(Boolean));
+}
+function myMark(g){ return g.player_x===user.id?"x":g.player_o===user.id?"o":null; }
+function gameStatusText(g){
+  const me=myMark(g), s=g.state||{}, xName=nameOf(g.player_x), oName=g.player_o?nameOf(g.player_o):"";
+  if(g.status==="waiting") return {text: g.player_x===user.id?"Waiting for someone to join…":`${xName} wants to play!`, turn: g.player_x!==user.id};
+  if(g.status==="done"){
+    if(s.winner==="draw") return {text:"It's a draw 🤝",turn:false};
+    const winnerId=s.winner==="x"?g.player_x:g.player_o;
+    return {text: winnerId===user.id?"You won! 🏆":`${nameOf(winnerId)} won`, turn:false, won:winnerId===user.id};
+  }
+  const turnId=s.turn==="x"?g.player_x:g.player_o;
+  if(turnId===user.id) return {text:"Your turn!",turn:true};
+  return {text: me?`${nameOf(turnId)}'s turn`:`${xName} vs ${oName}`, turn:false};
+}
+function miniGrid(g){
+  const box=el("span","minigrid"); box.setAttribute("aria-hidden","true");
+  const s=g?.state||{board:Array(9).fill(""),line:[]};
+  s.board.forEach((v,i)=>box.append(el("i",(v||"")+((s.line||[]).includes(i)?" win":""))));
+  return box;
+}
+function gameCard(m){
+  const g=gamesById.get(m.id), card=el("div","gamecard");
+  const top=el("div","gc-top"); top.append(miniGrid(g));
+  const info=el("div"); info.append(el("div","gc-title","🎮 TIC-TAC-TOE"));
+  if(!g){ info.append(el("div","gc-status","Loading…")); top.append(info); card.append(top); return card; }
+  const st=gameStatusText(g); info.append(el("div","gc-status"+(st.turn?" turn":""),st.text));
+  top.append(info); card.append(top);
+  const mine=!!myMark(g);
+  const label = g.status==="waiting" ? (g.player_x===user.id?"Open game":"Join game") : g.status==="done" ? (mine?"See board · Rematch":"See board") : (st.turn?"Play your turn":"Open game");
+  const btn=el("button","play"+(st.turn?" big":""),label); btn.type="button";
+  btn.onclick=e=>{ e.stopPropagation(); openGame(m.id); };
+  card.append(btn);
+  return card;
+}
+let openGameId=null;
+function openGame(id){ openGameId=id; say("gameMsg",""); paintGame(); show($("gameSheet")); }
+function closeGame(){ openGameId=null; show($("gameSheet"),false); }
+$("gameClose").onclick=closeGame;
+$("gameSheet").addEventListener("click",e=>{ if(e.target.id==="gameSheet") closeGame(); });
+function playerTile(node,uid,mark,active){
+  node.innerHTML=""; node.classList.toggle("active",!!active);
+  const f=el("span","face"); if(uid) paintFace(f,cache.get(uid)); else f.append(el("span","fi","?"));
+  node.append(f, el("span","pname",uid?(uid===user.id?"You":nameOf(uid)):"Open seat"), el("span","mark "+mark,mark.toUpperCase()));
+}
+function paintGame(prev){
+  const g=gamesById.get(openGameId); if(!g){ closeGame(); return; }
+  const s=g.state, st=gameStatusText(g), me=myMark(g);
+  playerTile($("gpX"),g.player_x,"x",g.status==="active"&&s.turn==="x");
+  playerTile($("gpO"),g.player_o,"o",g.status==="active"&&s.turn==="o");
+  $("gameStatus").textContent=st.text; $("gameStatus").classList.toggle("good",!!(st.turn||st.won));
+  const board=$("board"); board.innerHTML="";
+  const canPlay=g.status==="active"&&me&&s.turn===me;
+  s.board.forEach((v,i)=>{
+    const cell=el("button","cell"+((s.line||[]).includes(i)?" win":"")); cell.type="button"; cell.setAttribute("role","gridcell");
+    cell.setAttribute("aria-label",`Row ${Math.floor(i/3)+1}, column ${i%3+1}: ${v?v.toUpperCase():"empty"}`);
+    if(v){ const mk=el("span",v); if(prev?.state?.board?.[i]===v) mk.style.animation="none"; cell.append(mk); }
+    cell.disabled=!canPlay||!!v;
+    cell.onclick=()=>makeMove(i);
+    board.append(cell);
+  });
+  show($("gameJoin"), g.status==="waiting" && g.player_x!==user.id);
+  show($("gameRematch"), g.status==="done" && !!me);
+  if(g.status==="done"&&prev&&prev.status!=="done"){
+    if(st.won&&fxEnabled()) FX.play("confetti");
+    if(navigator.vibrate) navigator.vibrate(st.won?[40,60,40]:60);
+  } else if(prev?.state&&prev.state.turn!==s.turn&&s.turn===me&&navigator.vibrate) navigator.vibrate(25);
+}
+async function makeMove(i){
+  const g=gamesById.get(openGameId), me=g&&myMark(g);
+  if(!g||g.status!=="active"||g.state.turn!==me||g.state.board[i]) return;
+  const before=JSON.parse(JSON.stringify(g));
+  applyTTT(g,i,me); paintGame(before); refreshMsg(g.message_id);
+  try{ await api.playTicTacToe(g.message_id,i); }
+  catch(err){ gamesById.set(g.message_id,before); paintGame(); refreshMsg(g.message_id); say("gameMsg","Move didn't go through: "+err.message,true); }
+}
+$("gameJoin").onclick=async()=>{
+  const g=gamesById.get(openGameId); if(!g) return;
+  $("gameJoin").disabled=true;
+  try{ await api.joinGame(g.message_id); const before=JSON.parse(JSON.stringify(g)); g.player_o=user.id; g.status="active"; paintGame(before); refreshMsg(g.message_id); }
+  catch(err){ say("gameMsg","Couldn't join: "+err.message,true); }
+  finally{ $("gameJoin").disabled=false; }
+};
+$("gameRematch").onclick=async()=>{
+  const g=gamesById.get(openGameId); if(!g) return;
+  $("gameRematch").disabled=true;
+  try{ const m=await api.rematch(g.message_id); await addMessages([m]); openGame(m.id); }
+  catch(err){ say("gameMsg","Couldn't start a rematch: "+err.message,true); }
+  finally{ $("gameRematch").disabled=false; }
 };
 
 /* ================= INSTALL HELPER ================= */
