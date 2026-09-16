@@ -217,6 +217,11 @@ button:disabled{opacity:.5;cursor:default}
 .emoji-row{gap:6px;flex-wrap:nowrap}
 .emoji-row button{font-size:22px;width:42px;height:42px;padding:0}
 
+.namerow{display:flex;gap:8px;width:100%}
+.namerow .field{flex:1;min-width:0}
+.namerow .send{padding:10px 14px}
+.roomrow .code{font-size:13px;color:var(--muted);margin-left:6px;font-family:var(--body)}
+
 /* ===== full-screen effects ===== */
 #fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:20}
 #fxText{position:fixed;inset:0;pointer-events:none;z-index:21;display:grid;place-items:center;overflow:hidden}
@@ -334,6 +339,13 @@ button:disabled{opacity:.5;cursor:default}
 <div class="overlay hidden" id="roomSheet" role="dialog" aria-modal="true" aria-labelledby="rsTitle">
   <div class="sheet">
     <h2 id="rsTitle"></h2>
+    <p class="sub" id="rsCode"></p>
+    <h3>Room name</h3>
+    <form class="namerow" id="nameForm">
+      <label for="roomName" class="sr">Room name</label>
+      <input class="field" id="roomName" maxlength="40" placeholder="Name this room">
+      <button class="send" type="submit" id="nameSave">Save</button>
+    </form>
     <h3>Invite link</h3>
     <p class="sub left">Anyone with this link can join. Only share it with people you trust.</p>
     <label for="invLink" class="sr">Invite link</label>
@@ -482,7 +494,8 @@ const live = {
     if(error) throw new Error(/private_room/.test(error.message)?"private":error.message);
     return data;
   },
-  async roomInfo(room){ return must(await sb.from("rooms").select("code,owner,invite_token").eq("code",room).maybeSingle()); },
+  async roomInfo(room){ return must(await sb.from("rooms").select("code,name,owner,invite_token").eq("code",room).maybeSingle()); },
+  async renameRoom(room,name){ must(await sb.rpc("rename_room",{p_room:room,p_name:name})); },
   async rotateInvite(room){ return must(await sb.rpc("rotate_invite",{p_room:room})); },
   async removeMember(room,uid){ must(await sb.rpc("remove_member",{p_room:room,p_user:uid})); },
   async leaveRoom(room){ must(await sb.rpc("leave_room",{p_room:room})); },
@@ -509,6 +522,7 @@ const live = {
       .on("postgres_changes",{event:"INSERT",schema:"public",table:"room_members",filter:`room=eq.${room}`},p=>h.member(p.new))
       .on("postgres_changes",{event:"UPDATE",schema:"public",table:"room_members",filter:`room=eq.${room}`},p=>h.member(p.new))
       .on("postgres_changes",{event:"DELETE",schema:"public",table:"room_members"},p=>p.old?.room===room&&h.memberGone(p.old.user_id))
+      .on("postgres_changes",{event:"UPDATE",schema:"public",table:"rooms",filter:`code=eq.${room}`},p=>h.roomUpdated(p.new))
       .on("postgres_changes",{event:"INSERT",schema:"public",table:"message_reactions",filter:`room=eq.${room}`},p=>h.reaction(p.new,true))
       .on("postgres_changes",{event:"DELETE",schema:"public",table:"message_reactions"},p=>p.old&&h.reaction(p.old,false))
       .subscribe(s=>h.status(s==="SUBSCRIBED"?"Live":"Reconnecting…"));
@@ -545,9 +559,10 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     async profiles(ids){ return ids.map(i=>people[i]).filter(Boolean); },
     async upload(_b,_u,blob){ await new Promise(r=>setTimeout(r,300)); return URL.createObjectURL(blob); },
     async setAvatar(uid,url){ people[uid].avatar_url=url; },
-    async myRooms(){ seed("5959"); return Object.entries(rooms).filter(([,r])=>r.members.me).map(([code,r])=>{ const m=r.msgs[r.msgs.length-1]; return {code,is_owner:r.owner==="me",last_text:m?.text,last_image:!!m?.image_url,last_at:m?.created_at||iso(),last_sender:m?people[m.user_id]?.username:null,unread:r.msgs.filter(x=>x.user_id!=="me"&&x.created_at>(r.members.me?.read||"")).length}; }); },
+    async myRooms(){ seed("5959"); if(rooms["5959"].name===undefined) rooms["5959"].name="The Hideout"; return Object.entries(rooms).filter(([,r])=>r.members.me).map(([code,r])=>{ const m=r.msgs[r.msgs.length-1]; return {code,name:r.name||null,is_owner:r.owner==="me",last_text:m?.text,last_image:!!m?.image_url,last_at:m?.created_at||iso(),last_sender:m?people[m.user_id]?.username:null,unread:r.msgs.filter(x=>x.user_id!=="me"&&x.created_at>(r.members.me?.read||"")).length}; }); },
     async joinRoom(room){ const existed=!!rooms[room]; seed(room); if(!existed){ rooms[room].msgs=[]; rooms[room].members={me:{read:iso()}}; return "created"; } rooms[room].members.me ||= {read:iso()}; return "member"; },
-    async roomInfo(room){ const r=seed(room); return {code:room,owner:r.owner,invite_token:r.token}; },
+    async roomInfo(room){ const r=seed(room); if(room==="5959"&&r.name===undefined) r.name="The Hideout"; return {code:room,name:r.name||null,owner:r.owner,invite_token:r.token}; },
+    async renameRoom(room,name){ rooms[room].name=name||null; setTimeout(()=>fire("roomUpdated",{code:room,name:name||null,owner:rooms[room].owner}),40); },
     async rotateInvite(room){ return rooms[room].token="demo"+Math.random().toString(36).slice(2,8); },
     async removeMember(room,uid){ delete rooms[room].members[uid]; setTimeout(()=>fire("memberGone",uid),50); },
     async leaveRoom(room){ delete rooms[room].members.me; },
@@ -578,7 +593,7 @@ const api = sb ? live : demo;
 $("modeNote").textContent = sb ? "" : "Demo mode: no server connected, so accounts and friends are simulated.";
 
 /* ================= STATE ================= */
-let user=null, meProfile=null, room="", roomOwner=null, unsub=null, pendingFile=null, replyTo=null, hasMore=false, menuMsg=null;
+let user=null, meProfile=null, room="", roomName=null, roomOwner=null, unsub=null, pendingFile=null, replyTo=null, hasMore=false, menuMsg=null;
 const cache=new Map();        // user id -> profile
 const msgs=[];                // current room, oldest first
 const byId=new Map();         // message id -> message
@@ -685,13 +700,13 @@ async function loadInbox(){
   for(const r of list){
     const b=el("button","roomrow"); b.type="button";
     const hash=el("span","hash","#");
-    const info=el("span","info"); info.append(el("div","name",r.code));
+    const info=el("span","info"); const nm=el("div","name",r.name||"# "+r.code); if(r.name) nm.append(el("span","code","#"+r.code)); info.append(nm);
     const pv=r.last_image&&!r.last_text?"📷 Photo":(r.last_text||"No messages yet");
     info.append(el("div","preview",r.last_sender?`${r.last_sender}: ${pv}`:pv));
     const when=el("span","when"); when.append(el("span","",shortWhen(r.last_at)));
     if(+r.unread>0) when.append(el("span","badge",r.unread>99?"99+":String(r.unread)));
     b.append(hash,info,when);
-    b.setAttribute("aria-label",`Room ${r.code}${+r.unread?`, ${r.unread} unread`:""}`);
+    b.setAttribute("aria-label",`Room ${r.name||r.code}${+r.unread?`, ${r.unread} unread`:""}`);
     b.onclick=()=>{ $("room").value=r.code; enterRoom(r.code); };
     box.append(b);
   }
@@ -760,24 +775,25 @@ async function enterRoom(code,token){
   }
   $("jumpBtn").disabled=false; say("roomMsg","");
   if(unsub){unsub();unsub=null;}
-  room=target; roomOwner=null;
+  room=target; roomOwner=null; roomName=null;
   try{ localStorage.setItem("nl-room",room); }catch(e){}
   show($("front"),false); show($("chat")); $("roomLabel").textContent="# "+room; $("status").textContent="Connecting…";
   msgs.length=0; byId.clear(); elById.clear(); reactionsById.clear(); members.clear();
   typers.forEach(v=>clearTimeout(v.timer)); typers.clear(); paintTyping(); clearReply(); feed.innerHTML="";
   try{
     const [latest,mem,info]=await Promise.all([api.loadLatest(room),api.members(room).catch(()=>[]),api.roomInfo(room).catch(()=>null)]);
-    roomOwner=info?.owner||null;
+    roomOwner=info?.owner||null; setRoomName(info?.name);
     mem.forEach(setMember);
     hasMore=latest.length>=PAGE;
     await addMessages(latest);
-    if(result==="created"&&!latest.length) feed.innerHTML='<p class="empty">You made a new private room. Tap Room to invite friends.</p>';
+    if(result==="created"&&!latest.length) feed.innerHTML='<p class="empty">You made a new private room. Tap Room to name it and invite friends.</p>';
     markReadSoon();
     unsub=api.subscribe(room,{
       msg:m=>{ stopTyping(m.user_id); addMessages([m]).then(()=>{ if(m.user_id!==user.id) markReadSoon(); }); },
       msgGone:removeMessage,
       profile:p=>{ cache.set(p.id,p); repaintFaces(p.id); if(p.id===user.id){meProfile=p;paintMe();} paintReceipts(); },
       member:setMember,
+      roomUpdated:r=>{ if(r.code!==room) return; setRoomName(r.name); if(r.owner!==undefined) roomOwner=r.owner; },
       memberGone:uid=>{
         if(uid===user.id){ exitRoom(); say("roomMsg",`You're no longer in # ${room||"that room"}.`,true); return; }
         members.delete(uid); paintReceipts(); if(!$("roomSheet").classList.contains("hidden")) paintMembers();
@@ -972,13 +988,29 @@ function clearReply(){ replyTo=null; show($("replying"),false); }
 $("cancelReply").onclick=clearReply;
 
 /* ---------- room sheet ---------- */
+function setRoomName(name){
+  roomName=(name||"").trim()||null;
+  $("roomLabel").textContent=roomName||"# "+room;
+  $("roomLabel").title=roomName?`${roomName} (#${room})`:"#"+room;
+  paintRoomTitle();
+}
+function paintRoomTitle(){ $("rsTitle").textContent=roomName||"# "+room; $("rsCode").textContent=roomName?"#"+room:""; show($("rsCode"),!!roomName); }
+$("nameForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const name=$("roomName").value.trim().replace(/\s+/g," ").slice(0,40);
+  if(name===(roomName||"")) return say("rsMsg","That's already the name.");
+  $("nameSave").disabled=true;
+  try{ await api.renameRoom(room,name); setRoomName(name); say("rsMsg",name?`Room renamed to ${name}.`:"Room name cleared."); }
+  catch(err){ say("rsMsg","Couldn't rename: "+err.message,true); }
+  finally{ $("nameSave").disabled=false; }
+});
 function inviteUrl(code,token){ return location.origin+location.pathname+"?join="+encodeURIComponent(code)+"&t="+encodeURIComponent(token); }
 $("roomBtn").onclick=async()=>{
-  say("rsMsg",""); $("rsTitle").textContent="# "+room; $("invLink").value="Loading…"; show($("roomSheet"));
+  say("rsMsg",""); paintRoomTitle(); $("roomName").value=roomName||""; $("invLink").value="Loading…"; show($("roomSheet"));
   paintMembers();
   try{
     const info=await api.roomInfo(room); if(!info) throw new Error("Couldn't find this room.");
-    roomOwner=info.owner; paintMembers();
+    roomOwner=info.owner; setRoomName(info.name); if(document.activeElement!==$("roomName")) $("roomName").value=roomName||""; paintMembers();
     $("invLink").value=inviteUrl(info.code,info.invite_token);
     show($("invReset"),info.owner===user.id); show($("invShare"),!!navigator.share);
   }catch(err){ $("invLink").value=""; say("rsMsg",err.message,true); }
@@ -1021,7 +1053,7 @@ $("invReset").onclick=async()=>{
 };
 $("leaveRoom").onclick=async()=>{
   const owner=roomOwner===user.id;
-  if(!confirm(`Leave # ${room}?${owner?" You're the owner, so ownership passes to the next member.":""} You'll need a new invite link to come back.`)) return;
+  if(!confirm(`Leave ${roomName||"# "+room}?${owner?" You're the owner, so ownership passes to the next member.":""} You'll need a new invite link to come back.`)) return;
   try{ const code=room; await api.leaveRoom(code); exitRoom(); say("roomMsg",`You left # ${code}.`); }
   catch(err){ say("rsMsg",err.message,true); }
 };
