@@ -528,6 +528,79 @@ html,body{overscroll-behavior:none}
 .member .friendbtn.on{border-color:var(--muted)!important;color:var(--muted)!important}
 
 .contactrow .tagline{white-space:normal}
+
+/* ===== secrets ===== */
+#sfx{position:fixed;inset:0;z-index:22;pointer-events:none;overflow:hidden}
+.sfx-canvas{position:absolute;inset:0;width:100%;height:100%}
+.secretbox{width:100%;display:grid;gap:8px;justify-items:start;border:2px dashed #3b2d80;padding:10px}
+.secretcount{font-family:var(--tech);font-size:13px;color:var(--volt)}
+.secretlist{display:flex;flex-wrap:wrap;gap:6px}
+.sx-chip{font-family:var(--tech);font-size:10px;padding:3px 7px;border:1.5px solid #3b2d80;color:var(--muted)}
+.sx-chip.got{border-color:var(--volt);color:var(--white)}
+.sx-lock{flex:none;font-size:26px}
+.sx-banner{position:absolute;left:50%;top:42%;font-family:var(--num);white-space:nowrap;animation:sxslam 1.9s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes sxslam{0%{opacity:0;transform:translate(-50%,-50%) rotate(-8deg) scale(3)}15%{opacity:1;transform:translate(-50%,-50%) rotate(-8deg) scale(.94)}25%{transform:translate(-50%,-50%) rotate(-8deg) scale(1)}82%{opacity:1}100%{opacity:0;transform:translate(-40%,-50%) rotate(-8deg) scale(1.05)}}
+.sx-showtime{font-size:clamp(40px,14vw,120px);max-width:94vw;color:#F4F7FF;background:#E8182B;padding:4px 24px 0;border:6px solid #07041A;box-shadow:12px 12px 0 #07041A;clip-path:polygon(0 10%,100% 0,97% 100%,3% 90%);text-shadow:4px 4px 0 #07041A}
+.sx-showtime-bg{position:absolute;inset:0;background:repeating-linear-gradient(-35deg,rgba(232,24,43,.55) 0 60px,rgba(7,4,26,.75) 60px 120px);animation:sxflash 2.2s ease both}
+@keyframes sxflash{0%{opacity:0}10%{opacity:1}80%{opacity:1}100%{opacity:0}}
+.sx-card{position:absolute;left:50%;top:45%;width:34px;height:48px;border:3px solid #07041A;animation:sxcard 2s cubic-bezier(.1,.8,.3,1) both}
+@keyframes sxcard{from{transform:translate(-50%,-50%) rotate(0) scale(.2);opacity:1}to{transform:translate(calc(-50% + var(--tx)),calc(-50% + var(--ty))) rotate(var(--r)) scale(1);opacity:0}}
+.sx-dim{position:absolute;inset:0;background:radial-gradient(circle,rgba(7,4,26,.2),rgba(7,4,26,.85));animation:sxflash 3.6s ease both}
+.sx-clock{position:absolute;left:50%;top:42%;width:min(60vw,240px);transform:translate(-50%,-50%);animation:sxflash 3.6s ease both;text-align:center}
+.sx-clock svg{width:100%;filter:drop-shadow(6px 6px 0 var(--mag))}
+.sx-clock .h{transform-origin:50px 50px;animation:sxspin 3.6s linear both}
+.sx-clock .m{transform-origin:50px 50px;animation:sxspin .9s linear 4 both}
+@keyframes sxspin{to{transform:rotate(360deg)}}
+.sx-caption{font-family:var(--tech);font-weight:900;font-size:clamp(16px,5vw,24px);color:var(--volt);text-shadow:2px 2px 0 #07041A;margin-top:10px}
+#chat.sx-slow .msg,#chat.sx-slow .top{transition:filter 1s;filter:saturate(.3) blur(.4px)}
+.sx-power{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%) rotate(-4deg);width:min(80vw,320px);background:#07041A;border:4px solid var(--cyan);box-shadow:8px 8px 0 var(--mag);padding:14px;text-align:center;animation:sxflash 2.6s ease both}
+.sx-powerlabel{font-family:var(--tech);font-size:13px;color:var(--cyan)}
+.sx-bar{height:18px;border:2px solid var(--white);margin:10px 0;overflow:hidden}
+.sx-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--volt),#FF3D3D);animation:sxbar 1.4s cubic-bezier(.6,0,.9,.4) forwards}
+@keyframes sxbar{to{width:100%}}
+.sx-num{font-family:var(--num);font-size:clamp(40px,14vw,64px);color:var(--white)}
+.sx-power.maxed{animation:sxflash 2.6s ease both,sxjitter .08s linear 10}
+.sx-power.maxed .sx-num{color:var(--volt)}
+@keyframes sxjitter{50%{margin-left:3px;margin-top:-2px}}
+#chat.sx-roll{animation:sxroll 1.2s cubic-bezier(.5,0,.3,1)}
+@keyframes sxroll{to{transform:rotate(360deg)}}
+.sx-dark{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle 110px at var(--x) var(--y),transparent 0 70%,rgba(0,0,0,.97) 100%);animation:sxfadein .5s ease both;transition:opacity .5s}
+.sx-dark.out{opacity:0}
+@keyframes sxfadein{from{opacity:0}}
+.sx-moon{position:absolute;left:50%;bottom:-40%;width:min(50vw,200px);transform:translateX(-50%);animation:sxrise 3.4s cubic-bezier(.2,.8,.3,1) both;filter:drop-shadow(0 0 30px rgba(243,255,58,.6))}
+@keyframes sxrise{60%{bottom:40%}85%{bottom:40%;opacity:1}100%{bottom:42%;opacity:0}}
+.sx-city{position:absolute;inset:0;z-index:-1;pointer-events:none}
+.sx-citycap{position:absolute;left:0;right:0;top:18%;text-align:center;color:#FFB13B;font-size:clamp(18px,6vw,30px);animation:sxflash 3s ease both}
+#chat.sx-glitch{animation:sxglitch 1s steps(2,end)}
+@keyframes sxglitch{0%{filter:none;transform:none}10%{filter:hue-rotate(90deg) contrast(1.6);transform:translate(-6px,2px) skewX(8deg);clip-path:inset(10% 0 55% 0)}20%{transform:translate(8px,-3px);clip-path:inset(60% 0 5% 0);filter:invert(.1) saturate(3)}30%{transform:translate(-3px,0) skewX(-10deg);clip-path:none;filter:hue-rotate(-60deg)}45%{transform:translate(5px,4px);clip-path:inset(30% 0 30% 0)}60%{transform:none;clip-path:none;filter:saturate(2) contrast(1.3)}75%{transform:translate(-4px,-2px) skewX(4deg)}100%{filter:none;transform:none;clip-path:none}}
+.sx-scan{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,240,255,.12) 0 2px,transparent 2px 5px);display:grid;place-items:center;animation:sxflash 1.1s steps(6) both}
+.sx-scan span{font-family:var(--tech);font-weight:900;color:#00F0FF;font-size:clamp(14px,5vw,22px);text-shadow:-3px 0 #FF2BD6,3px 0 #F3FF3A;background:rgba(7,4,26,.8);padding:6px 12px}
+.sx-choomcap{position:absolute;left:0;right:0;top:12%;text-align:center;animation:sxflash 1.8s ease both}
+.sx-jackcap{position:absolute;left:0;right:0;top:45%;text-align:center;color:#7CFF6B;animation:sxflash 2.6s steps(8) both}
+#chat.sx-gray{animation:sxgray 3.2s ease both}
+@keyframes sxgray{15%{filter:grayscale(1) brightness(.7)}85%{filter:grayscale(1) brightness(.7)}100%{filter:none}}
+.sx-ekg{position:absolute;left:0;right:0;top:36%;text-align:center;animation:sxflash 3.2s ease both}
+.sx-ekg svg{width:100%;height:120px}
+.sx-ekg path{fill:none;stroke:#7CFF6B;stroke-width:4;stroke-dasharray:700;stroke-dashoffset:700;animation:sxdraw 2.2s linear forwards;filter:drop-shadow(0 0 6px #7CFF6B)}
+@keyframes sxdraw{to{stroke-dashoffset:0}}
+.sx-ekg .sx-caption{color:#FF3D3D;letter-spacing:4px}
+.sx-preem{font-size:clamp(52px,17vw,110px);color:transparent;background:linear-gradient(110deg,#9aa4c0 0%,#fff 30%,#9aa4c0 45%,#5b6480 60%,#e8ecff 80%);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-stroke:2px #07041A;filter:drop-shadow(6px 6px 0 var(--mag));animation:sxslam 1.8s cubic-bezier(.2,1.4,.4,1) both,sxshine 1.2s linear .3s both}
+@keyframes sxshine{from{background-position:100% 0}to{background-position:0 0}}
+#chat.sx-gonk .face{animation:sxdizzy .5s linear 3}
+@keyframes sxdizzy{to{transform:rotate(360deg)}}
+.sx-gonkcap{position:absolute;left:0;right:0;top:20%;text-align:center;animation:sxflash 1.5s ease both}
+.sx-blackwall{position:absolute;inset:0;display:grid;place-content:center;text-align:center;background:repeating-linear-gradient(0deg,rgba(255,20,40,.25) 0 3px,rgba(0,0,0,.9) 3px 6px);animation:sxwall .5s steps(5) both;transition:opacity .5s}
+.sx-blackwall span{font-family:var(--num);font-size:clamp(46px,16vw,100px);color:#FF1E3C;text-shadow:-4px 0 #00F0FF,4px 0 #07041A;letter-spacing:2px}
+.sx-blackwall small{font-family:var(--tech);font-size:14px;color:#fff;letter-spacing:6px}
+.sx-blackwall.out{opacity:0}
+@keyframes sxwall{from{clip-path:inset(0 0 0 100%)}to{clip-path:inset(0 0 0 0)}}
+#chat.sx-scatter .msg{animation:sxscatter 1s cubic-bezier(.3,1.5,.5,1) both}
+@keyframes sxscatter{35%{transform:translate(var(--sx),var(--sy)) rotate(var(--sr))}100%{transform:rotate(var(--tilt,0))}}
+#sIcon.sx-tap{animation:sxtap .2s ease}
+@keyframes sxtap{50%{transform:rotate(9deg) scale(.92)}}
+#sIcon.sx-wink{animation:sxwink 1.3s ease}
+@keyframes sxwink{20%{transform:rotate(-10deg) scaleY(.2)}40%{transform:rotate(20deg) scale(1.2)}60%{transform:rotate(0) scale(1)}}
+@media (prefers-reduced-motion:reduce){#sfx *{animation-duration:.01s!important}}
 </style>
 </head>
 <body>
@@ -692,6 +765,11 @@ html,body{overscroll-behavior:none}
     <button class="ghost hidden" type="button" id="notifTest">Send a test notification</button>
     <button class="ghost" type="button" id="fxBtn">Screen effects: On</button>
     <details class="fx-list"><summary>Words and emoji that trigger effects</summary><ul id="fxList"></ul></details>
+    <div class="secretbox">
+      <div class="secretcount" id="secretCount">🔓 Secrets found: 0</div>
+      <div class="secretlist" id="secretList"></div>
+      <button type="button" class="linkbtn hidden" id="motionBtn">Enable motion secrets</button>
+    </div>
     <p class="msgline" id="profMsg" role="status"></p>
     <h3 class="hidden" id="blockedTitle">Blocked people</h3>
     <div class="members" id="blockedList"></div>
@@ -886,6 +964,7 @@ const THEMES={
   ice:    {label:"Ice",          main:"#7FDBFF", accent:"#9FA8FF", hi:"#FFFFFF"},
   sunset: {label:"Sunset",       main:"#FF9A3D", accent:"#FF4FA3", hi:"#FFE45C"},
   mono:   {label:"Mono",         main:"#E8E8F0", accent:"#8A8AA8", hi:"#F3FF3A"},
+  phantom:{label:"🎭 Phantom",   main:"#FF2E3F", accent:"#F4F7FF", hi:"#FF2E3F"},
 };
 const BUBBLES=["#2A1B4A","#0E3B4A","#4A1330","#123D22","#3D2A08","#1B2A6B","#5A1E5A","#262630"];
 const colorFor = s => COLORS[[...(s||"?")].reduce((a,c)=>a+c.charCodeAt(0),0)%COLORS.length];
@@ -1365,7 +1444,7 @@ function paintFxSettings(){
   FX_TRIGGERS.forEach(t=>{ const li=el("li"); li.append(el("b","",t.label+": ")); li.append([...t.words.map(w=>`"${w}"`),...t.emoji].join(", ")); ul.append(li); });
 }
 $("fxBtn").onclick=()=>{ try{ localStorage.setItem("nl-fx",fxEnabled()?"off":"on"); }catch(e){} paintFxSettings(); if(fxEnabled()) FX.play("confetti"); };
-const openProfile=()=>{ say("profMsg",""); paintNotif(); paintBlocked(); paintFxSettings(); fillBirthdayPicker(); show($("profile")); $("closeProfile").focus(); };
+const openProfile=()=>{ say("profMsg",""); paintNotif(); paintBlocked(); paintFxSettings(); fillBirthdayPicker(); paintSecrets(); show($("profile")); $("closeProfile").focus(); };
 $("openProfile1").onclick=openProfile; $("openProfile2").onclick=openProfile;
 $("closeProfile").onclick=()=>show($("profile"),false);
 $("changePhoto").onclick=()=>$("avatarPicker").click();
@@ -1630,7 +1709,7 @@ function openMenu(m){
     row.append(b);
   });
   show($("menuCopy"),!!m.text&&m.kind!=="sticker");
-  show($("menuFx"),!!fxFor(m.text));
+  show($("menuFx"),!!(secretFor(m.text)||fxFor(m.text))&&m.kind!=="poll"&&m.kind!=="game");
   show($("menuDelete"),mine||roomOwner===user.id);
   $("menuDelete").textContent=mine?"Delete message":"Delete message (room owner)";
   show($("menuBlock"),!mine); $("menuBlock").textContent=`Block ${nameOf(m.user_id)}`;
@@ -2081,12 +2160,13 @@ const STICKERS={
   heart:{label:"Heart",svg:STK(`<path d="M60 102C20 74 8 52 18 34c10-18 32-18 42 0c10-18 32-18 42 0c10 18-2 40-42 68z" fill="#07041A" transform="translate(4 4)"/><path d="M60 102C20 74 8 52 18 34c10-18 32-18 42 0c10-18 32-18 42 0c10 18-2 40-42 68z" fill="#E07AC6" stroke="#07041A" stroke-width="4"/><path d="M30 42q6-10 16-8" stroke="#F4F7FF" stroke-width="5" fill="none" stroke-linecap="round"/>`,6)},
   fire:{label:"Fire",svg:STK(`<path d="M60 8c8 22 34 30 34 60a34 34 0 0 1-68 0c0-16 8-24 14-32c2 12 8 16 12 16c-4-16 0-32 8-44z" fill="#07041A" transform="translate(4 4)"/><path d="M60 8c8 22 34 30 34 60a34 34 0 0 1-68 0c0-16 8-24 14-32c2 12 8 16 12 16c-4-16 0-32 8-44z" fill="#FF8A3D" stroke="#07041A" stroke-width="4"/><path d="M60 58c6 10 16 14 16 28a16 16 0 0 1-32 0c0-8 6-12 8-18c2 6 4 8 6 8c-2-6 0-12 2-18z" fill="#F3FF3A"/>`,-4)},
   crown:{label:"Crown",svg:STK(`<polygon points="12,86 18,32 42,58 60,22 78,58 102,32 108,86" fill="#07041A" transform="translate(4 4)"/><polygon points="12,86 18,32 42,58 60,22 78,58 102,32 108,86" fill="#F3FF3A" stroke="#07041A" stroke-width="4"/><rect x="12" y="86" width="96" height="14" fill="#00F0FF" stroke="#07041A" stroke-width="4"/><circle cx="60" cy="66" r="7" fill="#E07AC6" stroke="#07041A" stroke-width="3"/>`,-8)},
+  nightowl:{label:"Night owl",secret:"moonwink",svg:STK(`<path d="M68 12a46 46 0 1 0 38 68a36 36 0 0 1-38-68z" fill="#07041A" transform="translate(4 4)"/><path d="M68 12a46 46 0 1 0 38 68a36 36 0 0 1-38-68z" fill="#F3FF3A" stroke="#07041A" stroke-width="4"/><rect x="18" y="46" width="30" height="14" rx="3" fill="#07041A"/><rect x="52" y="46" width="30" height="14" rx="3" fill="#07041A"/><rect x="46" y="50" width="8" height="4" fill="#07041A"/><rect x="22" y="49" width="10" height="4" fill="#00F0FF" opacity=".8"/><path d="M34 78q12 8 26 0" stroke="#07041A" stroke-width="4" fill="none" stroke-linecap="round"/><text x="84" y="30" font-family="Anton,Impact,sans-serif" font-size="20" fill="#E07AC6" stroke="#07041A" stroke-width="3" paint-order="stroke">✦</text>`,-6)},
   zzz:{label:"Sleepy",svg:STK(`<text x="20" y="96" font-family="Anton,Impact,sans-serif" font-size="56" fill="#00F0FF" stroke="#07041A" stroke-width="5" paint-order="stroke">Z</text><text x="56" y="70" font-family="Anton,Impact,sans-serif" font-size="42" fill="#E07AC6" stroke="#07041A" stroke-width="5" paint-order="stroke">Z</text><text x="84" y="44" font-family="Anton,Impact,sans-serif" font-size="30" fill="#F3FF3A" stroke="#07041A" stroke-width="5" paint-order="stroke">Z</text>`,-8)},
 };
 function stickerEl(id){ const s=el("span","stk"); s.innerHTML=STICKERS[id].svg; s.setAttribute("role","img"); s.setAttribute("aria-label",STICKERS[id].label+" sticker"); return s; }
 function paintStickers(){
   const g=$("stickerGrid"); if(g.children.length) return;
-  Object.keys(STICKERS).forEach(id=>{ const b=el("button"); b.type="button"; b.setAttribute("aria-label","Send "+STICKERS[id].label+" sticker"); b.append(stickerEl(id));
+  Object.keys(STICKERS).filter(id=>!STICKERS[id].secret||hasSecret(STICKERS[id].secret)).forEach(id=>{ const b=el("button"); b.type="button"; b.setAttribute("aria-label","Send "+STICKERS[id].label+" sticker"); b.append(stickerEl(id));
     b.onclick=async()=>{ closeTray(); try{ await sendFields({kind:"sticker",sticker:id}); }catch(err){ $("status").textContent="Sticker didn't send: "+err.message; } };
     g.append(b); });
 }
@@ -2172,7 +2252,7 @@ let draftTheme=null, draftBubble=null;
 function paintThemeSheet(){
   const grid=$("presetGrid"); grid.innerHTML="";
   const cur=draftTheme.preset||"custom";
-  Object.entries(THEMES).forEach(([id,t])=>{
+  Object.entries(THEMES).filter(([id])=>id!=="phantom"||hasSecret("konami")).forEach(([id,t])=>{
     const b=el("button","preset"); b.type="button"; b.setAttribute("aria-pressed",cur===id);
     const dots=el("span","dots"); [t.main,t.accent,t.hi].forEach(c=>{ const i=el("i"); i.style.background=c; dots.append(i); });
     b.append(dots,t.label); b.onclick=()=>{ draftTheme={preset:id}; previewTheme(); }; grid.append(b);
@@ -2359,11 +2439,12 @@ function hypeText(text){
   return "LET'S GO!";
 }
 function playFx(m,force){
-  if(!m?.text) return;
-  const t=fxFor(m.text); if(!t) return;
+  if(!m?.text||m.kind==="poll"||m.kind==="game") return;
+  const s=secretFor(m.text), t=s?null:fxFor(m.text); if(!s&&!t) return;
   if(!force){ if(!fxEnabled()||document.hidden||fxPlayed.has(m.id)) return; if(Date.now()-new Date(m.created_at)>15000) return; }
   fxPlayed.add(m.id);
-  FX.play(t.fx,{text:hypeText(m.text)});
+  if(s) playSecretFromMessage(m,s,force);
+  else FX.play(t.fx,{text:hypeText(m.text)});
 }
 
 /* ---------- keep the chat inside the visible area when the keyboard opens ---------- */
@@ -2848,6 +2929,240 @@ function celebrateMyBirthday(force){
     setTimeout(()=>{ t.classList.add("out"); setTimeout(()=>t.remove(),260); },6000);
   },600);
 }
+
+/* ================= SECRETS 🔓 ================= */
+const SECRETS_KEY="nl-secrets";
+const foundSecrets=()=>{ try{ return JSON.parse(localStorage.getItem(SECRETS_KEY)||"[]"); }catch(e){ return []; } };
+const hasSecret=id=>foundSecrets().includes(id);
+const reducedMotion=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
+const SX=(()=>{   // secret effects layer
+  const layer=document.createElement("div"); layer.id="sfx"; layer.setAttribute("aria-hidden","true"); document.body.append(layer);
+  const add=(cls,html="")=>{ const d=document.createElement("div"); d.className=cls; d.innerHTML=html; layer.append(d); return d; };
+  const later=(fn,ms)=>setTimeout(fn,ms);
+  const R=(a,b)=>a+Math.random()*(b-a);
+  function chatClass(cls,ms){ const c=$("chat"); c.classList.remove(cls); void c.offsetWidth; c.classList.add(cls); later(()=>c.classList.remove(cls),ms); }
+  function canvasFx(host,draw,ms){
+    const cv=document.createElement("canvas"); cv.className="sfx-canvas"; host.append(cv);
+    const dpr=Math.min(devicePixelRatio||1,2), ctx=cv.getContext("2d");
+    const size=()=>{ const r=host.getBoundingClientRect(); cv.width=r.width*dpr; cv.height=r.height*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); return r; };
+    let box=size(), start=performance.now(), raf;
+    const state=draw.init?draw.init(box):{};
+    const frame=now=>{ const t=now-start, k=Math.min(1,t/ms); ctx.clearRect(0,0,box.width,box.height); draw.step(ctx,box,state,t,k); if(k<1) raf=requestAnimationFrame(frame); else cv.remove(); };
+    raf=requestAnimationFrame(frame);
+  }
+  return {
+    showtime(){
+      const bg=add("sx-showtime-bg"); const ban=add("sx-banner sx-showtime","SHOWTIME!");
+      for(let i=0;i<34;i++){ const c=add("sx-card"); c.style.setProperty("--tx",R(-60,60)+"vw"); c.style.setProperty("--ty",R(-60,60)+"vh"); c.style.setProperty("--r",R(-540,540)+"deg"); c.style.background=["#E8182B","#07041A","#F4F7FF"][i%3]; c.style.animationDelay=R(0,.25)+"s"; later(()=>c.remove(),2300); }
+      later(()=>{ bg.remove(); ban.remove(); },2300);
+    },
+    takeyourtime(){
+      const v=add("sx-dim"); const clock=add("sx-clock",`<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#07041A" stroke="var(--cyan)" stroke-width="4"/>${[...Array(12)].map((_,i)=>`<rect x="49" y="9" width="2" height="7" fill="var(--volt)" transform="rotate(${i*30} 50 50)"/>`).join("")}<rect class="h" x="48.5" y="26" width="3" height="26" fill="var(--white)"/><rect class="m" x="49.2" y="14" width="1.6" height="38" fill="var(--mag)"/><circle cx="50" cy="50" r="3" fill="var(--volt)"/></svg><div class="sx-caption">take your time…</div>`);
+      chatClass("sx-slow",3600); later(()=>{ v.remove(); clock.remove(); },3600);
+    },
+    over9000(){
+      chatClass("fx-shake",1000);
+      const m=add("sx-power",`<div class="sx-powerlabel">POWER LEVEL</div><div class="sx-bar"><i></i></div><div class="sx-num">0</div>`);
+      const num=m.querySelector(".sx-num"), start=performance.now();
+      const tick=now=>{ const k=Math.min(1,(now-start)/1400); num.textContent=Math.floor(9001*Math.pow(k,2.2)).toLocaleString(); if(k<1) requestAnimationFrame(tick); else { num.textContent="9,001!!"; m.classList.add("maxed"); if(typeof FX!=="undefined") FX.play("boom"); } };
+      requestAnimationFrame(tick); later(()=>m.remove(),2600);
+    },
+    barrelroll(){ chatClass("sx-roll",1300); },
+    lightsout(){
+      const d=add("sx-dark"); d.style.setProperty("--x","50%"); d.style.setProperty("--y","45%");
+      const move=e=>{ const p=e.touches?e.touches[0]:e; d.style.setProperty("--x",p.clientX+"px"); d.style.setProperty("--y",p.clientY+"px"); };
+      addEventListener("pointermove",move); addEventListener("touchmove",move,{passive:true});
+      later(()=>{ d.classList.add("out"); later(()=>{ d.remove(); removeEventListener("pointermove",move); removeEventListener("touchmove",move); },500); },6000);
+    },
+    midnight(){
+      if(typeof FX!=="undefined") FX.play("night");
+      const moon=add("sx-moon",`<svg viewBox="0 0 100 100"><path d="M64 10a42 42 0 1 0 30 62a34 34 0 0 1-30-62z" fill="var(--volt)" stroke="#07041A" stroke-width="3"/></svg>`);
+      later(()=>moon.remove(),3400);
+    },
+    cityburn(){
+      const host=$("chat"), wrap=document.createElement("div"); wrap.className="sx-city"; host.prepend(wrap);
+      canvasFx(wrap,{
+        init(box){ const b=[]; let x=-10; while(x<box.width+20){ const w=R(26,64); b.push({x,w,h:R(box.height*.14,box.height*.55),win:[...Array(40)].map(()=>Math.random()<.35)}); x+=w+R(2,8); }
+          return {b,embers:[...Array(90)].map(()=>({x:R(0,box.width),y:R(box.height*.4,box.height*1.2),v:R(.6,2.2),s:R(1,3),p:R(0,6)})),smoke:[...Array(10)].map(()=>({x:R(0,box.width),y:R(box.height*.3,box.height*.7),r:R(60,140),v:R(.15,.45)}))}; },
+        step(ctx,box,s,t,k){
+          const a=k<.12?k/.12:k>.85?(1-k)/.15:1; ctx.globalAlpha=a;
+          const g=ctx.createLinearGradient(0,0,0,box.height); g.addColorStop(0,"#140409"); g.addColorStop(.45,"#5c0f12"); g.addColorStop(.75,"#d2461a"); g.addColorStop(1,"#ffb13b");
+          ctx.fillStyle=g; ctx.fillRect(0,0,box.width,box.height);
+          for(const m of s.smoke){ m.y-=m.v; ctx.fillStyle="rgba(20,8,12,.35)"; ctx.beginPath(); ctx.arc(m.x+Math.sin(t/900+m.r)*20,m.y,m.r,0,7); ctx.fill(); }
+          for(const bd of s.b){
+            const top=box.height-bd.h;
+            ctx.fillStyle="#07030a"; ctx.fillRect(bd.x,top,bd.w,bd.h);
+            let i=0; for(let wy=top+8; wy<box.height-10; wy+=12){ for(let wx=bd.x+5; wx<bd.x+bd.w-6; wx+=10){ if(bd.win[i++%40]){ ctx.fillStyle=`rgba(255,${120+Math.floor(80*Math.abs(Math.sin(t/180+wx*wy)))},40,.85)`; ctx.fillRect(wx,wy,4,6);} } }
+            const fh=12+8*Math.sin(t/120+bd.x); const fg=ctx.createLinearGradient(0,top-fh*2,0,top+4); fg.addColorStop(0,"rgba(255,220,80,0)"); fg.addColorStop(.6,"rgba(255,120,30,.9)"); fg.addColorStop(1,"rgba(255,60,20,.9)");
+            ctx.fillStyle=fg; ctx.beginPath(); ctx.moveTo(bd.x,top+2); for(let fx=0;fx<=bd.w;fx+=6) ctx.lineTo(bd.x+fx,top-fh*(0.5+0.5*Math.abs(Math.sin(t/90+fx+bd.x)))); ctx.lineTo(bd.x+bd.w,top+2); ctx.fill();
+          }
+          ctx.globalCompositeOperation="lighter";
+          for(const e of s.embers){ e.y-=e.v; e.x+=Math.sin(t/300+e.p)*.6; if(e.y<-10){ e.y=box.height+10; } ctx.fillStyle=`rgba(255,${150+Math.floor(Math.random()*80)},60,.9)`; ctx.beginPath(); ctx.arc(e.x,e.y,e.s,0,7); ctx.fill(); }
+          ctx.globalCompositeOperation="source-over"; ctx.globalAlpha=1;
+        }
+      },6500);
+      later(()=>wrap.remove(),6600);
+      const cap=add("sx-caption sx-citycap","🔥 WE HAVE A CITY TO BURN"); later(()=>cap.remove(),3000);
+    },
+    netrunner(){
+      chatClass("sx-glitch",1100);
+      const o=add("sx-scan","<span>// NETRUNNER DETECTED //</span>"); later(()=>o.remove(),1100);
+      if(navigator.vibrate) navigator.vibrate([20,40,20,40,60]);
+    },
+    choom(){
+      const swaps=[];
+      const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,{acceptNode:n=>/friend/i.test(n.nodeValue)&&!n.parentElement.closest("script,style,textarea,input,#feed .bubble")?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT});
+      const nodes=[]; while(walker.nextNode()) nodes.push(walker.currentNode);
+      nodes.forEach(n=>{ swaps.push([n,n.nodeValue]); n.nodeValue=n.nodeValue.replace(/friend/gi,w=>w[0]==="F"?(w==="FRIEND"?"CHOOM":"Choom"):"choom"); });
+      const ph=$("contactName"); const oldPh=ph.placeholder; ph.placeholder=oldPh.replace(/friend/gi,"choom");
+      const toast=add("sx-caption sx-choomcap","Preem, choom 😎"); later(()=>toast.remove(),1800);
+      const restore=()=>{ swaps.forEach(([n,v])=>{ if(n.isConnected) n.nodeValue=v; }); ph.placeholder=oldPh; removeEventListener("pointerdown",restore,true); };
+      setTimeout(()=>addEventListener("pointerdown",restore,true),400);
+    },
+    jackin(){
+      canvasFx(layer,{
+        init(box){ const cols=Math.floor(box.width/14); return {cols,drops:[...Array(cols)].map(()=>R(-40,0))}; },
+        step(ctx,box,s,t,k){
+          const a=k<.1?k/.1:k>.8?(1-k)/.2:1; ctx.fillStyle=`rgba(3,8,6,${.78*a})`; ctx.fillRect(0,0,box.width,box.height);
+          ctx.font="bold 14px ui-monospace,monospace";
+          s.drops.forEach((d,i)=>{ for(let j=0;j<16;j++){ const y=(d-j)*16; if(y<0||y>box.height) continue; ctx.fillStyle=j===0?`rgba(220,255,240,${a})`:`rgba(0,${200+Math.floor(55*Math.random())},${150+ (i%3)*30},${a*(1-j/16)})`; ctx.fillText("01ｱｲｳｴｵ#$%<>/"[Math.floor(Math.random()*15)],i*14,y); } s.drops[i]+=.55; if(d*16>box.height+260) s.drops[i]=R(-20,0); });
+        }
+      },3200);
+      const cap=add("sx-caption sx-jackcap","JACKED IN ▮"); later(()=>cap.remove(),2600);
+    },
+    flatline(){
+      chatClass("sx-gray",3200);
+      const o=add("sx-ekg",`<svg viewBox="0 0 400 100" preserveAspectRatio="none"><path d="M0 50 H90 L105 20 L120 80 L135 50 H200 L212 28 L224 72 L236 50 H400" /></svg><div class="sx-caption">FLATLINED</div>`);
+      if(navigator.vibrate) later(()=>navigator.vibrate(900),1500);
+      later(()=>o.remove(),3200);
+    },
+    preem(){ const s=add("sx-banner sx-preem","PREEM ✓"); later(()=>s.remove(),1800); },
+    gonk(){ chatClass("sx-gonk",1700); const c=add("sx-caption sx-gonkcap","🤪 gonk"); later(()=>c.remove(),1500); },
+    blackwall(){
+      const w=add("sx-blackwall","<span>BLACKWALL</span><small>ACCESS DENIED</small>"); chatClass("sx-glitch",900);
+      later(()=>w.classList.add("out"),2200); later(()=>w.remove(),2700);
+    },
+    phantomUnlock(){ const b=add("sx-banner sx-showtime","PHANTOM UNLOCKED"); const bg=add("sx-showtime-bg"); later(()=>{ b.remove(); bg.remove(); },2000); },
+    scatter(){
+      feed.querySelectorAll(".msg").forEach(n=>{ n.style.setProperty("--sx",R(-160,160)+"px"); n.style.setProperty("--sy",R(-120,120)+"px"); n.style.setProperty("--sr",R(-60,60)+"deg"); });
+      chatClass("sx-scatter",1100);
+    }
+  };
+})();
+
+const esc2=s=>s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+const SECRET_LIST=[
+  {id:"showtime", name:"Showtime", re:/(^|[^a-z])(it'?s )?showtime([^a-z]|$)/i, play:()=>SX.showtime()},
+  {id:"takeyourtime", name:"Take your time", re:/take your time/i, play:()=>SX.takeyourtime()},
+  {id:"over9000", name:"Over 9000", re:/over (9,?000|nine thousand)/i, play:()=>SX.over9000()},
+  {id:"barrelroll", name:"Barrel roll", re:/do a barrel roll/i, play:()=>SX.barrelroll()},
+  {id:"lightsout", name:"Lights out", re:/(^|[^a-z])lights out([^a-z]|$)/i, play:()=>SX.lightsout()},
+  {id:"midnight", name:"Midnight", re:/(^|[^a-z])midnight([^a-z]|$)/i, when:()=>new Date().getHours()===0, play:()=>SX.midnight()},
+  {id:"cityburn", name:"A city to burn", re:/we(?:'ve got| have| got|'ve) a city to burn/i, play:()=>SX.cityburn()},
+  {id:"netrunner", name:"Netrunner", re:/(^|[^a-z])netrunner(s)?([^a-z]|$)/i, play:()=>SX.netrunner()},
+  {id:"choom", name:"Choom", re:/(^|[^a-z])chooms?([^a-z]|$)/i, play:()=>SX.choom()},
+  {id:"jackin", name:"Jack in", re:/(^|[^a-z])jack(ing|ed)? in([^a-z]|$)/i, play:()=>SX.jackin()},
+  {id:"flatline", name:"Flatline", re:/(^|[^a-z])flatlin(e|ed|ing)([^a-z]|$)/i, play:()=>SX.flatline()},
+  {id:"preem", name:"Preem", re:/(^|[^a-z])preem([^a-z]|$)/i, play:()=>SX.preem()},
+  {id:"gonk", name:"Gonk", re:/(^|[^a-z])gonk([^a-z]|$)/i, play:()=>SX.gonk()},
+  {id:"blackwall", name:"Blackwall", re:/(^|[^a-z])blackwall([^a-z]|$)/i, play:()=>SX.blackwall()},
+  {id:"konami", name:"Phantom code", gesture:true},
+  {id:"moonwink", name:"Night owl", gesture:true},
+  {id:"shake", name:"Shake it", gesture:true},
+];
+function secretFor(text){
+  if(!text) return null;
+  const t=text.replace(/[’‘]/g,"'");
+  return SECRET_LIST.find(s=>s.re&&s.re.test(t)&&(!s.when||s.when()))||null;
+}
+function discoverSecret(id){
+  const f=foundSecrets(); if(f.includes(id)) return false;
+  f.push(id); try{ localStorage.setItem(SECRETS_KEY,JSON.stringify(f)); }catch(e){}
+  const s=SECRET_LIST.find(x=>x.id===id);
+  const t=el("div","toast mention"); const body=el("span","tbody");
+  body.append(el("div","ttitle",`🔓 Secret found (${f.length}/${SECRET_LIST.length})`), el("div","ttext",s?s.name:"???"));
+  t.append(el("span","sx-lock","🔓"),body); $("toasts").prepend(t);
+  setTimeout(()=>{ t.classList.add("out"); setTimeout(()=>t.remove(),260); },4500);
+  if(navigator.vibrate) navigator.vibrate([30,50,30,50,80]);
+  if(!$("profile").classList.contains("hidden")) paintSecrets();
+  return true;
+}
+const secretBannerShown=new Set();
+function playSecretFromMessage(m,s,force){
+  if(!force&&!reducedMotion()) s.play(); else if(force) s.play();
+  else if(s.id==="choom") s.play();          // text swap is fine with reduced motion
+  if(m.user_id===user.id) discoverSecret(s.id);
+  else {
+    const key=room+":"+s.id;
+    if(!secretBannerShown.has(key)&&!force){ secretBannerShown.add(key);
+      const t=el("div","toast"); const body=el("span","tbody");
+      body.append(el("div","ttitle","🔓 Secret"), el("div","ttext",`${nameOf(m.user_id)} found a secret!`));
+      const f=el("span","face"); paintFace(f,cache.get(m.user_id)); t.append(f,body); $("toasts").prepend(t);
+      setTimeout(()=>{ t.classList.add("out"); setTimeout(()=>t.remove(),260); },3500);
+    }
+  }
+}
+function paintSecrets(){
+  const f=foundSecrets();
+  $("secretCount").textContent=`🔓 Secrets found: ${f.length}/${SECRET_LIST.length}`;
+  const box=$("secretList"); box.innerHTML="";
+  SECRET_LIST.forEach(s=>{ const got=f.includes(s.id); box.append(el("span","sx-chip"+(got?" got":""),got?s.name:"???")); });
+  show($("motionBtn"), typeof DeviceMotionEvent!=="undefined" && typeof DeviceMotionEvent.requestPermission==="function" && !motionOn);
+}
+
+/* Konami code: swipe ↑↑↓↓←→←→ (or arrow keys), then double-tap the date stamp or the room name */
+const KONAMI=["up","up","down","down","left","right","left","right"];
+let konamiSeq=[], konamiArmedUntil=0, stampTaps=[];
+function konamiPush(dir){
+  konamiSeq.push(dir); konamiSeq=konamiSeq.slice(-8);
+  if(konamiSeq.join()===KONAMI.join()){ konamiArmedUntil=Date.now()+10000; konamiSeq=[]; if(navigator.vibrate) navigator.vibrate(15); }
+}
+let swipeStart=null;
+addEventListener("touchstart",e=>{ if(e.touches.length===1) swipeStart={x:e.touches[0].clientX,y:e.touches[0].clientY,t:Date.now()}; },{passive:true});
+addEventListener("touchend",e=>{
+  if(!swipeStart) return; const p=e.changedTouches[0], dx=p.clientX-swipeStart.x, dy=p.clientY-swipeStart.y; const quick=Date.now()-swipeStart.t<700; swipeStart=null;
+  if(!quick||Math.max(Math.abs(dx),Math.abs(dy))<40) return;
+  konamiPush(Math.abs(dx)>Math.abs(dy)?(dx>0?"right":"left"):(dy>0?"down":"up"));
+},{passive:true});
+addEventListener("keydown",e=>{
+  if(e.target.closest&&e.target.closest("input,textarea")) return;
+  const map={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right"};
+  if(map[e.key]) konamiPush(map[e.key]);
+  else if((e.key==="b"||e.key==="a")&&Date.now()<konamiArmedUntil){ stampTap(); }
+});
+function stampTap(){
+  if(Date.now()>konamiArmedUntil) return;
+  const now=Date.now(); stampTaps=stampTaps.filter(t=>now-t<700); stampTaps.push(now);
+  if(stampTaps.length>=2){ stampTaps=[]; konamiArmedUntil=0; unlockPhantom(); }
+}
+function unlockPhantom(){
+  const fresh=discoverSecret("konami");
+  if(!reducedMotion()) SX.phantomUnlock();
+  if(!fresh){ $("status").textContent="Phantom theme is already unlocked. Find it in Theme & colors."; }
+}
+[$("sMonth")?.closest(".stamp"),$("roomLabel"),$("miniDate")].forEach(n=>n&&n.addEventListener("click",stampTap));
+
+/* Tap the sun/moon 7 times: it winks and unlocks a secret sticker */
+let iconTaps=[];
+$("sIcon").addEventListener("click",()=>{
+  const now=Date.now(); iconTaps=iconTaps.filter(t=>now-t<3000); iconTaps.push(now);
+  const ic=$("sIcon"); ic.classList.remove("sx-tap"); void ic.offsetWidth; ic.classList.add("sx-tap");
+  if(iconTaps.length>=7){ iconTaps=[]; ic.classList.remove("sx-wink"); void ic.offsetWidth; ic.classList.add("sx-wink"); setTimeout(()=>ic.classList.remove("sx-wink"),1400);
+    const fresh=discoverSecret("moonwink"); $("stickerGrid").innerHTML="";
+    if(!fresh) say("roomMsg","🦉 The night owl sticker is already in your sticker tray."); }
+});
+
+/* Shake your phone in a room: bubbles scatter and snap back */
+let motionOn=false, lastShake=0, lastAcc=null;
+function onMotion(e){
+  const a=e.accelerationIncludingGravity; if(!a) return;
+  if(lastAcc){ const d=Math.abs(a.x-lastAcc.x)+Math.abs(a.y-lastAcc.y)+Math.abs(a.z-lastAcc.z);
+    if(d>32&&Date.now()-lastShake>2500&&room&&!$("chat").classList.contains("hidden")){ lastShake=Date.now(); if(!reducedMotion()) SX.scatter(); discoverSecret("shake"); } }
+  lastAcc={x:a.x||0,y:a.y||0,z:a.z||0};
+}
+function startMotion(){ if(motionOn) return; motionOn=true; addEventListener("devicemotion",onMotion); }
+if(typeof DeviceMotionEvent!=="undefined"&&typeof DeviceMotionEvent.requestPermission!=="function") startMotion();
+$("motionBtn").onclick=async()=>{ try{ if(await DeviceMotionEvent.requestPermission()==="granted") startMotion(); }catch(e){} paintSecrets(); };
 
 /* ================= STAYING CONNECTED ================= */
 let liveStatus=null, catchingUp=false, lastCatchUp=0;
