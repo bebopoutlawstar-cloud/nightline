@@ -426,6 +426,21 @@ html,body{overscroll-behavior:none}
 .toast.out{animation:toastout .25s ease forwards}
 @keyframes toastin{from{opacity:0;transform:translateY(-30px) rotate(-4deg)}}
 @keyframes toastout{to{opacity:0;transform:translateY(-30px)}}
+
+/* ===== birthdays: faces keep their cutout shape on an inner layer so a cake can sit on top ===== */
+.face{background:none!important;clip-path:none!important;overflow:visible!important;position:relative}
+.face .fi{position:absolute;inset:0;display:grid;place-items:center;background:var(--c,var(--cyan));clip-path:polygon(10% 0,100% 8%,90% 100%,0 92%);overflow:hidden}
+.face .fi img{width:100%;height:100%;object-fit:cover;display:block}
+.receipt .mini-faces .face{position:relative!important}
+.cake{position:absolute;right:-.6em;top:-.75em;font-size:max(17px,.78em);line-height:1;font-family:system-ui,"Apple Color Emoji","Segoe UI Emoji",sans-serif;font-weight:400;filter:drop-shadow(0 2px 0 var(--night)) drop-shadow(0 0 6px rgba(243,255,58,.6));transform:rotate(12deg);animation:cakebob 2.4s ease-in-out infinite;pointer-events:none;z-index:2}
+@keyframes cakebob{50%{transform:rotate(-6deg) translateY(-2px) scale(1.08)}}
+.face.bday .fi{box-shadow:inset 0 0 0 3px var(--volt)}
+.mini-faces .cake,.face.sm .cake{font-size:15px;right:-8px;top:-10px}
+.receipt .mini-faces .cake{display:none}
+.bdayrow{display:flex;gap:8px;width:100%}
+.bdayrow select{flex:1;min-width:0;padding:10px 8px;font-size:15px;appearance:auto;color:var(--white);background:var(--deep)}
+.bdayrow .send{padding:10px 12px}
+@media (prefers-reduced-motion:reduce){.cake{animation:none}}
 </style>
 </head>
 <body>
@@ -554,6 +569,15 @@ html,body{overscroll-behavior:none}
     <input type="file" id="avatarPicker" accept="image/*" class="sr">
     <button class="go" type="button" id="changePhoto">Change photo</button>
     <button class="ghost" type="button" id="openTheme">Theme &amp; colors 🎨</button>
+    <h3>Birthday 🎂</h3>
+    <div class="bdayrow">
+      <label for="bdMonth" class="sr">Birth month</label><select class="field" id="bdMonth"></select>
+      <label for="bdDay" class="sr">Birth day</label><select class="field" id="bdDay"></select>
+      <button type="button" class="send" id="bdSave">Save</button>
+    </div>
+    <p class="sub left">Just the month and day. On your birthday, everyone sees a cake on your picture.</p>
+    <button type="button" class="linkbtn hidden" id="bdClear">Remove my birthday</button>
+    <p class="msgline" id="bdMsg" role="status"></p>
     <button class="ghost" type="button" id="notifBtn">Turn on notifications</button>
     <button class="ghost hidden" type="button" id="notifTest">Send a test notification</button>
     <button class="ghost" type="button" id="fxBtn">Screen effects: On</button>
@@ -719,6 +743,9 @@ function paintDate(){
   $("miniDate").innerHTML=`${d.getMonth()+1}/${d.getDate()}<small>${DAYS[d.getDay()].slice(0,3)}</small>`;
 }
 paintDate(); setInterval(paintDate,60000);
+let lastDay=new Date().toDateString();
+setInterval(()=>{ const now=new Date().toDateString(); if(now===lastDay) return; lastDay=now;
+  if(typeof user!=="undefined"&&user){ paintMe(); if(room) renderAll(false); loadInbox(); loadContacts(); celebrateMyBirthday(); } },60000);
 
 /* ---------- starfield ---------- */
 (function(){
@@ -783,7 +810,7 @@ const live = {
   async resetPassword(email){ must(await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname})); },
   async updatePassword(pw){ must(await sb.auth.updateUser({password:pw})); },
   async deleteAccount(){ must(await sb.rpc("delete_my_account")); await sb.auth.signOut(); },
-  async profiles(ids){ return must(await sb.from("profiles").select("id,username,avatar_url,theme,bubble_color").in("id",ids)); },
+  async profiles(ids){ return must(await sb.from("profiles").select("id,username,avatar_url,theme,bubble_color,birthday").in("id",ids)); },
   async saveStyle(uid,style){ must(await sb.from("profiles").update(style).eq("id",uid)); },
   async upload(bucket,uid,blob){
     const t=(blob.type||"image/jpeg").split(";")[0];
@@ -889,6 +916,7 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     {id:6,room,user_id:"vee",kind:"sticker",sticker:"omw",created_at:iso(30000)}]};
   polls[5]={message_id:5,options:["Arcade","Movies","Both 😎"],multi:false}; votes.push({message_id:5,user_id:"vee",option_index:0});
   people.vee.bubble_color="#0E3B4A";
+  { const d=new Date(); people.vee.birthday=String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
   reacts.push({message_id:2,user_id:"rook",emoji:"😂"});
   const fire=(f,...a)=>H&&H[f](...a);
   return {
@@ -982,11 +1010,24 @@ const typers=new Map();       // user id -> {name,timer}
 let blocked=new Set();
 const feed=$("feed");
 
+function isBirthdayToday(bd){
+  if(typeof bd!=="string"||!/^\d\d-\d\d$/.test(bd)) return false;
+  const d=new Date(), y=d.getFullYear(), today=String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  const leap=(y%4===0&&y%100!==0)||y%400===0;
+  return bd===today || (bd==="02-29"&&!leap&&today==="02-28");
+}
 function paintFace(node,p){
   node.style.setProperty("--c",colorFor(p?.username));
-  node.textContent=""; const url=safeImg(p?.avatar_url);
-  if(url){ const i=document.createElement("img"); i.src=url; i.alt=""; node.append(i); }
-  else node.textContent=(p?.username||"?")[0].toUpperCase();
+  node.textContent="";
+  const inner=document.createElement("span"); inner.className="fi";
+  const url=safeImg(p?.avatar_url);
+  if(url){ const i=document.createElement("img"); i.src=url; i.alt=""; inner.append(i); }
+  else inner.textContent=(p?.username||"?")[0].toUpperCase();
+  node.append(inner);
+  const bday=isBirthdayToday(p?.birthday);
+  node.classList.toggle("bday",bday);
+  if(bday){ const c=document.createElement("span"); c.className="cake"; c.textContent="🎂"; c.setAttribute("aria-hidden","true"); node.append(c); node.title=`It's ${p?.username||"their"}'s birthday today!`; }
+  else if(node.title&&node.title.startsWith("It's ")) node.removeAttribute("title");
 }
 function paintMe(){
   ["meFace","openProfile2","profFace"].forEach(id=>paintFace($(id),meProfile));
@@ -1021,6 +1062,7 @@ async function handleAuth(u){
   show($("authCard"),false); show($("roomCard"));
   try{ $("room").value=localStorage.getItem("nl-room")||""; }catch(e){}
   loadInbox(); loadContacts();
+  celebrateMyBirthday();
   if(unsubAll) unsubAll();
   unsubAll=api.subscribeAll(onAnyMessage);
   clearBadge();
@@ -1109,7 +1151,7 @@ function paintFxSettings(){
   FX_TRIGGERS.forEach(t=>{ const li=el("li"); li.append(el("b","",t.label+": ")); li.append([...t.words.map(w=>`"${w}"`),...t.emoji].join(", ")); ul.append(li); });
 }
 $("fxBtn").onclick=()=>{ try{ localStorage.setItem("nl-fx",fxEnabled()?"off":"on"); }catch(e){} paintFxSettings(); if(fxEnabled()) FX.play("confetti"); };
-const openProfile=()=>{ say("profMsg",""); paintNotif(); paintBlocked(); paintFxSettings(); show($("profile")); $("closeProfile").focus(); };
+const openProfile=()=>{ say("profMsg",""); paintNotif(); paintBlocked(); paintFxSettings(); fillBirthdayPicker(); show($("profile")); $("closeProfile").focus(); };
 $("openProfile1").onclick=openProfile; $("openProfile2").onclick=openProfile;
 $("closeProfile").onclick=()=>show($("profile"),false);
 $("changePhoto").onclick=()=>$("avatarPicker").click();
@@ -2218,6 +2260,57 @@ $("notifTest").onclick=async()=>{
     say("profMsg","Test sent. If you didn't see it, check your phone's notification settings for this app.");
   }catch(err){ say("profMsg","Couldn't show a test: "+err.message,true); }
 };
+
+/* ================= BIRTHDAYS ================= */
+const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+function fillBirthdayPicker(){
+  const m=$("bdMonth"), d=$("bdDay");
+  if(!m.options.length){ m.append(new Option("Month","")); MONTHS.forEach((name,i)=>m.append(new Option(name,String(i+1).padStart(2,"0")))); }
+  const cur=meProfile?.birthday||"";
+  m.value=cur.slice(0,2);
+  paintDays(cur.slice(3,5));
+  $("bdClear").classList.toggle("hidden",!cur);
+  say("bdMsg", cur ? (isBirthdayToday(cur)?"Happy birthday! 🎂 Everyone sees a cake on your picture today.":`Friends will see a 🎂 on your picture on ${MONTHS[+cur.slice(0,2)-1]} ${+cur.slice(3,5)}.`) : "");
+}
+function paintDays(keep){
+  const m=$("bdMonth").value, d=$("bdDay"), prev=keep??d.value;
+  const max=m?[31,29,31,30,31,30,31,31,30,31,30,31][+m-1]:31;
+  d.innerHTML=""; d.append(new Option("Day",""));
+  for(let i=1;i<=max;i++) d.append(new Option(String(i),String(i).padStart(2,"0")));
+  d.value=prev&&+prev<=max?prev:"";
+}
+$("bdMonth").addEventListener("change",()=>paintDays());
+$("bdSave").onclick=async()=>{
+  const m=$("bdMonth").value, d=$("bdDay").value;
+  if(!m||!d) return say("bdMsg","Pick a month and a day.",true);
+  await saveBirthday(`${m}-${d}`);
+};
+$("bdClear").onclick=()=>saveBirthday(null);
+async function saveBirthday(bd){
+  $("bdSave").disabled=true;
+  try{
+    await api.saveStyle(user.id,{birthday:bd});
+    meProfile={...meProfile,birthday:bd}; cache.set(user.id,meProfile); paintMe();
+    if(room) repaintFaces(user.id);
+    fillBirthdayPicker();
+    if(bd===null) say("bdMsg","Birthday removed.");
+    else if(isBirthdayToday(bd)) celebrateMyBirthday(true);
+  }catch(err){ say("bdMsg","Couldn't save: "+err.message,true); }
+  finally{ $("bdSave").disabled=false; }
+}
+function celebrateMyBirthday(force){
+  if(!meProfile||!isBirthdayToday(meProfile.birthday)) return;
+  const key="nl-bday-"+new Date().toDateString();
+  try{ if(!force&&localStorage.getItem(key)) return; localStorage.setItem(key,"1"); }catch(e){}
+  setTimeout(()=>{
+    if(fxEnabled()) FX.play("confetti");
+    const t=el("div","toast mention");
+    const f=el("span","face"); paintFace(f,meProfile);
+    const body=el("span","tbody"); body.append(el("div","ttitle","🎂 Happy birthday!"), el("div","ttext",`Have an amazing day, ${meProfile.username}!`));
+    t.append(f,body); $("toasts").prepend(t);
+    setTimeout(()=>{ t.classList.add("out"); setTimeout(()=>t.remove(),260); },6000);
+  },600);
+}
 
 /* ---------- boot ---------- */
 setMode("in");
