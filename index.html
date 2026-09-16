@@ -235,6 +235,14 @@ button:disabled{opacity:.5;cursor:default}
 .fx-list summary{font-family:var(--tech);font-size:12px;color:var(--cyan);cursor:pointer}
 .fx-list ul{list-style:none;display:grid;gap:4px;margin-top:8px}
 .fx-list b{color:var(--white)}
+
+/* phone-width fix: long room previews must not stretch the layout */
+html,body{overflow-x:hidden}
+.front,.front-inner,.card,.inbox,#inboxWrap{min-width:0;max-width:100%}
+.card,.inbox{grid-template-columns:minmax(0,1fr)}
+.roomrow{min-width:0;max-width:100%;overflow:hidden}
+.roomrow .info,.roomrow .name,.roomrow .preview{min-width:0}
+.whoami .who-text{min-width:0;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
