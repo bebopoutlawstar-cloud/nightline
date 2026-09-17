@@ -1046,6 +1046,75 @@ body.theme-pipboy .compose,body.theme-pipboy .top{background:rgba(6,16,8,.92)!im
 .ken-text{position:absolute;left:50%;bottom:14%;transform:translateX(-50%) rotate(-3deg);text-align:center;color:#1d2b8a;background:#ff8ac6;border:5px solid #fff;padding:6px 22px;box-shadow:8px 8px 0 #1d2b8a;animation:sxslam 4.4s cubic-bezier(.2,1.4,.4,1) both;white-space:nowrap}
 .ken-text span{display:block;font-family:var(--body);font-weight:700;font-size:clamp(18px,6vw,26px)}
 .ken-text b{display:block;font-family:Georgia,"Times New Roman",serif;font-size:clamp(36px,12vw,64px);line-height:1}
+/* ===== gifs ===== */
+.gifbar{display:flex;gap:6px;margin-bottom:6px}
+.gifbar .field{flex:1;min-width:0;padding:8px 10px;font-size:15px}
+.gifgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;max-height:220px;overflow-y:auto}
+.gifpick{background:#000;border:2px solid transparent;padding:0;height:90px;overflow:hidden}
+.gifpick img{width:100%;height:100%;object-fit:cover;display:block}
+.gifpick:focus-visible,.gifpick:hover{border-color:var(--volt)}
+.gifgrid .note{grid-column:1/-1;text-align:center;font-size:13px}
+.gifcredit{font-family:var(--tech);font-size:10px;color:var(--muted)}
+/* ===== dice ===== */
+.dn-face{position:absolute;inset:0;background:#07041A;border:5px solid var(--cyan);box-shadow:7px 7px 0 var(--mag)}
+.dn-circle .dn-face{border-radius:50%}
+.dn-coin .dn-face{border-radius:50%;background:#b8860b;border-color:#ffd84a}
+.dn-triangle .dn-face{clip-path:polygon(50% 0,100% 100%,0 100%);box-shadow:none;border:none;background:var(--cyan)}
+.dn-triangle .dn-face::after{content:"";position:absolute;inset:8px;clip-path:polygon(50% 0,100% 100%,0 100%);background:#07041A}
+.dn-square .dn-face{border-radius:14px}
+.dn-diamond .dn-face{clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);border:none;box-shadow:none;background:var(--cyan)}
+.dn-diamond .dn-face::after{content:"";position:absolute;inset:7px;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);background:#07041A}
+.dn-kite .dn-face{clip-path:polygon(50% 0,100% 40%,50% 100%,0 40%);border:none;box-shadow:none;background:var(--cyan)}
+.dn-kite .dn-face::after{content:"";position:absolute;inset:7px;clip-path:polygon(50% 0,100% 40%,50% 100%,0 40%);background:#07041A}
+.dn-pentagon .dn-face{clip-path:polygon(50% 0,100% 38%,82% 100%,18% 100%,0 38%);border:none;box-shadow:none;background:var(--cyan)}
+.dn-pentagon .dn-face::after{content:"";position:absolute;inset:7px;clip-path:polygon(50% 0,100% 38%,82% 100%,18% 100%,0 38%);background:#07041A}
+.dn-label{position:absolute;left:0;right:0;bottom:-26px;text-align:center;font-family:var(--tech);font-size:12px;color:var(--cyan)}
+.dn-triangle .sx-dnum{transform:translateY(-30%)}
+/* ===== ghostface-style call ===== */
+.gf-call{gap:10px}
+.gf-mask{width:90px;margin:0 auto;animation:gfbreathe 1.2s ease-in-out infinite alternate;filter:drop-shadow(0 0 16px rgba(255,255,255,.4))}
+@keyframes gfbreathe{to{transform:scale(1.06) rotate(-3deg)}}
+.gf-line{font-size:18px;color:#eee;font-style:italic;max-width:80vw;margin:0 auto}
+/* ===== pot of greed ===== */
+.pg-wrap{position:absolute;inset:0;display:grid;place-content:center;gap:16px;text-align:center;background:rgba(0,0,0,.75);animation:sxfadein .3s ease both;perspective:800px}
+.pg-card{position:relative;width:150px;height:220px;margin:0 auto;transform-style:preserve-3d;animation:pgdraw .8s cubic-bezier(.2,1.2,.4,1) both;transition:transform .8s cubic-bezier(.4,0,.2,1)}
+.pg-wrap.flip .pg-card{transform:rotateY(180deg)}
+@keyframes pgdraw{from{transform:translateY(60vh) rotate(-20deg)}}
+.pg-back,.pg-front{position:absolute;inset:0;border-radius:8px;backface-visibility:hidden;border:4px solid #3b2a12}
+.pg-back{background:radial-gradient(circle,#6b3a1a,#3b2210);display:grid;place-items:center;font-size:48px;color:#d9a441}
+.pg-front{background:#1f8a4c;transform:rotateY(180deg);padding:8px;display:grid;grid-template-rows:auto 1fr auto auto;gap:4px;color:#07041A;text-align:left}
+.pg-name{font-family:var(--tech);font-size:11px;font-weight:900;background:#e8f5e9;padding:3px 5px;border:2px solid #07041A}
+.pg-art{background:#c8e6c9;border:2px solid #07041A;display:grid;place-items:center}
+.pg-art svg{width:80%}
+.pg-type{font-size:10px;font-family:var(--tech)}
+.pg-text{font-size:12px;background:#e8f5e9;border:2px solid #07041A;padding:3px 5px}
+.pg-cap{color:#ffd84a;max-width:84vw}
+/* ===== yugioh ===== */
+.yg-wrap{position:absolute;inset:0;overflow:hidden;background:radial-gradient(circle at 50% 40%,rgba(255,216,74,.35),rgba(20,8,0,.85) 70%);animation:sxflash 4.2s ease both}
+.yg-rays{position:absolute;inset:-60%;background:repeating-conic-gradient(from 0deg,rgba(255,216,74,.3) 0 5deg,transparent 5deg 15deg);animation:sxrays 4.2s linear both}
+.yg-eye{position:absolute;left:50%;top:38%;width:min(60vw,240px);transform:translate(-50%,-50%);filter:drop-shadow(0 0 20px #ffd84a);animation:sxslam 4s cubic-bezier(.2,1.4,.4,1) both}
+.yg-glyphs i{position:absolute;font-style:normal;font-size:30px;color:#ffd84a;text-shadow:0 0 10px #ffb300;animation:ygglyph 1.2s ease-in-out infinite alternate}
+@keyframes ygglyph{from{opacity:.3;transform:translateY(0)}to{opacity:1;transform:translateY(-8px)}}
+.yg-cap{position:absolute;left:0;right:0;bottom:22%;text-align:center;color:#ffd84a;letter-spacing:2px}
+/* ===== consoles ===== */
+.cs-wrap{position:absolute;inset:0;display:grid;place-content:center;gap:14px;text-align:center;animation:sxflash 3.6s ease both}
+.cs-glow{position:absolute;inset:0;box-shadow:inset 0 0 120px 30px var(--csc);animation:cspulse 1.2s ease-in-out 3 alternate}
+.cs-blue{--csc:#1e6fff}.cs-green{--csc:#2ecc40}
+@keyframes cspulse{from{opacity:.4}to{opacity:1}}
+.cs-logo{width:120px;margin:0 auto;filter:drop-shadow(0 0 18px var(--csc));animation:csfade 3.6s ease both}
+@keyframes csfade{0%{opacity:0;transform:scale(.8)}25%,80%{opacity:1;transform:scale(1)}100%{opacity:0}}
+.cs-text{font-family:var(--tech);font-size:13px;color:#fff;letter-spacing:3px;animation:sxblink .8s steps(1) infinite}
+/* ===== shot first ===== */
+.sf-wrap{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 80%,rgba(120,80,20,.5),rgba(0,0,0,.9) 70%);animation:sxfadein .3s ease both}
+.sf-man{position:absolute;left:50%;bottom:16%;width:min(40vw,150px);transform:translateX(-50%)}
+.sf-man svg{width:100%;transform-origin:50% 100%;transition:transform .5s cubic-bezier(.6,0,.9,.5)}
+.sf-arm{transform-origin:78px 70px;animation:sfaim 1.2s ease both}
+@keyframes sfaim{from{transform:rotate(60deg)}to{transform:rotate(0)}}
+.sf-flash{position:absolute;inset:0;background:#fff;opacity:0}
+.sf-wrap.bang .sf-flash{animation:sfbang .35s ease both}
+@keyframes sfbang{20%{opacity:.95}100%{opacity:0}}
+.sf-wrap.down .sf-man svg{transform:rotate(88deg) translateY(30%)}
+.sf-cap{position:absolute;left:0;right:0;top:20%;text-align:center;color:#ffd84a}
 </style>
 </head>
 <body>
@@ -1154,10 +1223,12 @@ body.theme-pipboy .compose,body.theme-pipboy .top{background:rgba(6,16,8,.92)!im
     <div class="tray hidden" id="tray">
       <div class="tray-tabs">
         <button type="button" class="ghost" id="traySticker" aria-pressed="true">Stickers</button>
+        <button type="button" class="ghost" id="trayGifs" aria-pressed="false">GIFs</button>
         <button type="button" class="ghost" id="trayGames" aria-pressed="false">Games</button>
         <button type="button" class="ghost" id="trayPoll">Poll</button>
       </div>
       <div class="stickers" id="stickerGrid"></div>
+      <div class="hidden" id="gifPane"><div class="gifbar"><label for="gifSearch" class="sr">Search GIFs</label><input class="field" id="gifSearch" placeholder="Search GIPHY…" autocomplete="off"></div><div class="gifgrid" id="gifGrid"></div></div>
       <div class="gamelist hidden" id="gameList">
         <button type="button" class="gamepick" data-game="tictactoe">
           <span class="gp-icon" aria-hidden="true"><i class="x"></i><i class="o"></i><i></i><i></i><i class="x"></i><i></i><i class="o"></i><i></i><i class="x"></i></span>
@@ -2176,6 +2247,7 @@ function buildMsg(m,index,noAnim){
   else if(m.kind==="game") bub.append(gameCard(m));
   else if(m.text){ const t=el("div"); renderTextWithDates(t,m.text,m.mentions,m); bub.append(t); const trb=translationBlock(m); if(trb) bub.append(trb);
     if(/el psy (k|c)ongroo|(^|[^a-z])world ?line([^a-z]|$)/i.test(m.text)&&typeof m.id==="number") bub.append(el("div","d20chip wlchip",`⚗️ world line ${worldLineFor(m)}`));
+    if(typeof m.id==="number"&&diceIn(m.text)){ const n=diceIn(m.text), r=dNFor(m,n); bub.append(el("div","d20chip"+(r===n&&n>1?" nat20":r===1&&n>1?" nat1":""),n===2?`🪙 d2 → ${r===1?"heads":"tails"}`:`🎲 d${n} → ${r}${r===n&&n>1?" MAX!":""}`)); }
     if(/(^|[^a-z])roll(s|ed|ing)? (a |the |me a )?d20([^a-z0-9]|$)/i.test(m.text)&&typeof m.id==="number"){ const n=d20For(m); bub.append(el("div","d20chip"+(n===20?" nat20":n===1?" nat1":""),`🎲 d20 → ${n}${n===20?" NAT 20!":n===1?" crit fail":""}`)); } }
   bub.onclick=e=>{ if(e.target.closest("a,video,.voice,.poll button,.gamecard button,.datechip,.trbox")) return; openMenu(m); };
   bub.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openMenu(m); } };
@@ -2709,7 +2781,7 @@ function paintStickers(){
 }
 function closeTray(){ show($("tray"),false); $("plusBtn").setAttribute("aria-expanded","false"); }
 $("plusBtn").onclick=()=>{ const open=$("tray").classList.contains("hidden"); if(open){ paintStickers(); show($("tray")); } else show($("tray"),false); $("plusBtn").setAttribute("aria-expanded",String(open)); };
-function trayTab(t){ $("traySticker").setAttribute("aria-pressed",t==="stickers"); $("trayGames").setAttribute("aria-pressed",t==="games"); show($("stickerGrid"),t==="stickers"); show($("gameList"),t==="games"); }
+function trayTab(t){ $("traySticker").setAttribute("aria-pressed",t==="stickers"); $("trayGames").setAttribute("aria-pressed",t==="games"); $("trayGifs").setAttribute("aria-pressed",t==="gifs"); show($("stickerGrid"),t==="stickers"); show($("gameList"),t==="games"); show($("gifPane"),t==="gifs"); }
 $("traySticker").onclick=()=>trayTab("stickers");
 $("trayGames").onclick=()=>{ $("gpHint").textContent=isDm&&dmUser?`Challenge ${nameOf(dmUser)}`:"Challenge the room"; trayTab("games"); };
 $("gameList").querySelectorAll(".gamepick").forEach(bt=>bt.onclick=async()=>{
@@ -4485,6 +4557,94 @@ SECRET_LIST.splice(SECRET_LIST.findIndex(s=>s.id==="konami"),0,
   {id:"kenough", name:"Kenough", re:/i'?m just ken([^a-z]|$)|i am ken(ough)?([^a-z]|$)|(^|[^a-z])kenough/i, play:()=>QX.kenough()}
 );
 Object.assign(HINTS,{kenough:"A plastic man in a mojo dojo casa house learns he's… enough."});
+
+/* ================= GIF KEYBOARD (GIPHY) ================= */
+const GIPHY_API_KEY="j48mHG8NqdGXnaItJSnY5P9VHFalsXqo";   // same key as GIFHUNT
+let gifTimer=null, gifLastQ=null;
+async function loadGifs(q){
+  const grid=$("gifGrid"); if(!GIPHY_API_KEY){ grid.innerHTML='<p class="note">Add a GIPHY key to turn on GIFs.</p>'; return; }
+  if(q===gifLastQ&&grid.children.length) return; gifLastQ=q;
+  grid.innerHTML='<p class="note">Loading…</p>';
+  try{
+    const u=q?`https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(q)}&limit=24&rating=pg-13`:`https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_API_KEY}&limit=24&rating=pg-13`;
+    const r=await fetch(u); const d=await r.json(); grid.innerHTML="";
+    if(!d.data?.length){ grid.innerHTML='<p class="note">No GIFs for that. Try another word.</p>'; return; }
+    d.data.forEach(g=>{ const b=el("button","gifpick"); b.type="button"; b.setAttribute("aria-label","Send GIF: "+(g.title||"gif"));
+      const i=document.createElement("img"); i.src=g.images.fixed_height_small.url; i.alt=g.title||""; i.loading="lazy"; b.append(i);
+      b.onclick=async()=>{ closeTray(); try{ await sendFields({kind:"image",image_url:g.images.fixed_height.url,text:null}); }catch(err){ $("status").textContent="GIF didn't send: "+err.message; } };
+      grid.append(b); });
+    grid.append(el("p","note gifcredit","Powered by GIPHY"));
+  }catch(e){ grid.innerHTML='<p class="note">Couldn\'t reach GIPHY. Check your connection.</p>'; }
+}
+$("gifSearch").addEventListener("input",e=>{ clearTimeout(gifTimer); gifTimer=setTimeout(()=>loadGifs(e.target.value.trim()),350); });
+$("trayGifs").onclick=()=>{ trayTab("gifs"); loadGifs($("gifSearch").value.trim()); setTimeout(()=>$("gifSearch").focus(),50); };
+
+/* ================= MORE DICE ================= */
+function diceIn(text){ const m=(text||"").match(/(^|[^a-z])roll(?:s|ed|ing)? (?:a |the |me a |an )?d(1|2|3|4|6|8|10|12|100)(?![0-9])/i); return m?+m[2]:null; }
+function dNFor(m,n){ let h=2166136261; for(const ch of "d"+n+"|"+String(m?.id)+"|"+(m?.created_at||"")){ h^=ch.charCodeAt(0); h=Math.imul(h,16777619)>>>0; } return (h%n)+1; }
+const DICE_SHAPES={1:"circle",2:"coin",3:"triangle",4:"triangle",6:"square",8:"diamond",10:"kite",12:"pentagon",100:"circle"};
+QX.diceN=function(m,n){
+  const layer=$("sfx"), r=dNFor(m,n), shape=DICE_SHAPES[n]||"hex";
+  const d=document.createElement("div"); d.className="sx-d20 dn-"+shape; d.innerHTML=`<div class="dn-face"></div><b class="sx-dnum">?</b><small class="dn-label">d${n}</small>`; layer.append(d);
+  const num=d.querySelector(".sx-dnum"); let spins=0;
+  const iv=setInterval(()=>{ num.textContent=1+Math.floor(Math.random()*n); if(++spins>14){ clearInterval(iv); num.textContent=r; d.classList.add("landed");
+    const cap=el("div","sx-caption sx-dcap", n===1?"…it's a d1. It's always 1. 🙃": n===2?(r===1?"HEADS":"TAILS"): r===n?`MAX ROLL! 🎉`: r===1?"ouch, a 1":`rolled a ${r}`); layer.append(cap);
+    if(r===n&&n>=6&&typeof FX!=="undefined") FX.play("confetti"); setTimeout(()=>cap.remove(),1800); } },70);
+  setTimeout(()=>d.remove(),2900);
+};
+SECRET_LIST.splice(SECRET_LIST.findIndex(s=>s.id==="konami"),0,
+  {id:"dice", name:"Dice bag", re:/(^|[^a-z])roll(s|ed|ing)? (a |the |me a |an )?d(1|2|3|4|6|8|10|12|100)(?![0-9])/i, play:m=>QX.diceN(m,diceIn(m.text))}
+);
+Object.assign(HINTS,{dice:"There's more than one die in the bag: try a d6, a d100, even a d1."});
+
+/* ================= PACK 10 SECRETS ================= */
+QX.scaryMovie=function(){
+  const layer=$("sfx"); const d=document.createElement("div"); d.className="px-call gf-call";
+  d.innerHTML=`<div class="gf-mask"><svg viewBox="0 0 100 130"><path d="M50 4 C82 4 96 40 92 80 C88 112 70 126 50 126 C30 126 12 112 8 80 C4 40 18 4 50 4Z" fill="#f4f4f8" stroke="#07041A" stroke-width="3"/><path d="M28 44 C30 34 44 36 42 50 C40 60 30 58 28 44Z M72 44 C70 34 56 36 58 50 C60 60 70 58 72 44Z" fill="#07041A"/><path d="M50 60 L45 78 L55 78Z" fill="#07041A"/><path d="M50 84 C40 86 34 100 38 116 C46 120 54 120 62 116 C66 100 60 86 50 84Z" fill="#07041A"/></svg></div><div class="px-caller">📞 UNKNOWN</div><div class="gf-line">"What's your favorite scary movie?"</div><div class="px-callbtns"><span>✕</span><span>✆</span></div>`;
+  layer.append(d); if(navigator.vibrate) navigator.vibrate([400,200,400,200,600]);
+  setTimeout(()=>{ d.querySelector(".gf-line").textContent="…they hung up."; d.classList.add("ended"); },3200); setTimeout(()=>d.remove(),4300);
+};
+QX.potOfGreed=function(){
+  const layer=$("sfx"); const d=document.createElement("div"); d.className="pg-wrap";
+  d.innerHTML=`<div class="pg-card"><div class="pg-back"><span>✦</span></div><div class="pg-front"><div class="pg-name">POT OF GREED</div><div class="pg-art"><svg viewBox="0 0 100 100"><path d="M30 30 Q20 30 22 44 L26 80 Q28 92 50 92 Q72 92 74 80 L78 44 Q80 30 70 30Z" fill="#1f8a4c" stroke="#07041A" stroke-width="4"/><ellipse cx="50" cy="30" rx="22" ry="8" fill="#2fb36a" stroke="#07041A" stroke-width="4"/><circle cx="40" cy="52" r="5" fill="#fff"/><circle cx="60" cy="52" r="5" fill="#fff"/><circle cx="41" cy="53" r="2"/><circle cx="61" cy="53" r="2"/><path d="M36 68 Q50 82 64 68" stroke="#07041A" stroke-width="4" fill="none"/><path d="M38 68 L62 68 L60 74 L40 74Z" fill="#fff"/></svg></div><div class="pg-type">[ SPELL CARD ]</div><div class="pg-text">Draw 2 cards.</div></div></div><div class="sx-caption pg-cap">"Draw your last pathetic card!"</div>`;
+  layer.append(d); setTimeout(()=>d.classList.add("flip"),900); setTimeout(()=>{ d.querySelector(".pg-cap").textContent="…what does it do again? 🤔"; },2400); setTimeout(()=>d.remove(),4600);
+};
+QX.yugioh=function(){
+  const layer=$("sfx"); const d=document.createElement("div"); d.className="yg-wrap";
+  d.innerHTML=`<div class="yg-rays"></div><div class="yg-eye"><svg viewBox="0 0 120 60"><path d="M4 30 Q60 -10 116 30 Q60 70 4 30Z" fill="none" stroke="#ffd84a" stroke-width="5"/><circle cx="60" cy="30" r="14" fill="#ffd84a"/><circle cx="60" cy="30" r="6" fill="#07041A"/><path d="M60 46 L56 60 M60 46 L70 58" stroke="#ffd84a" stroke-width="4"/></svg></div><div class="yg-glyphs">${["☥","▲","☉","◈","✦","⊙","☥","◬","▲","✧","☉","◈"].map((g,i)=>`<i style="left:${6+(i%6)*16}%;top:${i<6?12:78}%;animation-delay:${i*.12}s">${g}</i>`).join("")}</div><div class="sx-caption yg-cap">IT'S TIME TO D-D-D-DUEL</div>`;
+  layer.append(d); setTimeout(()=>d.remove(),4200);
+};
+QX.console=function(kind){
+  const layer=$("sfx"); const blue=kind==="ps"; const d=document.createElement("div"); d.className="cs-wrap "+(blue?"cs-blue":"cs-green");
+  d.innerHTML=`<div class="cs-glow"></div><div class="cs-logo">${blue?'<svg viewBox="0 0 120 40"><rect x="4" y="12" width="112" height="16" fill="none" stroke="#fff" stroke-width="3"/><rect x="52" y="4" width="16" height="32" fill="#fff"/></svg>':'<svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="26" fill="none" stroke="#fff" stroke-width="4"/><path d="M14 14 Q30 34 46 46 M46 14 Q30 34 14 46" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round"/></svg>'}</div><div class="cs-text">${blue?"powering on…":"powering on…"}</div>`;
+  layer.append(d);
+  try{ const ac=window.__sxac||(window.__sxac=new (window.AudioContext||window.webkitAudioContext)()); const o=ac.createOscillator(), g=ac.createGain(); o.type="sine"; o.frequency.setValueAtTime(blue?180:220,ac.currentTime); o.frequency.exponentialRampToValueAtTime(blue?740:660,ac.currentTime+.9); g.gain.setValueAtTime(.0001,ac.currentTime); g.gain.exponentialRampToValueAtTime(.06,ac.currentTime+.2); g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+1.6); o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime+1.7); }catch(e){}
+  setTimeout(()=>d.remove(),3600);
+};
+QX.shotFirst=function(){
+  const layer=$("sfx"); const d=document.createElement("div"); d.className="sf-wrap";
+  d.innerHTML=`<div class="sf-man"><svg viewBox="0 0 120 200"><g class="sf-body"><circle cx="60" cy="30" r="18" fill="#07041A"/><path d="M40 52 L80 52 L86 120 L34 120Z" fill="#07041A"/><path d="M38 125 L50 195 L60 195 L60 130 L60 195 L70 195 L82 125Z" fill="#07041A"/><g class="sf-arm"><path d="M78 62 L118 70 L118 80 L80 78Z" fill="#07041A"/><rect x="112" y="64" width="12" height="8" fill="#07041A"/></g></g></svg></div><div class="sf-flash"></div><div class="sx-caption sf-cap">who shot first?</div>`;
+  layer.append(d);
+  setTimeout(()=>{ d.classList.add("bang"); if(navigator.vibrate) navigator.vibrate(80); },1200);
+  setTimeout(()=>{ d.classList.add("down"); d.querySelector(".sf-cap").textContent="…you did. 🤠"; },1500);
+  setTimeout(()=>d.remove(),4200);
+};
+SECRET_LIST.splice(SECRET_LIST.findIndex(s=>s.id==="konami"),0,
+  {id:"scarymovie", name:"Scary movie", re:/favou?rite scary movie/i, play:()=>QX.scaryMovie()},
+  {id:"potofgreed", name:"Pot of Greed", re:/last pathetic card|pot of greed/i, play:()=>QX.potOfGreed()},
+  {id:"yugioh", name:"Yu-Gi-Oh!", re:/yu-?gi-?oh|d-d-d-duel|heart of the cards/i, play:()=>QX.yugioh()},
+  {id:"ps5", name:"PlayStation", re:/(^|[^a-z])ps ?5([^a-z0-9]|$)|playstation/i, play:()=>QX.console("ps")},
+  {id:"xbox", name:"Xbox", re:/(^|[^a-z])x-?box([^a-z]|$)/i, play:()=>QX.console("xb")},
+  {id:"shotfirst", name:"Who shot first", re:/who shot first/i, play:()=>QX.shotFirst()}
+);
+Object.assign(HINTS,{
+  scarymovie:"Answer the phone. The voice wants to know your favorite kind of film.",
+  potofgreed:"Taunt your opponent to draw their final, pitiful card. Everyone knows what the green pot does. Nobody remembers.",
+  yugioh:"It's time to d-d-d-…",
+  ps5:"Sony's fifth console. Say it and the room turns blue.",
+  xbox:"Microsoft's console. Say it and the room turns green.",
+  shotfirst:"A cantina argument that's lasted decades. Ask the question.",
+});
 
 /* ================= STAYING CONNECTED ================= */
 let liveStatus=null, catchingUp=false, lastCatchUp=0;
