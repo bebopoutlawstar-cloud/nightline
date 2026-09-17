@@ -964,6 +964,23 @@ html,body{overscroll-behavior:none}
 .rx-junesign{font-family:var(--num);font-size:clamp(28px,9vw,50px);line-height:1.05;color:#07041A;background:#fff;border:5px solid #d61f2c;padding:10px 18px;box-shadow:10px 10px 0 #d61f2c}
 .rx-junesign span{display:inline-block;color:#fff;background:#d61f2c;padding:0 10px;transform:rotate(-3deg);font-size:1.25em}
 .rx-bags{font-size:30px;margin-top:10px;animation:qxbounce .6s ease-in-out 5}
+
+/* ===== Pip-Boy theme ===== */
+body.theme-pipboy{--night:#061008;--deep:#0b1c0e;--white:#c9ffd8;--muted:#6fbf86;--red:#ff6b6b}
+body.theme-pipboy .app,body.theme-pipboy .sky{background:radial-gradient(circle at 50% 30%,#0f2a14,#061008 70%)!important}
+body.theme-pipboy .sky canvas{opacity:.25;filter:sepia(1) hue-rotate(60deg) saturate(3)}
+body.theme-pipboy::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9;background:repeating-linear-gradient(0deg,rgba(92,255,138,.07) 0 2px,transparent 2px 4px),radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.45))}
+body.theme-pipboy .bubble::before{background:#0b1c0e!important;box-shadow:inset 0 0 0 2px #5cff8a}
+body.theme-pipboy .msg.me .bubble::before{background:#173d20!important}
+body.theme-pipboy .msg.custom .bubble::before{background:var(--bub)!important}
+body.theme-pipboy .bubble,body.theme-pipboy .tag,body.theme-pipboy .roomname,body.theme-pipboy .field,body.theme-pipboy textarea{font-family:ui-monospace,Menlo,Consolas,monospace!important;text-shadow:0 0 6px rgba(92,255,138,.5)}
+body.theme-pipboy .face .fi{filter:sepia(1) hue-rotate(60deg) saturate(2.4) brightness(.95)}
+body.theme-pipboy .go,body.theme-pipboy .send{background:#5cff8a;color:#061008;box-shadow:0 0 14px rgba(92,255,138,.5)}
+body.theme-pipboy .title span,body.theme-pipboy .month,body.theme-pipboy .day,body.theme-pipboy .weekday,body.theme-pipboy .phase{text-shadow:0 0 10px #5cff8a}
+body.theme-pipboy .day{color:#c9ffd8!important}
+body.theme-pipboy .icon{background:#a7ffbf!important}
+body.theme-pipboy .weekday{background:#1f7a3a!important;color:#c9ffd8!important}
+body.theme-pipboy .compose,body.theme-pipboy .top{background:rgba(6,16,8,.92)!important}
 </style>
 </head>
 <body>
@@ -1364,6 +1381,7 @@ const THEMES={
   sunset: {label:"Sunset",       main:"#FF9A3D", accent:"#FF4FA3", hi:"#FFE45C"},
   mono:   {label:"Mono",         main:"#E8E8F0", accent:"#8A8AA8", hi:"#F3FF3A"},
   phantom:{label:"🎭 Phantom",   main:"#FF2E3F", accent:"#F4F7FF", hi:"#FF2E3F"},
+  pipboy: {label:"☢️ Pip-Boy",   main:"#5cff8a", accent:"#1f7a3a", hi:"#a7ffbf", body:"pipboy"},
 };
 const BUBBLES=["#2A1B4A","#0E3B4A","#4A1330","#123D22","#3D2A08","#1B2A6B","#5A1E5A","#262630"];
 const colorFor = s => COLORS[[...(s||"?")].reduce((a,c)=>a+c.charCodeAt(0),0)%COLORS.length];
@@ -2696,6 +2714,7 @@ function themeColors(t){ if(!t) return THEMES.night; if(t.preset&&t.preset!=="cu
 function applyTheme(t,persist=true){
   const c=themeColors(t), r=document.documentElement.style;
   r.setProperty("--cyan",c.main); r.setProperty("--mag",c.accent); r.setProperty("--volt",c.hi);
+  document.body.classList.toggle("theme-pipboy",t?.preset==="pipboy");
   if(persist) try{ localStorage.setItem("nl-theme",JSON.stringify(t||{preset:"night"})); }catch(e){}
 }
 let themeAtOpen=null;
@@ -2704,7 +2723,7 @@ let draftTheme=null, draftBubble=null;
 function paintThemeSheet(){
   const grid=$("presetGrid"); grid.innerHTML="";
   const cur=draftTheme.preset||"custom";
-  Object.entries(THEMES).filter(([id])=>id!=="phantom"||hasSecret("konami")).forEach(([id,t])=>{
+  Object.entries(THEMES).filter(([id])=>(id!=="phantom"||hasSecret("konami"))&&(id!=="pipboy"||hasSecret("pipboy"))).forEach(([id,t])=>{
     const b=el("button","preset"); b.type="button"; b.setAttribute("aria-pressed",cur===id);
     const dots=el("span","dots"); [t.main,t.accent,t.hi].forEach(c=>{ const i=el("i"); i.style.background=c; dots.append(i); });
     b.append(dots,t.label); b.onclick=()=>{ draftTheme={preset:id}; previewTheme(); }; grid.append(b);
@@ -4242,7 +4261,7 @@ const RX=(()=>{
   const senderFaces=m=>[...feed.querySelectorAll(`.face[data-uid="${CSS.escape(m?.user_id||"")}"]`)];
   return {
     war(){ chatClass("rx-sepia",4600); const w=add("rx-war",`<div class="rx-dust"></div><div class="rx-wartext"><span>WAR.</span><span>WAR NEVER CHANGES.</span></div>`); later(()=>w.remove(),4600); },
-    pipboy(){ chatClass("rx-pip",4200); const p=add("rx-pipboy",`<div class="rx-pipframe"><div class="rx-piphead">STAT &nbsp; INV &nbsp; DATA &nbsp; MAP &nbsp; RADIO</div><div class="rx-pipbody"><div class="rx-boy">👍</div><div class="rx-piprows"><b>HP</b> 100/100<br><b>RAD</b> ▮▮▯▯▯<br><b>CAPS</b> 42<br><b>STATUS</b> feeling groovy</div></div></div>`); chime([[880,0,.08,"square"],[660,.1,.08,"square"]]); later(()=>p.remove(),4200); },
+    pipboy(){ chatClass("rx-pip",4200); if(!hasSecret("pipboy")) later(()=>{ const c=add("sx-caption px-center","☢️ Pip-Boy theme unlocked in Theme & colors"); c.style.top="72%"; later(()=>c.remove(),2600); },2600); const p=add("rx-pipboy",`<div class="rx-pipframe"><div class="rx-piphead">STAT &nbsp; INV &nbsp; DATA &nbsp; MAP &nbsp; RADIO</div><div class="rx-pipbody"><div class="rx-boy">👍</div><div class="rx-piprows"><b>HP</b> 100/100<br><b>RAD</b> ▮▮▯▯▯<br><b>CAPS</b> 42<br><b>STATUS</b> feeling groovy</div></div></div>`); chime([[880,0,.08,"square"],[660,.1,.08,"square"]]); later(()=>p.remove(),4200); },
     nuka(){ for(let i=0;i<30;i++){ const c=add("rx-cap","⭐"); c.style.left=R(2,96)+"%"; c.style.animationDelay=R(0,1.6)+"s"; c.style.setProperty("--r",R(-720,720)+"deg"); later(()=>c.remove(),3800); } chime([[523,0,.1],[659,.1,.1],[784,.2,.2]]); const cap=add("sx-caption px-center rx-nukacap","🧢 +30 caps"); later(()=>cap.remove(),1800); },
     fallguys(){
       const colors=["#ff4fa3","#ffd400","#3dd6ff","#7cff6b","#ff7a3d","#c78bff"];
