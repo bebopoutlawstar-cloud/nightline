@@ -1115,6 +1115,69 @@ body.theme-pipboy .compose,body.theme-pipboy .top{background:rgba(6,16,8,.92)!im
 @keyframes sfbang{20%{opacity:.95}100%{opacity:0}}
 .sf-wrap.down .sf-man svg{transform:rotate(88deg) translateY(30%)}
 .sf-cap{position:absolute;left:0;right:0;top:20%;text-align:center;color:#ffd84a}
+/* ===== unlockables ===== */
+.unlockbox{width:100%;display:grid;gap:8px;border:2px dashed #3b2d80;padding:10px;justify-items:start}
+.unlockcount{font-family:var(--tech);font-size:13px;color:var(--volt)}
+.unlockgroup{font-family:var(--tech);font-size:11px;color:var(--cyan);margin-top:6px;width:100%}
+#unlockList{display:flex;flex-wrap:wrap;gap:6px;width:100%}
+.framerow{display:flex;flex-wrap:wrap;gap:8px;width:100%;justify-content:center}
+.framepick{background:var(--deep);border:2px solid #3b2d80;padding:6px;font-family:var(--tech);font-size:11px;color:var(--muted)}
+.framepick.on{border-color:var(--volt);box-shadow:3px 3px 0 var(--mag)}
+.framepick .face{width:40px;height:40px;font-size:18px;display:block}
+/* frames */
+.face[class*="frame-"] .fi{outline-offset:2px}
+.face.frame-neon .fi{box-shadow:0 0 0 3px var(--cyan),0 0 14px 4px var(--cyan)}
+.face.frame-glitch .fi{box-shadow:-3px 0 0 var(--cyan),3px 0 0 var(--mag);animation:frglitch 3s steps(2,end) infinite}
+@keyframes frglitch{0%,90%,100%{transform:none}92%{transform:translate(-2px,1px) skewX(6deg)}95%{transform:translate(2px,-1px)}}
+.face.frame-flame::before{content:"";position:absolute;inset:-6px;z-index:-1;background:conic-gradient(from 0deg,#ff3d00,#ffb300,#ff3d00,#ffea00,#ff3d00);clip-path:polygon(10% 0,100% 8%,90% 100%,0 92%);filter:blur(3px);animation:frspin 2s linear infinite}
+@keyframes frspin{to{transform:rotate(360deg)}}
+.face.frame-phantom .fi{box-shadow:0 0 0 3px #FF2E3F,0 0 0 6px #07041A,0 0 0 8px #F4F7FF}
+.face.frame-pixel .fi{box-shadow:0 0 0 3px #fff,0 0 0 6px #07041A;image-rendering:pixelated;clip-path:polygon(0 12%,12% 12%,12% 0,88% 0,88% 12%,100% 12%,100% 88%,88% 88%,88% 100%,12% 100%,12% 88%,0 88%)}
+.face.frame-gold .fi{box-shadow:0 0 0 3px #FFD86B,0 0 16px 4px rgba(255,216,107,.7)}
+.face.frame-gold::after{content:"👑";position:absolute;left:50%;top:-.8em;transform:translateX(-50%);font-size:max(12px,.55em);z-index:3;filter:drop-shadow(0 0 4px #FFD86B)}
+.face.frame-mythic::before{content:"";position:absolute;inset:-5px;z-index:-1;background:conic-gradient(#ff0055,#ffaa00,#aaff00,#00ffaa,#00aaff,#aa00ff,#ff0055);clip-path:polygon(10% 0,100% 8%,90% 100%,0 92%);animation:frspin 3s linear infinite;filter:saturate(1.4)}
+.face.frame-mythic .fi{box-shadow:0 0 12px 3px rgba(255,255,255,.6)}
+.mini-faces .face::before,.mini-faces .face::after,.face.sm::after{display:none}
+/* new themes */
+body.theme-redrum{--night:#0a0102;--deep:#1c0508;--white:#ffe9e9;--muted:#b06a6a}
+body.theme-redrum .app,body.theme-redrum .sky{background:radial-gradient(circle at 50% 20%,#3a0208,#0a0102 70%)!important}
+body.theme-redrum .bubble::before{background:#1c0508!important;box-shadow:inset 0 0 0 2px #ff1a1a}
+body.theme-redrum .msg.me .bubble::before{background:#4a0a10!important}
+body.theme-lab{--night:#120a03;--deep:#241407;--white:#ffe6c4;--muted:#c99a5b}
+body.theme-lab .app,body.theme-lab .sky{background:radial-gradient(circle at 50% 30%,#2a1607,#120a03 70%)!important}
+body.theme-lab .bubble::before{background:#241407!important;box-shadow:inset 0 0 0 2px #ff9a3d}
+body.theme-lab .msg.me .bubble::before{background:#3d2208!important}
+body.theme-lab .tag,body.theme-lab .roomname{font-family:ui-monospace,monospace!important;text-shadow:0 0 6px rgba(255,154,61,.6)}
+body.theme-tvworld{--night:#1a1a08;--deep:#2b2a10;--white:#fff7cf;--muted:#b9b47a}
+body.theme-tvworld .app,body.theme-tvworld .sky{background:radial-gradient(circle,#4a4614,#1a1a08 75%)!important}
+body.theme-tvworld::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9;background:repeating-linear-gradient(0deg,rgba(255,240,150,.06) 0 2px,transparent 2px 4px)}
+body.theme-tvworld .bubble::before{background:#2b2a10!important;box-shadow:inset 0 0 0 2px #ffe34a}
+body.theme-plumber{--night:#0b1d4a;--deep:#153077;--white:#fff;--muted:#a9b8e6}
+body.theme-plumber .app,body.theme-plumber .sky{background:linear-gradient(#0b1d4a,#153077)!important}
+body.theme-plumber .bubble::before{background:#e4342f!important;box-shadow:inset 0 0 0 2px #fff}
+body.theme-plumber .msg.me .bubble::before{background:#2e9b3a!important}
+body.theme-plumber .go,body.theme-plumber .send{background:#ffd400;color:#0b1d4a}
+body.theme-grandline{--night:#04101f;--deep:#0a2140;--white:#fff3d6;--muted:#9fb3c8}
+body.theme-grandline .app,body.theme-grandline .sky{background:linear-gradient(#04101f,#0a2140 60%,#12365e)!important}
+body.theme-grandline .bubble::before{background:#0a2140!important;box-shadow:inset 0 0 0 2px #ffd84a}
+body.theme-grandline .msg.me .bubble::before{background:#1a3d6b!important}
+body.theme-gold{--night:#120d02;--deep:#241a05;--white:#fff6d8;--muted:#c9b06a}
+body.theme-gold .app,body.theme-gold .sky{background:radial-gradient(circle at 50% 20%,#3a2a08,#120d02 70%)!important}
+body.theme-gold .bubble::before{background:#241a05!important;box-shadow:inset 0 0 0 2px #FFD86B}
+body.theme-gold .msg.me .bubble::before{background:#4a3608!important}
+body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD86B,#b8860b);color:#120d02}
+/* new backgrounds */
+#chat[data-bg="burning"]::before,.bgtile[data-bg="burning"]{background:linear-gradient(180deg,#140409 0%,#5c0f12 40%,#d2461a 75%,#ffb13b 100%)}
+#chat[data-bg="burning"]::after{inset:auto 0 0 0;height:32%;background:repeating-linear-gradient(90deg,#07030a 0 26px,transparent 26px 34px,#07030a 34px 70px,transparent 70px 78px);-webkit-mask:linear-gradient(180deg,transparent,#000 30%);mask:linear-gradient(180deg,transparent,#000 30%)}
+#chat[data-bg="darkhour"]::before,.bgtile[data-bg="darkhour"]{background:radial-gradient(circle at 70% 20%,#d8ffb0 0 12%,rgba(216,255,176,0) 13%),linear-gradient(180deg,#071a08,#0f2f12 60%,#1a4a1c)}
+#chat[data-bg="wasteland"]::before,.bgtile[data-bg="wasteland"]{background:linear-gradient(180deg,#2b2417 0%,#5a4a2c 55%,#8a7448 100%)}
+#chat[data-bg="wasteland"]::after{background:repeating-linear-gradient(0deg,rgba(0,0,0,.08) 0 2px,transparent 2px 4px);opacity:.6}
+#chat[data-bg="warp"]::before,.bgtile[data-bg="warp"]{background:radial-gradient(circle,#0b0b2a,#020208 70%)}
+#chat[data-bg="warp"]::after{background:repeating-radial-gradient(circle at 50% 45%,rgba(255,255,255,.35) 0 1px,transparent 1px 40px);animation:warpout 1.2s linear infinite}
+@keyframes warpout{to{transform:scale(1.4);opacity:0}}
+#chat[data-bg="matrix"]::before,.bgtile[data-bg="matrix"]{background:#010a03}
+#chat[data-bg="matrix"]::after{background:repeating-linear-gradient(90deg,rgba(0,255,90,.12) 0 2px,transparent 2px 16px),repeating-linear-gradient(0deg,rgba(0,255,90,.1) 0 2px,transparent 2px 14px);animation:coderain 1.4s linear infinite;-webkit-mask:linear-gradient(180deg,#000,transparent 85%);mask:linear-gradient(180deg,#000,transparent 85%)}
+@keyframes coderain{to{background-position:0 0,0 140px}}
 </style>
 </head>
 <body>
@@ -1285,6 +1348,7 @@ body.theme-pipboy .compose,body.theme-pipboy .top{background:rgba(6,16,8,.92)!im
     <button class="ghost" type="button" id="fxBtn">Screen effects: On</button>
     <details class="fx-list"><summary>Words and emoji that trigger effects</summary><ul id="fxList"></ul></details>
     <div class="xpbox"><div class="xphead"><b id="xpLevel">LV 1</b><span id="xpTitle">Newcomer</span></div><div class="xpbar"><i id="xpFill"></i></div><div class="xptext" id="xpText"></div><div class="xpways" id="xpWays"></div></div>
+    <div class="unlockbox"><div class="unlockcount" id="unlockCount"></div><div id="unlockList"></div></div>
     <div class="secretbox">
       <div class="secretcount" id="secretCount">🔓 Secrets found: 0</div>
       <div class="hintbox" id="hintBox"></div>
@@ -1392,6 +1456,9 @@ body.theme-pipboy .compose,body.theme-pipboy .top{background:rgba(6,16,8,.92)!im
       <label class="colorpick"><span>Accent</span><input type="color" id="colAccent"></label>
       <label class="colorpick"><span>Highlight</span><input type="color" id="colHi"></label>
     </div>
+    <h3>Profile frame</h3>
+    <p class="sub">Everyone sees your frame. Unlock more with secrets and levels.</p>
+    <div class="framerow" id="frameRow"></div>
     <h3>Your bubble color</h3>
     <div class="swatches" id="bubbleSwatches"></div>
     <label class="colorpick left"><span>Custom bubble</span><input type="color" id="colBubble" value="#2A1B4A"></label>
@@ -1495,6 +1562,7 @@ body.theme-pipboy .compose,body.theme-pipboy .top{background:rgba(6,16,8,.92)!im
 
 
 
+
 <script>
 /* ===== SETUP: paste your Supabase project info (Project Settings → API) =====
    Leave blank to run in demo mode. */
@@ -1510,7 +1578,7 @@ const COLORS=["#00F0FF","#E07AC6","#F3FF3A","#7CFF6B","#FF8A3D","#B18CFF"];
 const EMOJIS=["🔥","😂","😮","😢","👍","❤️"];
 const PAGE=50;
 const MAX_VIDEO_SECONDS=30, MAX_VIDEO_BYTES=25e6, MAX_VOICE_SECONDS=120;
-const BACKGROUNDS=[["stars","Stars"],["grid","Grid"],["rain","Rain"],["sunset","Sunset"],["aurora","Aurora"],["void","Void"]];
+const BACKGROUNDS=[["stars","Stars"],["grid","Grid"],["rain","Rain"],["sunset","Sunset"],["aurora","Aurora"],["void","Void"],["burning","Burning City"],["darkhour","Dark Hour"],["wasteland","Wasteland"],["warp","Hyperspace"],["matrix","Code Rain"]];
 const THEMES={
   night:  {label:"Night Signal", main:"#00F0FF", accent:"#C65AAE", hi:"#F3FF3A"},
   crimson:{label:"Crimson",      main:"#FF4D6D", accent:"#FFB347", hi:"#FFF1A8"},
@@ -1520,6 +1588,12 @@ const THEMES={
   mono:   {label:"Mono",         main:"#E8E8F0", accent:"#8A8AA8", hi:"#F3FF3A"},
   phantom:{label:"🎭 Phantom",   main:"#FF2E3F", accent:"#F4F7FF", hi:"#FF2E3F"},
   pipboy: {label:"☢️ Pip-Boy",   main:"#5cff8a", accent:"#1f7a3a", hi:"#a7ffbf", body:"pipboy"},
+  redrum: {label:"🩸 Redrum",    main:"#ff1a1a", accent:"#7a0a0a", hi:"#ffdddd", body:"redrum"},
+  lab:    {label:"⚗️ Lab",       main:"#ff9a3d", accent:"#7a3e10", hi:"#ffd08a", body:"lab"},
+  tvworld:{label:"📺 TV World",  main:"#ffe34a", accent:"#8a7a1a", hi:"#fff7cf", body:"tvworld"},
+  plumber:{label:"🍄 Plumber",   main:"#ffd400", accent:"#e4342f", hi:"#fff", body:"plumber"},
+  grandline:{label:"🏴‍☠️ Grand Line", main:"#ffd84a", accent:"#c0392b", hi:"#fff3d6", body:"grandline"},
+  gold:   {label:"👑 Gold",      main:"#FFD86B", accent:"#b8860b", hi:"#fff6d8", body:"gold"},
 };
 const BUBBLES=["#2A1B4A","#0E3B4A","#4A1330","#123D22","#3D2A08","#1B2A6B","#5A1E5A","#262630"];
 const colorFor = s => COLORS[[...(s||"?")].reduce((a,c)=>a+c.charCodeAt(0),0)%COLORS.length];
@@ -1924,7 +1998,7 @@ async function handleAuth(u){
   try{ $("room").value=localStorage.getItem("nl-room")||""; }catch(e){}
   await loadContacts(); loadInbox();
   try{ const t=localStorage.getItem("nl-front-tab"); if(["chats","dms","contacts"].includes(t)) setFrontTab(t); }catch(e){}
-  celebrateMyBirthday(); seasonalCheck("login"); hintNudge(); dailyXP();
+  celebrateMyBirthday(); seasonalCheck("login"); hintNudge(); dailyXP(); setTimeout(checkUnlocks,4000);
   if(unsubAll) unsubAll();
   unsubAll=api.subscribeAll(onAnyMessage,onFriendAdded);
   clearBadge();
@@ -2488,7 +2562,7 @@ function setRoomBackground(bg){
 }
 function paintBgTiles(){
   const box=$("bgTiles"); box.innerHTML="";
-  BACKGROUNDS.forEach(([id,label])=>{
+  BACKGROUNDS.filter(([id])=>unlockOk("bg",id)||(roomBg||"stars")===id).forEach(([id,label])=>{
     const t=el("button","bgtile",label); t.type="button"; t.dataset.bg=id; t.setAttribute("aria-pressed",(roomBg||"stars")===id);
     t.onclick=()=>chooseBackground(id==="stars"?null:id); box.append(t);
   });
@@ -2770,6 +2844,13 @@ const STICKERS={
   fire:{label:"Fire",svg:STK(`<path d="M60 8c8 22 34 30 34 60a34 34 0 0 1-68 0c0-16 8-24 14-32c2 12 8 16 12 16c-4-16 0-32 8-44z" fill="#07041A" transform="translate(4 4)"/><path d="M60 8c8 22 34 30 34 60a34 34 0 0 1-68 0c0-16 8-24 14-32c2 12 8 16 12 16c-4-16 0-32 8-44z" fill="#FF8A3D" stroke="#07041A" stroke-width="4"/><path d="M60 58c6 10 16 14 16 28a16 16 0 0 1-32 0c0-8 6-12 8-18c2 6 4 8 6 8c-2-6 0-12 2-18z" fill="#F3FF3A"/>`,-4)},
   crown:{label:"Crown",svg:STK(`<polygon points="12,86 18,32 42,58 60,22 78,58 102,32 108,86" fill="#07041A" transform="translate(4 4)"/><polygon points="12,86 18,32 42,58 60,22 78,58 102,32 108,86" fill="#F3FF3A" stroke="#07041A" stroke-width="4"/><rect x="12" y="86" width="96" height="14" fill="#00F0FF" stroke="#07041A" stroke-width="4"/><circle cx="60" cy="66" r="7" fill="#E07AC6" stroke="#07041A" stroke-width="3"/>`,-8)},
   nightowl:{label:"Night owl",secret:"moonwink",svg:STK(`<path d="M68 12a46 46 0 1 0 38 68a36 36 0 0 1-38-68z" fill="#07041A" transform="translate(4 4)"/><path d="M68 12a46 46 0 1 0 38 68a36 36 0 0 1-38-68z" fill="#F3FF3A" stroke="#07041A" stroke-width="4"/><rect x="18" y="46" width="30" height="14" rx="3" fill="#07041A"/><rect x="52" y="46" width="30" height="14" rx="3" fill="#07041A"/><rect x="46" y="50" width="8" height="4" fill="#07041A"/><rect x="22" y="49" width="10" height="4" fill="#00F0FF" opacity=".8"/><path d="M34 78q12 8 26 0" stroke="#07041A" stroke-width="4" fill="none" stroke-linecap="round"/><text x="84" y="30" font-family="Anton,Impact,sans-serif" font-size="20" fill="#E07AC6" stroke="#07041A" stroke-width="3" paint-order="stroke">✦</text>`,-6)},
+  dragon:{label:"Dragon",secret:"dragon",get svg(){ return `<img src="${DRAGON_IMG}" alt="" style="width:100%;height:100%;object-fit:contain;filter:drop-shadow(3px 3px 0 #F3FF3A)">`; }},
+  nat20:{label:"NAT 20",secret:"d20",svg:STK(`<polygon points="60,6 108,32 108,88 60,114 12,88 12,32" fill="#07041A" transform="translate(4 4)"/><polygon points="60,6 108,32 108,88 60,114 12,88 12,32" fill="#F3FF3A" stroke="#07041A" stroke-width="4"/><text x="60" y="76" text-anchor="middle" font-family="Anton,Impact,sans-serif" font-size="44" fill="#07041A">20</text>`,-8)},
+  preem:{label:"PREEM",secret:"preem",svg:STAMP("PREEM","#9aa4c0","#F4F7FF",34)},
+  pogs:{label:"POG",secret:"pog",svg:STK(`<circle cx="60" cy="60" r="50" fill="#07041A" transform="translate(4 4)"/><circle cx="60" cy="60" r="50" fill="#F3FF3A" stroke="#07041A" stroke-width="4"/><ellipse cx="42" cy="50" rx="12" ry="15" fill="#fff" stroke="#07041A" stroke-width="3"/><ellipse cx="78" cy="50" rx="12" ry="15" fill="#fff" stroke="#07041A" stroke-width="3"/><circle cx="44" cy="52" r="5"/><circle cx="80" cy="52" r="5"/><ellipse cx="60" cy="84" rx="13" ry="15" fill="#07041A"/>`,-6)},
+  nanis:{label:"NANI?!",secret:"nani",svg:STAMP("NANI?!","#c00","#F4F7FF",32)},
+  redrums:{label:"REDRUM",secret:"redrum",svg:STK(`<text x="60" y="76" text-anchor="middle" font-family="Brush Script MT,Segoe Script,cursive" font-size="34" fill="#ff1a1a" stroke="#07041A" stroke-width="2" paint-order="stroke" transform="scale(-1 1) translate(-120 0)">REDRUM</text>`,-8)},
+  showtimes:{label:"SHOWTIME",secret:"showtime",svg:STAMP("SHOWTIME!","#E8182B","#F4F7FF",22)},
   zzz:{label:"Sleepy",svg:STK(`<text x="20" y="96" font-family="Anton,Impact,sans-serif" font-size="56" fill="#00F0FF" stroke="#07041A" stroke-width="5" paint-order="stroke">Z</text><text x="56" y="70" font-family="Anton,Impact,sans-serif" font-size="42" fill="#E07AC6" stroke="#07041A" stroke-width="5" paint-order="stroke">Z</text><text x="84" y="44" font-family="Anton,Impact,sans-serif" font-size="30" fill="#F3FF3A" stroke="#07041A" stroke-width="5" paint-order="stroke">Z</text>`,-8)},
 };
 function stickerEl(id){ const s=el("span","stk"); s.innerHTML=STICKERS[id].svg; s.setAttribute("role","img"); s.setAttribute("aria-label",STICKERS[id].label+" sticker"); return s; }
@@ -2853,7 +2934,8 @@ function themeColors(t){ if(!t) return THEMES.night; if(t.preset&&t.preset!=="cu
 function applyTheme(t,persist=true){
   const c=themeColors(t), r=document.documentElement.style;
   r.setProperty("--cyan",c.main); r.setProperty("--mag",c.accent); r.setProperty("--volt",c.hi);
-  document.body.classList.toggle("theme-pipboy",t?.preset==="pipboy");
+  [...document.body.classList].filter(c=>c.startsWith("theme-")).forEach(c=>document.body.classList.remove(c));
+  if(t?.preset&&THEMES[t.preset]?.body) document.body.classList.add("theme-"+THEMES[t.preset].body);
   if(persist) try{ localStorage.setItem("nl-theme",JSON.stringify(t||{preset:"night"})); }catch(e){}
 }
 let themeAtOpen=null;
@@ -2862,14 +2944,14 @@ let draftTheme=null, draftBubble=null;
 function paintThemeSheet(){
   const grid=$("presetGrid"); grid.innerHTML="";
   const cur=draftTheme.preset||"custom";
-  Object.entries(THEMES).filter(([id])=>(id!=="phantom"||hasSecret("konami"))&&(id!=="pipboy"||hasSecret("pipboy"))).forEach(([id,t])=>{
+  Object.entries(THEMES).filter(([id])=>unlockOk("theme",id)).forEach(([id,t])=>{
     const b=el("button","preset"); b.type="button"; b.setAttribute("aria-pressed",cur===id);
     const dots=el("span","dots"); [t.main,t.accent,t.hi].forEach(c=>{ const i=el("i"); i.style.background=c; dots.append(i); });
-    b.append(dots,t.label); b.onclick=()=>{ draftTheme={preset:id}; previewTheme(); }; grid.append(b);
+    b.append(dots,t.label); b.onclick=()=>{ draftTheme={preset:id,frame:draftTheme.frame||null}; previewTheme(); }; grid.append(b);
   });
   const cb=el("button","preset"); cb.type="button"; cb.setAttribute("aria-pressed",cur==="custom");
   const cd=el("span","dots"); const cc=themeColors(draftTheme); [cc.main,cc.accent,cc.hi].forEach(c=>{ const i=el("i"); i.style.background=c; cd.append(i); });
-  cb.append(cd,"Custom"); cb.onclick=()=>{ const c=themeColors(draftTheme); draftTheme={preset:"custom",...c}; previewTheme(); }; grid.append(cb);
+  cb.append(cd,"Custom"); cb.onclick=()=>{ const c=themeColors(draftTheme); draftTheme={preset:"custom",...c,frame:draftTheme.frame||null}; previewTheme(); }; grid.append(cb);
   const c=themeColors(draftTheme); $("colMain").value=c.main; $("colAccent").value=c.accent; $("colHi").value=c.hi;
   const sw=$("bubbleSwatches"); sw.innerHTML="";
   const reset=el("button","reset"); reset.type="button"; reset.setAttribute("aria-label","Default bubble"); reset.setAttribute("aria-pressed",!draftBubble); reset.onclick=()=>{ draftBubble=null; previewTheme(); }; sw.append(reset);
@@ -2877,9 +2959,10 @@ function paintThemeSheet(){
   if(draftBubble) $("colBubble").value=draftBubble;
   const pm=$("themePreviewMsg"); paintFace($("themePreviewFace"),meProfile);
   if(draftBubble){ pm.classList.add("custom"); pm.style.setProperty("--bub",draftBubble); pm.style.setProperty("--bubtext",textOn(draftBubble)); } else { pm.classList.remove("custom"); }
+  paintFrameRow();
 }
 function previewTheme(){ applyTheme(draftTheme,false); paintThemeSheet(); }
-["colMain","colAccent","colHi"].forEach(id=>$(id).addEventListener("input",()=>{ draftTheme={preset:"custom",main:$("colMain").value,accent:$("colAccent").value,hi:$("colHi").value}; applyTheme(draftTheme,false); paintThemeSheet(); }));
+["colMain","colAccent","colHi"].forEach(id=>$(id).addEventListener("input",()=>{ draftTheme={preset:"custom",main:$("colMain").value,accent:$("colAccent").value,hi:$("colHi").value,frame:draftTheme.frame||null}; applyTheme(draftTheme,false); paintThemeSheet(); }));
 $("colBubble").addEventListener("input",e=>{ draftBubble=e.target.value; paintThemeSheet(); });
 $("openTheme").onclick=()=>{ themeAtOpen=meProfile?.theme||savedTheme()||{preset:"night"}; draftTheme=themeAtOpen; draftBubble=validHex(meProfile?.bubble_color); say("themeMsg",""); show($("profile"),false); paintThemeSheet(); show($("themeSheet")); };
 $("themeClose").onclick=()=>{ applyTheme(themeAtOpen||meProfile?.theme||savedTheme()); show($("themeSheet"),false); };
@@ -2888,7 +2971,7 @@ $("themeSave").onclick=async()=>{
   try{
     const style={theme:draftTheme,bubble_color:draftBubble};
     await api.saveStyle(user.id,style);
-    meProfile={...meProfile,...style}; cache.set(user.id,meProfile); applyTheme(draftTheme); gainXP("theme");
+    meProfile={...meProfile,...style}; cache.set(user.id,meProfile); applyTheme(draftTheme); gainXP("theme"); paintMe(); if(room) repaintFaces(user.id);
     if(room) renderAll(false);
     say("themeMsg","Saved."); setTimeout(()=>show($("themeSheet"),false),500);
   }catch(err){ say("themeMsg","Couldn't save: "+err.message,true); }
@@ -3820,7 +3903,7 @@ function secretFor(text){
 function discoverSecret(id){
   const f=foundSecrets(); if(f.includes(id)) return false;
   f.push(id); try{ localStorage.setItem(SECRETS_KEY,JSON.stringify(f)); }catch(e){}
-  const s=SECRET_LIST.find(x=>x.id===id); gainXP("secret");
+  const s=SECRET_LIST.find(x=>x.id===id); gainXP("secret"); setTimeout(checkUnlocks,900);
   const t=el("div","toast mention"); const body=el("span","tbody");
   body.append(el("div","ttitle",`🔓 Secret found (${f.length}/${SECRET_LIST.length})`), el("div","ttext",s?s.name:"???"));
   t.append(el("span","sx-lock","🔓"),body); $("toasts").prepend(t);
@@ -3845,7 +3928,7 @@ function playSecretFromMessage(m,s,force){
   }
 }
 function paintSecrets(){
-  paintHint(); paintXP();
+  paintHint(); paintXP(); paintUnlocks();
   const f=foundSecrets();
   $("secretCount").textContent=`🔓 Secrets found: ${f.length}/${SECRET_LIST.length}`;
   const box=$("secretList"); box.innerHTML="";
@@ -4531,7 +4614,7 @@ function gainXP(kind,mult=1){
   d.xp+=amt; d.log[kind]=(d.log[kind]||0)+1; try{ localStorage.setItem(XP_KEY,JSON.stringify(d)); }catch(e){}
   const now=xpLevel(d.xp);
   if(!$("profile").classList.contains("hidden")) paintXP();
-  if(now.lvl>before){ if(fxEnabled()&&typeof QX!=="undefined"&&!reducedMotion()) QX.levelup();
+  if(now.lvl>before){ setTimeout(checkUnlocks,2500); if(fxEnabled()&&typeof QX!=="undefined"&&!reducedMotion()) QX.levelup();
     const t=el("div","toast mention"); const body=el("span","tbody"); body.append(el("div","ttitle",`⬆ Level ${now.lvl} · ${LEVEL_TITLES[Math.min(now.lvl-1,LEVEL_TITLES.length-1)]}`), el("div","ttext","Keep going, you're on a roll."));
     t.append(el("span","sx-lock","⬆"),body); $("toasts").prepend(t); setTimeout(()=>{ t.classList.add("out"); setTimeout(()=>t.remove(),260); },5000);
     if(navigator.vibrate) navigator.vibrate([30,40,30,40,120]);
@@ -4645,6 +4728,80 @@ Object.assign(HINTS,{
   xbox:"Microsoft's console. Say it and the room turns green.",
   shotfirst:"A cantina argument that's lasted decades. Ask the question.",
 });
+
+/* ================= UNLOCKABLES ================= */
+const UNLOCKS=[
+  {id:"theme:phantom",  type:"theme", label:"🎭 Phantom theme",     by:{secret:"konami"}},
+  {id:"theme:pipboy",   type:"theme", label:"☢️ Pip-Boy theme",     by:{secret:"pipboy"}},
+  {id:"theme:redrum",   type:"theme", label:"🩸 Redrum theme",      by:{secret:"redrum"}},
+  {id:"theme:lab",      type:"theme", label:"⚗️ Future Gadget Lab", by:{secret:"elpsy"}},
+  {id:"theme:tvworld",  type:"theme", label:"📺 TV World theme",    by:{secret:"shadow"}},
+  {id:"theme:plumber",  type:"theme", label:"🍄 Plumber theme",     by:{secret:"letsago"}},
+  {id:"theme:grandline",type:"theme", label:"🏴‍☠️ Grand Line theme", by:{secret:"onepiece"}},
+  {id:"theme:gold",     type:"theme", label:"👑 Gold theme",        by:{level:8}},
+  {id:"bg:burning",     type:"bg",    label:"🔥 Burning City background", by:{secret:"cityburn"}},
+  {id:"bg:darkhour",    type:"bg",    label:"🌑 Dark Hour background",    by:{secret:"darkhour"}},
+  {id:"bg:wasteland",   type:"bg",    label:"☢️ Wasteland background",    by:{secret:"war"}},
+  {id:"bg:warp",        type:"bg",    label:"🚀 Hyperspace background",   by:{secret:"hyperspace"}},
+  {id:"bg:matrix",      type:"bg",    label:"🟢 Code Rain background",    by:{secret:"matrix"}},
+  {id:"sticker:nightowl",type:"sticker", label:"🦉 Night owl sticker",  by:{secret:"moonwink"}},
+  {id:"sticker:dragon", type:"sticker", label:"🐉 Dragon sticker",      by:{secret:"dragon"}},
+  {id:"sticker:nat20",  type:"sticker", label:"🎲 NAT 20 sticker",      by:{secret:"d20"}},
+  {id:"sticker:preem",  type:"sticker", label:"✨ PREEM sticker",       by:{secret:"preem"}},
+  {id:"sticker:pog",    type:"sticker", label:"😮 POG sticker",         by:{secret:"pog"}},
+  {id:"sticker:nani",   type:"sticker", label:"❗ NANI?! sticker",      by:{secret:"nani"}},
+  {id:"sticker:redrum", type:"sticker", label:"🩸 REDRUM sticker",      by:{secret:"redrum"}},
+  {id:"sticker:showtime",type:"sticker",label:"🎭 SHOWTIME sticker",   by:{secret:"showtime"}},
+  {id:"frame:neon",     type:"frame", label:"Neon ring frame",       by:{level:3}},
+  {id:"frame:glitch",   type:"frame", label:"Glitch frame",          by:{secret:"netrunner"}},
+  {id:"frame:flame",    type:"frame", label:"Flame frame",           by:{secret:"cityburn"}},
+  {id:"frame:phantom",  type:"frame", label:"Phantom frame",         by:{secret:"konami"}},
+  {id:"frame:pixel",    type:"frame", label:"Pixel frame",           by:{secret:"gameover"}},
+  {id:"frame:gold",     type:"frame", label:"Gold crown frame",      by:{level:6}},
+  {id:"frame:mythic",   type:"frame", label:"Mythic rainbow frame",  by:{level:11}},
+];
+const FRAMES={neon:"Neon ring",glitch:"Glitch",flame:"Flame",phantom:"Phantom",pixel:"Pixel",gold:"Gold crown",mythic:"Mythic"};
+const myLevel=()=>xpLevel(xpData().xp).lvl;
+function unlockMet(u){ return u.by.secret?hasSecret(u.by.secret):u.by.level?myLevel()>=u.by.level:true; }
+const unlockOk=(type,key)=>{ const u=UNLOCKS.find(x=>x.id===type+":"+key); return !u||unlockMet(u); };
+const UNLOCK_KEY="nl-unlocked";
+const seenUnlocks=()=>{ try{ return JSON.parse(localStorage.getItem(UNLOCK_KEY)||"[]"); }catch(e){ return []; } };
+function checkUnlocks(){
+  const seen=seenUnlocks(); const fresh=UNLOCKS.filter(u=>unlockMet(u)&&!seen.includes(u.id));
+  if(!fresh.length) return;
+  try{ localStorage.setItem(UNLOCK_KEY,JSON.stringify([...seen,...fresh.map(u=>u.id)])); }catch(e){}
+  if(seen.length===0&&fresh.length>2) return;            // first run: don't spam
+  fresh.forEach((u,i)=>setTimeout(()=>{
+    const where={theme:"Theme & colors",bg:"Room → Chat background",sticker:"the sticker tray",frame:"Theme & colors → Frame"}[u.type];
+    const t=el("button","toast mention"); t.type="button"; const body=el("span","tbody");
+    body.append(el("div","ttitle","🎁 Unlocked!"), el("div","ttext",`${u.label} · find it in ${where}`));
+    t.append(el("span","sx-lock","🎁"),body); t.onclick=()=>{ t.remove(); if(u.type==="theme"||u.type==="frame"){ openProfile(); $("openTheme").click(); } else openProfile(); };
+    $("toasts").prepend(t); setTimeout(()=>{ t.classList.add("out"); setTimeout(()=>t.remove(),260); },6000);
+    if(navigator.vibrate) navigator.vibrate([20,40,20]);
+  },1800+i*900));
+  if($("stickerGrid").children.length) $("stickerGrid").innerHTML="";
+  if(!$("profile").classList.contains("hidden")) paintUnlocks();
+}
+function paintUnlocks(){
+  const box=$("unlockList"); box.innerHTML="";
+  const got=UNLOCKS.filter(unlockMet).length; $("unlockCount").textContent=`🎁 Unlockables: ${got}/${UNLOCKS.length}`;
+  const groups={theme:"Themes",frame:"Profile frames",bg:"Chat backgrounds",sticker:"Stickers"};
+  Object.entries(groups).forEach(([type,title])=>{
+    const h=el("div","unlockgroup",title); box.append(h);
+    UNLOCKS.filter(u=>u.type===type).forEach(u=>{ const ok=unlockMet(u); const chip=el("span","sx-chip"+(ok?" got":""), ok?u.label:(u.by.level?`🔒 reach level ${u.by.level}`:"🔒 ???")); if(!ok&&u.by.secret) chip.title="Find a secret to unlock"; box.append(chip); });
+  });
+}
+/* frames: everyone sees them (saved inside your profile theme) */
+function frameOf(p){ const f=p?.theme?.frame; return f&&FRAMES[f]?f:null; }
+const _paintFace=paintFace;
+paintFace=function(node,p){ _paintFace(node,p); [...node.classList].filter(c=>c.startsWith("frame-")).forEach(c=>node.classList.remove(c)); const f=frameOf(p); if(f) node.classList.add("frame-"+f); };
+function paintFrameRow(){
+  const row=$("frameRow"); row.innerHTML="";
+  const cur=draftTheme.frame||"";
+  const none=el("button","framepick"+(cur===""?" on":""),"none"); none.type="button"; none.onclick=()=>{ draftTheme={...draftTheme,frame:null}; paintThemeSheet(); }; row.append(none);
+  Object.entries(FRAMES).forEach(([id,label])=>{ if(!unlockOk("frame",id)) return; const b=el("button","framepick"+(cur===id?" on":"")); b.type="button"; b.title=label; const f=el("span","face frame-"+id); f.append(el("span","fi","★")); b.append(f); b.onclick=()=>{ draftTheme={...draftTheme,frame:id}; paintThemeSheet(); }; row.append(b); });
+  const pf=$("themePreviewFace"); [...pf.classList].filter(c=>c.startsWith("frame-")).forEach(c=>pf.classList.remove(c)); if(draftTheme.frame&&FRAMES[draftTheme.frame]) pf.classList.add("frame-"+draftTheme.frame);
+}
 
 /* ================= STAYING CONNECTED ================= */
 let liveStatus=null, catchingUp=false, lastCatchUp=0;
