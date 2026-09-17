@@ -1205,6 +1205,32 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
 .lpdesc{font-size:13px;opacity:.85;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .lptext small{font-family:var(--tech);font-size:10px;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .me .lpcard{border-color:var(--volt)}
+
+/* ===== front screen declutter ===== */
+.front{padding-top:calc(env(safe-area-inset-top) + 10px)}
+.front-inner{gap:18px;margin:0}
+#front.logged .stamp{width:min(78%,300px);aspect-ratio:1.9;margin:0 auto -6px;transform:rotate(-5deg) scale(.92)}
+#front.logged .stamp .phase{display:none}
+#front.logged .stamp .day{font-size:clamp(76px,26vw,120px)}
+#front.logged .stamp .month{font-size:clamp(48px,16vw,80px)}
+#front.logged .stamp .weekday{font-size:clamp(13px,4.2vw,20px);bottom:16%}
+#front.logged .stamp .icon{width:24%}
+#front.logged .card{gap:10px}
+.homebar{display:flex;align-items:center;gap:10px;min-width:0}
+.homebar .face{width:44px;height:44px;font-size:20px;flex:none;cursor:pointer}
+.homebar .who-text{flex:1;min-width:0;display:flex;align-items:center;gap:8px;overflow:hidden}
+.homebar .who-text b{font-family:var(--tech);color:var(--white);font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lvlpill{font-family:var(--tech);font-size:10px;color:var(--night);background:var(--volt);padding:2px 6px;flex:none}
+.iconbtn{width:42px;height:42px;padding:0!important;display:grid;place-items:center;font-size:22px;line-height:1;flex:none}
+.iconbtn svg{width:20px;height:20px}
+.homebar .ghost{margin:0}
+.joinpanel{display:grid;gap:8px;border:2px solid #3b2d80;padding:10px;background:rgba(7,4,26,.7);animation:rise .25s ease both}
+.joinpanel .namerow .field{padding:10px 12px;font-size:16px}
+.fronttabs{margin-top:2px}
+.fronttabs .tab{padding:9px 4px;font-size:12px}
+.addcontact .iconbtn{width:42px;height:42px;font-size:18px}
+.installlink{font-size:14px}
+#front:not(.logged) .front-inner{gap:44px;margin:auto 0}
 </style>
 </head>
 <body>
@@ -1250,17 +1276,19 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
 
   <!-- logged in -->
   <form class="card hidden" id="roomCard">
-    <div class="whoami">
-      <div class="face" id="meFace"></div>
-      <div class="who-text">Signed in as<br><b id="meName"></b></div>
-      <button type="button" class="ghost" id="openProfile1">Profile</button>
+    <div class="homebar">
+      <button type="button" class="face" id="meFace" aria-label="Your profile"></button>
+      <div class="who-text"><b id="meName"></b><span class="lvlpill" id="homeLevel"></span></div>
+      <button type="button" class="ghost iconbtn" id="searchAll" aria-label="Search all chats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
+      <button type="button" class="send iconbtn" id="joinToggle" aria-expanded="false" aria-controls="joinPanel" aria-label="Join or make a room">＋</button>
     </div>
-    <div class="roomcard-row"><label for="room">Room code</label><button type="button" class="linkbtn" id="randomRoom">Make a new room</button></div>
-    <input class="field" id="room" maxlength="30" placeholder="A room you're in, or a new code" required>
-    <p class="msgline" id="roomMsg" role="status"></p>
-    <button class="go" type="submit" id="jumpBtn">Jump in</button>
+    <div class="joinpanel hidden" id="joinPanel">
+      <div class="roomcard-row"><label for="room">Room code</label><button type="button" class="linkbtn" id="randomRoom">Make a new room</button></div>
+      <div class="namerow"><input class="field" id="room" maxlength="30" placeholder="Enter a room code" required><button class="send" type="submit" id="jumpBtn">Join</button></div>
+      <p class="msgline" id="roomMsg" role="status"></p>
+    </div>
+    <button type="button" class="ghost hidden" id="openProfile1" style="display:none">Profile</button>
     <button type="button" class="linkbtn installlink hidden" id="installLink2">📲 Install NightLine as an app</button>
-    <div class="roomcard-row"><button type="button" class="linkbtn" id="searchAll">🔍 Search all chats</button></div>
     <div class="fronttabs" role="tablist">
       <button type="button" class="tab" role="tab" id="tabChats" aria-selected="true">Rooms<span class="tabbadge hidden" id="badgeRooms"></span></button>
       <button type="button" class="tab" role="tab" id="tabDms" aria-selected="false">DMs<span class="tabbadge hidden" id="badgeDms"></span></button>
@@ -1275,11 +1303,11 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
       <p class="note hidden" id="dmEmpty">No private messages yet. Go to Friends and tap Message, or tap someone's picture in a room.</p>
     </div>
     <div id="contactsPane" class="hidden">
-      <button class="go" type="button" id="inviteFriendBtn">📲 Invite a friend to NightLine</button>
       <div class="addcontact">
         <label for="contactName" class="sr">Username</label>
-        <input class="field" id="contactName" maxlength="20" placeholder="Add a friend by username" autocomplete="off">
+        <input class="field" id="contactName" maxlength="20" placeholder="Add by username" autocomplete="off">
         <button type="button" class="send" id="contactAdd">Add</button>
+        <button class="ghost iconbtn" type="button" id="inviteFriendBtn" aria-label="Invite a friend to NightLine" title="Invite a friend">📲</button>
       </div>
       <p class="msgline" id="contactMsg" role="status"></p>
       <h3 class="hidden" id="requestsTitle">Added you</h3>
@@ -2009,7 +2037,8 @@ function paintFace(node,p){
   if(bday){ const c=document.createElement("span"); c.className="cake"; c.textContent="🎂"; c.setAttribute("aria-hidden","true"); node.append(c); node.title=`It's ${p?.username||"their"}'s birthday today!`; }
   else if(node.title&&node.title.startsWith("It's ")) node.removeAttribute("title");
 }
-function paintMe(){
+function paintHomeLevel(){ try{ const L=xpLevel(xpData().xp); $("homeLevel").textContent="LV "+L.lvl; }catch(e){} }
+function paintMe(){ paintHomeLevel();
   ["meFace","openProfile2","profFace"].forEach(id=>paintFace($(id),meProfile));
   $("meName").textContent=meProfile?.username||""; $("profName").textContent=meProfile?.username||""; $("profEmail").textContent=user?.email||"";
 }
@@ -2033,7 +2062,7 @@ async function handleAuth(u){
     if(unsub){unsub();unsub=null;} if(unsubAll){unsubAll();unsubAll=null;} if(typeof stopPresence==="function") stopPresence();
     if(q.get("friend")) say("authMsg","A friend invited you to NightLine. Log in or sign up to add them.");
     ["chat","profile","roomSheet","msgMenu"].forEach(id=>show($(id),false));
-    show($("front")); show($("authCard")); show($("roomCard"),false);
+    show($("front")); show($("authCard")); show($("roomCard"),false); $("front").classList.remove("logged");
     if(q.get("join")){
       say("authMsg",`You're invited to room ${q.get("join").slice(0,30)}. Log in or sign up to join.`);
       try{ localStorage.setItem("nl-pending-join",JSON.stringify({code:q.get("join"),t:q.get("t")||null,at:Date.now()})); }catch(e){}
@@ -2045,7 +2074,8 @@ async function handleAuth(u){
   blocked=new Set(await api.blocks().catch(()=>[]));
   await ensureProfiles([...blocked]);
   show($("authCard"),false); show($("roomCard"));
-  try{ $("room").value=localStorage.getItem("nl-room")||""; }catch(e){}
+  try{ const last=localStorage.getItem("nl-room")||""; $("room").value=last.startsWith("dm-")?"":last; }catch(e){}
+  $("front").classList.add("logged");
   await loadContacts(); loadInbox(); startPresence();
   if(q.get("friend")){ const tok=q.get("friend"); history.replaceState(null,"",location.pathname); setTimeout(()=>handleFriendInvite(tok),400); }
   try{ const t=localStorage.getItem("nl-front-tab"); if(["chats","dms","contacts"].includes(t)) setFrontTab(t); }catch(e){}
@@ -2149,7 +2179,8 @@ function paintFxSettings(){
 }
 $("fxBtn").onclick=()=>{ try{ localStorage.setItem("nl-fx",fxEnabled()?"off":"on"); }catch(e){} paintFxSettings(); if(fxEnabled()) FX.play("confetti"); };
 const openProfile=()=>{ say("profMsg",""); paintNotif(); paintBlocked(); paintFxSettings(); fillBirthdayPicker(); paintSecrets(); paintLangPicker(); show($("profile")); $("closeProfile").focus(); };
-$("openProfile1").onclick=openProfile; $("openProfile2").onclick=openProfile;
+$("openProfile1").onclick=openProfile; $("openProfile2").onclick=openProfile; $("meFace").onclick=openProfile;
+$("joinToggle").onclick=()=>{ const open=$("joinPanel").classList.contains("hidden"); show($("joinPanel"),open); $("joinToggle").setAttribute("aria-expanded",String(open)); $("joinToggle").textContent=open?"✕":"＋"; if(open) setTimeout(()=>$("room").focus(),60); };
 $("closeProfile").onclick=()=>show($("profile"),false);
 $("changePhoto").onclick=()=>$("avatarPicker").click();
 $("avatarPicker").onchange=async e=>{
@@ -2185,7 +2216,7 @@ function paintBlocked(){
 
 /* ================= ROOMS ================= */
 $("roomCard").addEventListener("submit",e=>{ e.preventDefault(); enterRoom($("room").value); });
-$("randomRoom").onclick=()=>{
+$("randomRoom").onclick=()=>{ show($("joinPanel")); $("joinToggle").setAttribute("aria-expanded","true"); $("joinToggle").textContent="✕";
   const a=new Uint8Array(6); crypto.getRandomValues(a);
   $("room").value="room-"+[...a].map(b=>"abcdefghjkmnpqrstuvwxyz23456789"[b%31]).join("");
   say("roomMsg","New room code ready. Tap Jump in, then use Room to invite friends."); $("room").focus();
@@ -2198,13 +2229,15 @@ async function enterRoom(code,token){
   try{ result=await api.joinRoom(target,token); }
   catch(err){
     ["chat","roomSheet","msgMenu"].forEach(id=>show($(id),false)); show($("front")); show($("roomCard"));
+    show($("joinPanel")); $("joinToggle").setAttribute("aria-expanded","true"); $("joinToggle").textContent="✕";
     say("roomMsg", err.message==="private" ? "That room is private. Ask someone inside for an invite link." : "Couldn't join: "+err.message, true);
     $("jumpBtn").disabled=false; return;
   }
   $("jumpBtn").disabled=false; say("roomMsg","");
   if(unsub){unsub();unsub=null;}
   room=target; roomOwner=null; roomName=null;
-  try{ localStorage.setItem("nl-room",room); }catch(e){}
+  if(!room.startsWith("dm-")){ try{ localStorage.setItem("nl-room",room); }catch(e){} }
+  show($("joinPanel"),false); $("joinToggle").setAttribute("aria-expanded","false"); $("joinToggle").textContent="＋";
   show($("front"),false); show($("chat")); $("roomLabel").textContent="# "+room; $("status").textContent="Connecting…";
   msgs.length=0; byId.clear(); elById.clear(); claimed.clear(); contextById.clear(); reactionsById.clear(); members.clear(); pollsById.clear(); pins.clear(); gamesById.clear(); closeGame(); pinCursor=0; paintPinBar(); setRoomBackground(null); closeTray(); hideMentions();
   typers.forEach(v=>clearTimeout(v.timer)); typers.clear(); paintTyping(); clearReply(); feed.innerHTML="";
@@ -4665,7 +4698,7 @@ function gainXP(kind,mult=1){
   const d=xpData(); const before=xpLevel(d.xp).lvl;
   d.xp+=amt; d.log[kind]=(d.log[kind]||0)+1; try{ localStorage.setItem(XP_KEY,JSON.stringify(d)); }catch(e){}
   const now=xpLevel(d.xp);
-  if(!$("profile").classList.contains("hidden")) paintXP();
+  if(!$("profile").classList.contains("hidden")) paintXP(); paintHomeLevel();
   if(now.lvl>before){ setTimeout(checkUnlocks,2500); if(fxEnabled()&&typeof QX!=="undefined"&&!reducedMotion()) QX.levelup();
     const t=el("div","toast mention"); const body=el("span","tbody"); body.append(el("div","ttitle",`⬆ Level ${now.lvl} · ${LEVEL_TITLES[Math.min(now.lvl-1,LEVEL_TITLES.length-1)]}`), el("div","ttext","Keep going, you're on a roll."));
     t.append(el("span","sx-lock","⬆"),body); $("toasts").prepend(t); setTimeout(()=>{ t.classList.add("out"); setTimeout(()=>t.remove(),260); },5000);
