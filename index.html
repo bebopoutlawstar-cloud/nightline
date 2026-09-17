@@ -804,6 +804,11 @@ html,body{overscroll-behavior:none}
 .taskcount:empty{display:none}
 .expiry{font-family:var(--tech);font-size:10px;color:var(--volt);margin-left:6px}
 .sheet .field[type=date],.sheet .field[type=time]{color-scheme:dark;min-width:0}
+/* ===== photo + caption: compact preview, tap to see full size ===== */
+.msg:not(.photo-only) .bubble .shot{position:relative;width:min(56vw,210px);margin:2px 0 8px}
+.msg:not(.photo-only) .bubble .shot img{width:100%;height:150px;max-height:150px;max-width:none;object-fit:cover;object-position:top;transform:none;border:3px solid var(--cyan);box-shadow:3px 3px 0 var(--night)}
+.msg.me:not(.photo-only) .bubble .shot img{border-color:var(--mag)}
+.msg:not(.photo-only) .bubble .shot::after{content:"⤢";position:absolute;right:6px;bottom:6px;width:24px;height:24px;display:grid;place-items:center;font-size:14px;background:rgba(7,4,26,.8);color:var(--white);border:1.5px solid var(--cyan);pointer-events:none}
 </style>
 </head>
 <body>
