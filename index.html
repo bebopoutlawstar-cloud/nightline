@@ -780,6 +780,30 @@ html,body{overscroll-behavior:none}
 .swipe-hint.del.ready{color:#fff;background:var(--red);border-radius:50%;width:34px;height:34px;display:grid;place-items:center;font-size:18px}
 .msg.me .swipe-hint.del{left:auto;right:4px}
 .bubble{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+
+/* ===== ai / dates / tasks / disappearing ===== */
+.catchup{display:flex;align-items:center;gap:6px;padding:6px 10px;background:rgba(7,4,26,.9);border-bottom:2px solid var(--cyan)}
+.catchbtn{flex:1;text-align:left;background:linear-gradient(90deg,rgba(0,240,255,.18),transparent);border:2px solid var(--cyan);color:var(--white);font-family:var(--tech);font-size:12px;padding:8px 10px;clip-path:polygon(0 0,98% 0,100% 40%,100% 100%,2% 100%,0 60%)}
+.sumbody{width:100%;display:grid;gap:10px}
+.sumhead{font-size:18px;font-weight:700;color:var(--volt)}
+.sumlist{display:grid;gap:8px;padding-left:18px;font-size:17px;line-height:1.35}
+.sumbody h3{font-family:var(--tech);font-size:12px;color:var(--cyan);margin-top:6px}
+.trbox{margin-top:6px;border-top:1px dashed rgba(255,255,255,.35);padding-top:6px;cursor:pointer}
+.trtext{font-size:17px}
+.trlabel{display:block;font-family:var(--tech);font-size:10px;opacity:.75;margin-top:3px}
+.datechip{font:inherit;font-weight:700;background:rgba(243,255,58,.14);color:inherit;border:none;border-bottom:2px dashed var(--volt);padding:0 3px;cursor:pointer}
+.me .datechip{background:rgba(0,0,0,.25)}
+.tasks{display:grid;gap:6px;width:100%}
+.taskrow{display:flex;align-items:center;gap:8px;background:rgba(7,4,26,.6);border:2px solid #3b2d80;padding:6px 8px;text-align:left;cursor:pointer}
+.taskrow input{width:22px;height:22px;accent-color:var(--volt);flex:none}
+.taskrow .tasktext{flex:1;min-width:0;font-size:16px;overflow-wrap:anywhere}
+.taskrow small{color:var(--muted);font-size:11px;flex:none}
+.taskrow.done .tasktext{text-decoration:line-through;color:var(--muted)}
+.taskrow .rm{background:none;border:2px solid var(--muted);color:var(--muted);padding:2px 7px;flex:none}
+.taskcount{padding:6px 8px!important;font-size:11px}
+.taskcount:empty{display:none}
+.expiry{font-family:var(--tech);font-size:10px;color:var(--volt);margin-left:6px}
+.sheet .field[type=date],.sheet .field[type=time]{color-scheme:dark;min-width:0}
 </style>
 </head>
 <body>
@@ -871,9 +895,11 @@ html,body{overscroll-behavior:none}
     <button class="face sm" id="openProfile2" aria-label="Your profile"></button>
     <div class="mini" id="miniDate"></div>
     <div class="roombox"><div class="roomname" id="roomLabel"></div><div class="status" id="status"></div></div>
+    <button class="ghost taskcount" id="taskCount" type="button" aria-label="Room checklist"></button>
     <button class="ghost" id="roomBtn" type="button">Room</button>
     <button class="ghost" id="back" type="button">Back</button>
   </div>
+  <div class="catchup hidden" id="catchUp"><button type="button" class="catchbtn" id="catchUpBtn"><span id="catchUpText"></span></button><button type="button" class="ib-x" id="catchUpX" aria-label="Dismiss">✕</button></div>
   <div class="pinbar hidden" id="pinBar">
     <button type="button" class="pinmain" id="pinJump"><span class="pinicon" aria-hidden="true">📌</span><span class="pintext" id="pinText"></span><span class="pincount" id="pinCount"></span></button>
   </div>
@@ -941,6 +967,7 @@ html,body{overscroll-behavior:none}
     <button type="button" class="linkbtn hidden" id="bdClear">Remove my birthday</button>
     <p class="msgline" id="bdMsg" role="status"></p>
     <button class="ghost" type="button" id="notifBtn">Turn on notifications</button>
+    <label class="colorpick left"><span>🌐 Translate messages to</span><select class="field" id="langPick"></select></label>
     <button class="ghost hidden" type="button" id="notifTest">Send a test notification</button>
     <button class="ghost" type="button" id="fxBtn">Screen effects: On</button>
     <details class="fx-list"><summary>Words and emoji that trigger effects</summary><ul id="fxList"></ul></details>
@@ -963,6 +990,15 @@ html,body{overscroll-behavior:none}
   <div class="sheet">
     <h2 id="rsTitle"></h2>
     <p class="sub" id="rsCode"></p>
+    <button class="ghost" type="button" id="rsSummarize">✨ Catch me up on this chat</button>
+    <h3>Disappearing messages</h3>
+    <div class="segmented" id="disappearModes" role="radiogroup" aria-label="Disappearing messages">
+      <button type="button" role="radio" data-sec="0">Off</button><button type="button" role="radio" data-sec="3600">1h</button><button type="button" role="radio" data-sec="86400">24h</button><button type="button" role="radio" data-sec="604800">7d</button>
+    </div>
+    <p class="sub left" id="disappearNote"></p>
+    <h3 id="taskTitle">Checklist</h3>
+    <form class="namerow" id="taskForm"><label for="taskInput" class="sr">New task</label><input class="field" id="taskInput" maxlength="200" placeholder="Add a task for this chat"><button class="send" type="submit">Add</button></form>
+    <div class="tasks" id="taskList"></div>
     <h3>Notifications</h3>
     <div class="segmented" id="notifyModes" role="radiogroup" aria-label="Notifications for this chat">
       <button type="button" role="radio" data-mode="all">All</button>
@@ -1008,6 +1044,8 @@ html,body{overscroll-behavior:none}
     <button class="ghost hidden" type="button" id="menuDm">Message privately</button>
     <button class="ghost hidden" type="button" id="menuFriend">Add friend</button>
     <button class="ghost" type="button" id="menuPin">Pin message</button>
+    <button class="ghost" type="button" id="menuTask">Add to checklist ✅</button>
+    <button class="ghost hidden" type="button" id="menuTranslate">Translate 🌐</button>
     <button class="ghost hidden" type="button" id="menuFx">Replay effect ✨</button>
     <button class="ghost hidden" type="button" id="menuCopy">Copy text</button>
     <button class="ghost hidden" type="button" id="menuBlock"></button>
@@ -1116,6 +1154,26 @@ html,body{overscroll-behavior:none}
   </div>
 </div>
 
+<!-- ============ SUMMARY SHEET ============ -->
+<div class="overlay hidden" id="summarySheet" role="dialog" aria-modal="true" aria-labelledby="sumTitle">
+  <div class="sheet"><h2 id="sumTitle"></h2><div class="left sumbody" id="sumBody"></div><button class="ghost" type="button" id="sumClose">Close</button></div>
+</div>
+<!-- ============ CALENDAR SHEET ============ -->
+<div class="overlay hidden" id="calSheet" role="dialog" aria-modal="true" aria-labelledby="calH">
+  <div class="sheet">
+    <h2 id="calH">📅 Add to calendar</h2>
+    <p class="sub" id="calHint"></p>
+    <label class="left" for="calTitle">Title</label><input class="field" id="calTitle" maxlength="60">
+    <div class="namerow"><input class="field" id="calDate" type="date" aria-label="Date"><input class="field" id="calTime" type="time" aria-label="Time"></div>
+    <label class="left" for="calWhere">Where</label><input class="field" id="calWhere" maxlength="80">
+    <button class="go" type="button" id="calGoogle">Open in Google Calendar</button>
+    <button class="ghost" type="button" id="calIcs">Download calendar file (iPhone / other)</button>
+    <button class="ghost" type="button" id="calTask">Add to room checklist instead</button>
+    <p class="msgline" id="calMsg" role="status"></p>
+    <button class="ghost" type="button" id="calClose">Close</button>
+  </div>
+</div>
+
 <div class="toasts" id="toasts" aria-live="polite"></div>
 <div class="overlay lightbox hidden" id="lightbox"><img id="lightImg" alt="Full size photo"></div>
 
@@ -1126,7 +1184,8 @@ html,body{overscroll-behavior:none}
    Leave blank to run in demo mode. */
 const SUPABASE_URL = "https://iqxmnodyxfgljlopprju.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_elzC4wE2PQl8u7v2MFSJUQ_gVhgaqVc";
-const VAPID_PUBLIC_KEY = "BOrqIEUU9fqA8IYWE2HGUyCZqLbYn_inpdDszPxxVV0UO1gjIRp1T3hhOtRxs5ZGlHNEygTB-lF2dHX6YI7mmg4";   // from `npx web-push generate-vapid-keys` (the PUBLIC one only)
+const VAPID_PUBLIC_KEY = "BOrqIEUU9fqA8IYWE2HGUyCZqLbYn_inpdDszPxxVV0UO1gjIRp1T3hhOtRxs5ZGlHNEygTB-lF2dHX6YI7mmg4";
+const AI_ENABLED = false;   // set to true once the "ai" function + ANTHROPIC_API_KEY are set up in Supabase (summaries + translation)   // from `npx web-push generate-vapid-keys` (the PUBLIC one only)
 
 const $ = id => document.getElementById(id);
 const show = (el, on=true) => el.classList.toggle("hidden", !on);
@@ -1251,6 +1310,12 @@ const live = {
     return data;
   },
   async setNotify(room,mode){ must(await sb.from("room_members").update({notify:mode}).eq("room",room).eq("user_id",user.id)); },
+  async ai(body){ const {data,error}=await sb.functions.invoke("ai",{body}); if(error){ let msg=error.message; try{ const j=await error.context?.json(); if(j?.error) msg=j.error; }catch(e){} throw new Error(msg); } if(data?.error) throw new Error(data.error); return data; },
+  async tasks(room){ return must(await sb.from("room_tasks").select("*").eq("room",room).order("created_at")); },
+  async addTask(room,text){ return must(await sb.from("room_tasks").insert({room,text}).select().single()); },
+  async setTaskDone(id,done){ must(await sb.from("room_tasks").update({done,done_at:done?new Date().toISOString():null}).eq("id",id)); },
+  async deleteTask(id){ must(await sb.from("room_tasks").delete().eq("id",id)); },
+  async setDisappear(room,sec){ must(await sb.rpc("set_disappear",{p_room:room,p_seconds:sec})); },
   subscribeAll(onMsg,onFriend){
     const ch=sb.channel("inbox-"+user.id)
       .on("postgres_changes",{event:"INSERT",schema:"public",table:"messages"},p=>onMsg(p.new))
@@ -1263,7 +1328,7 @@ const live = {
     if(error) throw new Error(/private_room/.test(error.message)?"private":error.message);
     return data;
   },
-  async roomInfo(room){ return must(await sb.from("rooms").select("code,name,background,owner,invite_token,is_dm").eq("code",room).maybeSingle()); },
+  async roomInfo(room){ return must(await sb.from("rooms").select("code,name,background,owner,invite_token,is_dm,disappear_seconds").eq("code",room).maybeSingle()); },
   async setBackground(room,bg){ must(await sb.rpc("set_room_background",{p_room:room,p_background:bg})); },
   async setNickname(room,uid,nick){ must(await sb.rpc("set_nickname",{p_room:room,p_user:uid,p_nickname:nick})); },
   async pins(room){ return must(await sb.from("pinned_messages").select("message_id,pinned_by,created_at").eq("room",room).order("created_at",{ascending:false})); },
@@ -1319,6 +1384,7 @@ const live = {
       .on("postgres_changes",{event:"DELETE",schema:"public",table:"poll_votes"},p=>p.old&&h.vote(p.old,false))
       .on("postgres_changes",{event:"INSERT",schema:"public",table:"pinned_messages",filter:`room=eq.${room}`},p=>h.pin(p.new,true))
       .on("postgres_changes",{event:"UPDATE",schema:"public",table:"games",filter:`room=eq.${room}`},p=>h.game(p.new))
+      .on("postgres_changes",{event:"*",schema:"public",table:"room_tasks",filter:`room=eq.${room}`},p=>h.task(p))
       .on("postgres_changes",{event:"DELETE",schema:"public",table:"pinned_messages"},p=>p.old&&h.pin(p.old,false))
       .subscribe(s=>h.status(s==="SUBSCRIBED"?"Live":"Reconnecting…"));
     const priv=sb.channel("typing:"+room,{config:{private:true,broadcast:{self:false}}})
@@ -1413,6 +1479,20 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
       return code;
     },
     async setNotify(room,mode){ rooms[room].members.me.notify=mode; },
+    async ai(body){
+      await new Promise(r=>setTimeout(r,500));
+      if(body.action==="summarize") return {headline:"Demo summary: the crew is planning an arcade night.",points:["Rook asked who's up for the arcade later; Vee and you are in.","A poll is running: Arcade vs Movies vs Both.","Someone is bringing snacks (Vee volunteered)."],todo:["Vote in the poll","Reply about tonight's time"]};
+      const m=Object.values(rooms).flatMap(r=>r.msgs).find(x=>x.id===body.message_id)||(typeof byId!=="undefined"&&byId.get(body.message_id));
+      const es={"Here. Bring snacks.":"Aquí. Trae bocadillos.","Morning crew.":"Buenos días, equipo."};
+      if(m&&/[áéíóñ¿¡]/.test(m.text||"")) return {text:"(translated) "+m.text,from:"Spanish"};
+      if(m&&es[m.text]&&body.lang==="es") return {text:es[m.text],from:"English"};
+      return {same:true};
+    },
+    async tasks(room){ return (rooms[room].tasks||[]).slice(); },
+    async addTask(room,text){ const t={id:nextId++,room,text,done:false,created_by:"me",created_at:iso()}; (rooms[room].tasks ||= []).push(t); return {...t}; },
+    async setTaskDone(id,done){ Object.values(rooms).forEach(r=>(r.tasks||[]).forEach(t=>{ if(t.id===id) t.done=done; })); },
+    async deleteTask(id){ Object.values(rooms).forEach(r=>{ r.tasks=(r.tasks||[]).filter(t=>t.id!==id); }); },
+    async setDisappear(room,sec){ rooms[room].disappear=sec; setTimeout(()=>fire("roomUpdated",{code:room,name:rooms[room].name||null,disappear_seconds:sec,owner:rooms[room].owner}),30); },
     _injectMissed(room,text,who="vee"){ const m={id:nextId++,room,user_id:who,kind:"text",text,mentions:[],created_at:iso()}; seed(room).msgs.push(m); return m; },
     _deleteSilently(room,id){ rooms[room].msgs=rooms[room].msgs.filter(m=>m.id!==id); },
     _status(s){ H&&H.status(s); },
@@ -1420,7 +1500,7 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     subscribeAll(onMsg,onFriend){ ALL=onMsg; FRIEND=onFriend; const t=setTimeout(()=>{ const r=seed("5959"); const m={id:nextId++,room:"5959",user_id:"rook",kind:"text",text:"@"+(people.me?.username||"you")+" you coming tonight?",mentions:["me"],created_at:iso()}; r.msgs.push(m); onMsg(m); },4000); return ()=>{ ALL=null; clearTimeout(t); }; },
     async myRooms(){ seed("5959"); if(rooms["5959"].name===undefined) rooms["5959"].name="The Hideout"; return Object.entries(rooms).filter(([,r])=>r.members.me).map(([code,r])=>{ const m=r.msgs[r.msgs.length-1]; const other=r.is_dm?Object.keys(r.members).find(u=>u!=="me"):null; return {code,name:r.name||null,is_dm:!!r.is_dm,dm_user:other,dm_name:other?people[other].username:null,dm_avatar:null,notify:r.members.me.notify||"all",is_owner:r.owner==="me",last_text:m?.text,last_image:!!m?.image_url,last_kind:m?.kind||"text",last_at:m?.created_at||iso(),last_sender:m?people[m.user_id]?.username:null,unread:r.msgs.filter(x=>x.user_id!=="me"&&x.created_at>(r.members.me?.read||"")).length}; }); },
     async joinRoom(room){ const existed=!!rooms[room]; seed(room); if(!existed){ rooms[room].msgs=[]; rooms[room].members={me:{read:iso()}}; return "created"; } rooms[room].members.me ||= {read:iso()}; return "member"; },
-    async roomInfo(room){ const r=seed(room); if(room==="5959"&&r.name===undefined) r.name="The Hideout"; return {code:room,name:r.name||null,background:r.background||null,owner:r.owner,invite_token:r.token,is_dm:!!r.is_dm}; },
+    async roomInfo(room){ const r=seed(room); if(room==="5959"&&r.name===undefined) r.name="The Hideout"; return {code:room,name:r.name||null,background:r.background||null,owner:r.owner,invite_token:r.token,is_dm:!!r.is_dm,disappear_seconds:r.disappear||0}; },
     async renameRoom(room,name){ rooms[room].name=name||null; setTimeout(()=>fire("roomUpdated",{code:room,name:name||null,owner:rooms[room].owner}),40); },
     async rotateInvite(room){ return rooms[room].token="demo"+Math.random().toString(36).slice(2,8); },
     async removeMember(room,uid){ delete rooms[room].members[uid]; setTimeout(()=>fire("memberGone",uid),50); },
@@ -1431,7 +1511,7 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     async loadBefore(){ return []; },
     async fetchMessage(id){ return Object.values(rooms).flatMap(r=>r.msgs).find(m=>m.id===id)||null; },
     async send(room,f){
-      const m={id:nextId++,room,user_id:"me",kind:f.kind||"text",text:f.text||null,image_url:f.image_url||null,media_url:f.media_url||null,media_type:f.media_type||null,media_duration:f.media_duration||null,sticker:f.sticker||null,reply_to:f.reply_to||null,mentions:f.mentions||[],created_at:iso()}; rooms[room].msgs.push(m);
+      const m={id:nextId++,room,user_id:"me",kind:f.kind||"text",text:f.text||null,image_url:f.image_url||null,media_url:f.media_url||null,media_type:f.media_type||null,media_duration:f.media_duration||null,sticker:f.sticker||null,reply_to:f.reply_to||null,mentions:f.mentions||[],created_at:iso(),expires_at:rooms[room].disappear?new Date(Date.now()+rooms[room].disappear*1000).toISOString():null}; rooms[room].msgs.push(m);
       const others=Object.keys(rooms[room].members).filter(u=>u!=="me"); if(!others.length) return m;
       const who=others[Math.floor(Math.random()*others.length)];
       setTimeout(()=>{ rooms[room].members[who].read=iso(); fire("member",{user_id:who,last_read_at:iso()}); },700);
@@ -1625,7 +1705,7 @@ function paintFxSettings(){
   FX_TRIGGERS.forEach(t=>{ const li=el("li"); li.append(el("b","",t.label+": ")); li.append([...t.words.map(w=>`"${w}"`),...t.emoji].join(", ")); ul.append(li); });
 }
 $("fxBtn").onclick=()=>{ try{ localStorage.setItem("nl-fx",fxEnabled()?"off":"on"); }catch(e){} paintFxSettings(); if(fxEnabled()) FX.play("confetti"); };
-const openProfile=()=>{ say("profMsg",""); paintNotif(); paintBlocked(); paintFxSettings(); fillBirthdayPicker(); paintSecrets(); show($("profile")); $("closeProfile").focus(); };
+const openProfile=()=>{ say("profMsg",""); paintNotif(); paintBlocked(); paintFxSettings(); fillBirthdayPicker(); paintSecrets(); paintLangPicker(); show($("profile")); $("closeProfile").focus(); };
 $("openProfile1").onclick=openProfile; $("openProfile2").onclick=openProfile;
 $("closeProfile").onclick=()=>show($("profile"),false);
 $("changePhoto").onclick=()=>$("avatarPicker").click();
@@ -1687,7 +1767,7 @@ async function enterRoom(code,token){
   typers.forEach(v=>clearTimeout(v.timer)); typers.clear(); paintTyping(); clearReply(); feed.innerHTML="";
   try{
     const [latest,mem,info,pinRows]=await Promise.all([api.loadLatest(room),api.members(room).catch(()=>[]),api.roomInfo(room).catch(()=>null),api.pins(room).catch(()=>[])]);
-    roomOwner=info?.owner||null; isDm=!!info?.is_dm; dmUser=null;
+    roomOwner=info?.owner||null; isDm=!!info?.is_dm; dmUser=null; disappear=+info?.disappear_seconds||0; delete $("catchUp").dataset.dismissed; show($("catchUp"),false); translations.clear(); showOriginal.clear(); loadTasks();
     if(isDm){ dmUser=(mem.find(x=>x.user_id!==user.id)||{}).user_id||null; await ensureProfiles([dmUser].filter(Boolean)); }
     myNotify=(mem.find(x=>x.user_id===user.id)||{}).notify||"all";
     setRoomName(info?.name); setRoomBackground(info?.background);
@@ -1696,6 +1776,7 @@ async function enterRoom(code,token){
     mem.forEach(setMember);
     hasMore=latest.length>=PAGE;
     await addMessages(latest);
+    updateCatchUp(); scheduleExpiry();
     await loadPinnedContext(); paintPinBar(); seasonalCheck("room");
     if(result==="created"&&!latest.length) feed.innerHTML='<p class="empty">You made a new private room. Tap Room to name it and invite friends.</p>';
     markReadSoon();
@@ -1704,7 +1785,8 @@ async function enterRoom(code,token){
       msgGone:removeMessage,
       profile:p=>{ const old=cache.get(p.id); cache.set(p.id,p); repaintFaces(p.id); if(p.id===user.id){meProfile=p;paintMe();} if(old?.bubble_color!==p.bubble_color) renderAll(false); paintReceipts(); },
       member:setMember,
-      roomUpdated:r=>{ if(r.code!==room) return; setRoomName(r.name); if(r.background!==undefined) setRoomBackground(r.background); if(r.owner!==undefined) roomOwner=r.owner; },
+      roomUpdated:r=>{ if(r.code!==room) return; setRoomName(r.name); if(r.background!==undefined) setRoomBackground(r.background); if(r.owner!==undefined) roomOwner=r.owner; if(r.disappear_seconds!==undefined){ disappear=+r.disappear_seconds||0; paintDisappear(); } },
+      task:p=>{ if(p.eventType==="DELETE"){ tasks.delete(p.old.id); } else tasks.set(p.new.id,p.new); paintTasks(); },
       game:g=>{ const prev=gamesById.get(g.message_id); gamesById.set(g.message_id,g); refreshMsg(g.message_id); if(openGameId===g.message_id) paintGame(prev); },
       vote:(v,added)=>{ const p=pollsById.get(v.message_id); if(!p) return; setVote(p,v,added); refreshMsg(v.message_id); },
       pin:async(p,added)=>{ if(added){ if(p.room&&p.room!==room) return; pins.set(p.message_id,p); await loadPinnedContext(); } else { if(!pins.has(p.message_id)) return; pins.delete(p.message_id); } pinCursor=0; paintPinBar(); if(!$("roomSheet").classList.contains("hidden")) paintPins(); },
@@ -1778,6 +1860,8 @@ function appendEl(m){
   if(!prev || dayKey(prev.created_at)!==dayKey(m.created_at)) feed.append(el("div","daybreak",dayLabel(m.created_at)));
   const node=buildMsg(m,elById.size); elById.set(m.id,node); feed.append(node);
   paintReceipts(); feed.scrollTop=feed.scrollHeight;
+  if(m.user_id!==user.id&&myLang()) translateMsg(m);
+  if(m.expires_at) scheduleExpiry();
   playFx(m);
   if(m.user_id!==user.id && Date.now()-new Date(m.created_at)<15000 && navigator.vibrate) navigator.vibrate(30);
 }
@@ -1825,6 +1909,7 @@ function buildMsg(m,index,noAnim){
   if(fresh&&!noAnim) tag.append(el("b","","NEW"));
   if(pins.has(m.id)) tag.append("📌 ");
   tag.append(`${nameOf(m.user_id)} · ${timeOf(at)}`);
+  const exp=expiryTag(m); if(exp) tag.append(exp);
   const bub=el("div","bubble"); bub.tabIndex=0; bub.setAttribute("role","button"); bub.setAttribute("aria-label",`Message from ${nameOf(m.user_id)}. Open options`);
   if(m.reply_to){
     const r=byId.get(m.reply_to)||contextById.get(m.reply_to), q=el("button","quote"); q.type="button";
@@ -1843,10 +1928,10 @@ function buildMsg(m,index,noAnim){
   if(m.kind==="sticker"&&STICKERS[m.sticker]) bub.append(stickerEl(m.sticker));
   if(m.kind==="poll") bub.append(pollEl(m));
   else if(m.kind==="game") bub.append(gameCard(m));
-  else if(m.text){ const t=el("div"); renderText(t,m.text,m.mentions); bub.append(t);
+  else if(m.text){ const t=el("div"); renderTextWithDates(t,m.text,m.mentions,m); bub.append(t); const trb=translationBlock(m); if(trb) bub.append(trb);
     if(/el psy (k|c)ongroo|(^|[^a-z])world ?line([^a-z]|$)/i.test(m.text)&&typeof m.id==="number") bub.append(el("div","d20chip wlchip",`⚗️ world line ${worldLineFor(m)}`));
     if(/(^|[^a-z])roll(s|ed|ing)? (a |the |me a )?d20([^a-z0-9]|$)/i.test(m.text)&&typeof m.id==="number"){ const n=d20For(m); bub.append(el("div","d20chip"+(n===20?" nat20":n===1?" nat1":""),`🎲 d20 → ${n}${n===20?" NAT 20!":n===1?" crit fail":""}`)); } }
-  bub.onclick=e=>{ if(e.target.closest("a,video,.voice,.poll button,.gamecard button")) return; openMenu(m); };
+  bub.onclick=e=>{ if(e.target.closest("a,video,.voice,.poll button,.gamecard button,.datechip,.trbox")) return; openMenu(m); };
   bub.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openMenu(m); } };
   col.append(tag,bub);
   const map=reactionsById.get(m.id);
@@ -1893,6 +1978,7 @@ function openMenu(m){
     row.append(b);
   });
   show($("menuCopy"),!!m.text&&m.kind!=="sticker");
+  show($("menuTranslate"),aiOn()&&!!m.text&&m.kind!=="sticker"&&m.kind!=="poll"&&m.kind!=="game"&&!mine);
   show($("menuFx"),!!(secretFor(m.text)||fxFor(m.text))&&m.kind!=="poll"&&m.kind!=="game");
   show($("menuDelete"),mine||roomOwner===user.id);
   $("menuDelete").textContent=mine?"Delete message":"Delete message (room owner)";
@@ -2009,7 +2095,7 @@ function inviteUrl(code,token){ return location.origin+location.pathname+"?join=
 $("roomBtn").onclick=async()=>{
   say("rsMsg",""); paintRoomTitle(); $("roomName").value=roomName||""; $("invLink").value="Loading…"; show($("roomSheet"));
   show($("roomOnly"),!isDm); $("leaveRoom").textContent=isDm?"Hide this chat":"Leave this room";
-  paintMembers(); paintBgTiles(); paintPins(); paintNotifyModes();
+  paintMembers(); paintBgTiles(); paintPins(); paintNotifyModes(); paintDisappear(); paintTasks(); show($("rsSummarize"),aiOn());
   try{
     const info=await api.roomInfo(room); if(!info) throw new Error("Couldn't find this room.");
     roomOwner=info.owner; setRoomName(info.name); if(document.activeElement!==$("roomName")) $("roomName").value=roomName||""; paintMembers();
@@ -2141,6 +2227,7 @@ function setMember(r){
   const next={read: r.last_read_at!==undefined ? (r.last_read_at?new Date(r.last_read_at).getTime():0) : prev.read,
               nick: r.nickname!==undefined ? (r.nickname||null) : prev.nick};
   members.set(r.user_id,next);
+  if(r.user_id===user?.id&&room&&typeof updateCatchUp==="function"&&!$("catchUp").dataset.shownOnce){ $("catchUp").dataset.shownOnce="1"; }
   if(next.nick!==prev.nick && room){ renderAll(false); paintPinBar(); if(!$("roomSheet").classList.contains("hidden")) paintMembers(); }
   ensureProfiles([r.user_id]).then(paintReceipts);
 }
@@ -2503,7 +2590,7 @@ function previewOf(m){
 
 /* ---------- overlays ---------- */
 $("lightbox").onclick=()=>show($("lightbox"),false);
-["profile","roomSheet","msgMenu","pollSheet"].forEach(id=>$(id).addEventListener("click",e=>{ if(e.target.id===id) show($(id),false); }));
+["profile","roomSheet","msgMenu","pollSheet","summarySheet","calSheet"].forEach(id=>$(id).addEventListener("click",e=>{ if(e.target.id===id) show($(id),false); }));
 addEventListener("keydown",e=>{ if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu","pollSheet","tray"].forEach(id=>show($(id),false)); });
 
 /* ================= PUSH NOTIFICATIONS ================= */
@@ -3646,6 +3733,177 @@ function seasonalCheck(where){
   stamp.addEventListener("contextmenu",e=>e.preventDefault());
 })();
 
+/* ================= AI, DATES, CHECKLISTS, DISAPPEARING MESSAGES ================= */
+const LANGS=[["","Off"],["en","English"],["es","Spanish"],["fr","French"],["de","German"],["pt","Portuguese"],["it","Italian"],["ja","Japanese"],["ko","Korean"],["zh","Chinese"],["tl","Tagalog"],["vi","Vietnamese"],["ar","Arabic"],["hi","Hindi"],["ru","Russian"]];
+const aiOn=()=>!sb||AI_ENABLED;
+const myLang=()=>{ if(!aiOn()) return ""; try{ return localStorage.getItem("nl-lang")||""; }catch(e){ return ""; } };
+const translations=new Map();   // message id -> {text, same}
+const showOriginal=new Set();
+
+/* ---------- catch me up (summaries) ---------- */
+function updateCatchUp(){
+  const mine=members.get(user?.id)?.read||0;
+  const unread=msgs.filter(m=>m.user_id!==user.id&&new Date(m.created_at).getTime()>mine&&(m.text||m.kind!=="text")).length;
+  const bar=$("catchUp"); bar.dataset.n=unread;
+  show(bar, aiOn() && unread>=8 && !bar.dataset.dismissed);
+  $("catchUpText").textContent=`${unread} new messages · ✨ Catch me up`;
+}
+$("catchUpX").onclick=()=>{ $("catchUp").dataset.dismissed="1"; show($("catchUp"),false); };
+$("catchUpBtn").onclick=()=>summarize(+$("catchUp").dataset.n||30);
+$("rsSummarize").onclick=()=>{ show($("roomSheet"),false); summarize(60); };
+async function summarize(count){
+  $("sumTitle").textContent="✨ Catching you up…"; $("sumBody").innerHTML='<p class="sub">Reading the last '+count+' messages…</p>'; show($("summarySheet"));
+  try{
+    const r=await api.ai({action:"summarize",room,count});
+    $("sumTitle").textContent="✨ Here's what you missed";
+    const ul=el("ul","sumlist"); (r.points||[]).forEach(pt=>ul.append(el("li","",pt)));
+    $("sumBody").innerHTML=""; if(r.headline) $("sumBody").append(el("p","sumhead",r.headline)); $("sumBody").append(ul);
+    if(r.todo?.length){ $("sumBody").append(el("h3","","For you")); const t=el("ul","sumlist"); r.todo.forEach(x=>t.append(el("li","",x))); $("sumBody").append(t); }
+    $("catchUp").dataset.dismissed="1"; show($("catchUp"),false);
+  }catch(err){ $("sumTitle").textContent="Couldn't summarize"; $("sumBody").innerHTML=""; $("sumBody").append(el("p","msgline bad",friendlyAiError(err))); }
+}
+$("sumClose").onclick=()=>show($("summarySheet"),false);
+function friendlyAiError(err){
+  const m=String(err?.message||err);
+  if(/not set up|ANTHROPIC|api key/i.test(m)) return "AI features aren't set up yet. The notify-style 'ai' function needs an ANTHROPIC_API_KEY secret in Supabase.";
+  if(/demo/i.test(m)) return m;
+  return "Something went wrong: "+m;
+}
+
+/* ---------- translation ---------- */
+function paintLangPicker(){ show($("langPick").closest("label"),aiOn()); const s=$("langPick"); if(!s.options.length) LANGS.forEach(([v,n])=>s.append(new Option(n,v))); s.value=myLang(); }
+$("langPick").onchange=e=>{ try{ localStorage.setItem("nl-lang",e.target.value); }catch(x){} translations.clear(); if(room) renderAll(false); say("profMsg",e.target.value?"New messages in other languages will be translated for you.":"Translation turned off."); };
+async function translateMsg(m,force){
+  const lang=myLang(); if(!lang||!m.text||m.kind==="poll"||m.kind==="game") return;
+  if(translations.has(m.id)&&!force) return;
+  translations.set(m.id,{pending:true});
+  try{ const r=await api.ai({action:"translate",message_id:m.id,room:m.room,lang}); translations.set(m.id,{text:r.text,same:!!r.same,from:r.from}); }
+  catch(err){ translations.set(m.id,{error:friendlyAiError(err)}); }
+  refreshMsg(m.id);
+}
+function translationBlock(m){
+  const tr=translations.get(m.id); if(!tr||tr.pending||tr.same||!tr.text) return null;
+  const box=el("div","trbox");
+  if(showOriginal.has(m.id)){ box.append(el("span","trlabel","original")); }
+  else { const t=el("div","trtext"); linkify(t,tr.text); box.append(t); box.append(el("span","trlabel",`🌐 translated${tr.from?" from "+tr.from:""} · tap for original`)); }
+  box.onclick=e=>{ e.stopPropagation(); showOriginal.has(m.id)?showOriginal.delete(m.id):showOriginal.add(m.id); refreshMsg(m.id); };
+  return box;
+}
+$("menuTranslate").onclick=()=>{ const m=menuMsg; show($("msgMenu"),false); if(!myLang()){ $("status").textContent="Pick your language in your profile first."; openProfile(); return; } translateMsg(m,true); };
+
+/* ---------- dates → calendar ---------- */
+const MONTH_RE="jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?";
+const DAY_RE="sun(?:day)?|mon(?:day)?|tue(?:s(?:day)?)?|wed(?:nesday)?|thu(?:rs(?:day)?)?|fri(?:day)?|sat(?:urday)?";
+const TIME_RE="(?:\\d{1,2}(?::\\d{2})?\\s?(?:am|pm)|\\d{1,2}:\\d{2}|noon|midnight)";
+const DATE_PATTERNS=[
+  new RegExp(`\\b(?:(?:this|next)\\s+)?(?:${DAY_RE})\\b(?:\\s+(?:at\\s+)?${TIME_RE})?`,"i"),
+  new RegExp(`\\b(?:tomorrow|tonight|today)\\b(?:\\s+(?:at\\s+)?${TIME_RE})?`,"i"),
+  new RegExp(`\\b(?:${MONTH_RE})\\.?\\s+\\d{1,2}(?:st|nd|rd|th)?(?:,?\\s+\\d{4})?\\b(?:\\s+(?:at\\s+)?${TIME_RE})?`,"i"),
+  new RegExp(`\\b\\d{1,2}\\/\\d{1,2}(?:\\/\\d{2,4})?\\b(?:\\s+(?:at\\s+)?${TIME_RE})?`,"i"),
+  new RegExp(`\\bat\\s+${TIME_RE}\\b`,"i"),
+];
+function findDates(text){
+  const hits=[]; let s=text;
+  for(const re of DATE_PATTERNS){ let m; const g=new RegExp(re.source,"gi"); while((m=g.exec(s))){ if(!hits.some(h=>m.index<h.end&&m.index+m[0].length>h.start)) hits.push({start:m.index,end:m.index+m[0].length,text:m[0]}); } }
+  return hits.sort((a,b)=>a.start-b.start);
+}
+function parseWhen(phrase,base=new Date()){
+  const p=phrase.toLowerCase(); let d=new Date(base); d.setSeconds(0,0); let hasTime=false;
+  const mon=p.match(new RegExp(`(${MONTH_RE})\\.?\\s+(\\d{1,2})(?:st|nd|rd|th)?(?:,?\\s+(\\d{4}))?`));
+  const num=p.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/);
+  const day=p.match(new RegExp(`\\b(${DAY_RE})\\b`));
+  if(mon){ const mi=["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"].indexOf(mon[1].slice(0,3)); d.setMonth(mi,+mon[2]); if(mon[3]) d.setFullYear(+mon[3]); else if(d<base&&(base-d)>864e5*2) d.setFullYear(d.getFullYear()+1); }
+  else if(num){ d.setMonth(+num[1]-1,+num[2]); if(num[3]) d.setFullYear(num[3].length===2?2000+ +num[3]:+num[3]); else if(d<base&&(base-d)>864e5*2) d.setFullYear(d.getFullYear()+1); }
+  else if(day){ const want=["sun","mon","tue","wed","thu","fri","sat"].indexOf(day[1].slice(0,3)); let diff=(want-base.getDay()+7)%7; if(diff===0&&!/this/.test(p)) diff=7; if(/next/.test(p)&&diff<7) diff+=7; d.setDate(base.getDate()+diff); }
+  else if(/tomorrow/.test(p)) d.setDate(base.getDate()+1);
+  const t=p.match(/(\d{1,2})(?::(\d{2}))?\s?(am|pm)|(\d{1,2}):(\d{2})|(noon)|(midnight)/);
+  if(t){ hasTime=true; if(t[6]) d.setHours(12,0); else if(t[7]) d.setHours(0,0); else if(t[3]){ let h=+t[1]%12; if(t[3]==="pm") h+=12; d.setHours(h,+(t[2]||0)); } else d.setHours(+t[4],+t[5]); }
+  else if(/tonight/.test(p)){ hasTime=true; d.setHours(19,0); }
+  else d.setHours(9,0);
+  return {date:d,hasTime};
+}
+let calDraft=null;
+function openCalendar(phrase,m){
+  const {date,hasTime}=parseWhen(phrase);
+  calDraft={m,phrase};
+  const pad=n=>String(n).padStart(2,"0");
+  $("calTitle").value=(m.text||"NightLine plan").replace(/\s+/g," ").slice(0,60);
+  $("calDate").value=`${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`;
+  $("calTime").value=`${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  $("calWhere").value=roomName||("#"+room);
+  $("calHint").textContent=`From "${phrase}"${hasTime?"":" · no time given, so 9:00 AM is a guess"}`;
+  say("calMsg",""); show($("calSheet"));
+}
+function calEvent(){
+  const [y,mo,da]=$("calDate").value.split("-").map(Number), [h,mi]=$("calTime").value.split(":").map(Number);
+  const start=new Date(y,mo-1,da,h,mi), end=new Date(start.getTime()+3600e3);
+  return {title:$("calTitle").value.trim()||"NightLine plan",start,end,where:$("calWhere").value.trim(),desc:`Planned in NightLine${calDraft?.m?` by ${nameOf(calDraft.m.user_id)}: "${(calDraft.m.text||"").slice(0,200)}"`:""}`};
+}
+const icsStamp=d=>d.toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"");
+$("calGoogle").onclick=()=>{ const e=calEvent(); const u=new URL("https://calendar.google.com/calendar/render"); u.searchParams.set("action","TEMPLATE"); u.searchParams.set("text",e.title); u.searchParams.set("dates",`${icsStamp(e.start)}/${icsStamp(e.end)}`); u.searchParams.set("details",e.desc); if(e.where) u.searchParams.set("location",e.where); window.open(u.toString(),"_blank","noopener"); };
+$("calIcs").onclick=()=>{
+  const e=calEvent(); const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//NightLine//EN","BEGIN:VEVENT",`UID:${Date.now()}@nightline`,`DTSTAMP:${icsStamp(new Date())}`,`DTSTART:${icsStamp(e.start)}`,`DTEND:${icsStamp(e.end)}`,`SUMMARY:${e.title.replace(/[,;\\]/g,"\\$&")}`,`LOCATION:${e.where.replace(/[,;\\]/g,"\\$&")}`,`DESCRIPTION:${e.desc.replace(/[,;\\]/g,"\\$&").replace(/\n/g,"\\n")}`,"END:VEVENT","END:VCALENDAR"].join("\r\n");
+  const blob=new Blob([ics],{type:"text/calendar;charset=utf-8"}), url=URL.createObjectURL(blob), a=document.createElement("a"); a.href=url; a.download="nightline-plan.ics"; document.body.append(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),4000);
+  say("calMsg","Calendar file ready. Open it to add the event.");
+};
+$("calTask").onclick=async()=>{ const e=calEvent(); show($("calSheet"),false); await addTask(`${e.title} — ${e.start.toLocaleString([],{weekday:"short",month:"numeric",day:"numeric",hour:"numeric",minute:"2-digit"})}`); };
+$("calClose").onclick=()=>show($("calSheet"),false);
+function renderTextWithDates(node,text,mentionIds,m){
+  const hits=findDates(text); if(!hits.length){ renderText(node,text,mentionIds); return; }
+  let last=0;
+  for(const h of hits){ const s=el("span"); renderText(s,text.slice(last,h.start),mentionIds); node.append(s);
+    const chip=el("button","datechip","📅 "+h.text); chip.type="button"; chip.onclick=e=>{ e.stopPropagation(); openCalendar(h.text,m); }; node.append(chip); last=h.end; }
+  const s=el("span"); renderText(s,text.slice(last),mentionIds); node.append(s);
+}
+
+/* ---------- room checklist ---------- */
+const tasks=new Map();
+async function loadTasks(){ tasks.clear(); (await api.tasks(room).catch(()=>[])).forEach(t=>tasks.set(t.id,t)); paintTasks(); }
+function paintTasks(){
+  const list=[...tasks.values()].sort((a,b)=>(a.done-b.done)||(a.created_at<b.created_at?-1:1));
+  const box=$("taskList"); box.innerHTML=""; $("taskTitle").textContent=`Checklist (${list.filter(t=>!t.done).length} open)`;
+  list.forEach(t=>{
+    const row=el("label","taskrow"+(t.done?" done":"")); const cb=document.createElement("input"); cb.type="checkbox"; cb.checked=!!t.done;
+    cb.onchange=async()=>{ t.done=cb.checked; paintTasks(); try{ await api.setTaskDone(t.id,cb.checked); }catch(err){ t.done=!cb.checked; paintTasks(); say("rsMsg",err.message,true); } };
+    const txt=el("span","tasktext",t.text); const who=el("small","",nameOf(t.created_by));
+    const x=el("button","rm","✕"); x.type="button"; x.setAttribute("aria-label","Remove task"); x.onclick=async e=>{ e.preventDefault(); if(!confirm("Remove this task?")) return; tasks.delete(t.id); paintTasks(); try{ await api.deleteTask(t.id); }catch(err){ say("rsMsg",err.message,true); loadTasks(); } };
+    row.append(cb,txt,who,x); box.append(row);
+  });
+  $("taskCount").textContent=list.filter(t=>!t.done).length?`✅ ${list.filter(t=>!t.done).length}`:""; 
+}
+async function addTask(text){
+  text=(text||"").trim().slice(0,200); if(!text) return;
+  try{ const t=await api.addTask(room,text); tasks.set(t.id,t); paintTasks(); $("status").textContent="Added to the room checklist ✅"; }
+  catch(err){ $("status").textContent="Couldn't add task: "+err.message; }
+}
+$("taskForm").addEventListener("submit",async e=>{ e.preventDefault(); const v=$("taskInput").value; $("taskInput").value=""; await addTask(v); });
+$("menuTask").onclick=()=>{ const m=menuMsg; show($("msgMenu"),false); addTask(previewOf(m)); };
+$("taskCount").onclick=()=>{ $("roomBtn").click(); setTimeout(()=>$("taskTitle").scrollIntoView({behavior:"smooth",block:"start"}),300); };
+
+/* ---------- disappearing messages ---------- */
+let disappear=0;
+const DISAPPEAR=[[0,"Off"],[3600,"1 hour"],[86400,"24 hours"],[604800,"7 days"]];
+function paintDisappear(){ const s=$("disappearModes"); s.querySelectorAll("button").forEach(b=>b.setAttribute("aria-checked",+b.dataset.sec===disappear)); $("disappearNote").textContent=disappear?`New messages here vanish for everyone ${DISAPPEAR.find(x=>x[0]===disappear)[1]} after they're sent.`:"Messages stay until someone deletes them."; }
+$("disappearModes").querySelectorAll("button").forEach(b=>b.onclick=async()=>{
+  const prev=disappear; disappear=+b.dataset.sec; paintDisappear();
+  try{ await api.setDisappear(room,disappear); say("rsMsg",disappear?"Disappearing messages on.":"Disappearing messages off."); }
+  catch(err){ disappear=prev; paintDisappear(); say("rsMsg",err.message,true); }
+});
+let expiryTimer=null;
+function scheduleExpiry(){
+  clearTimeout(expiryTimer);
+  const next=msgs.filter(m=>m.expires_at).map(m=>new Date(m.expires_at).getTime()).filter(t=>t>Date.now()).sort((a,b)=>a-b)[0];
+  const due=msgs.filter(m=>m.expires_at&&new Date(m.expires_at).getTime()<=Date.now()).map(m=>m.id);
+  due.forEach(id=>removeMessage(id));
+  if(next) expiryTimer=setTimeout(scheduleExpiry,Math.min(next-Date.now()+50,60000));
+}
+function expiryTag(m){
+  if(!m.expires_at) return null;
+  const left=new Date(m.expires_at).getTime()-Date.now(); if(left<=0) return null;
+  const s=el("span","expiry","⏳"+(left<3600e3?Math.max(1,Math.round(left/60000))+"m":left<86400e3?Math.round(left/3600e3)+"h":Math.round(left/86400e3)+"d"));
+  s.title="This message will disappear"; return s;
+}
+
 /* ================= STAYING CONNECTED ================= */
 let liveStatus=null, catchingUp=false, lastCatchUp=0;
 async function catchUp(reason){
@@ -3686,7 +3944,7 @@ feed.addEventListener("click",e=>{
 /* ================= BACK BUTTON (Android / browser back) ================= */
 // Each chat or sheet you open adds a history step, so Back closes the top one instead of leaving the app.
 (function(){
-  const LAYERS=["chat","profile","roomSheet","msgMenu","themeSheet","pollSheet","installSheet","gameSheet","personSheet","lightbox"];
+  const LAYERS=["chat","profile","roomSheet","msgMenu","themeSheet","pollSheet","installSheet","gameSheet","personSheet","summarySheet","calSheet","lightbox"];
   const stack=[]; let popping=false, ignorePops=0, pendingBack=0, flushQueued=false;
   const isOpen=id=>!$(id).classList.contains("hidden");
   function queueBack(){
