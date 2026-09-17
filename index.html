@@ -908,6 +908,10 @@ html,body{overscroll-behavior:none}
 .qx-pog{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);width:min(50vw,200px);text-align:center;animation:sxslam 1.7s cubic-bezier(.2,1.6,.4,1) both}
 .qx-pog svg{width:100%;filter:drop-shadow(8px 8px 0 var(--mag))}
 .qx-pog b{display:block;font-family:var(--num);font-size:clamp(40px,14vw,70px);color:var(--white);text-shadow:4px 4px 0 var(--mag)}
+
+.hintbox{font-size:15px;color:var(--white);background:rgba(243,255,58,.08);border-left:3px solid var(--volt);padding:6px 10px;width:100%}
+.hintbox b{color:var(--volt);font-family:var(--tech);font-size:11px}
+.hintbox small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
 </style>
 </head>
 <body>
@@ -1077,6 +1081,7 @@ html,body{overscroll-behavior:none}
     <details class="fx-list"><summary>Words and emoji that trigger effects</summary><ul id="fxList"></ul></details>
     <div class="secretbox">
       <div class="secretcount" id="secretCount">🔓 Secrets found: 0</div>
+      <div class="hintbox" id="hintBox"></div>
       <div class="secretlist" id="secretList"></div>
       <button type="button" class="linkbtn hidden" id="motionBtn">Enable motion secrets</button>
     </div>
@@ -1711,7 +1716,7 @@ async function handleAuth(u){
   try{ $("room").value=localStorage.getItem("nl-room")||""; }catch(e){}
   await loadContacts(); loadInbox();
   try{ const t=localStorage.getItem("nl-front-tab"); if(["chats","dms","contacts"].includes(t)) setFrontTab(t); }catch(e){}
-  celebrateMyBirthday(); seasonalCheck("login");
+  celebrateMyBirthday(); seasonalCheck("login"); hintNudge();
   if(unsubAll) unsubAll();
   unsubAll=api.subscribeAll(onAnyMessage,onFriendAdded);
   clearBadge();
@@ -3629,6 +3634,7 @@ function playSecretFromMessage(m,s,force){
   }
 }
 function paintSecrets(){
+  paintHint();
   const f=foundSecrets();
   $("secretCount").textContent=`🔓 Secrets found: ${f.length}/${SECRET_LIST.length}`;
   const box=$("secretList"); box.innerHTML="";
@@ -4127,6 +4133,52 @@ SECRET_LIST.splice(SECRET_LIST.findIndex(s=>s.id==="konami"),0,
 // "celebrate" joins the everyday confetti trigger (not a secret)
 FX_TRIGGERS.find(t=>t.fx==="confetti").words.push("celebrate","celebration","let's celebrate");
 FX_TRIGGERS.forEach(t=>t.re=new RegExp("(^|[^a-z0-9'])("+t.words.map(w=>w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|")+")(?=$|[^a-z0-9])","i"));
+
+/* ================= DAILY HINT ================= */
+const HINTS={
+ showtime:"A phantom's favorite word when the curtain goes up.", takeyourtime:"The kindest thing a game ever told you while it loaded.", over9000:"A scouter reading that broke the scale.",
+ barrelroll:"An old fox's advice for dodging fire. Say the full instruction.", lightsout:"What you shout before hide-and-seek in the dark.", midnight:"Only whispered when the clock has just struck twelve.",
+ cityburn:"A mercenary's motto about torching a whole town.", netrunner:"The hacker class of a neon-lit future.", choom:"Night City slang for a friend.", jackin:"What you do to a terminal before the code rains down.",
+ flatline:"When the heart monitor sings one long note.", preem:"Night City for 'top quality'.", gonk:"Night City for 'idiot'.", blackwall:"The AI firewall nobody's supposed to cross.",
+ easycome:"…easy go. Say both halves.", lumos:"A wand-lighting spell.", d20:"Ask for a roll of the biggest die in the bag.", creator:"Say the name of the person who built this place.",
+ matrix:"Green code falls from the sky in this movie.", zombies:"The undead, plural.", wendigo:"An antlered legend of the frozen north.", ghost:"The EMF meter spikes when you say this.",
+ allout:"The whole party jumps in for one finishing blow.", callingcard:"Thieves leave this before they steal a heart.", persona:"Say the name of the game itself.", velvet:"A blue room between dream and reality.",
+ midnightchannel:"Tune in when it rains, after twelve.", darkhour:"The hidden 25th hour, when the moon looks wrong.", rankup:"A confidant's bond grows stronger.", batonpass:"Hand the turn to a teammate.",
+ iamthou:"'…thou art I.' Say the first half.", lookingcool:"A compliment Joker's friends give him.", elpsy:"The mad scientist's sign-off. Two words, kind of Latin.", tuturu:"Mayuri's greeting.",
+ dmail:"Email sent to the past.", timeleap:"Jump your memories back 48 hours.", organization:"The shadowy group Okabe fears.", hououin:"The mad scientist's chosen name.",
+ worldline:"Attractor fields shift between these.", microwave:"A kitchen appliance that became a time machine.", snap:"Half of everything turns to dust.", pressf:"Pay respects with a single key.",
+ achievement:"Unlocked! (say the word).", dragon:"A fire-breathing beast with wings.", goodkid:"A band name, or what your mom calls you.", drift:"Running tofu up a mountain, or that feeling you've seen this exact moment before.",
+ redrum:"Read it backwards in a mirror.", behindyou:"Where the monster always is.", boo:"What a ghost says.", cursed:"A videotape you shouldn't have watched.",
+ beamup:"Ask Scotty for a lift.", hyperspace:"The stars stretch into lines when you go this fast. Say the pilot's two-word order.", force:"May it be with you.", assimilate:"What the Borg tell you.",
+ fortytwo:"The answer to life, the universe and everything.", spacecowboy:"See you… (finish the Bebop sign-off).", terminate:"A robot's farewell, in Spanish.", yippee:"John McClane's catchphrase.",
+ illbeback:"The most famous three-word promise in action movies.", kamehameha:"Goku's signature beam.", nani:"The word you scream when someone says you're already dead.", leeroy:"He had chicken. He charged anyway.",
+ fatality:"The gory word a certain announcer growls when you end a fight in style.", hadouken:"A fireball from a Street Fighter's palms.", gameover:"Two words on every arcade screen when you lose.", oneup:"A green mushroom would give you one of these. One digit, a hyphen, two letters.",
+ cake:"Portal's most famous lie.", headshot:"A sniper's favorite word.", victory:"What you say after coming first in a battle royale… something about poultry.", levelup:"Your XP bar just filled.",
+ crit:"When the dice roll max damage.", pog:"Twitch's favorite wide-eyed face.",
+ konami:"↑↑↓↓←→←→ then tap the date twice.", moonwink:"Tap the sky's biggest light seven times.", shake:"Give your phone a good shake in a room.", credits:"Press and hold the date stamp.",
+ combo:"Send five messages in ten seconds.", shiny:"About 1 in 500 messages sparkles. Keep talking.", lateowl:"Send something between 3 and 5 AM.",
+};
+const dayNum=()=>Math.floor((Date.now()-new Date().getTimezoneOffset()*60000)/864e5);
+function hintOfDay(){
+  const left=SECRET_LIST.filter(s=>HINTS[s.id]&&!hasSecret(s.id)); if(!left.length) return null;
+  return left[dayNum()%left.length];
+}
+function paintHint(){
+  const h=hintOfDay(), box=$("hintBox");
+  if(!h){ box.textContent="🏆 You've found every secret. Legend."; return; }
+  box.innerHTML=""; box.append(el("b","","🔍 Today's hint: "),el("span","",HINTS[h.id]));
+  const left=SECRET_LIST.filter(s=>!hasSecret(s.id)).length; box.append(el("small","",` · ${left} still hidden · new hint tomorrow`));
+}
+function hintNudge(){
+  const h=hintOfDay(); if(!h) return;
+  const key="nl-hint-"+dayNum(); try{ if(localStorage.getItem(key)) return; localStorage.setItem(key,"1"); }catch(e){}
+  setTimeout(()=>{
+    const t=el("button","toast"); t.type="button"; const body=el("span","tbody");
+    body.append(el("div","ttitle","🔍 Daily secret hint"), el("div","ttext",HINTS[h.id]));
+    t.append(el("span","sx-lock","🔍"),body); t.onclick=()=>{ t.remove(); openProfile(); setTimeout(()=>$("hintBox").scrollIntoView({behavior:"smooth",block:"center"}),300); };
+    $("toasts").prepend(t); setTimeout(()=>{ t.classList.add("out"); setTimeout(()=>t.remove(),260); },7000);
+  },2500);
+}
 
 /* ================= STAYING CONNECTED ================= */
 let liveStatus=null, catchingUp=false, lastCatchUp=0;
