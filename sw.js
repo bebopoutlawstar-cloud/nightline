@@ -1,6 +1,20 @@
-// NightLine service worker (v9): push notifications that don't get lost across lots of rooms.
-self.addEventListener("install", () => self.skipWaiting());
-self.addEventListener("activate", e => e.waitUntil(self.clients.claim()));
+// NightLine service worker (v10): push notifications + fast repeat loads.
+const CACHE="nightline-v10";
+const STATIC=["icon-192.png","icon-512.png","favicon.ico","manifest.json"];
+self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(async c => { await c.addAll(STATIC).catch(()=>{}); try { const r = await fetch("./", { cache: "no-store" }); if (r.ok) await c.put("shell", r); } catch (e) {} }).then(()=>self.skipWaiting())); });
+self.addEventListener("activate", e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())));
+self.addEventListener("fetch", e => {
+  const req = e.request; if (req.method !== "GET") return;
+  const url = new URL(req.url); if (url.origin !== location.origin) return;
+  const isShell = req.mode === "navigate" || url.pathname.endsWith("/index.html") || url.pathname.endsWith("/");
+  if (isShell) {
+    // network first: always pick up your latest upload; fall back to the cached copy when offline
+    e.respondWith(fetch(req).then(r => { const copy = r.clone(); caches.open(CACHE).then(c => c.put("shell", copy)); return r; }).catch(() => caches.match("shell")));
+  } else if (STATIC.some(s => url.pathname.endsWith("/" + s))) {
+    e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(r => { const copy = r.clone(); caches.open(CACHE).then(c => c.put(req, copy)); return r; })));
+  }
+});
+
 
 // Ask an open app window which chat it's showing (answers null if none / hidden).
 function askWhichRoom(client) {

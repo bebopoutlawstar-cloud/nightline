@@ -1178,6 +1178,33 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
 #chat[data-bg="matrix"]::before,.bgtile[data-bg="matrix"]{background:#010a03}
 #chat[data-bg="matrix"]::after{background:repeating-linear-gradient(90deg,rgba(0,255,90,.12) 0 2px,transparent 2px 16px),repeating-linear-gradient(0deg,rgba(0,255,90,.1) 0 2px,transparent 2px 14px);animation:coderain 1.4s linear infinite;-webkit-mask:linear-gradient(180deg,#000,transparent 85%);mask:linear-gradient(180deg,#000,transparent 85%)}
 @keyframes coderain{to{background-position:0 0,0 140px}}
+/* ===== search ===== */
+.srch{background:none;border:2px solid var(--cyan);color:var(--cyan);width:34px;height:34px;display:grid;place-items:center;padding:0}
+.srch svg{width:18px;height:18px}
+.searchbar{display:flex;gap:8px;width:100%}
+.searchbar .field{flex:1;min-width:0}
+.sresults{display:grid;gap:8px;width:100%;max-height:52dvh;overflow-y:auto;text-align:left}
+.srow{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;background:rgba(7,4,26,.7);border:2px solid #3b2d80;color:var(--white);padding:8px}
+.srow .face{flex:none;width:34px;height:34px;font-size:15px}
+.srow .info{flex:1;min-width:0}
+.srhead{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.srhead b{color:var(--cyan);font-family:var(--tech);font-size:11px}
+.srsnip{font-size:16px;line-height:1.3;overflow-wrap:anywhere}
+.srsnip mark{background:var(--volt);color:var(--night);padding:0 2px}
+.sscope{color:var(--muted);font-size:14px;margin-top:-8px}
+/* ===== presence ===== */
+.face.online::after{content:"";position:absolute;right:-4px;bottom:-4px;width:12px;height:12px;background:#2ee66b;border:2px solid var(--night);border-radius:50%;z-index:4;box-shadow:0 0 6px #2ee66b}
+.face.sm.online::after,.mini-faces .face.online::after{width:9px;height:9px;right:-3px;bottom:-3px}
+.receipt .mini-faces .face.online::after{display:none}
+.lastseen{font-size:12px;color:var(--muted);margin-left:6px}
+/* ===== link previews ===== */
+.lpcard{display:flex;gap:10px;margin-top:8px;background:rgba(0,0,0,.35);border:2px solid var(--cyan);text-decoration:none!important;color:inherit!important;overflow:hidden;max-width:280px}
+.lpcard img{width:84px;height:84px;object-fit:cover;flex:none;background:#000}
+.lptext{display:grid;gap:2px;padding:8px;min-width:0;align-content:center}
+.lptext b{font-size:15px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lpdesc{font-size:13px;opacity:.85;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lptext small{font-family:var(--tech);font-size:10px;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.me .lpcard{border-color:var(--volt)}
 </style>
 </head>
 <body>
@@ -1233,6 +1260,7 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
     <p class="msgline" id="roomMsg" role="status"></p>
     <button class="go" type="submit" id="jumpBtn">Jump in</button>
     <button type="button" class="linkbtn installlink hidden" id="installLink2">📲 Install NightLine as an app</button>
+    <div class="roomcard-row"><button type="button" class="linkbtn" id="searchAll">🔍 Search all chats</button></div>
     <div class="fronttabs" role="tablist">
       <button type="button" class="tab" role="tab" id="tabChats" aria-selected="true">Rooms<span class="tabbadge hidden" id="badgeRooms"></span></button>
       <button type="button" class="tab" role="tab" id="tabDms" aria-selected="false">DMs<span class="tabbadge hidden" id="badgeDms"></span></button>
@@ -1247,6 +1275,7 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
       <p class="note hidden" id="dmEmpty">No private messages yet. Go to Friends and tap Message, or tap someone's picture in a room.</p>
     </div>
     <div id="contactsPane" class="hidden">
+      <button class="go" type="button" id="inviteFriendBtn">📲 Invite a friend to NightLine</button>
       <div class="addcontact">
         <label for="contactName" class="sr">Username</label>
         <input class="field" id="contactName" maxlength="20" placeholder="Add a friend by username" autocomplete="off">
@@ -1269,6 +1298,7 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
     <button class="face sm" id="openProfile2" aria-label="Your profile"></button>
     <div class="mini" id="miniDate"></div>
     <div class="roombox"><div class="roomname" id="roomLabel"></div><div class="status" id="status"></div></div>
+    <button class="srch" id="searchBtn" type="button" aria-label="Search this chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
     <button class="ghost taskcount" id="taskCount" type="button" aria-label="Room checklist"></button>
     <button class="ghost" id="roomBtn" type="button">Room</button>
     <button class="ghost" id="back" type="button">Back</button>
@@ -1557,6 +1587,17 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
 </div>
 
 <div class="toasts" id="toasts" aria-live="polite"></div>
+<!-- ============ SEARCH SHEET ============ -->
+<div class="overlay hidden" id="searchSheet" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
+  <div class="sheet">
+    <h2 id="searchTitle">🔍 Search</h2>
+    <p class="sscope" id="searchScope"></p>
+    <div class="searchbar"><label for="searchBox" class="sr">Search</label><input class="field" id="searchBox" placeholder="Find a message…" autocomplete="off"></div>
+    <div class="sresults" id="searchResults"></div>
+    <button class="ghost" type="button" id="searchClose">Close</button>
+  </div>
+</div>
+
 <div class="overlay lightbox hidden" id="lightbox"><img id="lightImg" alt="Full size photo"></div>
 
 
@@ -1679,7 +1720,11 @@ const live = {
   async resetPassword(email){ must(await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname})); },
   async updatePassword(pw){ must(await sb.auth.updateUser({password:pw})); },
   async deleteAccount(){ must(await sb.rpc("delete_my_account")); await sb.auth.signOut(); },
-  async profiles(ids){ return must(await sb.from("profiles").select("id,username,avatar_url,theme,bubble_color,birthday").in("id",ids)); },
+  async profiles(ids){ return must(await sb.from("profiles").select("id,username,avatar_url,theme,bubble_color,birthday,last_seen,invite_token").in("id",ids)); },
+  async search(q,roomCode){ return must(await sb.rpc("search_messages",{p_query:q,p_room:roomCode||null,p_limit:40})); },
+  async touchSeen(){ await sb.rpc("touch_seen"); },
+  async acceptFriendInvite(token){ return must(await sb.rpc("accept_friend_invite",{p_token:token})); },
+  async linkPreview(url){ const {data,error}=await sb.functions.invoke("linkpreview",{body:{url}}); if(error||!data||data.error) return null; return data; },
   async saveStyle(uid,style){ must(await sb.from("profiles").update(style).eq("id",uid)); },
   async upload(bucket,uid,blob){
     const t=(blob.type||"image/jpeg").split(";")[0];
@@ -1812,7 +1857,7 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
   return {
     async session(){ return user; },
     onAuth(cb){ listeners.push(cb); },
-    async signUp(username,email){ user={id:"me",email,user_metadata:{username}}; people.me={id:"me",username,avatar_url:null}; listeners.forEach(f=>f(user,"SIGNED_IN")); return "in"; },
+    async signUp(username,email){ user={id:"me",email,user_metadata:{username}}; people.me={id:"me",username,avatar_url:null,invite_token:"demo-me"}; people.rook.last_seen=new Date(Date.now()-7*60000).toISOString(); listeners.forEach(f=>f(user,"SIGNED_IN")); return "in"; },
     async signIn(email){ const n=email.split("@")[0]||"you"; user={id:"me",email,user_metadata:{username:n}}; people.me=people.me||{id:"me",username:n,avatar_url:null}; listeners.forEach(f=>f(user,"SIGNED_IN")); },
     async signOut(){ user=null; listeners.forEach(f=>f(null,"SIGNED_OUT")); },
     async resetPassword(){}, async updatePassword(){},
@@ -1857,6 +1902,9 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
       if(had) remove(had); else { if(!p.multi) mine.forEach(remove); const v={message_id:id,user_id:"me",option_index:idx}; votes.push(v); setTimeout(()=>fire("vote",v,true),30); }
     },
     async contacts(){ return [...contacts]; },
+    async search(q,roomCode){ const all=Object.entries(rooms).flatMap(([code,r])=>r.msgs.map(m=>({...m,room:code,room_name:r.name||null}))); return all.filter(m=>(!roomCode||m.room===roomCode)&&(m.text||"").toLowerCase().includes(q.toLowerCase())).slice(-40).reverse(); },
+    async touchSeen(){}, async acceptFriendInvite(token){ if(token!=="demo-nix") throw new Error("invalid"); contacts.add("nix"); return {username:"Nix"}; },
+    async linkPreview(url){ return {title:"Example Domain",description:"This domain is for use in illustrative examples in documents.",site:"example.com"}; },
     async addedMe(){ return ["rook","vee"]; },
     async findUser(n){ return Object.values(people).find(p=>p.username.toLowerCase()===n.toLowerCase())||null; },
     async addContact(uid){ contacts.add(uid); },
@@ -1982,13 +2030,15 @@ async function handleAuth(u){
   user=u;
   const q=new URLSearchParams(location.search);
   if(!u){
-    if(unsub){unsub();unsub=null;} if(unsubAll){unsubAll();unsubAll=null;}
+    if(unsub){unsub();unsub=null;} if(unsubAll){unsubAll();unsubAll=null;} if(typeof stopPresence==="function") stopPresence();
+    if(q.get("friend")) say("authMsg","A friend invited you to NightLine. Log in or sign up to add them.");
     ["chat","profile","roomSheet","msgMenu"].forEach(id=>show($(id),false));
     show($("front")); show($("authCard")); show($("roomCard"),false);
     if(q.get("join")){
       say("authMsg",`You're invited to room ${q.get("join").slice(0,30)}. Log in or sign up to join.`);
       try{ localStorage.setItem("nl-pending-join",JSON.stringify({code:q.get("join"),t:q.get("t")||null,at:Date.now()})); }catch(e){}
     }
+    if(q.get("friend")){ try{ localStorage.setItem("nl-pending-friend",JSON.stringify({t:q.get("friend"),at:Date.now()})); }catch(e){} }
     return;
   }
   await refreshMe();
@@ -1996,7 +2046,8 @@ async function handleAuth(u){
   await ensureProfiles([...blocked]);
   show($("authCard"),false); show($("roomCard"));
   try{ $("room").value=localStorage.getItem("nl-room")||""; }catch(e){}
-  await loadContacts(); loadInbox();
+  await loadContacts(); loadInbox(); startPresence();
+  if(q.get("friend")){ const tok=q.get("friend"); history.replaceState(null,"",location.pathname); setTimeout(()=>handleFriendInvite(tok),400); }
   try{ const t=localStorage.getItem("nl-front-tab"); if(["chats","dms","contacts"].includes(t)) setFrontTab(t); }catch(e){}
   celebrateMyBirthday(); seasonalCheck("login"); hintNudge(); dailyXP(); setTimeout(checkUnlocks,4000);
   if(unsubAll) unsubAll();
@@ -2004,6 +2055,7 @@ async function handleAuth(u){
   clearBadge();
   let linked=q.get("room"), joinCode=q.get("join"), joinToken=q.get("t");
   if(joinCode||linked) history.replaceState(null,"",location.pathname);
+  try{ const pf=JSON.parse(localStorage.getItem("nl-pending-friend")||"null"); localStorage.removeItem("nl-pending-friend"); if(pf&&Date.now()-pf.at<3*864e5&&!q.get("friend")) setTimeout(()=>handleFriendInvite(pf.t),600); }catch(e){}
   if(!joinCode&&!linked){
     try{ const p=JSON.parse(localStorage.getItem("nl-pending-join")||"null");
       if(p&&Date.now()-p.at<3*864e5){ joinCode=p.code; joinToken=p.t; } }catch(e){}
@@ -2070,7 +2122,7 @@ async function loadInbox(){
     const box=r.is_dm?dmBox:roomsBox;
     const b=el("button","roomrow"); b.type="button";
     let hash;
-    if(r.is_dm){ hash=el("span","face"); paintFace(hash,cache.get(r.dm_user)||{username:r.dm_name,avatar_url:r.dm_avatar}); }
+    if(r.is_dm){ hash=el("span","face"); paintFace(hash,cache.get(r.dm_user)||{id:r.dm_user,username:r.dm_name,avatar_url:r.dm_avatar}); }
     else hash=el("span","hash","#");
     const info=el("span","info");
     const nm=el("div","name",r.is_dm?(r.dm_name||"Private chat"):(r.name||"# "+r.code));
@@ -2319,7 +2371,7 @@ function buildMsg(m,index,noAnim){
   if(m.kind==="sticker"&&STICKERS[m.sticker]) bub.append(stickerEl(m.sticker));
   if(m.kind==="poll") bub.append(pollEl(m));
   else if(m.kind==="game") bub.append(gameCard(m));
-  else if(m.text){ const t=el("div"); renderTextWithDates(t,m.text,m.mentions,m); bub.append(t); const trb=translationBlock(m); if(trb) bub.append(trb);
+  else if(m.text){ const t=el("div"); renderTextWithDates(t,m.text,m.mentions,m); bub.append(t); const trb=translationBlock(m); if(trb) bub.append(trb); if(!noAnim||!node.querySelector(".lpcard")) setTimeout(()=>attachPreview(bub,m),0);
     if(/el psy (k|c)ongroo|(^|[^a-z])world ?line([^a-z]|$)/i.test(m.text)&&typeof m.id==="number") bub.append(el("div","d20chip wlchip",`⚗️ world line ${worldLineFor(m)}`));
     if(typeof m.id==="number"&&diceIn(m.text)){ const n=diceIn(m.text), r=dNFor(m,n); bub.append(el("div","d20chip"+(r===n&&n>1?" nat20":r===1&&n>1?" nat1":""),n===2?`🪙 d2 → ${r===1?"heads":"tails"}`:`🎲 d${n} → ${r}${r===n&&n>1?" MAX!":""}`)); }
     if(/(^|[^a-z])roll(s|ed|ing)? (a |the |me a )?d20([^a-z0-9]|$)/i.test(m.text)&&typeof m.id==="number"){ const n=d20For(m); bub.append(el("div","d20chip"+(n===20?" nat20":n===1?" nat1":""),`🎲 d20 → ${n}${n===20?" NAT 20!":n===1?" crit fail":""}`)); } }
@@ -2503,7 +2555,7 @@ async function paintMembers(){
   for(const uid of ids){
     const row=el("div","member"); const f=el("span","face"); paintFace(f,cache.get(uid));
     const nick=members.get(uid)?.nick, uname=cache.get(uid)?.username||"";
-    const n=el("span","mname",nameOf(uid)+(uid===user.id?" (you)":""));
+    const n=el("span","mname",nameOf(uid)+(uid===user.id?" (you)":"")); if(uid!==user.id){ const ls=el("span","lastseen",lastSeenText(uid)); ls.dataset.presence=uid; n.append(ls); }
     if(nick&&nick!==uname) n.append(el("span","role",uname));
     if(uid===roomOwner) n.append(el("span","role","OWNER"));
     const nb=el("button","unblock","Nickname"); nb.type="button";
@@ -2992,7 +3044,7 @@ function previewOf(m){
 
 /* ---------- overlays ---------- */
 $("lightbox").onclick=()=>show($("lightbox"),false);
-["profile","roomSheet","msgMenu","pollSheet","summarySheet","calSheet"].forEach(id=>$(id).addEventListener("click",e=>{ if(e.target.id===id) show($(id),false); }));
+["profile","roomSheet","msgMenu","pollSheet","summarySheet","calSheet","searchSheet"].forEach(id=>$(id).addEventListener("click",e=>{ if(e.target.id===id) show($(id),false); }));
 addEventListener("keydown",e=>{ if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu","pollSheet","tray"].forEach(id=>show($(id),false)); });
 
 /* ================= PUSH NOTIFICATIONS ================= */
@@ -3259,7 +3311,7 @@ function paintPerson(){
   const uid=personUid, p=cache.get(uid)||{username:"Someone"}, nick=room?members.get(uid)?.nick:null;
   paintFace($("personFace"),p);
   $("personName").textContent=nick||p.username;
-  $("personSub").textContent=(nick&&nick!==p.username?`@${p.username} · `:"@"+p.username+" · ")+(isBirthdayToday(p.birthday)?"🎂 birthday today!":(roomName&&!isDm?`in ${roomName}`:"NightLine"));
+  $("personSub").textContent=(nick&&nick!==p.username?`@${p.username} · `:"@"+p.username+" · ")+(isBirthdayToday(p.birthday)?"🎂 birthday today!":(lastSeenText(uid)||(roomName&&!isDm?`in ${roomName}`:"NightLine")));
   const f=isFriend(uid), back=addedMe(uid);
   $("personTag").textContent = f&&back?"🤝 You're friends": f?"✓ On your friends list": back?"👋 Added you as a friend":"";
   show($("personTag"),f||back);
@@ -4803,6 +4855,106 @@ function paintFrameRow(){
   const pf=$("themePreviewFace"); [...pf.classList].filter(c=>c.startsWith("frame-")).forEach(c=>pf.classList.remove(c)); if(draftTheme.frame&&FRAMES[draftTheme.frame]) pf.classList.add("frame-"+draftTheme.frame);
 }
 
+/* ================= SEARCH ================= */
+let searchTimer=null;
+function openSearch(scope){ $("searchScope").textContent=scope==="room"?`in ${roomName||"# "+room}`:"all your chats"; $("searchSheet").dataset.scope=scope; $("searchBox").value=""; $("searchResults").innerHTML='<p class="note">Type a word to search.</p>'; show($("searchSheet")); setTimeout(()=>$("searchBox").focus(),60); }
+$("searchBtn").onclick=()=>openSearch("room"); $("searchAll").onclick=()=>openSearch("all"); $("searchClose").onclick=()=>show($("searchSheet"),false);
+$("searchBox").addEventListener("input",()=>{ clearTimeout(searchTimer); searchTimer=setTimeout(runSearch,300); });
+async function runSearch(){
+  const q=$("searchBox").value.trim(), box=$("searchResults"); if(q.length<2){ box.innerHTML='<p class="note">Type at least 2 letters.</p>'; return; }
+  box.innerHTML='<p class="note">Searching…</p>';
+  try{
+    const scope=$("searchSheet").dataset.scope, rows=await api.search(q,scope==="room"?room:null);
+    await ensureProfiles(rows.map(r=>r.user_id));
+    box.innerHTML=""; if(!rows.length){ box.append(el("p","note",`Nothing found for “${q}”.`)); return; }
+    rows.forEach(r=>{
+      const b=el("button","srow"); b.type="button";
+      const f=el("span","face"); paintFace(f,cache.get(r.user_id));
+      const info=el("span","info"); const head=el("div","srhead"); head.append(el("b","",nameOf(r.user_id)),el("span","",` · ${r.room_name||"#"+r.room} · ${shortWhen(r.created_at)}`));
+      const snip=el("div","srsnip"); highlightSnippet(snip,previewOf(r)||"",q); info.append(head,snip);
+      b.append(f,info); b.onclick=()=>jumpToMessage(r.room,r.id); box.append(b);
+    });
+  }catch(err){ box.innerHTML=""; box.append(el("p","msgline bad","Search isn't set up yet: run the search SQL update.")); }
+}
+function highlightSnippet(node,text,q){
+  const i=text.toLowerCase().indexOf(q.toLowerCase()); const start=Math.max(0,i-40), s=(start?"…":"")+text.slice(start,start+140)+(text.length>start+140?"…":"");
+  const j=s.toLowerCase().indexOf(q.toLowerCase()); if(j<0){ node.textContent=s; return; }
+  node.append(s.slice(0,j), el("mark","",s.slice(j,j+q.length)), s.slice(j+q.length));
+}
+async function jumpToMessage(code,id){
+  show($("searchSheet"),false);
+  if(room!==code){ await enterRoom(code); }
+  let tries=0; while(!elById.has(id)&&hasMore&&tries++<8) await loadOlder();
+  if(elById.has(id)) jumpTo(id); else $("status").textContent="That message is too far back to load here.";
+}
+
+/* ================= PRESENCE ================= */
+const online=new Set(); let presenceCh=null, presenceTimer=null;
+function startPresence(){
+  if(!sb||!user||presenceCh) return;
+  presenceCh=sb.channel("presence:all",{config:{presence:{key:user.id}}});
+  presenceCh.on("presence",{event:"sync"},()=>{ online.clear(); Object.keys(presenceCh.presenceState()).forEach(id=>online.add(id)); paintPresence(); })
+    .subscribe(async s=>{ if(s==="SUBSCRIBED") await presenceCh.track({at:Date.now()}); });
+  const touch=()=>{ if(!document.hidden) api.touchSeen().catch(()=>{}); };
+  touch(); clearInterval(presenceTimer); presenceTimer=setInterval(touch,90000);
+  document.addEventListener("visibilitychange",()=>{ if(document.hidden){ presenceCh?.untrack(); } else { presenceCh?.track({at:Date.now()}); touch(); } });
+}
+function stopPresence(){ if(presenceCh){ sb.removeChannel(presenceCh); presenceCh=null; } clearInterval(presenceTimer); online.clear(); }
+const isOnline=uid=>online.has(uid)||(!sb&&["vee"].includes(uid));
+function lastSeenText(uid){
+  if(isOnline(uid)) return "active now";
+  const t=cache.get(uid)?.last_seen; if(!t) return "";
+  const m=Math.round((Date.now()-new Date(t))/60000); if(m<1) return "active just now"; if(m<60) return `active ${m}m ago`; const h=Math.round(m/60); if(h<24) return `active ${h}h ago`; const d=Math.round(h/24); return d===1?"active yesterday":`active ${d}d ago`;
+}
+function paintPresence(){
+  document.querySelectorAll(".face[data-uid]").forEach(f=>f.classList.toggle("online",isOnline(f.dataset.uid)));
+  document.querySelectorAll("[data-presence]").forEach(n=>{ n.textContent=lastSeenText(n.dataset.presence); });
+  if(isDm&&dmUser&&!$("chat").classList.contains("hidden")){ const t=lastSeenText(dmUser); if(t) $("status").textContent=t; }
+}
+const _paintFace2=paintFace;
+paintFace=function(node,p){ _paintFace2(node,p); if(p?.id){ node.dataset.uid=p.id; node.classList.toggle("online",isOnline(p.id)); } };
+
+/* ================= LINK PREVIEWS ================= */
+const previewCache=new Map();
+const URL_RE=/https?:\/\/[^\s<]+[^\s<.,:;"')\]!?]/i;
+function firstUrl(text){ const m=(text||"").match(URL_RE); return m?m[0]:null; }
+async function fetchPreview(url){
+  if(previewCache.has(url)) return previewCache.get(url);
+  let p=null;
+  const yt=url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([\w-]{11})/);
+  try{
+    if(yt){ const r=await fetch("https://www.youtube.com/oembed?format=json&url="+encodeURIComponent("https://www.youtube.com/watch?v="+yt[1])); if(r.ok){ const j=await r.json(); p={title:j.title,site:"YouTube",image:`https://i.ytimg.com/vi/${yt[1]}/hqdefault.jpg`,by:j.author_name}; } }
+    else if(api.linkPreview) p=await api.linkPreview(url);
+  }catch(e){ p=null; }
+  previewCache.set(url,p); return p;
+}
+function previewCard(url,p){
+  const a=el("a","lpcard"); a.href=url; a.target="_blank"; a.rel="noopener noreferrer";
+  if(p.image){ const i=document.createElement("img"); i.src=p.image; i.alt=""; i.loading="lazy"; i.onerror=()=>i.remove(); a.append(i); }
+  const t=el("span","lptext"); t.append(el("b","",p.title||url)); if(p.description) t.append(el("span","lpdesc",p.description.slice(0,120))); t.append(el("small","",(p.site||new URL(url).hostname.replace(/^www\./,""))+(p.by?" · "+p.by:"")));
+  a.append(t); a.onclick=e=>e.stopPropagation(); return a;
+}
+function attachPreview(bub,m){
+  if(m.kind!=="text"||!m.text) return; const url=firstUrl(m.text); if(!url) return;
+  if(/giphy\.com|tenor\.com|\.(png|jpe?g|gif|webp)(\?|$)/i.test(url)) return;
+  if(location.origin&&url.startsWith(location.origin+location.pathname)) return;
+  fetchPreview(url).then(p=>{ if(!p||!p.title) return; const node=elById.get(m.id); const b=node?.querySelector(".bubble"); if(b&&!b.querySelector(".lpcard")) b.append(previewCard(url,p)); });
+}
+
+/* ================= PERSONAL INVITE LINKS ================= */
+function myInviteUrl(){ return meProfile?.invite_token ? `${location.origin}${location.pathname}?friend=${encodeURIComponent(meProfile.invite_token)}` : null; }
+$("inviteFriendBtn").onclick=async()=>{
+  const u=myInviteUrl(); if(!u){ say("contactMsg","Invite links aren't set up yet: run the search & friends SQL update.",true); return; }
+  const text=`Come chat with me on NightLine 🌙 ${u}`;
+  if(navigator.share){ try{ await navigator.share({title:"Join me on NightLine",text,url:u}); return; }catch(e){} }
+  try{ await navigator.clipboard.writeText(u); say("contactMsg","Your invite link is copied. Anyone who opens it becomes your friend."); }catch(e){ say("contactMsg",u); }
+};
+async function handleFriendInvite(token){
+  try{ const r=await api.acceptFriendInvite(token); await loadContacts(); const name=r?.username||"your friend";
+    say("contactMsg",`You and ${name} are friends now 🤝`); setFrontTab("contacts"); if(fxEnabled()&&typeof FX!=="undefined") FX.play("hearts"); }
+  catch(err){ say("contactMsg",/expired|invalid|not_found/i.test(err.message)?"That invite link isn't valid anymore.":"Couldn't use that invite: "+err.message,true); setFrontTab("contacts"); }
+}
+
 /* ================= STAYING CONNECTED ================= */
 let liveStatus=null, catchingUp=false, lastCatchUp=0;
 async function catchUp(reason){
@@ -4843,7 +4995,7 @@ feed.addEventListener("click",e=>{
 /* ================= BACK BUTTON (Android / browser back) ================= */
 // Each chat or sheet you open adds a history step, so Back closes the top one instead of leaving the app.
 (function(){
-  const LAYERS=["chat","profile","roomSheet","msgMenu","themeSheet","pollSheet","installSheet","gameSheet","personSheet","summarySheet","calSheet","lightbox"];
+  const LAYERS=["chat","profile","roomSheet","msgMenu","themeSheet","pollSheet","installSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","lightbox"];
   const stack=[]; let popping=false, ignorePops=0, pendingBack=0, flushQueued=false;
   const isOpen=id=>!$(id).classList.contains("hidden");
   function queueBack(){
