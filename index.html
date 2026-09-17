@@ -912,6 +912,58 @@ html,body{overscroll-behavior:none}
 .hintbox{font-size:15px;color:var(--white);background:rgba(243,255,58,.08);border-left:3px solid var(--volt);padding:6px 10px;width:100%}
 .hintbox b{color:var(--volt);font-family:var(--tech);font-size:11px}
 .hintbox small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+/* ===== pack 6 ===== */
+#chat.rx-sepia{animation:rxsepia 4.6s ease both}
+@keyframes rxsepia{15%,85%{filter:sepia(1) contrast(1.15) brightness(.75)}}
+.rx-war{position:absolute;inset:0;display:grid;place-items:center;animation:sxflash 4.6s ease both}
+.rx-dust{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(190,150,90,.55),transparent 60%),repeating-linear-gradient(0deg,rgba(0,0,0,.08) 0 2px,transparent 2px 4px)}
+.rx-wartext{position:relative;text-align:center;font-family:var(--num);color:#e8d9b0;text-shadow:3px 3px 0 #2a1a08}
+.rx-wartext span{display:block;font-size:clamp(46px,16vw,96px);line-height:1;opacity:0;animation:rxtype .6s ease forwards}
+.rx-wartext span+span{font-size:clamp(20px,6.5vw,38px);letter-spacing:3px;animation-delay:1.1s}
+@keyframes rxtype{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+#chat.rx-pip{animation:rxpip 4.2s ease both}
+@keyframes rxpip{10%,90%{filter:sepia(1) hue-rotate(60deg) saturate(3) contrast(1.2) brightness(.8)}}
+.rx-pipboy{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%) rotate(-2deg);width:min(84vw,330px);animation:sxfadein .3s ease both;font-family:ui-monospace,Menlo,monospace;color:#5cff8a}
+.rx-pipframe{background:#08140a;border:6px solid #2b2f2a;border-radius:16px;box-shadow:0 0 0 3px #111,8px 8px 0 #07041A,inset 0 0 40px rgba(92,255,138,.25);padding:12px;background-image:repeating-linear-gradient(0deg,rgba(92,255,138,.08) 0 2px,transparent 2px 4px)}
+.rx-piphead{font-size:11px;letter-spacing:2px;border-bottom:2px solid #5cff8a;padding-bottom:6px;margin-bottom:8px}
+.rx-pipbody{display:flex;gap:12px;align-items:center}
+.rx-boy{font-size:54px;filter:sepia(1) hue-rotate(60deg) saturate(3);animation:sxwink 1.3s ease 2}
+.rx-piprows{font-size:14px;line-height:1.7}
+.rx-piprows b{color:#a7ffbf;display:inline-block;width:64px}
+.rx-cap{position:absolute;top:-40px;font-size:24px;color:#ff3b3b;text-shadow:0 0 2px #fff;animation:rxcapfall 2.2s cubic-bezier(.3,0,.7,1) both}
+@keyframes rxcapfall{to{transform:translateY(115vh) rotate(var(--r));opacity:.9}}
+.rx-nukacap{top:30%;color:#ff8a3d}
+.rx-bean{position:absolute;left:-80px;width:56px;animation:rxwaddle 3.6s linear both}
+.rx-bean svg{width:100%;animation:rxbob .35s ease-in-out infinite alternate}
+@keyframes rxwaddle{0%{transform:translateX(0)}70%{transform:translateX(105vw)}80%{transform:translateX(102vw) rotate(90deg)}100%{transform:translateX(130vw) rotate(90deg)}}
+@keyframes rxbob{from{transform:rotate(-10deg) translateY(0)}to{transform:rotate(10deg) translateY(-8px)}}
+.rx-qualified{font-size:clamp(40px,14vw,90px);color:#fff;background:#ff4fa3;border:5px solid #07041A;padding:4px 24px;box-shadow:10px 10px 0 #ffd400;clip-path:polygon(0 10%,100% 0,97% 100%,3% 90%);text-shadow:4px 4px 0 #07041A}
+#chat.rx-tvworld{animation:rxtv 4.2s ease both}
+@keyframes rxtv{15%,85%{filter:saturate(.2) contrast(1.4) sepia(.4) hue-rotate(20deg)}}
+.rx-shadow{position:absolute;inset:0;display:grid;place-content:center;gap:16px;text-align:center;background:radial-gradient(circle,rgba(60,0,20,.6),rgba(0,0,0,.92));animation:sxflash 4.2s ease both}
+.rx-shadowface{position:relative;width:140px;height:140px;margin:0 auto}
+.rx-shadowface .face{width:140px;height:140px;font-size:60px}
+.rx-shadowface .face .fi{filter:brightness(.25) contrast(1.4) saturate(0)}
+.rx-eye{position:absolute;top:52px;width:22px;height:12px;background:#ffd400;border-radius:50%;box-shadow:0 0 16px #ffd400,0 0 30px #ff8a00;animation:qxglow .5s ease-in-out infinite alternate}
+.rx-eye.l{left:38px}.rx-eye.r{right:38px}
+.rx-shadowtext{font-size:22px;color:#e8e8f0;font-style:italic;max-width:80vw}
+.rx-shadowtext b{color:#ffd400;font-style:normal}
+#chat.rx-rain{animation:rxrainy 6s ease both}
+@keyframes rxrainy{10%,90%{filter:saturate(.7) brightness(.75) contrast(1.1)}}
+.rx-rainlayer{position:absolute;inset:0;overflow:hidden}
+.rx-rainlayer i{position:absolute;top:-30px;width:2px;height:26px;background:rgba(170,200,255,.6);animation:rxdrop linear infinite}
+@keyframes rxdrop{to{transform:translateY(115vh)}}
+.rx-bowl{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%) rotate(-2deg);width:min(84vw,320px);background:var(--night);border:4px solid var(--volt);box-shadow:8px 8px 0 var(--mag);padding:12px;text-align:center;animation:sxfadein .3s ease both}
+.rx-bowltitle{font-family:var(--tech);font-size:12px;color:var(--volt)}
+.rx-bowlart svg{width:60%;margin:6px auto;display:block}
+.rx-timer{font-family:var(--num);font-size:clamp(40px,14vw,64px);color:#ff3b3b;text-shadow:3px 3px 0 #07041A;letter-spacing:2px}
+.rx-bowlfoot{font-size:15px;color:var(--muted)}
+.rx-sweat{position:absolute;right:-8px;top:-4px;font-size:16px;animation:rxsweat 1s ease-in-out infinite;z-index:4}
+@keyframes rxsweat{50%{transform:translateY(4px)}}
+.rx-junes{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%) rotate(-3deg);text-align:center;animation:sxslam 3.6s cubic-bezier(.2,1.4,.4,1) both}
+.rx-junesign{font-family:var(--num);font-size:clamp(28px,9vw,50px);line-height:1.05;color:#07041A;background:#fff;border:5px solid #d61f2c;padding:10px 18px;box-shadow:10px 10px 0 #d61f2c}
+.rx-junesign span{display:inline-block;color:#fff;background:#d61f2c;padding:0 10px;transform:rotate(-3deg);font-size:1.25em}
+.rx-bags{font-size:30px;margin-top:10px;animation:qxbounce .6s ease-in-out 5}
 </style>
 </head>
 <body>
@@ -4179,6 +4231,63 @@ function hintNudge(){
     $("toasts").prepend(t); setTimeout(()=>{ t.classList.add("out"); setTimeout(()=>t.remove(),260); },7000);
   },2500);
 }
+
+/* ================= SECRETS PACK 6: Fallout, Fall Guys, Persona 4 ================= */
+const RX=(()=>{
+  const layer=$("sfx");
+  const add=(cls,html="")=>{ const d=document.createElement("div"); d.className=cls; d.innerHTML=html; layer.append(d); return d; };
+  const later=(fn,ms)=>setTimeout(fn,ms), R=(a,b)=>a+Math.random()*(b-a);
+  const chatClass=(cls,ms)=>{ const c=$("chat"); c.classList.remove(cls); void c.offsetWidth; c.classList.add(cls); later(()=>c.classList.remove(cls),ms); };
+  const chime=(notes)=>{ try{ const ac=window.__sxac||(window.__sxac=new (window.AudioContext||window.webkitAudioContext)()); notes.forEach(([f,at,len,type])=>{ const o=ac.createOscillator(), g=ac.createGain(); o.type=type||"triangle"; o.frequency.value=f; g.gain.setValueAtTime(.0001,ac.currentTime+at); g.gain.exponentialRampToValueAtTime(.07,ac.currentTime+at+.02); g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+at+len); o.connect(g); g.connect(ac.destination); o.start(ac.currentTime+at); o.stop(ac.currentTime+at+len+.05); }); }catch(e){} };
+  const senderFaces=m=>[...feed.querySelectorAll(`.face[data-uid="${CSS.escape(m?.user_id||"")}"]`)];
+  return {
+    war(){ chatClass("rx-sepia",4600); const w=add("rx-war",`<div class="rx-dust"></div><div class="rx-wartext"><span>WAR.</span><span>WAR NEVER CHANGES.</span></div>`); later(()=>w.remove(),4600); },
+    pipboy(){ chatClass("rx-pip",4200); const p=add("rx-pipboy",`<div class="rx-pipframe"><div class="rx-piphead">STAT &nbsp; INV &nbsp; DATA &nbsp; MAP &nbsp; RADIO</div><div class="rx-pipbody"><div class="rx-boy">👍</div><div class="rx-piprows"><b>HP</b> 100/100<br><b>RAD</b> ▮▮▯▯▯<br><b>CAPS</b> 42<br><b>STATUS</b> feeling groovy</div></div></div>`); chime([[880,0,.08,"square"],[660,.1,.08,"square"]]); later(()=>p.remove(),4200); },
+    nuka(){ for(let i=0;i<30;i++){ const c=add("rx-cap","⭐"); c.style.left=R(2,96)+"%"; c.style.animationDelay=R(0,1.6)+"s"; c.style.setProperty("--r",R(-720,720)+"deg"); later(()=>c.remove(),3800); } chime([[523,0,.1],[659,.1,.1],[784,.2,.2]]); const cap=add("sx-caption px-center rx-nukacap","🧢 +30 caps"); later(()=>cap.remove(),1800); },
+    fallguys(){
+      const colors=["#ff4fa3","#ffd400","#3dd6ff","#7cff6b","#ff7a3d","#c78bff"];
+      for(let i=0;i<7;i++){ const b=add("rx-bean",`<svg viewBox="0 0 60 90"><path d="M30 4 C52 4 56 30 56 50 C56 74 46 88 30 88 C14 88 4 74 4 50 C4 30 8 4 30 4Z" fill="${colors[i%6]}" stroke="#07041A" stroke-width="4"/><ellipse cx="30" cy="40" rx="16" ry="20" fill="#fff" stroke="#07041A" stroke-width="3"/><circle cx="24" cy="38" r="3"/><circle cx="36" cy="38" r="3"/></svg>`); b.style.animationDelay=(i*.22)+"s"; b.style.bottom=(8+(i%3)*4)+"%"; later(()=>b.remove(),4200); }
+      later(()=>{ const q=add("sx-banner rx-qualified","QUALIFIED!"); later(()=>q.remove(),1600); },2200);
+      chime([[659,0,.12],[784,.12,.12],[988,.24,.12],[1319,.36,.3]]);
+    },
+    shadow(m){
+      const p=cache.get(m?.user_id)||{username:"you"};
+      const s=add("rx-shadow",`<div class="rx-shadowface"><span class="face"></span><i class="rx-eye l"></i><i class="rx-eye r"></i></div><div class="rx-shadowtext">"I am a shadow… <b>the true self.</b>"</div>`);
+      paintFace(s.querySelector(".face"),p); chatClass("rx-tvworld",4200); if(navigator.vibrate) navigator.vibrate([20,80,20,80,200]);
+      later(()=>s.remove(),4200);
+    },
+    beefbowl(m){
+      chatClass("rx-rain",6000); const rain=add("rx-rainlayer"); for(let i=0;i<60;i++){ const d=document.createElement("i"); d.style.left=R(0,100)+"%"; d.style.animationDelay=R(0,1.2)+"s"; d.style.animationDuration=R(.5,.9)+"s"; rain.append(d); }
+      const b=add("rx-bowl",`<div class="rx-bowltitle">☔ RAINY DAY MEGA BEEF BOWL CHALLENGE</div><div class="rx-bowlart"><svg viewBox="0 0 160 110"><ellipse cx="80" cy="34" rx="70" ry="22" fill="#8b4a1f" stroke="#07041A" stroke-width="4"/><ellipse cx="80" cy="30" rx="60" ry="16" fill="#c96a2c"/><path d="M20 40 Q80 130 140 40 Z" fill="#F4F7FF" stroke="#07041A" stroke-width="4"/><path d="M30 60 Q80 66 130 60" stroke="#E07AC6" stroke-width="5" fill="none"/></svg></div><div class="rx-timer">30:00</div><div class="rx-bowlfoot">Finish it and it's free.</div>`);
+      const t=b.querySelector(".rx-timer"); let s=1800; const iv=setInterval(()=>{ s-=61; if(s<=0){ s=0; clearInterval(iv); t.textContent="TIME!"; b.querySelector(".rx-bowlfoot").textContent="Nice try. Come back next rainy day."; } else t.textContent=`${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`; },140);
+      senderFaces(m).forEach(f=>{ const sw=el("span","rx-sweat","💦"); f.append(sw); later(()=>sw.remove(),6000); });
+      later(()=>{ clearInterval(iv); b.remove(); rain.remove(); },6000);
+    },
+    junes(){
+      const j=add("rx-junes",`<div class="rx-junesign">Every day's great<br>at your <span>JUNES</span></div><div class="rx-bags">🛍️ 🛍️ 🛍️</div>`);
+      chime([[659,0,.18],[659,.2,.18],[880,.4,.18],[784,.6,.18],[659,.8,.32],[784,1.2,.18],[880,1.4,.5]]);
+      later(()=>j.remove(),3600);
+    },
+  };
+})();
+SECRET_LIST.splice(SECRET_LIST.findIndex(s=>s.id==="konami"),0,
+  {id:"war", name:"War never changes", re:/war never changes/i, play:()=>RX.war()},
+  {id:"pipboy", name:"Pip-Boy", re:/pip[- ]?boy|vault[- ]?(boy|tec|dweller)/i, play:()=>RX.pipboy()},
+  {id:"nuka", name:"Nuka-Cola", re:/nuka[- ]?cola|bottle ?caps?/i, play:()=>RX.nuka()},
+  {id:"fallguys", name:"Qualified!", re:/fall ?guys?|(^|[^a-z])qualified!?([^a-z]|$)/i, play:()=>RX.fallguys()},
+  {id:"shadow", name:"The true self", re:/(shadow,? )?the true self|i am a shadow/i, play:m=>RX.shadow(m)},
+  {id:"beefbowl", name:"Beef bowl", re:/rainy day( mega)? beef bowl|mega beef bowl|beef bowl challenge/i, play:m=>RX.beefbowl(m)},
+  {id:"junes", name:"Your Junes", re:/(^|[^a-z])junes([^a-z]|$)/i, play:()=>RX.junes()}
+);
+Object.assign(HINTS,{
+  war:"The first thing every Fallout narrator says.",
+  pipboy:"The green-screen wrist computer everyone in the wasteland wears. Say its name with a hyphen.",
+  nuka:"The wasteland's favorite soda, or the currency it's capped with.",
+  fallguys:"Sixty jellybeans race through an obstacle course. Say the game, or what the winners are.",
+  shadow:"In the TV world, your other half admits what it really is.",
+  beefbowl:"Inaba's free-if-you-finish-it challenge, only served in bad weather.",
+  junes:"Every day's great at your…",
+});
 
 /* ================= STAYING CONNECTED ================= */
 let liveStatus=null, catchingUp=false, lastCatchUp=0;
