@@ -1005,6 +1005,38 @@ body.theme-pipboy .compose,body.theme-pipboy .top{background:rgba(6,16,8,.92)!im
 @keyframes mxfall{35%,55%{transform:translateY(60vh) rotate(25deg);opacity:0}100%{transform:rotate(var(--tilt,0));opacity:1}}
 .face.mx-grow .fi{animation:mxgrow 3s ease both}
 @keyframes mxgrow{15%,25%,35%{transform:scale(1.5)}20%,30%{transform:scale(1)}40%,85%{transform:scale(1.5)}100%{transform:scale(1)}}
+/* ===== dragon scene ===== */
+.dg-scene{position:absolute;inset:0;background:#000;opacity:0;animation:dgin .6s ease forwards;transition:opacity .8s}
+.dg-scene.out{opacity:0!important}
+@keyframes dgin{to{opacity:1}}
+.dg-stars i{position:absolute;width:3px;height:3px;background:#fff;clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);animation:dgtwinkle 1.6s ease-in-out infinite alternate;transform:scale(1.6)}
+@keyframes dgtwinkle{from{opacity:.25}to{opacity:1;transform:scale(2.4)}}
+.dg-moon{position:absolute;left:50%;top:44%;width:min(62vw,260px);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:#fff200;box-shadow:0 0 60px 10px rgba(255,242,0,.25)}
+.dg-dragon{position:absolute;top:44%;left:-40%;width:min(46vw,190px);transform:translateY(-50%);animation:dgfly 4.6s cubic-bezier(.45,.05,.55,.95) both}
+@keyframes dgfly{0%{left:-40%;transform:translateY(-30%) scale(.7)}45%{transform:translateY(-55%) scale(1)}55%{transform:translateY(-55%) scale(1)}100%{left:120%;transform:translateY(-80%) scale(.75)}}
+/* ===== one piece chest ===== */
+.op-wrap{position:absolute;inset:0;display:grid;place-content:center;gap:14px;text-align:center;background:radial-gradient(circle at 50% 45%,rgba(60,30,0,.5),rgba(0,0,0,.85));animation:sxfadein .3s ease both}
+.op-chest{position:relative;width:200px;height:150px;margin:0 auto}
+.op-body{position:absolute;left:0;right:0;bottom:0;height:90px;background:linear-gradient(#7a4a1e,#4a2a0e);border:5px solid #2a1606;border-radius:6px 6px 10px 10px;box-shadow:inset 0 0 0 6px #b8862e,8px 8px 0 #07041A}
+.op-body b{position:absolute;left:50%;top:-4px;width:34px;height:40px;transform:translateX(-50%);background:#d4a537;border:4px solid #2a1606;border-radius:4px}
+.op-lid{position:absolute;left:0;right:0;top:0;height:70px;background:linear-gradient(#8a5a2a,#5a3410);border:5px solid #2a1606;border-radius:60px 60px 6px 6px;box-shadow:inset 0 0 0 6px #b8862e;transform-origin:50% 100%;transition:transform 1.4s cubic-bezier(.3,.9,.4,1);z-index:2}
+.op-lid i{position:absolute;left:50%;bottom:6px;width:22px;height:14px;transform:translateX(-50%);background:#d4a537;border:3px solid #2a1606}
+.op-glow{position:absolute;left:10%;right:10%;top:40px;height:60px;background:radial-gradient(ellipse at 50% 100%,#fff6a8,#ffd84a 40%,rgba(255,216,74,0) 75%);opacity:0;transition:opacity 1s;z-index:1}
+.op-wrap.open .op-lid{transform:rotateX(-70deg) translateY(-10px)}
+.op-wrap.open .op-glow{opacity:1}
+.op-wrap.slam .op-lid{transition:transform .12s ease-in;transform:none}
+.op-wrap.slam .op-glow{transition:opacity .12s;opacity:0}
+.op-wrap.slam .op-chest{animation:sxjitter .08s linear 6}
+.op-cap{color:#ffd84a}
+/* ===== XP ===== */
+.xpbox{width:100%;display:grid;gap:6px;border:2px solid var(--cyan);padding:10px;background:rgba(0,240,255,.06)}
+.xphead{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--tech)}
+.xphead b{font-size:18px;color:var(--volt)}.xphead span{font-size:12px;color:var(--cyan)}
+.xpbar{height:14px;border:2px solid var(--white);overflow:hidden;clip-path:polygon(0 0,100% 0,98% 100%,2% 100%)}
+.xpbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--volt));transition:width .5s ease}
+.xptext{font-size:13px;color:var(--muted);text-align:left}
+.xpways{display:flex;flex-wrap:wrap;gap:6px}
+.xpfloat{pointer-events:none;font-family:var(--num);font-size:24px;color:var(--volt);text-shadow:2px 2px 0 var(--night);animation:qxup 1.4s ease-out both;justify-self:end;margin-right:16px}
 </style>
 </head>
 <body>
@@ -1172,6 +1204,7 @@ body.theme-pipboy .compose,body.theme-pipboy .top{background:rgba(6,16,8,.92)!im
     <button class="ghost hidden" type="button" id="notifTest">Send a test notification</button>
     <button class="ghost" type="button" id="fxBtn">Screen effects: On</button>
     <details class="fx-list"><summary>Words and emoji that trigger effects</summary><ul id="fxList"></ul></details>
+    <div class="xpbox"><div class="xphead"><b id="xpLevel">LV 1</b><span id="xpTitle">Newcomer</span></div><div class="xpbar"><i id="xpFill"></i></div><div class="xptext" id="xpText"></div><div class="xpways" id="xpWays"></div></div>
     <div class="secretbox">
       <div class="secretcount" id="secretCount">🔓 Secrets found: 0</div>
       <div class="hintbox" id="hintBox"></div>
@@ -1378,6 +1411,7 @@ body.theme-pipboy .compose,body.theme-pipboy .top{background:rgba(6,16,8,.92)!im
 
 <div class="toasts" id="toasts" aria-live="polite"></div>
 <div class="overlay lightbox hidden" id="lightbox"><img id="lightImg" alt="Full size photo"></div>
+
 
 
 
@@ -1810,7 +1844,7 @@ async function handleAuth(u){
   try{ $("room").value=localStorage.getItem("nl-room")||""; }catch(e){}
   await loadContacts(); loadInbox();
   try{ const t=localStorage.getItem("nl-front-tab"); if(["chats","dms","contacts"].includes(t)) setFrontTab(t); }catch(e){}
-  celebrateMyBirthday(); seasonalCheck("login"); hintNudge();
+  celebrateMyBirthday(); seasonalCheck("login"); hintNudge(); dailyXP();
   if(unsubAll) unsubAll();
   unsubAll=api.subscribeAll(onAnyMessage,onFriendAdded);
   clearBadge();
@@ -2165,7 +2199,7 @@ function repaintFaces(uid){ feed.querySelectorAll(`.face[data-uid="${CSS.escape(
 async function toggleReaction(m,emoji){
   const has=reactionsById.get(m.id)?.get(emoji)?.has(user.id);
   setReaction({message_id:m.id,user_id:user.id,emoji},!has); refreshMsg(m.id);   // instant feedback
-  try{ has ? await api.unreact(m.id,user.id,emoji) : await api.react(m.id,room,emoji); }
+  try{ has ? await api.unreact(m.id,user.id,emoji) : (await api.react(m.id,room,emoji), gainXP("reaction")); }
   catch(err){ setReaction({message_id:m.id,user_id:user.id,emoji},has); refreshMsg(m.id); $("status").textContent="Reaction didn't save."; }
 }
 
@@ -2198,7 +2232,7 @@ $("menuPin").onclick=async()=>{
   const m=menuMsg; show($("msgMenu"),false);
   try{
     if(pins.has(m.id)){ await api.unpin(m.id); pins.delete(m.id); $("status").textContent="Unpinned."; }
-    else { await api.pin(room,m.id); pins.set(m.id,{message_id:m.id,pinned_by:user.id,created_at:new Date().toISOString()}); $("status").textContent="Pinned to the top."; }
+    else { await api.pin(room,m.id); pins.set(m.id,{message_id:m.id,pinned_by:user.id,created_at:new Date().toISOString()}); gainXP("pin"); $("status").textContent="Pinned to the top."; }
     pinCursor=0; paintPinBar(); refreshMsg(m.id);
   }catch(err){ $("status").textContent="Couldn't pin: "+err.message; }
 };
@@ -2700,7 +2734,7 @@ function pollEl(m){
     b.onclick=async e=>{ e.stopPropagation();
       const had=mine; if(!p.multi&&!had) p.options.forEach((_,k)=>p.votes.get(k)?.delete(user.id));
       setVote(p,{option_index:i,user_id:user.id},!had); refreshMsg(m.id);
-      try{ await api.vote(m.id,i); }catch(err){ $("status").textContent="Vote didn't save: "+err.message; } };
+      try{ await api.vote(m.id,i); if(!had) gainXP("vote"); }catch(err){ $("status").textContent="Vote didn't save: "+err.message; } };
     box.append(b);
   });
   box.append(el("div","pollfoot",`${voters.size} ${voters.size===1?"person":"people"} voted${p.multi?" · pick any":""}`));
@@ -2773,7 +2807,7 @@ $("themeSave").onclick=async()=>{
   try{
     const style={theme:draftTheme,bubble_color:draftBubble};
     await api.saveStyle(user.id,style);
-    meProfile={...meProfile,...style}; cache.set(user.id,meProfile); applyTheme(draftTheme);
+    meProfile={...meProfile,...style}; cache.set(user.id,meProfile); applyTheme(draftTheme); gainXP("theme");
     if(room) renderAll(false);
     say("themeMsg","Saved."); setTimeout(()=>show($("themeSheet"),false),500);
   }catch(err){ say("themeMsg","Couldn't save: "+err.message,true); }
@@ -2973,7 +3007,7 @@ const isFriend=uid=>contactIds.includes(uid);
 const addedMe=uid=>addedMeIds.includes(uid);
 async function addFriend(uid){
   if(isFriend(uid)) return;
-  await api.addContact(uid); contactIds.push(uid);
+  await api.addContact(uid); contactIds.push(uid); gainXP("friend");
   refreshFriendUI();
 }
 async function removeFriend(uid){
@@ -3239,6 +3273,7 @@ function paintGame(prev){
   show($("gameJoin"), g.status==="waiting" && g.player_x!==user.id);
   show($("gameRematch"), g.status==="done" && !!me);
   if(g.status==="done"&&prev&&prev.status!=="done"){
+    if(st.won) gainXP("gamewin");
     if(st.won&&fxEnabled()) FX.play("confetti");
     if(navigator.vibrate) navigator.vibrate(st.won?[40,60,40]:60);
   } else if(prev?.state&&prev.state.turn!==s.turn&&s.turn===me&&navigator.vibrate) navigator.vibrate(25);
@@ -3704,7 +3739,7 @@ function secretFor(text){
 function discoverSecret(id){
   const f=foundSecrets(); if(f.includes(id)) return false;
   f.push(id); try{ localStorage.setItem(SECRETS_KEY,JSON.stringify(f)); }catch(e){}
-  const s=SECRET_LIST.find(x=>x.id===id);
+  const s=SECRET_LIST.find(x=>x.id===id); gainXP("secret");
   const t=el("div","toast mention"); const body=el("span","tbody");
   body.append(el("div","ttitle",`🔓 Secret found (${f.length}/${SECRET_LIST.length})`), el("div","ttext",s?s.name:"???"));
   t.append(el("span","sx-lock","🔓"),body); $("toasts").prepend(t);
@@ -3729,7 +3764,7 @@ function playSecretFromMessage(m,s,force){
   }
 }
 function paintSecrets(){
-  paintHint();
+  paintHint(); paintXP();
   const f=foundSecrets();
   $("secretCount").textContent=`🔓 Secrets found: ${f.length}/${SECRET_LIST.length}`;
   const box=$("secretList"); box.innerHTML="";
@@ -3910,6 +3945,8 @@ SECRET_LIST.splice(SECRET_LIST.findIndex(s=>s.id==="konami"),0,
 /* things that happen when YOU send a message */
 let myRecentSends=[];
 async function afterMySend(m){
+  gainXP(m.kind==="image"?"photo":m.kind==="audio"||m.kind==="video"?"voice":m.kind==="sticker"?"sticker":m.kind==="poll"?"poll":m.kind==="game"?"game":"message");
+  if(m.reply_to) gainXP("reply");
   const now=Date.now(); myRecentSends=myRecentSends.filter(t=>now-t<10000); myRecentSends.push(now);
   if(myRecentSends.length>=5&&fxEnabled()){ PX.combo(myRecentSends.length); if(myRecentSends.length===5) discoverSecret("combo"); }
   if(isShiny(m)) discoverSecret("shiny");
@@ -4078,7 +4115,7 @@ function paintTasks(){
 }
 async function addTask(text){
   text=(text||"").trim().slice(0,200); if(!text) return;
-  try{ const t=await api.addTask(room,text); tasks.set(t.id,t); paintTasks(); $("status").textContent="Added to the room checklist ✅"; }
+  try{ const t=await api.addTask(room,text); tasks.set(t.id,t); paintTasks(); gainXP("task"); $("status").textContent="Added to the room checklist ✅"; }
   catch(err){ $("status").textContent="Couldn't add task: "+err.message; }
 }
 $("taskForm").addEventListener("submit",async e=>{ e.preventDefault(); const v=$("taskInput").value; $("taskInput").value=""; await addTask(v); });
@@ -4376,6 +4413,57 @@ Object.assign(HINTS,{
   mammamia:"What the same plumber says when things go wrong.",
   powerup:"Eat the mushroom and you grow twice as tall.",
 });
+
+/* ================= DRAGON (silhouette scene), ONE PIECE, XP ================= */
+const DRAGON_IMG="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAL4AAACACAYAAAC1BNNAAAAEJUlEQVR42u3dUWrDMBCE4VoIeofe/2y9Q6DQPgVKSFI5leyV9pvXUkfW/jsa2Y7z9kZT671+fL/Xj28zsU+bKTge1FHHvnx9qmej6kqFJ2pVAT0Bf7AsxYwlJfhX+DUApQOf+1Nq8Lk/nalQ0MmoVtOU4GsA8KeIOopGwJf/CfgagBJmfPlfZEzv+IpJwBd/KGvUEX+skGkd3wpAwNcAlB18y/t8MfCsr06WVQvO/Skl+BrAyvRMmwnOoYjNf68WR42zgJ4yqgKdotXsCNd3A0vcCVezI8ZZZ4P78vW5AZ3rL+34AM/p+EeMdwM5+CPXe9R4K9gpozaQc/3oDIwY7wZy4M9ger3HvAEd+LOs8j3HXYFOGVf9Dexcfxbouzv+75tDQKdoDXplseeNLXdBOX5Yx39kxD3GXiAgg2fK9sCnqZq0dwyvz5YNMYhWzfuu6oCpW9Y/4mpOr6xfX50gjUDRItAQ8Fu7kGyWZzi+Z3WoS9w5s+avjN/TmfQv8KPUde85lCMH5v024k0UbSaQXnHMiDXbcw5TvGSIYkETuUat51GjD1wjMKYR8uNv1Az0SiY0zXt17sFvNeD0U29uexTFi6bG5eMj5vX62T0/61lSWDZCaIK59lijnwS4Pa802VkjxAAwQoy9fH1uJVNBbZLnMYrR3xADgtUg7N5iZH2Av3ATzLDhb3X2KZ7O1AjxwIp6Hmc9KuE7t417g9n3B6vsb/5zHr//l+MnWA0iR55XQX50Pq3HA75olHIVEnUGRSMzEVsKZDVIuefg+FYDjk9WgiyOD3xNAHzSCBmgB75GSAu+zS2lVDUFXB74BPgkkvEBny7fy/igTyvggz6d28v4YOf4BHqbWwL7wjGH41NayfhcXsYn0GeIOTI+4FNCL+oAPq04PuDTuT3wgZ4SeptbEnWI02dweuADPjX8og7oUwr4oAc+gT7LvAEf9ByfQA980NPC8wh80HN80BPwQU8LzyvwieNzJcoyv1VR6C/9fvZmlTkroKdnwN8+cLbKb3gV0FML8KvBX0BPrcCvNOcF9JRRLmfSS8awd2WIZjpFUeko+IEPevMFfAI/8BVw4bmLVIuicJRxDouCraMzr8O3fm6UuhTQrwf8iAZ4NKezXtkpoJ8f+qNWgL/mdqYm2IC/HvBHzM2jz+8Zizg+6Luca88VYPa5LqCf+5zPbgDg0+kNsLcJjtoAA5/bh10FOD7oU0W/UZEnepSqgM8B/2gQj/ystI4P+r4RaDSotzfXOD51iRB7jOC9fnzfHmOkkUR1/+kcP7vb37uCEwmuWb6kXkBv47sHylawvS0Z9MtvKP/aO3jLAp0WM3r8/dn/jTp2avC5/euN0PImtBFQ+mXzhYGKVNzWO7b3ruo8A7bHOUZsgjoLaJHHFmFFaoU5+8NpV/0As4EXcEP5Yk8AAAAASUVORK5CYII=";
+QX.dragon=function(){
+  const layer=$("sfx"); const scene=document.createElement("div"); scene.className="dg-scene";
+  scene.innerHTML=`<div class="dg-stars">${[...Array(28)].map(()=>`<i style="left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*2}s"></i>`).join("")}</div><div class="dg-moon"></div><img class="dg-dragon" src="${DRAGON_IMG}" alt="">`;
+  layer.append(scene); setTimeout(()=>scene.classList.add("out"),4600); setTimeout(()=>scene.remove(),5400);
+};
+QX.onepiece=function(){
+  const layer=$("sfx"); const d=document.createElement("div"); d.className="op-wrap";
+  d.innerHTML=`<div class="op-chest"><div class="op-glow"></div><div class="op-lid"><i></i></div><div class="op-body"><b></b></div></div><div class="sx-caption op-cap">the treasure is…</div>`;
+  layer.append(d);
+  const lid=d.querySelector(".op-lid"), cap=d.querySelector(".op-cap");
+  setTimeout(()=>d.classList.add("open"),600);
+  setTimeout(()=>{ d.classList.remove("open"); d.classList.add("slam"); cap.textContent="…nice try. Keep sailing. 🏴‍☠️"; if(navigator.vibrate) navigator.vibrate(60); },2300);
+  setTimeout(()=>d.remove(),4200);
+};
+SECRET_LIST.splice(SECRET_LIST.findIndex(s=>s.id==="konami"),0,
+  {id:"onepiece", name:"The One Piece", re:/one piece/i, play:()=>QX.onepiece()}
+);
+Object.assign(HINTS,{onepiece:"The treasure at the end of the Grand Line. Say its name."});
+HINTS.dragon="A winged silhouette crosses the moon when you say it.";
+
+/* ---------- XP & levels ---------- */
+const XP_KEY="nl-xp";
+const XP_RULES={secret:50,message:2,photo:6,voice:6,sticker:3,poll:10,vote:2,game:5,gamewin:30,friend:15,daily:20,reply:3,reaction:1,task:4,pin:2,rename:5,theme:10};
+const LEVEL_TITLES=["Newcomer","Regular","Night Owl","Neon Runner","Chatterbox","Phantom","Netrunner","Legend","Choom Supreme","Creator's Favorite","Mythic"];
+const xpData=()=>{ try{ return JSON.parse(localStorage.getItem(XP_KEY))||{xp:0,log:{}}; }catch(e){ return {xp:0,log:{}}; } };
+const xpNeed=lvl=>100+Math.round(60*(lvl-1)*(lvl-1)*.6+40*(lvl-1));   // xp to go from lvl → lvl+1
+function xpLevel(total){ let lvl=1,rem=total; while(rem>=xpNeed(lvl)){ rem-=xpNeed(lvl); lvl++; } return {lvl,rem,need:xpNeed(lvl)}; }
+let lastXpToast=0;
+function gainXP(kind,mult=1){
+  const amt=(XP_RULES[kind]||0)*mult; if(!amt) return;
+  const d=xpData(); const before=xpLevel(d.xp).lvl;
+  d.xp+=amt; d.log[kind]=(d.log[kind]||0)+1; try{ localStorage.setItem(XP_KEY,JSON.stringify(d)); }catch(e){}
+  const now=xpLevel(d.xp);
+  if(!$("profile").classList.contains("hidden")) paintXP();
+  if(now.lvl>before){ if(fxEnabled()&&typeof QX!=="undefined"&&!reducedMotion()) QX.levelup();
+    const t=el("div","toast mention"); const body=el("span","tbody"); body.append(el("div","ttitle",`⬆ Level ${now.lvl} · ${LEVEL_TITLES[Math.min(now.lvl-1,LEVEL_TITLES.length-1)]}`), el("div","ttext","Keep going, you're on a roll."));
+    t.append(el("span","sx-lock","⬆"),body); $("toasts").prepend(t); setTimeout(()=>{ t.classList.add("out"); setTimeout(()=>t.remove(),260); },5000);
+    if(navigator.vibrate) navigator.vibrate([30,40,30,40,120]);
+  } else if(amt>=15&&Date.now()-lastXpToast>4000){ lastXpToast=Date.now(); const f=el("div","xpfloat","+"+amt+" XP"); $("toasts").append(f); setTimeout(()=>f.remove(),1400); }
+}
+function paintXP(){
+  const d=xpData(), L=xpLevel(d.xp), pct=Math.round(L.rem/L.need*100);
+  $("xpLevel").textContent=`LV ${L.lvl}`; $("xpTitle").textContent=LEVEL_TITLES[Math.min(L.lvl-1,LEVEL_TITLES.length-1)];
+  $("xpFill").style.width=pct+"%"; $("xpText").textContent=`${L.rem} / ${L.need} XP · ${d.xp.toLocaleString()} total`;
+  const ways=[["secret","🔓 find a secret",50],["gamewin","🏆 win a game",30],["daily","📅 open the app daily",20],["friend","🤝 add a friend",15],["poll","📊 start a poll",10],["theme","🎨 change your theme",10],["photo","📷 send a photo",6],["voice","🎤 voice message",6],["message","💬 send a message",2]];
+  $("xpWays").innerHTML=ways.map(([k,label,v])=>`<span class="sx-chip${(d.log[k]||0)>0?" got":""}">${label} +${v}</span>`).join("");
+}
+function dailyXP(){ const key="nl-xpday-"+new Date().toDateString(); try{ if(localStorage.getItem(key)) return; localStorage.setItem(key,"1"); }catch(e){} setTimeout(()=>gainXP("daily"),1500); }
 
 /* ================= STAYING CONNECTED ================= */
 let liveStatus=null, catchingUp=false, lastCatchUp=0;
