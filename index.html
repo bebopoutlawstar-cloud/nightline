@@ -1303,6 +1303,48 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
 .onlinechip span{max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .onlinechip small{font-size:10px;color:#2ee66b;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .face.here::after{background:var(--volt)!important;box-shadow:0 0 8px var(--volt)!important}
+/* ===== DESKTOP: netrunner terminal mode ===== */
+body.desktop{--term:#7CFF6B}
+body.desktop .sky canvas{opacity:.55}
+body.desktop::before{content:"";position:fixed;inset:0;z-index:8;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.14) 0 2px,transparent 2px 4px);mix-blend-mode:multiply}
+body.desktop .deskframe{position:fixed;inset:0;z-index:1;display:grid;grid-template-columns:360px 1fr;gap:0;max-width:1400px;margin:0 auto;padding:22px;box-sizing:border-box}
+body.desktop #front{max-width:none;height:auto;margin:0;padding:18px 18px 18px 10px;border:2px solid rgba(0,240,255,.35);border-right:none;background:rgba(7,4,26,.72);backdrop-filter:blur(6px);display:flex!important;overflow-y:auto;clip-path:polygon(0 0,100% 0,100% 100%,0 100%)}
+body.desktop #front.hidden{display:flex!important}
+body.desktop #chat{position:relative;top:auto;height:auto;max-width:none;width:auto;margin:0;border:2px solid rgba(0,240,255,.35);background:rgba(7,4,26,.6);backdrop-filter:blur(6px)}
+body.desktop #chat.hidden{display:flex!important}
+body.desktop #chat.hidden > *{display:none!important}
+body.desktop #chat.hidden::after{content:attr(data-idle);display:grid;place-items:center;height:100%;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:15px;color:var(--term);white-space:pre-wrap;text-align:center;line-height:1.7;text-shadow:0 0 8px rgba(124,255,107,.6);padding:40px}
+body.desktop #front.logged .stamp{width:180px;aspect-ratio:1.9;margin:0 auto 0;transform:rotate(-4deg) scale(.9)}
+body.desktop #front:not(.logged){grid-column:1/3;border:none;background:transparent;justify-content:center;align-items:center}
+body.desktop #front:not(.logged) .front-inner{width:min(92vw,460px)}
+/* terminal bar */
+.termbar{display:none}
+body.desktop .termbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:9;height:26px;align-items:center;gap:22px;padding:0 20px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--term);background:#020705;border-top:1px solid rgba(124,255,107,.35);letter-spacing:.5px}
+.termbar b{color:#fff;font-weight:400}
+.termbar .blink{animation:sxblink 1s steps(1) infinite}
+.termbar .right{margin-left:auto;opacity:.75}
+body.desktop .deskframe{padding-bottom:48px}
+/* login as a terminal */
+body.desktop #authCard{font-family:ui-monospace,Menlo,Consolas,monospace}
+body.desktop #authCard label::before{content:"> ";color:var(--term)}
+body.desktop #authCard .field{background:#020705;border-color:var(--term);color:#e8ffe8;font-family:inherit;box-shadow:inset 0 0 12px rgba(124,255,107,.15)}
+body.desktop #authCard .field:focus{outline:2px solid var(--term)}
+body.desktop #authCard .go{font-family:var(--num)}
+body.desktop #authCard .tabs .tab{font-family:inherit;font-size:14px}
+/* boot screen */
+.boot{position:fixed;inset:0;z-index:60;background:#020705;color:var(--term);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:15px;line-height:1.7;padding:6vh 8vw;text-shadow:0 0 8px rgba(124,255,107,.55);cursor:pointer;overflow:hidden}
+.boot::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.25) 0 2px,transparent 2px 4px);pointer-events:none}
+.boot::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.7));pointer-events:none}
+.boot pre{margin:0;white-space:pre-wrap;font:inherit}
+.boot .cur{display:inline-block;width:.6em;height:1.1em;background:var(--term);vertical-align:-2px;animation:sxblink .9s steps(1) infinite}
+.boot .skip{position:absolute;right:20px;bottom:16px;opacity:.6;font-size:12px}
+.boot.out{animation:bootout .5s ease forwards}
+@keyframes bootout{to{opacity:0;transform:scaleY(.002)}}
+.boot h1{font-family:var(--num);font-size:56px;color:#fff;letter-spacing:2px;margin:0 0 10px;text-shadow:-3px 0 var(--cyan),4px 4px var(--mag)}
+/* keyboard hint chips */
+.kbd{font-family:ui-monospace,monospace;font-size:11px;border:1px solid rgba(124,255,107,.5);padding:0 5px;color:var(--term)}
+body.desktop #chat .feed,body.desktop #chat .compose,body.desktop #chat .top,body.desktop #chat .pinbar,body.desktop #chat .catchup{max-width:820px;width:100%;margin-left:auto;margin-right:auto}
+body.desktop .bubble{max-width:520px}
 </style>
 </head>
 <body>
@@ -2308,7 +2350,7 @@ async function enterRoom(code,token){
   }
   $("jumpBtn").disabled=false; say("roomMsg","");
   if(unsub){unsub();unsub=null;}
-  room=target; roomOwner=null; roomName=null; setTimeout(()=>{ if(typeof pushPresence==="function") pushPresence(); },50);
+  room=target; roomOwner=null; roomName=null; setTimeout(()=>{ if(typeof pushPresence==="function") pushPresence(); if(typeof paintTermBar==="function") paintTermBar(); },50);
   if(!room.startsWith("dm-")){ try{ localStorage.setItem("nl-room",room); }catch(e){} }
   show($("joinPanel"),false); $("joinToggle").setAttribute("aria-expanded","false"); $("joinToggle").textContent="＋";
   show($("front"),false); show($("chat")); $("roomLabel").textContent="# "+room; $("status").textContent="Connecting…";
@@ -2356,7 +2398,7 @@ function exitRoom(){
   sendTyping(false); if(unsub){unsub();unsub=null;}
   clearPending(); clearReply();
   ["chat","roomSheet","msgMenu"].forEach(id=>show($(id),false)); show($("front")); show($("roomCard"));
-  room=""; isDm=false; dmUser=null; loadInbox();
+  room=""; isDm=false; dmUser=null; loadInbox(); if(typeof paintTermBar==="function") paintTermBar();
 }
 $("back").onclick=exitRoom;
 
@@ -3154,7 +3196,7 @@ function previewOf(m){
 /* ---------- overlays ---------- */
 $("lightbox").onclick=()=>show($("lightbox"),false);
 ["profile","roomSheet","msgMenu","pollSheet","summarySheet","calSheet","searchSheet"].forEach(id=>$(id).addEventListener("click",e=>{ if(e.target.id===id) show($(id),false); }));
-addEventListener("keydown",e=>{ if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu","pollSheet","tray"].forEach(id=>show($(id),false)); });
+addEventListener("keydown",e=>{ if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu","pollSheet","tray","themeSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","installSheet"].forEach(id=>{ const n=$(id); if(n) show(n,false); }); });
 
 /* ================= PUSH NOTIFICATIONS ================= */
 let swReg=null;
@@ -5161,6 +5203,41 @@ feed.addEventListener("click",e=>{
     setTimeout(()=>{ popping=false; },0);
   });
 })();
+
+/* ================= DESKTOP TERMINAL MODE ================= */
+const isDesktop=()=>matchMedia("(min-width: 900px) and (pointer: fine)").matches;
+function applyDesktop(){
+  const d=isDesktop(); document.body.classList.toggle("desktop",d);
+  if(d&&!document.querySelector(".deskframe")){ const f=document.createElement("div"); f.className="deskframe"; document.body.insertBefore(f,$("front")); f.append($("front"),$("chat"));
+    const bar=document.createElement("div"); bar.className="termbar"; bar.id="termbar"; document.body.append(bar); }
+  if(d){ $("chat").dataset.idle="▮ NIGHTLINE TERMINAL\n\nno channel open.\nselect a room on the left, or press  Ctrl+K  to search.\n\n> _"; paintTermBar(); }
+}
+function paintTermBar(){
+  const bar=$("termbar"); if(!bar) return;
+  const on=[...online.keys()].filter(id=>id!==user?.id).length;
+  bar.innerHTML=`<span>▮ NIGHTLINE<span class="blink">_</span></span><span>uplink: <b>${!sb?"DEMO":(navigator.onLine?(liveStatus||"IDLE"):"OFFLINE")}</b></span><span>user: <b>${meProfile?.username||"—"}</b></span><span>channel: <b>${room?(isDm?"private":(roomName||"#"+room)):"none"}</b></span><span>online: <b>${on}</b></span><span class="right"><span class="kbd">Ctrl+K</span> search · <span class="kbd">Esc</span> close · <span class="kbd">Ctrl+/</span> secrets</span>`;
+}
+setInterval(()=>{ if(document.body.classList.contains("desktop")) paintTermBar(); },4000);
+addEventListener("resize",applyDesktop); applyDesktop();
+addEventListener("keydown",e=>{
+  if(!document.body.classList.contains("desktop")) return;
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){ e.preventDefault(); if(user) openSearch(room?"room":"all"); }
+  if((e.ctrlKey||e.metaKey)&&e.key==="/"){ e.preventDefault(); if(user){ openProfile(); setTimeout(()=>$("secretCount").scrollIntoView({behavior:"smooth",block:"center"}),300); } }
+});
+/* boot sequence: once per session, desktop only */
+function bootSequence(){
+  if(!isDesktop()) return; try{ if(sessionStorage.getItem("nl-booted")) return; sessionStorage.setItem("nl-booted","1"); }catch(e){}
+  const lines=["NIGHTLINE//OS  v1.0  —  neon shell","> initializing uplink ......... OK","> resolving signal path ....... OK","> loading cutout renderer ..... OK","> mounting secret vault ....... 99 entries","> checking clearance .......... netrunner","",`> ${new Date().toLocaleString([],{weekday:"long",hour:"numeric",minute:"2-digit"})}`,"> welcome back. jack in when ready."];
+  const b=document.createElement("div"); b.className="boot"; b.innerHTML=`<h1>NIGHTLINE</h1><pre id="bootText"></pre><span class="cur"></span><div class="skip">click or press any key to skip</div>`; document.body.append(b);
+  const pre=b.querySelector("#bootText"); let li=0,ci=0,done=false;
+  const chime=(f,len)=>{ try{ const ac=window.__sxac||(window.__sxac=new (window.AudioContext||window.webkitAudioContext)()); const o=ac.createOscillator(),g=ac.createGain(); o.type="square"; o.frequency.value=f; g.gain.value=.02; o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime+len); }catch(e){} };
+  const finish=()=>{ if(done) return; done=true; b.classList.add("out"); setTimeout(()=>b.remove(),520); removeEventListener("keydown",finish); };
+  const tick=()=>{ if(done) return; if(li>=lines.length){ setTimeout(finish,700); return; }
+    const line=lines[li]; if(ci<line.length){ pre.textContent+=line[ci++]; if(ci%3===0) chime(600+Math.random()*300,.01); setTimeout(tick,line.startsWith(">")?8:22); }
+    else { pre.textContent+="\n"; li++; ci=0; setTimeout(tick,line.includes("OK")?90:220); } };
+  b.onclick=finish; addEventListener("keydown",finish); setTimeout(tick,300);
+}
+bootSequence();
 
 /* ---------- boot ---------- */
 setMode("in");
