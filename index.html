@@ -1433,6 +1433,32 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .dr-vcard.g{box-shadow:10px 10px 0 #ff1a3c}.dr-vcard.g b{color:#ff1a3c}
 .dr-vcard.ng{box-shadow:10px 10px 0 #2ee66b}.dr-vcard.ng b{color:#1a9e4a}
 .dr-verdict .dr-vcard.slam{transform:scale(1) rotate(-4deg);opacity:1}
+
+/* ===== King's Court ===== */
+.kc-icon{grid-template-columns:repeat(3,14px)!important}
+.kc-icon i.ct{background:rgba(243,255,58,.35)}
+.kc-icon i.x::before{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--cyan)}
+.kc-icon i.o::before{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--mag)}
+.kcboard{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;width:min(100%,320px);aspect-ratio:1;transform:rotate(-1deg);margin:0 auto}
+.kccell{position:relative;background:var(--deep);border:1.5px solid #3b2d80;padding:0;min-height:0}
+.kccell.court{background:rgba(243,255,58,.1);border-color:rgba(243,255,58,.45)}
+.kccell.sel{border-color:var(--white);box-shadow:inset 0 0 0 2px var(--white)}
+.kccell.tgt-simple::after{content:"";position:absolute;inset:30%;border-radius:50%;background:rgba(255,255,255,.55)}
+.kccell.tgt-jump::after{content:"";position:absolute;inset:14%;border-radius:50%;border:2px solid var(--volt);box-shadow:0 0 6px var(--volt)}
+.kccell.last{box-shadow:inset 0 0 0 2px var(--volt)}
+.kccell:disabled{cursor:default}
+.kcpc{position:absolute;inset:12%;border-radius:50%;box-shadow:2px 2px 0 #07041A}
+.kcpc.x{background:var(--cyan)}
+.kcpc.o{background:var(--mag)}
+.kc-chainbar{display:flex;gap:10px;align-items:center;justify-content:center;width:100%}
+.kc-chainbar b{color:var(--volt);font-family:var(--tech);font-size:13px}
+.kcboard-wrap{width:min(100%,340px);display:flex;justify-content:center}
+.kc-mini{grid-template-columns:repeat(8,8px)!important;gap:1px!important}
+.kc-mini i{width:8px;height:8px}
+.kc-mini i.x{background:var(--cyan)}
+.kc-mini i.o{background:var(--mag)}
+.kc-mini i.court{background:rgba(243,255,58,.3)}
+.gamecard .gc-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
@@ -1557,7 +1583,11 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
       <div class="gamelist hidden" id="gameList">
         <button type="button" class="gamepick" data-game="tictactoe">
           <span class="gp-icon" aria-hidden="true"><i class="x"></i><i class="o"></i><i></i><i></i><i class="x"></i><i></i><i class="o"></i><i></i><i class="x"></i></span>
-          <span class="gp-text"><b>Tic-tac-toe</b><small id="gpHint">Challenge the room</small></span>
+          <span class="gp-text"><b>Tic-tac-toe</b><small class="gp-hint">Challenge the room</small></span>
+        </button>
+        <button type="button" class="gamepick" data-game="kingscourt">
+          <span class="gp-icon kc-icon" aria-hidden="true"><i class="x"></i><i class="o"></i><i class="x"></i><i class="o"></i><i class="ct"></i><i class="ct"></i><i class="o"></i><i class="x"></i><i class="o"></i></span>
+          <span class="gp-text"><b>King's Court</b><small class="gp-hint">Fast checkers · everyone's a king</small></span>
         </button>
         <p class="note">More games coming soon 👀</p>
       </div>
@@ -1771,6 +1801,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 <div class="overlay hidden" id="gameSheet" role="dialog" aria-modal="true" aria-labelledby="gameTitle">
   <div class="sheet gamesheet"><div class="sheetbody">
     <h2 id="gameTitle">Tic-tac-toe</h2>
+    <p class="sub hidden" id="gameSub">Every piece moves like a king. Land in the glowing Court and keep at least one piece there.</p>
     <div class="versus">
       <div class="player" id="gpX"></div>
       <span class="vs">VS</span>
@@ -1778,6 +1809,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     </div>
     <p class="gstatus" id="gameStatus" role="status"></p>
     <div class="board" id="board" role="grid" aria-label="Tic-tac-toe board"></div>
+    <div class="kc-chainbar hidden" id="kcChainBar"><b>Chain continues…</b><button class="ghost" type="button" id="kcDone">Done</button></div>
     <button class="go hidden" type="button" id="gameJoin">Join game</button>
     <button class="go hidden" type="button" id="gameRematch">Rematch 🔁</button>
     <p class="msgline" id="gameMsg" role="status"></p>
@@ -1838,6 +1870,157 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 
 
 <script>
+/* ================= KING'S COURT ================= */
+function kcInCourt(i){ const r=(i/8)|0, c=i%8; return r>=2&&r<=5&&c>=2&&c<=5; }
+function kcInitialBoard(){ const b=Array(64).fill(""); for(let i=0;i<64;i++){ if(kcInCourt(i)) continue; const r=(i/8)|0, c=i%8; b[i]=((r+c)%2===0)?"x":"o"; } return b; }
+function kcNeighbors(i){ const r=(i/8)|0, c=i%8, out=[]; if(r>0) out.push(i-8); if(r<7) out.push(i+8); if(c>0) out.push(i-1); if(c<7) out.push(i+1); return out; }
+function kcSimpleTargets(b,i){ return kcNeighbors(i).filter(n=>b[n]===""); }
+function kcJumpTargets(b,i){
+  const r=(i/8)|0, c=i%8, out=[];
+  [[-2,0],[2,0],[0,-2],[0,2]].forEach(([dr,dc])=>{
+    const nr=r+dr, nc=c+dc; if(nr<0||nr>7||nc<0||nc>7) return;
+    const mid=i+(dr/2)*8+(dc/2), land=nr*8+nc;
+    if(b[mid]&&b[land]==="") out.push({mid,land});
+  });
+  return out;
+}
+// Mirrors play_kingscourt() in Postgres exactly, so demo mode plays by the real rules
+// and the live client can apply a move optimistically before the server confirms it.
+function kcApplyPath(state,mark,path){
+  const b=state.board.slice(), opp=mark==="x"?"o":"x";
+  if(!path||path.length<2) throw new Error("That's not a move.");
+  if(b[path[0]]!==mark) throw new Error("That's not your piece.");
+  const seen=new Set([path[0]]);
+  for(let k=1;k<path.length;k++){ if(seen.has(path[k])&&path[k]!==path[0]) throw new Error("A move can't land on a square it already passed through."); seen.add(path[k]); }
+  const wasFirst=!state["first_"+mark];
+  b[path[0]]="";
+  const a=path[0], c=path[1], ar=(a/8)|0, ac=a%8, cr=(c/8)|0, cc=c%8, step=Math.abs(cr-ar)+Math.abs(cc-ac);
+  if(path.length===2 && step===1 && (ar===cr||ac===cc)){
+    if(b[c]!=="") throw new Error("That square is taken.");
+    b[c]=mark;
+  } else {
+    if(wasFirst) throw new Error("Your first move has to be a simple step into the Court (no jumping yet).");
+    for(let k=0;k<path.length-1;k++){
+      const A=path[k], C=path[k+1], Ar=(A/8)|0, Ac=A%8, Cr=(C/8)|0, Cc=C%8;
+      const straight=(Ar===Cr&&Math.abs(Ac-Cc)===2)||(Ac===Cc&&Math.abs(Ar-Cr)===2);
+      if(!straight) throw new Error("Jumps move exactly two squares in a straight line.");
+      const mid=((Ar+Cr)/2|0)*8+((Ac+Cc)/2|0);
+      if(b[mid]==="") throw new Error("There's nothing to jump there.");
+      if(b[C]!=="") throw new Error("That landing square is taken.");
+      if(b[mid]===opp) b[mid]="";
+      b[C]=mark;
+    }
+  }
+  const final=path[path.length-1];
+  if(wasFirst){ if(!kcInCourt(final)) throw new Error("Your first move has to land inside the Court."); }
+  else { const myCourt=b.reduce((n,v,i)=>n+(v===mark&&kcInCourt(i)?1:0),0); if(myCourt===0) throw new Error("You always need at least one piece in the Court — that move would leave you with none."); }
+  let oppCourt=b.reduce((n,v,i)=>n+(v===opp&&kcInCourt(i)?1:0),0);
+  const oppTotal=b.reduce((n,v)=>n+(v===opp?1:0),0);
+  if(oppTotal>0 && !state["first_"+opp]) oppCourt=1;
+  const done = oppCourt===0 || oppTotal===0;
+  return { board:b, turn: done?state.turn:opp, winner: done?mark:null, line:[],
+           first_x: mark==="x"?true:!!state.first_x, first_o: mark==="o"?true:!!state.first_o,
+           last: path, done };
+}
+function kcBotPath(state,mark){
+  const b=state.board, opp=mark==="x"?"o":"x", mine=b.map((v,i)=>v===mark?i:-1).filter(i=>i>=0);
+  const wasFirst=!state["first_"+mark];
+  if(wasFirst){
+    for(const i of mine){ for(const t of kcSimpleTargets(b,i)) if(kcInCourt(t)) return [i,t]; }
+    for(const i of mine){ const t=kcSimpleTargets(b,i)[0]; if(t!==undefined) return [i,t]; }
+    return null;
+  }
+  let best=null;
+  for(const i of mine){
+    const chains=kcAllChains(b,i,mark);
+    for(const path of chains){
+      const caps=path.length-1;
+      const capturesOpp=path.slice(0,-1).some((p,k)=>{ const A=p,C=path[k+1]; const mid=(((A/8|0)+(C/8|0))/2|0)*8+(((A%8)+(C%8))/2|0); return b[mid]===opp; });
+      if(!best||caps>best.caps) best={path,caps,capturesOpp};
+    }
+  }
+  if(best&&best.path.length>1) return best.path;
+  for(const i of mine){ const t=kcSimpleTargets(b,i)[0]; if(t!==undefined) return [i,t]; }
+  return null;
+}
+function kcAllChains(b,start,mark){
+  const results=[]; const walk=(board,path)=>{
+    const jumps=kcJumpTargets(board,path[path.length-1]).filter(j=>true);
+    if(!jumps.length){ if(path.length>1) results.push(path.slice()); return; }
+    let any=false;
+    for(const j of jumps){ const nb=board.slice(); nb[j.land]=mark; nb[path[path.length-1]]=""; any=true; walk(nb,[...path,j.land]); }
+    if(!any&&path.length>1) results.push(path.slice());
+  };
+  walk(b,[start]);
+  return results;
+}
+function kcCourtCount(b,mark){ return b.reduce((n,v,i)=>n+(v===mark&&kcInCourt(i)?1:0),0); }
+function kcPieceCount(b,mark){ return b.reduce((n,v)=>n+(v===mark?1:0),0); }
+
+let kcSel=null, kcPath=null, kcChaining=false, kcPreview=null;
+function kcReset(){ kcSel=null; kcPath=null; kcChaining=false; kcPreview=null; }
+function kcBoardEl(g){
+  const s=g.state, me=myMark(g), board=el("div","kcboard");
+  const showBoard = kcPreview || s.board;
+  const canPlay=g.status==="active"&&me&&s.turn===me;
+  const wasFirst=canPlay&&!s["first_"+me];
+  let targets=new Map();
+  if(canPlay&&kcSel!=null){
+    if(kcChaining){ kcJumpTargets(showBoard,kcSel).forEach(j=>targets.set(j.land,"jump")); }
+    else if(wasFirst){ kcSimpleTargets(showBoard,kcSel).filter(kcInCourt).forEach(t=>targets.set(t,"simple")); }
+    else { kcSimpleTargets(showBoard,kcSel).forEach(t=>targets.set(t,"simple")); kcJumpTargets(showBoard,kcSel).forEach(j=>targets.set(j.land,"jump")); }
+  }
+  const lastSet=new Set(s.last||[]);
+  for(let i=0;i<64;i++){
+    const cell=el("button","kccell"+(kcInCourt(i)?" court":"")+(i===kcSel?" sel":"")+(targets.has(i)?" tgt-"+targets.get(i):"")+(lastSet.has(i)&&!kcPreview?" last":"")); cell.type="button";
+    cell.setAttribute("aria-label",`${kcInCourt(i)?"Court, ":""}row ${((i/8)|0)+1}, column ${i%8+1}: ${showBoard[i]?showBoard[i].toUpperCase():"empty"}`);
+    const v=showBoard[i];
+    if(v){ const p=el("span","kcpc "+v); cell.append(p); }
+    cell.disabled=!canPlay || (kcChaining && i!==kcSel && !targets.has(i)) || (!kcChaining && !(v===me || targets.has(i)));
+    cell.onclick=()=>kcTap(g,i);
+    board.append(cell);
+  }
+  return board;
+}
+function kcTap(g,i){
+  const s=g.state, me=myMark(g), board=kcPreview||s.board;
+  if(kcChaining){
+    if(i===kcSel) return;
+    const jt=kcJumpTargets(board,kcSel); const hit=jt.find(j=>j.land===i); if(!hit) return;
+    const nb=board.slice(); const opp=me==="x"?"o":"x"; if(nb[hit.mid]===opp) nb[hit.mid]=""; nb[i]=me; nb[kcSel]="";
+    kcPreview=nb; kcPath.push(i); kcSel=i;
+    if(!kcJumpTargets(nb,i).length) kcFinish(g); else paintGame();
+    return;
+  }
+  if(board[i]===me){ kcSel=(kcSel===i)?null:i; paintGame(); return; }
+  if(kcSel==null) return;
+  const wasFirst=!s["first_"+me];
+  const simple=kcSimpleTargets(board,kcSel), jumps=kcJumpTargets(board,kcSel);
+  if(simple.includes(i)&&(!wasFirst||kcInCourt(i))){ kcPath=[kcSel,i]; kcFinish(g); return; }
+  const hit=jumps.find(j=>j.land===i);
+  if(hit&&!wasFirst){ const nb=board.slice(); const opp=me==="x"?"o":"x"; if(nb[hit.mid]===opp) nb[hit.mid]=""; nb[i]=me; nb[kcSel]="";
+    kcPreview=nb; kcPath=[kcSel,i]; kcSel=i; kcChaining=true;
+    if(!kcJumpTargets(nb,i).length) kcFinish(g); else paintGame();
+  }
+}
+async function kcFinish(g){
+  const path=kcPath, before=JSON.parse(JSON.stringify(g)); kcReset();
+  let applied; try{ applied=kcApplyPath(g.state,myMark(g),path); }catch(err){ say("gameMsg",err.message,true); paintGame(); return; }
+  g.state={board:applied.board,turn:applied.turn,winner:applied.winner,line:[],first_x:applied.first_x,first_o:applied.first_o,last:applied.last};
+  g.status=applied.done?"done":"active"; paintGame(before); refreshMsg(g.message_id);
+  try{ await api.playKingsCourt(g.message_id,path); if(!sb) setTimeout(()=>kcBotTurn(g.message_id),900); }
+  catch(err){ gamesById.set(g.message_id,before); paintGame(); refreshMsg(g.message_id); say("gameMsg","Move didn't go through: "+err.message,true); }
+}
+function kcBotTurn(id){
+  const g=gamesById.get(id); if(!g||g.status!=="active"||myMark(g)===g.state.turn) return;
+  const bot=g.state.turn; const path=kcBotPath(g.state,bot); if(!path) return;
+  try{ const before=JSON.parse(JSON.stringify(g)); const applied=kcApplyPath(g.state,bot,path);
+    g.state={board:applied.board,turn:applied.turn,winner:applied.winner,line:[],first_x:applied.first_x,first_o:applied.first_o,last:applied.last};
+    g.status=applied.done?"done":"active"; paintGame(before); refreshMsg(id);
+    if(!applied.done&&g.state.turn===bot) setTimeout(()=>kcBotTurn(id),700);
+  }catch(e){}
+}
+
 /* ===== SETUP: paste your Supabase project info (Project Settings → API) =====
    Leave blank to run in demo mode. */
 const SUPABASE_URL = "https://iqxmnodyxfgljlopprju.supabase.co";
@@ -2012,6 +2195,7 @@ const live = {
   async createGame(room,type){ return must(await sb.rpc("create_game",{p_room:room,p_type:type})); },
   async joinGame(id){ must(await sb.rpc("join_game",{p_message:id})); },
   async playTicTacToe(id,cell){ must(await sb.rpc("play_tictactoe",{p_message:id,p_cell:cell})); },
+  async playKingsCourt(id,path){ must(await sb.rpc("play_kingscourt",{p_message:id,p_path:path})); },
   async rematch(id){ return must(await sb.rpc("rematch_game",{p_message:id})); },
   async createPoll(room,question,options,multi){ return must(await sb.rpc("create_poll",{p_room:room,p_question:question,p_options:options,p_multi:multi})); },
   async vote(id,idx){ must(await sb.rpc("vote_poll",{p_message:id,p_option:idx})); },
@@ -2108,8 +2292,9 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     async createGame(room,type){
       const r=rooms[room], m={id:nextId++,room,user_id:"me",kind:"game",text:"Tic-tac-toe",created_at:iso()}; r.msgs.push(m);
       const other=r.is_dm?Object.keys(r.members).find(u=>u!=="me"):null;
-      games[m.id]={message_id:m.id,room,type,player_x:"me",player_o:other,status:other?"active":"waiting",state:{board:Array(9).fill(""),turn:"x",winner:null,line:[]},moves:0};
-      if(!other) setTimeout(()=>{ const g=games[m.id]; if(g.status!=="waiting") return; g.player_o=Object.keys(r.members).find(u=>u!=="me")||"rook"; g.status="active"; fire("game",JSON.parse(JSON.stringify(g))); },1500);
+      const st0 = type==="kingscourt" ? {board:kcInitialBoard(),turn:"x",winner:null,line:[],first_x:false,first_o:false,last:[]} : {board:Array(9).fill(""),turn:"x",winner:null,line:[]};
+      games[m.id]={message_id:m.id,room,type,player_x:"me",player_o:other,status:other?"active":"waiting",state:st0,moves:0};
+      if(!other) setTimeout(()=>{ const g=games[m.id]; if(g.status!=="waiting") return; g.player_o=Object.keys(r.members).find(u=>u!=="me")||"rook"; g.status="active"; fire("game",JSON.parse(JSON.stringify(g))); if(type==="kingscourt"&&g.player_x!=="me") setTimeout(()=>kcBotTurn(m.id),900); },1500);
       return m;
     },
     async joinGame(id){ const g=games[id]; g.player_o="me"; g.status="active"; setTimeout(()=>fire("game",JSON.parse(JSON.stringify(g))),30); setTimeout(()=>demoBot(id),900); },
@@ -2119,10 +2304,20 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
       applyTTT(g,cell,mark); setTimeout(()=>fire("game",JSON.parse(JSON.stringify(g))),30);
       if(g.status==="active") setTimeout(()=>demoBot(id),900);
     },
+    async playKingsCourt(id,path){
+      const g=games[id], mark=g.player_x==="me"?"x":"o";
+      if(g.status!=="active"||g.state.turn!==mark) throw new Error("Not your turn.");
+      const applied=kcApplyPath(g.state,mark,path);
+      g.state={board:applied.board,turn:applied.turn,winner:applied.winner,line:[],first_x:applied.first_x,first_o:applied.first_o,last:applied.last};
+      g.status=applied.done?"done":"active";
+      setTimeout(()=>fire("game",JSON.parse(JSON.stringify(g))),30);
+    },
     async rematch(id){
-      const old=games[id], r=rooms[old.room], m={id:nextId++,room:old.room,user_id:"me",kind:"game",text:"Tic-tac-toe",created_at:iso()}; r.msgs.push(m);
-      games[m.id]={message_id:m.id,room:old.room,type:old.type,player_x:old.player_o,player_o:old.player_x,status:"active",state:{board:Array(9).fill(""),turn:"x",winner:null,line:[]},moves:0};
-      if(games[m.id].player_x!=="me") setTimeout(()=>demoBot(m.id),900);
+      const old=games[id], r=rooms[old.room], label=old.type==="kingscourt"?"King's Court":"Tic-tac-toe";
+      const m={id:nextId++,room:old.room,user_id:"me",kind:"game",text:label,created_at:iso()}; r.msgs.push(m);
+      const st0 = old.type==="kingscourt" ? {board:kcInitialBoard(),turn:"x",winner:null,line:[],first_x:false,first_o:false,last:[]} : {board:Array(9).fill(""),turn:"x",winner:null,line:[]};
+      games[m.id]={message_id:m.id,room:old.room,type:old.type,player_x:old.player_o,player_o:old.player_x,status:"active",state:st0,moves:0};
+      if(games[m.id].player_x!=="me") setTimeout(()=>old.type==="kingscourt"?kcBotTurn(m.id):demoBot(m.id),900);
       return m;
     },
     async polls(ids){ return {polls:ids.map(i=>polls[i]).filter(Boolean),votes:votes.filter(v=>ids.includes(v.message_id))}; },
@@ -2166,6 +2361,7 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     async deleteTask(id){ Object.values(rooms).forEach(r=>{ r.tasks=(r.tasks||[]).filter(t=>t.id!==id); }); },
     async setDisappear(room,sec){ rooms[room].disappear=sec; setTimeout(()=>fire("roomUpdated",{code:room,name:rooms[room].name||null,disappear_seconds:sec,owner:rooms[room].owner}),30); },
     _injectMissed(room,text,who="vee"){ const m={id:nextId++,room,user_id:who,kind:"text",text,mentions:[],created_at:iso()}; seed(room).msgs.push(m); return m; },
+    _setGameState(id,state,status){ if(games[id]){ games[id].state=state; if(status) games[id].status=status; } },
     _deleteSilently(room,id){ rooms[room].msgs=rooms[room].msgs.filter(m=>m.id!==id); },
     _status(s){ H&&H.status(s); },
     _friendAdd(uid){ FRIEND&&FRIEND(uid); },
@@ -3158,7 +3354,7 @@ function closeTray(){ show($("tray"),false); $("plusBtn").setAttribute("aria-exp
 $("plusBtn").onclick=()=>{ const open=$("tray").classList.contains("hidden"); if(open){ paintStickers(); show($("tray")); } else show($("tray"),false); $("plusBtn").setAttribute("aria-expanded",String(open)); };
 function trayTab(t){ $("traySticker").setAttribute("aria-pressed",t==="stickers"); $("trayGames").setAttribute("aria-pressed",t==="games"); $("trayGifs").setAttribute("aria-pressed",t==="gifs"); show($("stickerGrid"),t==="stickers"); show($("gameList"),t==="games"); show($("gifPane"),t==="gifs"); }
 $("traySticker").onclick=()=>trayTab("stickers");
-$("trayGames").onclick=()=>{ $("gpHint").textContent=isDm&&dmUser?`Challenge ${nameOf(dmUser)}`:"Challenge the room"; trayTab("games"); };
+$("trayGames").onclick=()=>{ const t=isDm&&dmUser?`Challenge ${nameOf(dmUser)}`:"Challenge the room"; document.querySelectorAll("#gameList .gp-hint").forEach(n=>n.textContent=t); trayTab("games"); };
 $("gameList").querySelectorAll(".gamepick").forEach(bt=>bt.onclick=async()=>{
   closeTray(); trayTab("stickers");
   try{ const m=await api.createGame(room,bt.dataset.game); await addMessages([m]); openGame(m.id); }
@@ -3688,10 +3884,16 @@ function miniGrid(g){
   s.board.forEach((v,i)=>box.append(el("i",(v||"")+((s.line||[]).includes(i)?" win":""))));
   return box;
 }
+function kcMiniBoard(g){
+  const box=el("span","minigrid kc-mini"); box.setAttribute("aria-hidden","true"); box.style.gridTemplateColumns="repeat(8,1fr)";
+  const b=g?.state?.board||kcInitialBoard();
+  b.forEach((v,i)=>box.append(el("i",(v||"")+(kcInCourt(i)?" court":""))));
+  return box;
+}
 function gameCard(m){
   const g=gamesById.get(m.id), card=el("div","gamecard");
-  const top=el("div","gc-top"); top.append(miniGrid(g));
-  const info=el("div"); info.append(el("div","gc-title","🎮 TIC-TAC-TOE"));
+  const top=el("div","gc-top"); top.append(g?.type==="kingscourt"?kcMiniBoard(g):miniGrid(g));
+  const info=el("div"); info.append(el("div","gc-title",g?.type==="kingscourt"?"👑 KING'S COURT":"🎮 TIC-TAC-TOE"));
   if(!g){ info.append(el("div","gc-status","Loading…")); top.append(info); card.append(top); return card; }
   const st=gameStatusText(g); info.append(el("div","gc-status"+(st.turn?" turn":""),st.text));
   top.append(info); card.append(top);
@@ -3703,8 +3905,8 @@ function gameCard(m){
   return card;
 }
 let openGameId=null;
-function openGame(id){ openGameId=id; say("gameMsg",""); paintGame(); show($("gameSheet")); }
-function closeGame(){ openGameId=null; show($("gameSheet"),false); }
+function openGame(id){ openGameId=id; kcReset(); say("gameMsg",""); paintGame(); show($("gameSheet")); }
+function closeGame(){ openGameId=null; kcReset(); show($("gameSheet"),false); }
 $("gameClose").onclick=closeGame;
 $("gameSheet").addEventListener("click",e=>{ if(e.target.id==="gameSheet") closeGame(); });
 function playerTile(node,uid,mark,active){
@@ -3714,28 +3916,44 @@ function playerTile(node,uid,mark,active){
 }
 function paintGame(prev){
   const g=gamesById.get(openGameId); if(!g){ closeGame(); return; }
+  const isKC=g.type==="kingscourt";
+  $("gameTitle").textContent=isKC?"King's Court":"Tic-tac-toe"; show($("gameSub"),isKC);
   const s=g.state, st=gameStatusText(g), me=myMark(g);
   playerTile($("gpX"),g.player_x,"x",g.status==="active"&&s.turn==="x");
   playerTile($("gpO"),g.player_o,"o",g.status==="active"&&s.turn==="o");
-  $("gameStatus").textContent=st.text; $("gameStatus").classList.toggle("good",!!(st.turn||st.won));
+  let statusText=st.text;
+  if(isKC&&g.status==="active"){
+    const wasFirst=me&&!s["first_"+me];
+    if(kcChaining) statusText="Keep jumping, or tap Done";
+    else if(st.turn&&wasFirst) statusText="Your first move: step into the glowing Court";
+    else if(st.turn) statusText=`Your turn! (${kcCourtCount(s.board,me)} in the Court)`;
+  }
+  $("gameStatus").textContent=statusText; $("gameStatus").classList.toggle("good",!!(st.turn||st.won));
   const board=$("board"); board.innerHTML="";
-  const canPlay=g.status==="active"&&me&&s.turn===me;
-  s.board.forEach((v,i)=>{
-    const cell=el("button","cell"+((s.line||[]).includes(i)?" win":"")); cell.type="button"; cell.setAttribute("role","gridcell");
-    cell.setAttribute("aria-label",`Row ${Math.floor(i/3)+1}, column ${i%3+1}: ${v?v.toUpperCase():"empty"}`);
-    if(v){ const mk=el("span",v); if(prev?.state?.board?.[i]===v) mk.style.animation="none"; cell.append(mk); }
-    cell.disabled=!canPlay||!!v;
-    cell.onclick=()=>makeMove(i);
-    board.append(cell);
-  });
+  if(isKC){
+    board.className="kcboard-wrap"; board.append(kcBoardEl(g));
+    show($("kcChainBar"),kcChaining);
+  } else {
+    board.className="board"; board.removeAttribute("aria-label"); board.setAttribute("role","grid"); board.setAttribute("aria-label","Tic-tac-toe board");
+    const canPlay=g.status==="active"&&me&&s.turn===me;
+    s.board.forEach((v,i)=>{
+      const cell=el("button","cell"+((s.line||[]).includes(i)?" win":"")); cell.type="button"; cell.setAttribute("role","gridcell");
+      cell.setAttribute("aria-label",`Row ${Math.floor(i/3)+1}, column ${i%3+1}: ${v?v.toUpperCase():"empty"}`);
+      if(v){ const mk=el("span",v); if(prev?.state?.board?.[i]===v) mk.style.animation="none"; cell.append(mk); }
+      cell.disabled=!canPlay||!!v;
+      cell.onclick=()=>makeMove(i);
+      board.append(cell);
+    });
+  }
   show($("gameJoin"), g.status==="waiting" && g.player_x!==user.id);
-  show($("gameRematch"), g.status==="done" && !!me);
+  show($("gameRematch"), g.status==="done" && !!me && !kcChaining);
   if(g.status==="done"&&prev&&prev.status!=="done"){
     if(st.won) gainXP("gamewin");
     if(st.won&&fxEnabled()) FX.play("confetti");
     if(navigator.vibrate) navigator.vibrate(st.won?[40,60,40]:60);
   } else if(prev?.state&&prev.state.turn!==s.turn&&s.turn===me&&navigator.vibrate) navigator.vibrate(25);
 }
+$("kcDone").onclick=()=>{ const g=gamesById.get(openGameId); if(g&&kcChaining&&kcPath) kcFinish(g); };
 async function makeMove(i){
   const g=gamesById.get(openGameId), me=g&&myMark(g);
   if(!g||g.status!=="active"||g.state.turn!==me||g.state.board[i]) return;
