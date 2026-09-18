@@ -1459,6 +1459,15 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .kc-mini i.o{background:var(--mag)}
 .kc-mini i.court{background:rgba(243,255,58,.3)}
 .gamecard .gc-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* ===== hi-five ===== */
+.hf-hand{position:absolute;top:38%;width:min(30vw,120px);filter:drop-shadow(4px 4px 0 #07041A)}
+.hf-left{left:-40%;animation:hfL .42s cubic-bezier(.3,0,.6,1) forwards}
+.hf-right{right:-40%;transform:scaleX(-1);animation:hfR .42s cubic-bezier(.3,0,.6,1) forwards}
+@keyframes hfL{to{left:38%;transform:rotate(-8deg)}}
+@keyframes hfR{to{right:38%;transform:scaleX(-1) rotate(8deg)}}
+.hf-burst{position:absolute;left:50%;top:44%;width:0;height:0}
+.hf-burst i{position:absolute;left:0;top:0;width:5px;height:16px;background:var(--volt);box-shadow:0 0 6px var(--volt);transform:rotate(var(--a));transform-origin:50% 0;animation:hfspark .5s ease-out forwards}
+@keyframes hfspark{to{transform:rotate(var(--a)) translateY(-46px);opacity:0}}
 </style>
 </head>
 <body>
@@ -5567,6 +5576,23 @@ Object.assign(HINTS,{
   guilty:"The verdict nobody wants to hear.",
   notguilty:"The verdict everyone hopes for.",
 });
+
+QX.hifive=function(m){
+  const layer=$("sfx"), add=(cls,html="")=>{ const d=document.createElement("div"); d.className=cls; d.innerHTML=html; layer.append(d); return d; };
+  const HAND=`<svg viewBox="0 0 100 120"><path d="M50 118 L34 90 Q20 82 20 66 L20 30 Q20 22 28 22 Q36 22 36 30 L36 54 L36 14 Q36 4 46 4 Q56 4 56 14 L56 52 L56 8 Q56 -2 66 -2 Q76 -2 76 8 L76 52 L76 18 Q76 10 84 10 Q92 10 92 18 L92 62 Q92 90 72 100 L64 118Z" fill="#f2c396" stroke="#07041A" stroke-width="4"/></svg>`;
+  const left=add("hf-hand hf-left",HAND), right=add("hf-hand hf-right",HAND);
+  setTimeout(()=>{
+    const burst=add("hf-burst"); for(let i=0;i<14;i++){ const s=document.createElement("i"); s.style.setProperty("--a",(i*(360/14))+"deg"); burst.append(s); }
+    try{ const ac=window.__sxac||(window.__sxac=new (window.AudioContext||window.webkitAudioContext)()); const o=ac.createOscillator(), g=ac.createGain(); o.type="square"; o.frequency.value=180; g.gain.setValueAtTime(.12,ac.currentTime); g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+.15); o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime+.16); }catch(e){}
+    if(navigator.vibrate) navigator.vibrate(40);
+    setTimeout(()=>burst.remove(),700);
+  },420);
+  setTimeout(()=>{ left.remove(); right.remove(); },1600);
+};
+SECRET_LIST.splice(SECRET_LIST.findIndex(s=>s.id==="konami"),0,
+  {id:"hifive", name:"Hi-five", re:/hi-?five|hi-?5\b|high[- ]?five/i, play:m=>QX.hifive(m)}
+);
+Object.assign(HINTS,{ hifive:"Two open hands meet in the middle. Say it as one word or two." });
 
 /* ================= STAYING CONNECTED ================= */
 let liveStatus=null, catchingUp=false, lastCatchUp=0;
