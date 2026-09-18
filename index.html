@@ -1503,6 +1503,12 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .toast.missed-secret{flex-wrap:wrap}
 .missed-actions{display:flex;gap:8px;width:100%;margin-top:6px}
 .missed-actions button{flex:1;padding:8px;font-size:13px}
+
+/* ===== bigger, punchier "!" ===== */
+.punct.bang{font-size:40px;-webkit-text-stroke:3px var(--night);filter:drop-shadow(0 0 4px rgba(0,0,0,.5))}
+.punct.bang::before{content:"";position:absolute;left:50%;top:52%;width:2.1em;height:2.1em;transform:translate(-50%,-50%) rotate(-8deg);z-index:-1;
+  background:var(--mag);clip-path:polygon(50% 0%,63% 30%,93% 15%,75% 42%,100% 50%,75% 58%,93% 85%,63% 70%,50% 100%,37% 70%,7% 85%,25% 58%,0% 50%,25% 42%,7% 15%,37% 30%)}
+.msg.me .punct.bang::before{background:var(--cyan)}
 </style>
 </head>
 <body>
@@ -2884,7 +2890,7 @@ function buildMsg(m,index,noAnim){
   if(m.kind==="poll") bub.append(pollEl(m));
   else if(m.kind==="game") bub.append(gameCard(m));
   else if(m.text){ const t=el("div"); renderTextWithDates(t,m.text,m.mentions,m); bub.append(t);
-    const pm=m.text.trim().match(/[?!]+$/); if(pm&&(m.kind||"text")==="text"){ const cluster=pm[0]; const marks=cluster.includes("?")&&cluster.includes("!")?"?!":(cluster.includes("?")?"?":"!"); const p=el("span","punct"+(cluster.length>2?" loud":""),marks); p.setAttribute("aria-hidden","true"); bub.append(p); } const trb=translationBlock(m); if(trb) bub.append(trb); if(!noAnim||!node.querySelector(".lpcard")) setTimeout(()=>attachPreview(bub,m),0);
+    const pm=m.text.trim().match(/[?!]+$/); if(pm&&(m.kind||"text")==="text"){ const cluster=pm[0]; const marks=cluster.includes("?")&&cluster.includes("!")?"?!":(cluster.includes("?")?"?":"!"); const solo=marks==="!"&&cluster.length<=2; const p=el("span","punct"+(cluster.length>2?" loud":"")+(solo?" bang":""),marks); p.setAttribute("aria-hidden","true"); bub.append(p); } const trb=translationBlock(m); if(trb) bub.append(trb); if(!noAnim||!node.querySelector(".lpcard")) setTimeout(()=>attachPreview(bub,m),0);
     if(/el psy (k|c)ongroo|(^|[^a-z])world ?line([^a-z]|$)/i.test(m.text)&&typeof m.id==="number") bub.append(el("div","d20chip wlchip",`⚗️ world line ${worldLineFor(m)}`));
     if(typeof m.id==="number"&&diceIn(m.text)){ const n=diceIn(m.text), r=dNFor(m,n); bub.append(el("div","d20chip"+(r===n&&n>1?" nat20":r===1&&n>1?" nat1":""),n===2?`🪙 d2 → ${r===1?"heads":"tails"}`:`🎲 d${n} → ${r}${r===n&&n>1?" MAX!":""}`)); }
     if(/(^|[^a-z])roll(s|ed|ing)? (a |the |me a )?d20([^a-z0-9]|$)/i.test(m.text)&&typeof m.id==="number"){ const n=d20For(m); bub.append(el("div","d20chip"+(n===20?" nat20":n===1?" nat1":""),`🎲 d20 → ${n}${n===20?" NAT 20!":n===1?" crit fail":""}`)); } }
