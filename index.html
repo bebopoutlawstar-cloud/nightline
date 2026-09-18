@@ -1367,6 +1367,46 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 @keyframes punctpop{from{transform:scale(.2) rotate(30deg);opacity:0}}
 .msg.me .punct{animation-name:punctpopme}
 @keyframes punctpopme{from{transform:scale(.2) rotate(-30deg);opacity:0}to{transform:rotate(-12deg)}}
+/* ===== pack 15 ===== */
+.p15-cap{color:#ffd27a}
+.p15-flicker{animation:p15flick 1.8s ease-in-out infinite alternate}
+@keyframes p15flick{to{opacity:.55}}
+.p15-hand{transform-origin:66px 176px;animation:p15type .3s ease-in-out infinite alternate}
+@keyframes p15type{to{transform:translateY(-3px)}}
+.kh-wrap{position:absolute;inset:0;overflow:hidden;opacity:0;animation:dgin .8s ease forwards;transition:opacity .8s}
+.kh-wrap.out{opacity:0!important}
+.kh-sky{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,#3b1d7a,#0a0620 60%,#02010a)}
+.kh-moon{position:absolute;left:50%;bottom:-40%;width:min(60vw,260px);aspect-ratio:1;transform:translateX(-50%) rotate(45deg);background:#ffe27a;box-shadow:0 0 60px 20px rgba(255,226,122,.5);animation:khrise 4.5s cubic-bezier(.2,.8,.3,1) both;filter:drop-shadow(0 0 30px rgba(255,226,122,.6))}
+.kh-moon::before,.kh-moon::after{content:"";position:absolute;width:100%;height:100%;background:#ffe27a;border-radius:50%}
+.kh-moon::before{left:-50%;top:0}.kh-moon::after{left:0;top:-50%}
+@keyframes khrise{to{bottom:38%}}
+.kh-city{position:absolute;left:0;right:0;bottom:0;height:45%}
+.kh-city i{position:absolute;bottom:0;width:6%;background:#02010a;box-shadow:inset 0 0 0 1px rgba(255,226,122,.08)}
+.kh-cap{position:absolute;left:0;right:0;bottom:12%;text-align:center;color:#ffe27a}
+.kb-wrap{position:absolute;inset:0;background:rgba(0,0,0,.7);display:grid;place-content:center;gap:18px;text-align:center;animation:sxfadein .3s ease both}
+.kb-hole{width:110px;height:150px;margin:0 auto;position:relative;filter:drop-shadow(0 0 20px #fff)}
+.kb-hole i{position:absolute;left:50%;top:0;width:64px;height:64px;transform:translateX(-50%);border-radius:50%;background:#fff}
+.kb-hole::after{content:"";position:absolute;left:50%;top:44px;width:34px;height:100px;transform:translateX(-50%);background:#fff;clip-path:polygon(30% 0,70% 0,100% 100%,0 100%)}
+.kb-beam{position:absolute;left:-60%;top:50%;width:80%;height:6px;background:linear-gradient(90deg,transparent,#fff,#9be7ff);box-shadow:0 0 18px #9be7ff;transform:translateY(-50%);animation:kbbeam 1.4s cubic-bezier(.6,0,.3,1) both}
+@keyframes kbbeam{to{left:20%;width:30%}}
+.kb-cap{opacity:0;color:#9be7ff;transition:opacity .3s}
+.kb-wrap.lock .kb-cap{opacity:1}
+.kb-wrap.lock .kb-hole{animation:kblock .5s ease both}
+@keyframes kblock{30%{transform:scale(1.15);filter:drop-shadow(0 0 40px #fff) brightness(2)}100%{transform:scale(1)}}
+.re-wrap{position:absolute;inset:0;background:radial-gradient(circle,rgba(40,0,0,.55),rgba(0,0,0,.92));display:grid;place-content:center;gap:16px;animation:sxfadein .3s ease both}
+.re-tw{width:min(80vw,320px);margin:0 auto;background:#1a1a1a;border:4px solid #444;border-radius:10px 10px 4px 4px;padding:12px;box-shadow:8px 8px 0 #07041A}
+.re-paper{background:#f2ecd8;color:#222;padding:14px;font-family:"Courier New",ui-monospace,monospace;text-align:center;display:grid;gap:6px;transform:translateY(-6px);animation:repaper .5s ease both}
+@keyframes repaper{from{transform:translateY(40px)}}
+.re-paper b{font-size:22px;letter-spacing:2px}
+.re-paper span{font-size:13px}.re-paper small{font-size:11px;color:#8a1c1c;font-style:italic;margin-top:6px}
+.re-keys{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px}
+.re-keys i{height:14px;background:#333;border:1px solid #555;border-radius:3px}
+.re-heart{font-size:40px;color:#ff2a2a;text-align:center;animation:reheart .8s ease-in-out infinite;filter:drop-shadow(0 0 10px #f00)}
+@keyframes reheart{50%{transform:scale(1.3)}}
+.face.re-heal .fi{animation:reheal 2.4s ease both;box-shadow:0 0 0 3px #2ee66b,0 0 20px 6px rgba(46,230,107,.7)}
+@keyframes reheal{30%{filter:brightness(1.6) hue-rotate(60deg)}}
+.re-herb{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);text-align:center;font-size:70px;animation:sxslam 2.2s cubic-bezier(.2,1.4,.4,1) both;filter:drop-shadow(0 0 16px #2ee66b)}
+.re-herb b{display:block;font-family:var(--num);font-size:28px;color:#2ee66b;text-shadow:3px 3px 0 #07041A;letter-spacing:2px}
 </style>
 </head>
 <body>
@@ -5162,6 +5202,71 @@ async function handleFriendInvite(token){
     say("contactMsg",`You and ${name} are friends now 🤝`); setFrontTab("contacts"); if(fxEnabled()&&typeof FX!=="undefined") FX.play("hearts"); }
   catch(err){ say("contactMsg",/expired|invalid|not_found/i.test(err.message)?"That invite link isn't valid anymore.":"Couldn't use that invite: "+err.message,true); setFrontTab("contacts"); }
 }
+
+/* ================= PACK 15: Jay, The Writer, Kingdom Hearts, Resident Evil ================= */
+(function(){
+  const layer=$("sfx"), add=(cls,html="")=>{ const d=document.createElement("div"); d.className=cls; d.innerHTML=html; layer.append(d); return d; };
+  const later=(fn,ms)=>setTimeout(fn,ms);
+  const chatClass=(cls,ms)=>{ const c=$("chat"); c.classList.remove(cls); void c.offsetWidth; c.classList.add(cls); later(()=>c.classList.remove(cls),ms); };
+  const bg=(cls,html,ms)=>{ const w=document.createElement("div"); w.className="sx-city "+cls; w.innerHTML=html; $("chat").prepend(w); chatClass("sx-see",ms); later(()=>w.remove(),ms); return w; };
+  const chime=(notes)=>{ try{ const ac=window.__sxac||(window.__sxac=new (window.AudioContext||window.webkitAudioContext)()); notes.forEach(([f,at,len,type])=>{ const o=ac.createOscillator(), g=ac.createGain(); o.type=type||"sine"; o.frequency.value=f; g.gain.setValueAtTime(.0001,ac.currentTime+at); g.gain.exponentialRampToValueAtTime(.06,ac.currentTime+at+.02); g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+at+len); o.connect(g); g.connect(ac.destination); o.start(ac.currentTime+at); o.stop(ac.currentTime+at+len+.05); }); }catch(e){} };
+  QX.jay=function(){
+    bg("p15-sunset",`<svg viewBox="0 0 200 300" preserveAspectRatio="xMidYMax slice">
+      <defs><linearGradient id="p15sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b1055"/><stop offset=".45" stop-color="#c2417a"/><stop offset=".72" stop-color="#ff9a3d"/><stop offset="1" stop-color="#ffd27a"/></linearGradient></defs>
+      <rect width="200" height="300" fill="url(#p15sky)"/><circle cx="100" cy="205" r="34" fill="#fff1b0"/><rect x="0" y="205" width="200" height="95" fill="#1a0b2e"/>
+      <g fill="#0a0414"><rect x="0" y="230" width="200" height="70"/><ellipse cx="100" cy="232" rx="120" ry="14"/>
+        <circle cx="86" cy="196" r="11"/><path d="M72 206 Q86 200 100 206 L98 236 L74 236Z"/><path d="M74 236 L70 268 L80 268 L86 244 L92 268 L102 268 L98 236Z"/>
+        <circle cx="116" cy="202" r="9"/><path d="M104 211 Q116 206 128 211 L126 236 L106 236Z"/><path d="M106 236 L102 266 L111 266 L116 246 L121 266 L130 266 L126 236Z"/>
+        <path d="M100 214 L106 214 L108 224 L98 224Z"/></g></svg>`,7000);
+    const cap=add("sx-caption px-center p15-cap","brothers. 🌇"); cap.style.top="14%"; later(()=>cap.remove(),3000);
+  };
+  QX.writer=function(){
+    bg("p15-study",`<svg viewBox="0 0 200 300" preserveAspectRatio="xMidYMid slice">
+      <rect width="200" height="300" fill="#140c05"/><rect x="0" y="0" width="200" height="140" fill="#1e1308"/>
+      <g fill="#3a2410">${[...Array(6)].map((_,i)=>`<rect x="${10+i*32}" y="20" width="26" height="110"/>`).join("")}</g>
+      <g fill="#7a4a1e">${[...Array(18)].map((_,i)=>`<rect x="${12+(i%6)*32+(i%3)*3}" y="${24+Math.floor(i/6)*36}" width="${5+(i%3)*2}" height="30"/>`).join("")}</g>
+      <radialGradient id="p15lamp"><stop offset="0" stop-color="#ffd27a" stop-opacity=".9"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/></radialGradient>
+      <circle cx="150" cy="150" r="90" fill="url(#p15lamp)" class="p15-flicker"/><path d="M136 132 L164 132 L172 152 L128 152Z" fill="#2a1a0a"/><rect x="149" y="152" width="3" height="40" fill="#2a1a0a"/>
+      <rect x="20" y="190" width="160" height="12" fill="#3a2410"/><rect x="26" y="202" width="8" height="60" fill="#2a1a0a"/><rect x="166" y="202" width="8" height="60" fill="#2a1a0a"/>
+      <rect x="60" y="176" width="46" height="14" fill="#0a0604"/><g fill="#d9c9a5">${[...Array(12)].map((_,i)=>`<rect x="${64+(i%6)*7}" y="${178+Math.floor(i/6)*5}" width="4" height="3"/>`).join("")}</g>
+      <g fill="#0a0604"><circle cx="82" cy="150" r="14"/><path d="M62 166 Q82 156 102 166 L106 192 L58 192Z"/><path d="M66 176 L60 186 L92 184Z" class="p15-hand"/></g>
+      <text x="100" y="230" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="11" fill="#d9c9a5">...and the night kept typing back.</text></svg>`,6500);
+    chime([[880,0,.05,"square"],[880,.25,.05,"square"],[880,.45,.05,"square"],[880,.6,.05,"square"],[1200,1.1,.3,"triangle"]]);
+  };
+  QX.kingdomHearts=function(){
+    const w=add("kh-wrap",`<div class="kh-sky"></div><div class="kh-moon"></div><div class="kh-city">${[...Array(14)].map((_,i)=>`<i style="left:${i*7.3}%;height:${20+((i*37)%50)}%"></i>`).join("")}</div><div class="sx-caption kh-cap">the heart-shaped moon rises…</div>`);
+    chime([[523,0,.5],[659,.4,.5],[784,.8,.9],[1047,1.5,1.2]]); later(()=>w.classList.add("out"),5200); later(()=>w.remove(),6000);
+  };
+  QX.keyblade=function(){
+    const w=add("kb-wrap",`<div class="kb-hole"><i></i></div><div class="kb-beam"></div><div class="sx-caption kb-cap">🔒 sealed</div>`);
+    later(()=>w.classList.add("lock"),1400); later(()=>{ chime([[1568,0,.15,"square"],[784,.15,.35,"square"]]); if(navigator.vibrate) navigator.vibrate([30,30,80]); },1500); later(()=>w.remove(),3600);
+  };
+  QX.residentEvil=function(){
+    chatClass("qx-flicker",1200); const w=add("re-wrap",`<div class="re-tw"><div class="re-paper"><b>SAVE GAME?</b><span>You will need an <i>Ink Ribbon</i>.</span><small>Itchy. Tasty.</small></div><div class="re-keys">${[...Array(14)].map(()=>"<i></i>").join("")}</div></div><div class="re-heart">❤</div>`);
+    const paper=w.querySelector(".re-paper"); const seq=["SAVE GAME?","SAVING","SAVING.","SAVING..","SAVED"]; let i=0; const iv=setInterval(()=>{ i++; if(i<seq.length){ paper.querySelector("b").textContent=seq[i]; chime([[900,0,.03,"square"]]); } else clearInterval(iv); },500);
+    later(()=>{ clearInterval(iv); w.remove(); },4200);
+  };
+  QX.greenHerb=function(m){
+    const faces=[...feed.querySelectorAll(`.face[data-uid="${CSS.escape(m?.user_id||"")}"]`)]; faces.forEach(f=>{ f.classList.remove("re-heal"); void f.offsetWidth; f.classList.add("re-heal"); later(()=>f.classList.remove("re-heal"),2600); });
+    const h=add("re-herb",`🌿<b>HP FINE</b>`); chime([[659,0,.12],[988,.12,.25]]); later(()=>h.remove(),2200);
+  };
+})();
+SECRET_LIST.splice(SECRET_LIST.findIndex(s=>s.id==="konami"),0,
+  {id:"jay", name:"Jay", re:/(^|[^a-z])jay([^a-z]|$)/i, play:()=>QX.jay()},
+  {id:"writer", name:"The writer", re:/the writer/i, play:()=>QX.writer()},
+  {id:"kingdomhearts", name:"Kingdom Hearts", re:/kingdom hearts|simple and clean|got it memori[sz]ed/i, play:()=>QX.kingdomHearts()},
+  {id:"keyblade", name:"Keyblade", re:/key ?blade/i, play:()=>QX.keyblade()},
+  {id:"residentevil", name:"Resident Evil", re:/resident evil|itchy,? tasty|ink ribbon|jill sandwich/i, play:()=>QX.residentEvil()},
+  {id:"greenherb", name:"Green herb", re:/green herb|first aid spray/i, play:m=>QX.greenHerb(m)}
+);
+Object.assign(HINTS,{
+  jay:"Say a little brother's name and two silhouettes watch the sun go down.",
+  writer:"Two words: an author at work. The study lamp flickers.",
+  kingdomhearts:"A heart-shaped moon rises when you name the crossover RPG.",
+  keyblade:"The weapon that locks worlds. One word, or two.",
+  residentevil:"The zombie mansion series. Bonus: what the zombie diary says.",
+  greenherb:"The plant that heals in the mansion.",
+});
 
 /* ================= STAYING CONNECTED ================= */
 let liveStatus=null, catchingUp=false, lastCatchUp=0;
