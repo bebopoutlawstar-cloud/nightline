@@ -1231,6 +1231,68 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
 .addcontact .iconbtn{width:42px;height:42px;font-size:18px}
 .installlink{font-size:14px}
 #front:not(.logged) .front-inner{gap:44px;margin:auto 0}
+/* ===== PERSONA-STYLE MENUS ===== */
+/* sheets become slanted cutout panels with a halftone backdrop */
+.overlay{background:rgba(7,4,26,.7);backdrop-filter:blur(3px) saturate(1.2)}
+.overlay::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle,rgba(255,255,255,.14) 1.2px,transparent 1.6px) 0 0/10px 10px,
+  linear-gradient(115deg,transparent 0 55%,var(--mag) 55% 58%,transparent 58% 62%,var(--cyan) 62% 63%,transparent 63%);
+  -webkit-mask:linear-gradient(160deg,#000 20%,transparent 75%);mask:linear-gradient(160deg,#000 20%,transparent 75%);opacity:.5}
+.overlay::after{content:"";position:absolute;right:-12vw;bottom:-6vh;width:70vw;height:38vh;pointer-events:none;
+  background:repeating-linear-gradient(-30deg,rgba(255,255,255,.06) 0 14px,transparent 14px 28px)}
+.sheet{position:relative;transform:rotate(-2deg);border:none;box-shadow:none;background:transparent;padding:0;gap:0;max-height:none;overflow:visible}
+.sheet::before{content:"";position:absolute;inset:0;z-index:-2;background:var(--mag);clip-path:polygon(2% 3%,100% 0,98% 96%,0 100%);transform:translate(10px,10px)}
+.sheet::after{content:"";position:absolute;inset:0;z-index:-1;background:var(--night);clip-path:polygon(0 4%,98% 0,100% 97%,2% 100%);box-shadow:inset 0 0 0 4px var(--cyan)}
+.sheet > *{position:relative}
+.sheetbody{display:grid;gap:14px;justify-items:center;text-align:center;padding:30px 24px 26px;max-height:calc(100dvh - 40px);overflow-y:auto;overflow-x:hidden;width:100%}
+/* big cutout titles */
+.sheet h2{font-family:var(--num);font-size:clamp(34px,10vw,52px);line-height:.95;letter-spacing:1px;text-transform:uppercase;color:var(--night);background:var(--white);padding:2px 14px 0;transform:rotate(-4deg) skewX(-6deg);box-shadow:6px 6px 0 var(--mag);clip-path:polygon(0 6%,100% 0,97% 100%,3% 94%);justify-self:start;margin:-8px 0 4px -6px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sheet h3{font-family:var(--num);font-size:22px;letter-spacing:1px;text-transform:uppercase;color:var(--volt);transform:skewX(-8deg);justify-self:start;margin-top:8px;text-shadow:3px 3px 0 var(--night),4px 4px 0 var(--mag)}
+/* command-list buttons: slanted, staggered, huge type */
+.sheet .go,.sheet .ghost,.sheet .danger{font-family:var(--num);font-size:24px;letter-spacing:1px;text-transform:uppercase;text-align:left;padding:8px 22px 6px;width:100%;clip-path:polygon(0 10%,100% 0,98% 90%,2% 100%);transform:skewX(-8deg);transition:transform .12s,background .12s,color .12s}
+.sheet .go{background:var(--white);color:var(--night);box-shadow:5px 5px 0 var(--mag)}
+.sheet .ghost{background:transparent;border:none;color:var(--white);text-shadow:3px 3px 0 var(--night),4px 4px 0 var(--mag)}
+.sheet .ghost:hover,.sheet .ghost:focus-visible{background:var(--cyan);color:var(--night);text-shadow:none;transform:skewX(-8deg) translateX(8px)}
+.sheet .danger{background:transparent;border:none;color:var(--red);text-shadow:3px 3px 0 var(--night)}
+.sheet .go:active,.sheet .ghost:active,.sheet .danger:active{transform:skewX(-8deg) scale(.97)}
+.sheet .go:nth-of-type(odd),.sheet .ghost:nth-of-type(even){margin-left:14px}
+.sheet .linkbtn{font-family:var(--tech);text-transform:uppercase;font-size:12px}
+/* message menu = COMMAND */
+#msgMenu .sheet h2{display:none}
+#msgMenu .menu-preview{font-family:var(--body);font-size:15px;color:var(--muted);border-left:3px solid var(--volt);padding-left:8px;text-align:left;justify-self:start;max-width:100%}
+#msgMenu .sheetbody::before{content:"COMMAND";font-family:var(--num);font-size:clamp(56px,20vw,96px);line-height:.8;color:transparent;-webkit-text-stroke:2px rgba(255,255,255,.25);position:absolute;right:-10px;top:-14px;transform:rotate(-8deg);pointer-events:none;letter-spacing:2px}
+.emoji-row{justify-self:stretch;justify-content:flex-start}
+.emoji-row button{clip-path:polygon(8% 0,100% 8%,92% 100%,0 92%);border:none;background:var(--deep);transform:rotate(-6deg)}
+.emoji-row button:nth-child(even){transform:rotate(6deg)}
+/* player / member rows and chips keep body font */
+.member,.contactrow,.taskrow,.sx-chip,.member .mname,.roomrow{font-family:var(--body)}
+/* segmented controls */
+.segmented{border:none;gap:6px;transform:skewX(-8deg)}
+.segmented button{font-family:var(--num);font-size:18px;letter-spacing:1px;background:transparent;color:var(--white);border:3px solid transparent;text-shadow:2px 2px 0 var(--night)}
+.segmented button[aria-checked="true"]{background:var(--white);color:var(--night);box-shadow:4px 4px 0 var(--mag);text-shadow:none}
+/* front tabs & + tray tabs */
+.fronttabs{gap:0;transform:skewX(-10deg);margin:6px 0 8px;overflow:visible}
+.fronttabs .tab{font-family:var(--num);font-size:22px;letter-spacing:1px;text-transform:uppercase;border:none;background:transparent;color:var(--white);text-shadow:3px 3px 0 var(--night),4px 4px 0 var(--mag);padding:6px 4px}
+.fronttabs .tab[aria-selected="true"]{background:var(--white);color:var(--night);text-shadow:none;box-shadow:5px 5px 0 var(--mag);clip-path:polygon(0 8%,100% 0,97% 100%,3% 92%)}
+.tabbadge{transform:rotate(6deg) skewX(10deg)}
+.tray-tabs .ghost{font-family:var(--num);font-size:16px;letter-spacing:1px;text-transform:uppercase;border:none;color:var(--white);text-shadow:2px 2px 0 var(--night);transform:skewX(-8deg)}
+.tray-tabs .ghost[aria-pressed="true"]{background:var(--white);color:var(--night);text-shadow:none;box-shadow:3px 3px 0 var(--mag);clip-path:polygon(0 8%,100% 0,97% 100%,3% 92%)}
+.tabs .tab{font-family:var(--num);font-size:20px;letter-spacing:1px;text-transform:uppercase;border:none;background:transparent;color:var(--white);text-shadow:3px 3px 0 var(--night),4px 4px 0 var(--mag);transform:skewX(-8deg)}
+.tabs .tab[aria-selected="true"]{background:var(--white);color:var(--night);text-shadow:none;box-shadow:4px 4px 0 var(--mag);clip-path:polygon(0 8%,100% 0,97% 100%,3% 92%)}
+/* game sheet & big tiles keep their look inside the new panel */
+.gamesheet .versus,.board{transform:none}
+.player{transform:none}
+/* subs/notes */
+.sheet .sub,.sheet .email,.sheet .sub.left{font-family:var(--body)}
+.sheet .msgline{font-family:var(--body)}
+@media (prefers-reduced-motion:reduce){.sheet,.fronttabs,.segmented,.tabs .tab{transform:none}}
+.sheet{max-height:calc(100dvh - 28px);width:min(100%,380px)}
+.sheetbody{max-height:calc(100dvh - 28px);padding:36px 24px 30px;box-sizing:border-box}
+.sheet h2{margin:0 0 4px 0;transform:rotate(-3deg) skewX(-6deg)}
+#msgMenu .sheetbody{padding-top:44px}
+.overlay{align-items:center}
+.sheet h2{overflow:visible;white-space:normal;text-overflow:clip;overflow-wrap:anywhere;line-height:1}
+.sheetbody{align-content:start}
 </style>
 </head>
 <body>
@@ -1383,7 +1445,7 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
 
 <!-- ============ PROFILE SHEET ============ -->
 <div class="overlay hidden" id="profile" role="dialog" aria-modal="true" aria-labelledby="profTitle">
-  <div class="sheet">
+  <div class="sheet"><div class="sheetbody">
     <h2 id="profTitle">Your profile</h2>
     <div class="face lg" id="profFace"></div>
     <div class="uname" id="profName"></div>
@@ -1419,12 +1481,12 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
     <button class="danger" type="button" id="logout">Log out</button>
     <button class="ghost" type="button" id="closeProfile">Close</button>
     <button class="linkbtn" type="button" id="deleteAccount" style="justify-self:center;color:var(--red)">Delete my account</button>
-  </div>
+  </div></div>
 </div>
 
 <!-- ============ ROOM SHEET ============ -->
 <div class="overlay hidden" id="roomSheet" role="dialog" aria-modal="true" aria-labelledby="rsTitle">
-  <div class="sheet">
+  <div class="sheet"><div class="sheetbody">
     <h2 id="rsTitle"></h2>
     <p class="sub" id="rsCode"></p>
     <button class="ghost" type="button" id="rsSummarize">✨ Catch me up on this chat</button>
@@ -1468,12 +1530,12 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
     <p class="msgline" id="rsMsg" role="status"></p>
     <button class="danger" type="button" id="leaveRoom">Leave this room</button>
     <button class="ghost" type="button" id="rsClose">Close</button>
-  </div>
+  </div></div>
 </div>
 
 <!-- ============ MESSAGE MENU ============ -->
 <div class="overlay hidden" id="msgMenu" role="dialog" aria-modal="true" aria-label="Message options">
-  <div class="sheet">
+  <div class="sheet"><div class="sheetbody">
     <div class="menu-preview" id="menuPreview"></div>
     <div class="emoji-row" id="emojiRow"></div>
     <button class="danger hidden" type="button" id="menuDelete">🗑 Delete message</button>
@@ -1487,23 +1549,23 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
     <button class="ghost hidden" type="button" id="menuCopy">Copy text</button>
     <button class="ghost hidden" type="button" id="menuBlock"></button>
     <button class="ghost" type="button" id="menuClose">Close</button>
-  </div>
+  </div></div>
 </div>
 
 <!-- ============ NEW PASSWORD SHEET ============ -->
 <div class="overlay hidden" id="recover" role="dialog" aria-modal="true" aria-labelledby="recTitle">
-  <form class="sheet" id="recoverForm">
+  <form class="sheet" id="recoverForm"><div class="sheetbody">
     <h2 id="recTitle">Choose a new password</h2>
     <label for="newPass" class="sr">New password</label>
     <input class="field" id="newPass" type="password" autocomplete="new-password" placeholder="At least 6 characters">
     <button class="go" type="submit" id="savePass">Save password</button>
     <p class="msgline" id="recMsg" role="status"></p>
-  </form>
+  </div></form>
 </div>
 
 <!-- ============ THEME SHEET ============ -->
 <div class="overlay hidden" id="themeSheet" role="dialog" aria-modal="true" aria-labelledby="themeTitle">
-  <div class="sheet">
+  <div class="sheet"><div class="sheetbody">
     <h2 id="themeTitle">Theme &amp; colors</h2>
     <p class="sub">Only you see your app theme. Everyone sees your bubble color.</p>
     <h3>Theme style</h3>
@@ -1526,12 +1588,12 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
     <p class="msgline" id="themeMsg" role="status"></p>
     <button class="go" type="button" id="themeSave">Save theme</button>
     <button class="ghost" type="button" id="themeClose">Cancel</button>
-  </div>
+  </div></div>
 </div>
 
 <!-- ============ POLL SHEET ============ -->
 <div class="overlay hidden" id="pollSheet" role="dialog" aria-modal="true" aria-labelledby="pollTitle">
-  <form class="sheet" id="pollForm">
+  <form class="sheet" id="pollForm"><div class="sheetbody">
     <h2 id="pollTitle">Make a poll</h2>
     <label for="pollQ" class="sr">Question</label>
     <input class="field" id="pollQ" maxlength="200" placeholder="Ask something…">
@@ -1541,12 +1603,12 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
     <p class="msgline" id="pollMsg" role="status"></p>
     <button class="go" type="submit" id="pollCreate">Post poll</button>
     <button class="ghost" type="button" id="pollClose">Cancel</button>
-  </form>
+  </div></form>
 </div>
 
 <!-- ============ INSTALL SHEET ============ -->
 <div class="overlay hidden" id="installSheet" role="dialog" aria-modal="true" aria-labelledby="installTitle">
-  <div class="sheet">
+  <div class="sheet"><div class="sheetbody">
     <h2 id="installTitle">Install NightLine</h2>
     <p class="sub" id="installIntro"></p>
     <button class="go hidden" type="button" id="installNow">Install now</button>
@@ -1559,12 +1621,12 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
     <p class="sub left" id="installWhy">Installing gives you a home screen icon, full-screen chats, and notifications.</p>
     <p class="msgline" id="installMsg" role="status"></p>
     <button class="ghost" type="button" id="installClose">Close</button>
-  </div>
+  </div></div>
 </div>
 
 <!-- ============ GAME SCREEN ============ -->
 <div class="overlay hidden" id="gameSheet" role="dialog" aria-modal="true" aria-labelledby="gameTitle">
-  <div class="sheet gamesheet">
+  <div class="sheet gamesheet"><div class="sheetbody">
     <h2 id="gameTitle">Tic-tac-toe</h2>
     <div class="versus">
       <div class="player" id="gpX"></div>
@@ -1577,12 +1639,12 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
     <button class="go hidden" type="button" id="gameRematch">Rematch 🔁</button>
     <p class="msgline" id="gameMsg" role="status"></p>
     <button class="ghost" type="button" id="gameClose">Back to chat</button>
-  </div>
+  </div></div>
 </div>
 
 <!-- ============ PERSON CARD ============ -->
 <div class="overlay hidden" id="personSheet" role="dialog" aria-modal="true" aria-labelledby="personName">
-  <div class="sheet">
+  <div class="sheet"><div class="sheetbody">
     <div class="face lg" id="personFace"></div>
     <h2 id="personName"></h2>
     <p class="sub" id="personSub"></p>
@@ -1591,16 +1653,16 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
     <button class="ghost" type="button" id="personDm">Message privately</button>
     <p class="msgline" id="personMsg" role="status"></p>
     <button class="ghost" type="button" id="personClose">Close</button>
-  </div>
+  </div></div>
 </div>
 
 <!-- ============ SUMMARY SHEET ============ -->
 <div class="overlay hidden" id="summarySheet" role="dialog" aria-modal="true" aria-labelledby="sumTitle">
-  <div class="sheet"><h2 id="sumTitle"></h2><div class="left sumbody" id="sumBody"></div><button class="ghost" type="button" id="sumClose">Close</button></div>
+  <div class="sheet"><div class="sheetbody"><h2 id="sumTitle"></h2><div class="left sumbody" id="sumBody"></div><button class="ghost" type="button" id="sumClose">Close</button></div></div>
 </div>
 <!-- ============ CALENDAR SHEET ============ -->
 <div class="overlay hidden" id="calSheet" role="dialog" aria-modal="true" aria-labelledby="calH">
-  <div class="sheet">
+  <div class="sheet"><div class="sheetbody">
     <h2 id="calH">📅 Add to calendar</h2>
     <p class="sub" id="calHint"></p>
     <label class="left" for="calTitle">Title</label><input class="field" id="calTitle" maxlength="60">
@@ -1611,19 +1673,19 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
     <button class="ghost" type="button" id="calTask">Add to room checklist instead</button>
     <p class="msgline" id="calMsg" role="status"></p>
     <button class="ghost" type="button" id="calClose">Close</button>
-  </div>
+  </div></div>
 </div>
 
 <div class="toasts" id="toasts" aria-live="polite"></div>
 <!-- ============ SEARCH SHEET ============ -->
 <div class="overlay hidden" id="searchSheet" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
-  <div class="sheet">
+  <div class="sheet"><div class="sheetbody">
     <h2 id="searchTitle">🔍 Search</h2>
     <p class="sscope" id="searchScope"></p>
     <div class="searchbar"><label for="searchBox" class="sr">Search</label><input class="field" id="searchBox" placeholder="Find a message…" autocomplete="off"></div>
     <div class="sresults" id="searchResults"></div>
     <button class="ghost" type="button" id="searchClose">Close</button>
-  </div>
+  </div></div>
 </div>
 
 <div class="overlay lightbox hidden" id="lightbox"><img id="lightImg" alt="Full size photo"></div>
@@ -1641,7 +1703,7 @@ const VAPID_PUBLIC_KEY = "BOrqIEUU9fqA8IYWE2HGUyCZqLbYn_inpdDszPxxVV0UO1gjIRp1T3
 const AI_ENABLED = false;   // set to true once the "ai" function + ANTHROPIC_API_KEY are set up in Supabase (summaries + translation)   // from `npx web-push generate-vapid-keys` (the PUBLIC one only)
 
 const $ = id => document.getElementById(id);
-const show = (el, on=true) => el.classList.toggle("hidden", !on);
+const show = (el, on=true) => { el.classList.toggle("hidden", !on); if(on&&el.classList.contains("overlay")){ const sb=el.querySelector(".sheetbody"); if(sb) sb.scrollTop=0; } };
 const DAYS=["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"];
 const COLORS=["#00F0FF","#E07AC6","#F3FF3A","#7CFF6B","#FF8A3D","#B18CFF"];
 const EMOJIS=["🔥","😂","😮","😢","👍","❤️"];
@@ -2178,7 +2240,7 @@ function paintFxSettings(){
   FX_TRIGGERS.forEach(t=>{ const li=el("li"); li.append(el("b","",t.label+": ")); li.append([...t.words.map(w=>`"${w}"`),...t.emoji].join(", ")); ul.append(li); });
 }
 $("fxBtn").onclick=()=>{ try{ localStorage.setItem("nl-fx",fxEnabled()?"off":"on"); }catch(e){} paintFxSettings(); if(fxEnabled()) FX.play("confetti"); };
-const openProfile=()=>{ say("profMsg",""); paintNotif(); paintBlocked(); paintFxSettings(); fillBirthdayPicker(); paintSecrets(); paintLangPicker(); show($("profile")); $("closeProfile").focus(); };
+const openProfile=()=>{ say("profMsg",""); paintNotif(); paintBlocked(); paintFxSettings(); fillBirthdayPicker(); paintSecrets(); paintLangPicker(); show($("profile")); $("closeProfile").focus({preventScroll:true}); };
 $("openProfile1").onclick=openProfile; $("openProfile2").onclick=openProfile; $("meFace").onclick=openProfile;
 $("joinToggle").onclick=()=>{ const open=$("joinPanel").classList.contains("hidden"); show($("joinPanel"),open); $("joinToggle").setAttribute("aria-expanded",String(open)); $("joinToggle").textContent=open?"✕":"＋"; if(open) setTimeout(()=>$("room").focus(),60); };
 $("closeProfile").onclick=()=>show($("profile"),false);
