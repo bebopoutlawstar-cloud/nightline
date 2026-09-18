@@ -1,6 +1,6 @@
 // NightLine service worker (v10): push notifications + fast repeat loads.
-const CACHE="nightline-v10";
-const STATIC=["icon-192.png","icon-512.png","favicon.ico","manifest.json"];
+const CACHE="nightline-v11";
+const STATIC=["icon-192.png","icon-512.png","favicon.ico","manifest.json","badge-96.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(async c => { await c.addAll(STATIC).catch(()=>{}); try { const r = await fetch("./", { cache: "no-store" }); if (r.ok) await c.put("shell", r); } catch (e) {} }).then(()=>self.skipWaiting())); });
 self.addEventListener("activate", e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())));
 self.addEventListener("fetch", e => {
@@ -61,7 +61,7 @@ self.addEventListener("push", event => {
     await self.registration.showNotification(title, {
       body,
       icon: data.icon || "icon-192.png",
-      badge: "icon-192.png",
+      badge: "badge-96.png",
       tag,
       renotify: true,                              // buzz again for each new message
       requireInteraction: !!data.mention,          // mentions stay on screen until dismissed (where supported)

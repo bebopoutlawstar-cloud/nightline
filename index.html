@@ -1610,6 +1610,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     <button class="ghost hidden" type="button" id="menuFriend">Add friend</button>
     <button class="ghost" type="button" id="menuPin">Pin message</button>
     <button class="ghost" type="button" id="menuTask">Add to checklist ✅</button>
+    <button class="ghost" type="button" id="menuCal">Add to calendar 📅</button>
     <button class="ghost hidden" type="button" id="menuTranslate">Translate 🌐</button>
     <button class="ghost hidden" type="button" id="menuFx">Replay effect ✨</button>
     <button class="ghost hidden" type="button" id="menuCopy">Copy text</button>
@@ -2583,7 +2584,7 @@ function openMenu(m){
     b.onclick=()=>{ show($("msgMenu"),false); toggleReaction(m,emoji); };
     row.append(b);
   });
-  show($("menuCopy"),!!m.text&&m.kind!=="sticker");
+  show($("menuCopy"),!!m.text&&m.kind!=="sticker"); show($("menuCal"),!!m.text&&m.kind==="text");
   show($("menuTranslate"),aiOn()&&!!m.text&&m.kind!=="sticker"&&m.kind!=="poll"&&m.kind!=="game"&&!mine);
   show($("menuFx"),!!(secretFor(m.text)||fxFor(m.text))&&m.kind!=="poll"&&m.kind!=="game");
   show($("menuDelete"),mine||roomOwner===user.id);
@@ -3564,7 +3565,7 @@ navigator.serviceWorker?.addEventListener("message",e=>{
 $("notifTest").onclick=async()=>{
   try{
     const reg=swReg||await navigator.serviceWorker.getRegistration();
-    await reg.showNotification("NightLine test 🌙",{body:"Notifications are working on this device.",icon:"icon-192.png",badge:"icon-192.png",tag:"test"});
+    await reg.showNotification("NightLine test 🌙",{body:"Notifications are working on this device.",icon:"icon-192.png",badge:"badge-96.png",tag:"test"});
     say("profMsg","Test sent. If you didn't see it, check your phone's notification settings for this app.");
   }catch(err){ say("profMsg","Couldn't show a test: "+err.message,true); }
 };
@@ -4415,10 +4416,14 @@ $("menuTranslate").onclick=()=>{ const m=menuMsg; show($("msgMenu"),false); if(!
 
 /* ---------- dates → calendar ---------- */
 const MONTH_RE="jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?";
-const DAY_RE="sun(?:day)?|mon(?:day)?|tue(?:s(?:day)?)?|wed(?:nesday)?|thu(?:rs(?:day)?)?|fri(?:day)?|sat(?:urday)?";
+const DAY_FULL="sunday|monday|tuesday|wednesday|thursday|friday|saturday";
+const DAY_ABBR="sun|mon|tues?|wed|thu(?:rs)?|fri|sat";
+const DAY_RE=DAY_FULL+"|"+DAY_ABBR;
 const TIME_RE="(?:\\d{1,2}(?::\\d{2})?\\s?(?:am|pm)|\\d{1,2}:\\d{2}|noon|midnight)";
 const DATE_PATTERNS=[
-  new RegExp(`\\b(?:(?:this|next)\\s+)?(?:${DAY_RE})\\b(?:\\s+(?:at\\s+)?${TIME_RE})?`,"i"),
+  new RegExp(`(?<![a-z])(?:(?:this|next|on|every)\\s+)?(?:${DAY_FULL})(?![a-z])(?:\\s+(?:at\\s+)?${TIME_RE})?`,"i"),
+  new RegExp(`(?<![a-z])(?:this|next|on|every)\\s+(?:${DAY_ABBR})(?![a-z])(?:\\s+(?:at\\s+)?${TIME_RE})?`,"i"),
+  new RegExp(`(?<![a-z])(?:${DAY_ABBR})(?![a-z])\\s+(?:(?:at\\s+)?${TIME_RE}|at\\s+\\d{1,2}(?![0-9:]))`,"i"),
   new RegExp(`\\b(?:tomorrow|tonight|today)\\b(?:\\s+(?:at\\s+)?${TIME_RE})?`,"i"),
   new RegExp(`\\b(?:${MONTH_RE})\\.?\\s+\\d{1,2}(?:st|nd|rd|th)?(?:,?\\s+\\d{4})?\\b(?:\\s+(?:at\\s+)?${TIME_RE})?`,"i"),
   new RegExp(`\\b\\d{1,2}\\/\\d{1,2}(?:\\/\\d{2,4})?\\b(?:\\s+(?:at\\s+)?${TIME_RE})?`,"i"),
@@ -4438,7 +4443,7 @@ function parseWhen(phrase,base=new Date()){
   else if(num){ d.setMonth(+num[1]-1,+num[2]); if(num[3]) d.setFullYear(num[3].length===2?2000+ +num[3]:+num[3]); else if(d<base&&(base-d)>864e5*2) d.setFullYear(d.getFullYear()+1); }
   else if(day){ const want=["sun","mon","tue","wed","thu","fri","sat"].indexOf(day[1].slice(0,3)); let diff=(want-base.getDay()+7)%7; if(diff===0&&!/this/.test(p)) diff=7; if(/next/.test(p)&&diff<7) diff+=7; d.setDate(base.getDate()+diff); }
   else if(/tomorrow/.test(p)) d.setDate(base.getDate()+1);
-  const t=p.match(/(\d{1,2})(?::(\d{2}))?\s?(am|pm)|(\d{1,2}):(\d{2})|(noon)|(midnight)/);
+  const t=p.match(/(\d{1,2})(?::(\d{2}))?\s?(am|pm)|(\d{1,2}):(\d{2})|(noon)|(midnight)/) || (p.match(/\bat\s+(\d{1,2})\b/)&&(()=>{ const hh=+p.match(/\bat\s+(\d{1,2})\b/)[1]; return [null,String(hh),null,(hh>=1&&hh<=7)?"pm":"am"]; })());
   if(t){ hasTime=true; if(t[6]) d.setHours(12,0); else if(t[7]) d.setHours(0,0); else if(t[3]){ let h=+t[1]%12; if(t[3]==="pm") h+=12; d.setHours(h,+(t[2]||0)); } else d.setHours(+t[4],+t[5]); }
   else if(/tonight/.test(p)){ hasTime=true; d.setHours(19,0); }
   else d.setHours(9,0);
@@ -4474,7 +4479,7 @@ function renderTextWithDates(node,text,mentionIds,m){
   const hits=findDates(text); if(!hits.length){ renderText(node,text,mentionIds); return; }
   let last=0;
   for(const h of hits){ const s=el("span"); renderText(s,text.slice(last,h.start),mentionIds); node.append(s);
-    const chip=el("button","datechip","📅 "+h.text); chip.type="button"; chip.onclick=e=>{ e.stopPropagation(); openCalendar(h.text,m); }; node.append(chip); last=h.end; }
+    const chip=el("button","datechip","📅 "+h.text); chip.type="button"; chip.title="Looks like a date — tap to add it to your calendar"; chip.onclick=e=>{ e.stopPropagation(); openCalendar(h.text,m); }; node.append(chip); last=h.end; }
   const s=el("span"); renderText(s,text.slice(last),mentionIds); node.append(s);
 }
 
@@ -4500,6 +4505,7 @@ async function addTask(text){
 }
 $("taskForm").addEventListener("submit",async e=>{ e.preventDefault(); const v=$("taskInput").value; $("taskInput").value=""; await addTask(v); });
 $("menuTask").onclick=()=>{ const m=menuMsg; show($("msgMenu"),false); addTask(previewOf(m)); };
+$("menuCal").onclick=()=>{ const m=menuMsg; show($("msgMenu"),false); const h=findDates(m.text||""); openCalendar(h.length?h[0].text:"tomorrow",m); if(!h.length) $("calHint").textContent="No date spotted, so this defaults to tomorrow 9:00 AM. Change it below."; };
 $("taskCount").onclick=()=>{ $("roomBtn").click(); setTimeout(()=>$("taskTitle").scrollIntoView({behavior:"smooth",block:"start"}),300); };
 
 /* ---------- disappearing messages ---------- */
