@@ -1293,6 +1293,16 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
 .overlay{align-items:center}
 .sheet h2{overflow:visible;white-space:normal;text-overflow:clip;overflow-wrap:anywhere;line-height:1}
 .sheetbody{align-content:start}
+
+/* ===== who's on ===== */
+.onlinestrip{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 6px;scrollbar-width:none;align-items:center}
+.onlinestrip::-webkit-scrollbar{display:none}
+.onlinelbl{flex:none;font-family:var(--tech);font-size:10px;color:#2ee66b;letter-spacing:1px;text-transform:uppercase;writing-mode:vertical-rl;transform:rotate(180deg)}
+.onlinechip{flex:none;display:grid;justify-items:center;gap:2px;background:none;border:none;color:var(--white);font-size:12px;width:64px;padding:0}
+.onlinechip .face{width:40px;height:40px;font-size:18px}
+.onlinechip span{max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.onlinechip small{font-size:10px;color:#2ee66b;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.face.here::after{background:var(--volt)!important;box-shadow:0 0 8px var(--volt)!important}
 </style>
 </head>
 <body>
@@ -1344,6 +1354,7 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
       <button type="button" class="ghost iconbtn" id="searchAll" aria-label="Search all chats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
       <button type="button" class="send iconbtn" id="joinToggle" aria-expanded="false" aria-controls="joinPanel" aria-label="Join or make a room">＋</button>
     </div>
+    <div class="onlinestrip hidden" id="onlineStrip" aria-label="Friends online now"></div>
     <div class="joinpanel hidden" id="joinPanel">
       <div class="roomcard-row"><label for="room">Room code</label><button type="button" class="linkbtn" id="randomRoom">Make a new room</button></div>
       <div class="namerow"><input class="field" id="room" maxlength="30" placeholder="Enter a room code" required><button class="send" type="submit" id="jumpBtn">Join</button></div>
@@ -2297,7 +2308,7 @@ async function enterRoom(code,token){
   }
   $("jumpBtn").disabled=false; say("roomMsg","");
   if(unsub){unsub();unsub=null;}
-  room=target; roomOwner=null; roomName=null;
+  room=target; roomOwner=null; roomName=null; setTimeout(()=>{ if(typeof pushPresence==="function") pushPresence(); },50);
   if(!room.startsWith("dm-")){ try{ localStorage.setItem("nl-room",room); }catch(e){} }
   show($("joinPanel"),false); $("joinToggle").setAttribute("aria-expanded","false"); $("joinToggle").textContent="＋";
   show($("front"),false); show($("chat")); $("roomLabel").textContent="# "+room; $("status").textContent="Connecting…";
@@ -2341,6 +2352,7 @@ async function enterRoom(code,token){
 
 function exitRoom(){
   if(rec) finishRecording(false); closeTray(); hideMentions();
+  setTimeout(()=>{ if(typeof pushPresence==="function") pushPresence(); },50);
   sendTyping(false); if(unsub){unsub();unsub=null;}
   clearPending(); clearReply();
   ["chat","roomSheet","msgMenu"].forEach(id=>show($(id),false)); show($("front")); show($("roomCard"));
@@ -2650,7 +2662,7 @@ async function paintMembers(){
   for(const uid of ids){
     const row=el("div","member"); const f=el("span","face"); paintFace(f,cache.get(uid));
     const nick=members.get(uid)?.nick, uname=cache.get(uid)?.username||"";
-    const n=el("span","mname",nameOf(uid)+(uid===user.id?" (you)":"")); if(uid!==user.id){ const ls=el("span","lastseen",lastSeenText(uid)); ls.dataset.presence=uid; n.append(ls); }
+    const n=el("span","mname",nameOf(uid)+(uid===user.id?" (you)":"")); if(uid!==user.id){ const ls=el("span","lastseen",presenceLine(uid)); ls.dataset.presence=uid; n.append(ls); }
     if(nick&&nick!==uname) n.append(el("span","role",uname));
     if(uid===roomOwner) n.append(el("span","role","OWNER"));
     const nb=el("button","unblock","Nickname"); nb.type="button";
@@ -2802,7 +2814,9 @@ function onTyping(p){
   paintTyping();
 }
 function stopTyping(uid){ const v=typers.get(uid); if(!v) return; clearTimeout(v.timer); typers.delete(uid); paintTyping(); }
+let typingPresenceTimer=null;
 function sendTyping(on){
+  clearTimeout(typingPresenceTimer); typingPresenceTimer=setTimeout(()=>{ if(typeof pushPresence==="function") pushPresence(); },on?300:1200);
   if(!unsub?.typing||!user) return;
   const now=Date.now(); if(on&&now-lastTypingSent<2000) return;
   lastTypingSent=on?now:0;
@@ -3406,7 +3420,7 @@ function paintPerson(){
   const uid=personUid, p=cache.get(uid)||{username:"Someone"}, nick=room?members.get(uid)?.nick:null;
   paintFace($("personFace"),p);
   $("personName").textContent=nick||p.username;
-  $("personSub").textContent=(nick&&nick!==p.username?`@${p.username} · `:"@"+p.username+" · ")+(isBirthdayToday(p.birthday)?"🎂 birthday today!":(lastSeenText(uid)||(roomName&&!isDm?`in ${roomName}`:"NightLine")));
+  $("personSub").textContent=(nick&&nick!==p.username?`@${p.username} · `:"@"+p.username+" · ")+(isBirthdayToday(p.birthday)?"🎂 birthday today! · "+(presenceLine(uid)||""):(presenceLine(uid)||(roomName&&!isDm?`in ${roomName}`:"NightLine")));
   const f=isFriend(uid), back=addedMe(uid);
   $("personTag").textContent = f&&back?"🤝 You're friends": f?"✓ On your friends list": back?"👋 Added you as a friend":"";
   show($("personTag"),f||back);
@@ -4984,26 +4998,53 @@ async function jumpToMessage(code,id){
 }
 
 /* ================= PRESENCE ================= */
-const online=new Set(); let presenceCh=null, presenceTimer=null;
+const online=new Map();   // user id -> {room, typing, at}
+let presenceCh=null, presenceTimer=null;
+const myPresence=()=>({at:Date.now(),room:room||null,typing:!!(room&&$("box").value.trim())});
+function pushPresence(){ if(presenceCh&&!document.hidden) presenceCh.track(myPresence()).catch(()=>{}); }
 function startPresence(){
   if(!sb||!user||presenceCh) return;
   presenceCh=sb.channel("presence:all",{config:{presence:{key:user.id}}});
-  presenceCh.on("presence",{event:"sync"},()=>{ online.clear(); Object.keys(presenceCh.presenceState()).forEach(id=>online.add(id)); paintPresence(); })
-    .subscribe(async s=>{ if(s==="SUBSCRIBED") await presenceCh.track({at:Date.now()}); });
+  presenceCh.on("presence",{event:"sync"},()=>{ online.clear(); Object.entries(presenceCh.presenceState()).forEach(([id,arr])=>online.set(id,arr[arr.length-1]||{})); paintPresence(); })
+    .subscribe(async s=>{ if(s==="SUBSCRIBED") await presenceCh.track(myPresence()); });
   const touch=()=>{ if(!document.hidden) api.touchSeen().catch(()=>{}); };
   touch(); clearInterval(presenceTimer); presenceTimer=setInterval(touch,90000);
-  document.addEventListener("visibilitychange",()=>{ if(document.hidden){ presenceCh?.untrack(); } else { presenceCh?.track({at:Date.now()}); touch(); } });
+  document.addEventListener("visibilitychange",()=>{ if(document.hidden){ presenceCh?.untrack(); } else { pushPresence(); touch(); } });
 }
 function stopPresence(){ if(presenceCh){ sb.removeChannel(presenceCh); presenceCh=null; } clearInterval(presenceTimer); online.clear(); }
 const isOnline=uid=>online.has(uid)||(!sb&&["vee"].includes(uid));
+const whereIs=uid=>{ if(!sb){ return uid==="vee"?{room:"5959",typing:false}:uid==="rook"?{room:null,typing:false}:null; } return online.get(uid)||null; };
+// only name rooms the viewer is also in
+function presenceLine(uid){
+  if(!isOnline(uid)) return lastSeenText(uid);
+  const w=whereIs(uid); if(!w||!w.room) return "active now";
+  const mine=inboxRows.find(r=>r.code===w.room); if(!mine) return "active now";
+  const label=mine.is_dm?(mine.dm_user===user.id?"a private chat":(mine.dm_user===uid?"your chat":"a private chat")):(mine.name||"#"+w.room);
+  if(mine.is_dm&&mine.dm_user!==uid) return "active now";
+  return (w.typing?"typing in ":"in ")+label;
+}
+function paintOnlineStrip(){
+  const strip=$("onlineStrip"); if(!strip) return;
+  const ids=[...new Set([...online.keys(),...(!sb?["vee"]:[])])].filter(id=>id!==user?.id&&cache.has(id)&&!blocked.has(id)&&(contactIds.includes(id)||inboxRows.some(r=>r.is_dm&&r.dm_user===id)||members.has(id)));
+  strip.innerHTML=""; show(strip,ids.length>0); if(!ids.length) return;
+  strip.append(el("span","onlinelbl",`${ids.length} online`));
+  ids.slice(0,12).forEach(id=>{ const bt=el("button","onlinechip"); bt.type="button"; const f=el("span","face"); paintFace(f,cache.get(id)); const w=whereIs(id); const t=el("small","",w?.typing?"typing…":w?.room&&inboxRows.find(r=>r.code===w.room&&!r.is_dm)?(inboxRows.find(r=>r.code===w.room).name||"#"+w.room):"online"); bt.append(f,el("span","",nameOf(id)),t); bt.onclick=()=>openPerson(id); strip.append(bt); });
+}
+function paintRoomOnline(){
+  if(!room) return; const here=[...members.keys()].filter(id=>id!==user.id&&isOnline(id)&&whereIs(id)?.room===room);
+  const on=[...members.keys()].filter(id=>id!==user.id&&isOnline(id));
+  const t=here.length?`${here.length} here now`:on.length?`${on.length} online`:"";
+  const st=$("status"); if(t&&(liveStatus==="Live"||liveStatus==="Demo mode")){ st.textContent=isDm&&dmUser?(here.length?"here now":presenceLine(dmUser)):"Live · "+t; }
+}
 function lastSeenText(uid){
   if(isOnline(uid)) return "active now";
   const t=cache.get(uid)?.last_seen; if(!t) return "";
   const m=Math.round((Date.now()-new Date(t))/60000); if(m<1) return "active just now"; if(m<60) return `active ${m}m ago`; const h=Math.round(m/60); if(h<24) return `active ${h}h ago`; const d=Math.round(h/24); return d===1?"active yesterday":`active ${d}d ago`;
 }
 function paintPresence(){
-  document.querySelectorAll(".face[data-uid]").forEach(f=>f.classList.toggle("online",isOnline(f.dataset.uid)));
-  document.querySelectorAll("[data-presence]").forEach(n=>{ n.textContent=lastSeenText(n.dataset.presence); });
+  document.querySelectorAll(".face[data-uid]").forEach(f=>{ const w=whereIs(f.dataset.uid); f.classList.toggle("online",isOnline(f.dataset.uid)); f.classList.toggle("here",!!(w&&room&&w.room===room&&f.dataset.uid!==user?.id)); });
+  document.querySelectorAll("[data-presence]").forEach(n=>{ n.textContent=presenceLine(n.dataset.presence); });
+  paintOnlineStrip(); paintRoomOnline();
   if(isDm&&dmUser&&!$("chat").classList.contains("hidden")){ const t=lastSeenText(dmUser); if(t) $("status").textContent=t; }
 }
 const _paintFace2=paintFace;
