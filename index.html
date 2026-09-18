@@ -1345,6 +1345,18 @@ body.desktop #authCard .tabs .tab{font-family:inherit;font-size:14px}
 .kbd{font-family:ui-monospace,monospace;font-size:11px;border:1px solid rgba(124,255,107,.5);padding:0 5px;color:var(--term)}
 body.desktop #chat .feed,body.desktop #chat .compose,body.desktop #chat .top,body.desktop #chat .pinbar,body.desktop #chat .catchup{max-width:820px;width:100%;margin-left:auto;margin-right:auto}
 body.desktop .bubble{max-width:520px}
+/* ===== desktop fixes: full-height panes, backgrounds, compact date ===== */
+body.desktop .deskframe{grid-template-rows:minmax(0,1fr);height:100dvh;overflow:hidden}
+body.desktop #front,body.desktop #chat{height:100%;min-height:0}
+body.desktop #chat{display:flex;flex-direction:column;overflow:hidden;isolation:isolate}
+body.desktop #chat .feed{flex:1 1 auto;min-height:0}
+body.desktop #chat::before,body.desktop #chat::after{position:absolute;inset:0;z-index:-1}
+body.desktop #chat .compose{flex:none}
+body.desktop #front.logged .stamp{display:none}
+.deskdate{display:none}
+body.desktop #front.logged .deskdate{display:flex;align-items:baseline;gap:10px;font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--term);font-size:13px;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid rgba(124,255,107,.35);padding:4px 0 10px;margin-bottom:6px;text-shadow:0 0 8px rgba(124,255,107,.5)}
+body.desktop .deskdate b{font-family:var(--num);font-size:34px;color:#fff;letter-spacing:2px;text-shadow:-2px 0 var(--cyan),3px 3px var(--mag);font-weight:400}
+body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 </style>
 </head>
 <body>
@@ -1390,6 +1402,7 @@ body.desktop .bubble{max-width:520px}
 
   <!-- logged in -->
   <form class="card hidden" id="roomCard">
+    <div class="deskdate" id="deskDate"></div>
     <div class="homebar">
       <button type="button" class="face" id="meFace" aria-label="Your profile"></button>
       <div class="who-text"><b id="meName"></b><span class="lvlpill" id="homeLevel"></span></div>
@@ -5212,7 +5225,9 @@ function applyDesktop(){
     const bar=document.createElement("div"); bar.className="termbar"; bar.id="termbar"; document.body.append(bar); }
   if(d){ $("chat").dataset.idle="▮ NIGHTLINE TERMINAL\n\nno channel open.\nselect a room on the left, or press  Ctrl+K  to search.\n\n> _"; paintTermBar(); }
 }
-function paintTermBar(){
+function paintDeskDate(){ const n=$("deskDate"); if(!n) return; const d=new Date(); const wd=d.toLocaleDateString([],{weekday:"short"}), md=`${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")}`; const ph=(typeof phaseName==="function"?phaseName(d.getHours()):""); n.innerHTML=`<b>${md}</b><span>${wd}</span><span>· ${ph||d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}</span><span class="blink">_</span>`; }
+setInterval(()=>{ if(document.body.classList.contains("desktop")) paintDeskDate(); },30000);
+function paintTermBar(){ paintDeskDate();
   const bar=$("termbar"); if(!bar) return;
   const on=[...online.keys()].filter(id=>id!==user?.id).length;
   bar.innerHTML=`<span>▮ NIGHTLINE<span class="blink">_</span></span><span>uplink: <b>${!sb?"DEMO":(navigator.onLine?(liveStatus||"IDLE"):"OFFLINE")}</b></span><span>user: <b>${meProfile?.username||"—"}</b></span><span>channel: <b>${room?(isDm?"private":(roomName||"#"+room)):"none"}</b></span><span>online: <b>${on}</b></span><span class="right"><span class="kbd">Ctrl+K</span> search · <span class="kbd">Esc</span> close · <span class="kbd">Ctrl+/</span> secrets</span>`;
