@@ -2530,9 +2530,10 @@ let splashMsgI=0; const splashMsgTimer=setInterval(()=>{ const n=$("splashMsg");
 setTimeout(hideSplash,6000);   // safety net: never let the splash get stuck
 
 async function handleAuth(u){
-  user=u; hideSplash();
+  user=u;
   const q=new URLSearchParams(location.search);
   if(!u){
+    hideSplash();
     if(unsub){unsub();unsub=null;} if(unsubAll){unsubAll();unsubAll=null;} if(typeof stopPresence==="function") stopPresence();
     if(q.get("friend")) say("authMsg","A friend invited you to NightLine. Log in or sign up to add them.");
     ["chat","profile","roomSheet","msgMenu"].forEach(id=>show($(id),false));
@@ -2550,7 +2551,9 @@ async function handleAuth(u){
   show($("authCard"),false); show($("roomCard"));
   try{ const last=localStorage.getItem("nl-room")||""; $("room").value=last.startsWith("dm-")?"":last; }catch(e){}
   $("front").classList.add("logged");
-  await loadContacts(); loadInbox(); startPresence();
+  await loadContacts(); await loadInbox(); startPresence();
+  await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));   // let the real front screen actually paint first
+  hideSplash();
   if(q.get("friend")){ const tok=q.get("friend"); history.replaceState(null,"",location.pathname); setTimeout(()=>handleFriendInvite(tok),400); }
   try{ const t=localStorage.getItem("nl-front-tab"); if(["chats","dms","contacts"].includes(t)) setFrontTab(t); }catch(e){}
   celebrateMyBirthday(); seasonalCheck("login"); hintNudge(); dailyXP(); setTimeout(checkUnlocks,4000);
