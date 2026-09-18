@@ -1407,6 +1407,32 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 @keyframes reheal{30%{filter:brightness(1.6) hue-rotate(60deg)}}
 .re-herb{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);text-align:center;font-size:70px;animation:sxslam 2.2s cubic-bezier(.2,1.4,.4,1) both;filter:drop-shadow(0 0 16px #2ee66b)}
 .re-herb b{display:block;font-family:var(--num);font-size:28px;color:#2ee66b;text-shadow:3px 3px 0 #07041A;letter-spacing:2px}
+/* ===== danganronpa ===== */
+.dr-monokuma{position:absolute;left:50%;top:38%;width:min(50vw,190px);transform:translate(-50%,-50%);animation:sxslam 3s cubic-bezier(.2,1.4,.4,1) both}
+.dr-monokuma svg{width:100%;filter:drop-shadow(8px 8px 0 #ff1a3c)}
+.dr-monokuma.out{animation:none;opacity:0;transition:opacity .5s}
+.dr-cap{text-align:center;font-family:var(--tech);font-size:15px;color:#ff1a3c;margin-top:6px;letter-spacing:1px}
+.dr-trial{background:#0a0a0a!important;color:#fff!important;border-color:#ff1a3c!important;box-shadow:10px 10px 0 #ff1a3c!important;font-size:clamp(30px,10vw,64px)!important}
+.dr-nonstop{position:absolute;inset:0;overflow:hidden}
+.dr-strip{position:absolute;inset:0;background:repeating-linear-gradient(100deg,rgba(255,26,60,.14) 0 30px,transparent 30px 60px);animation:drstrip .5s linear infinite}
+@keyframes drstrip{to{background-position:60px 0}}
+.dr-target{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);max-width:80vw;background:#fff;color:#07041A;font-family:var(--tech);font-weight:900;font-size:16px;padding:10px 18px;border:4px solid #ff1a3c;box-shadow:6px 6px 0 #07041A;text-align:center}
+.dr-cross{position:absolute;left:8%;top:44%;width:56px;height:56px;transform:translate(-100%,-50%) rotate(-20deg);opacity:0}
+.dr-cross::before,.dr-cross::after{content:"";position:absolute;inset:0;background:#ff1a3c;border-radius:4px}
+.dr-cross::before{height:14px;top:21px}.dr-cross::after{width:14px;left:21px}
+.dr-cross.hit{animation:drcross .5s cubic-bezier(.5,0,.3,1) forwards}
+@keyframes drcross{to{transform:translate(150%,-50%) rotate(20deg);opacity:1}}
+.dr-despair{position:absolute;inset:0;background:linear-gradient(115deg,#0a0a0a 48%,#ff1a3c 49%,#ff1a3c 51%,#0a0a0a 52%);display:grid;place-items:center;animation:sxflash 2.6s ease both}
+.dr-desptext,.dr-hopetext,.dr-desptext2{position:absolute;font-family:var(--num);font-size:clamp(30px,11vw,58px);text-shadow:3px 3px 0 #07041A}
+.dr-desptext{left:14%;top:38%;color:#fff}
+.dr-desptext2{right:10%;top:56%;color:#ffd84a}
+.dr-hopetext{left:50%;top:47%;transform:translate(-50%,-50%);color:#ff1a3c;font-size:40px}
+.dr-verdict{position:absolute;inset:0;background:rgba(0,0,0,.5);display:grid;place-items:center}
+.dr-vcard{background:#fff;border:6px solid #07041A;padding:20px 30px;transform:scale(3) rotate(0);opacity:0;transition:transform .35s cubic-bezier(.3,0,.6,1),opacity .2s}
+.dr-vcard b{font-family:var(--num);font-size:clamp(34px,11vw,56px);letter-spacing:2px}
+.dr-vcard.g{box-shadow:10px 10px 0 #ff1a3c}.dr-vcard.g b{color:#ff1a3c}
+.dr-vcard.ng{box-shadow:10px 10px 0 #2ee66b}.dr-vcard.ng b{color:#1a9e4a}
+.dr-verdict .dr-vcard.slam{transform:scale(1) rotate(-4deg);opacity:1}
 </style>
 </head>
 <body>
@@ -5266,6 +5292,62 @@ Object.assign(HINTS,{
   keyblade:"The weapon that locks worlds. One word, or two.",
   residentevil:"The zombie mansion series. Bonus: what the zombie diary says.",
   greenherb:"The plant that heals in the mansion.",
+});
+
+/* ================= DANGANRONPA ================= */
+(function(){
+  const layer=$("sfx"), add=(cls,html="")=>{ const d=document.createElement("div"); d.className=cls; d.innerHTML=html; layer.append(d); return d; };
+  const later=(fn,ms)=>setTimeout(fn,ms), R=(a,b)=>a+Math.random()*(b-a);
+  const chatClass=(cls,ms)=>{ const c=$("chat"); c.classList.remove(cls); void c.offsetWidth; c.classList.add(cls); later(()=>c.classList.remove(cls),ms); };
+  const chime=(notes)=>{ try{ const ac=window.__sxac||(window.__sxac=new (window.AudioContext||window.webkitAudioContext)()); notes.forEach(([f,at,len,type])=>{ const o=ac.createOscillator(), g=ac.createGain(); o.type=type||"square"; o.frequency.value=f; g.gain.setValueAtTime(.0001,ac.currentTime+at); g.gain.exponentialRampToValueAtTime(.07,ac.currentTime+at+.02); g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+at+len); o.connect(g); g.connect(ac.destination); o.start(ac.currentTime+at); o.stop(ac.currentTime+at+len+.05); }); }catch(e){} };
+  QX.monokuma=function(){
+    const w=add("dr-monokuma",`<svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="92" fill="#fff" stroke="#07041A" stroke-width="6"/><path d="M100 8 A92 92 0 0 1 100 192 Z" fill="#07041A"/>
+      <circle cx="66" cy="88" r="16" fill="#fff" stroke="#07041A" stroke-width="4"/><circle cx="66" cy="88" r="6" fill="#07041A"/>
+      <circle cx="134" cy="88" r="18" fill="#ff1a3c" stroke="#07041A" stroke-width="4"/><path d="M134 74 L130 102 L138 102Z" fill="#07041A"/><circle cx="134" cy="88" r="5" fill="#07041A"/>
+      <path d="M60 128 Q100 152 140 128 Q100 146 60 128Z" fill="#07041A"/>
+      <path d="M40 40 Q55 5 75 35Z" fill="#fff" stroke="#07041A" stroke-width="4"/><path d="M160 40 Q145 5 125 35Z" fill="#07041A" stroke="#07041A" stroke-width="4"/></svg>
+      <div class="dr-cap">upupupu…</div>`);
+    chime([[1046,0,.08],[880,.08,.08],[1046,.16,.08],[1318,.3,.2]]); if(navigator.vibrate) navigator.vibrate([20,30,20,30,60]); later(()=>w.classList.add("out"),2400); later(()=>w.remove(),3000);
+  };
+  QX.classTrial=function(){
+    chatClass("qx-glitch",900);
+    const b=add("sx-banner qx-stamp dr-trial","CLASS TRIAL"); chime([[220,0,.15,"sawtooth"],[220,.15,.15,"sawtooth"],[330,.3,.4,"sawtooth"]]); if(navigator.vibrate) navigator.vibrate([15,20,15,20,15,20,80]);
+    later(()=>b.remove(),1900);
+  };
+  QX.nonstop=function(m){
+    const w=add("dr-nonstop",`<div class="dr-strip"></div><div class="dr-target">${(m?.text||"").slice(0,60).replace(/[<>&]/g,"")||"…"}</div><div class="dr-cross"></div>`);
+    later(()=>{ w.querySelector(".dr-cross").classList.add("hit"); chime([[1568,0,.06,"square"],[2093,.06,.14,"square"]]); if(navigator.vibrate) navigator.vibrate(40); },700);
+    later(()=>w.remove(),1900);
+  };
+  QX.despair=function(){
+    chatClass("qx-glitch",1300); const w=add("dr-despair",`<div class="dr-desptext">DESPAIR</div><div class="dr-hopetext">×</div><div class="dr-desptext2">HOPE</div>`);
+    chime([[196,0,.3,"sawtooth"],[261,.3,.5,"sawtooth"]]); later(()=>w.remove(),2600);
+  };
+  QX.guilty=function(m){
+    const w=add("dr-verdict",`<div class="dr-vcard g"><b>GUILTY</b></div>`); chime([[220,0,.15,"square"],[196,.15,.15,"square"],[164,.3,.5,"square"]]);
+    if(navigator.vibrate) navigator.vibrate([10,10,10,10,10,10,150]);
+    later(()=>w.classList.add("slam"),100); later(()=>w.remove(),2400);
+  };
+  QX.notGuilty=function(){
+    const w=add("dr-verdict",`<div class="dr-vcard ng"><b>NOT GUILTY</b></div>`); chime([[659,0,.15],[880,.15,.15],[1318,.3,.4]]);
+    later(()=>w.classList.add("slam"),100); later(()=>w.remove(),2400);
+  };
+})();
+SECRET_LIST.splice(SECRET_LIST.findIndex(s=>s.id==="konami"),0,
+  {id:"monokuma", name:"Monokuma", re:/mono ?kuma|upupupu/i, play:()=>QX.monokuma()},
+  {id:"classtrial", name:"Class Trial", re:/class trial/i, play:()=>QX.classTrial()},
+  {id:"nonstop", name:"Non-stop Debate", re:/non-?stop debate/i, play:m=>QX.nonstop(m)},
+  {id:"despair", name:"Despair", re:/(^|[^a-z])despair([^a-z]|$)/i, play:()=>QX.despair()},
+  {id:"notguilty", name:"Not guilty verdict", re:/not guilty([^a-z]|$)/i, play:()=>QX.notGuilty()},
+  {id:"guilty", name:"Guilty verdict", re:/(^|[^a-z])guilty([^a-z]|$)/i, play:m=>QX.guilty(m)}
+);
+Object.assign(HINTS,{
+  monokuma:"A two-toned bear headmaster, half kind, half cruel. Say his name, or his laugh.",
+  classtrial:"Two words: the courtroom phase of a certain killing game.",
+  nonstop:"A rapid-fire debate where you shoot down the lie with the truth.",
+  despair:"The opposite of hope, in one word.",
+  guilty:"The verdict nobody wants to hear.",
+  notguilty:"The verdict everyone hopes for.",
 });
 
 /* ================= STAYING CONNECTED ================= */
