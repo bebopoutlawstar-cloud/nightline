@@ -1357,6 +1357,16 @@ body.desktop #front.logged .stamp{display:none}
 body.desktop #front.logged .deskdate{display:flex;align-items:baseline;gap:10px;font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--term);font-size:13px;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid rgba(124,255,107,.35);padding:4px 0 10px;margin-bottom:6px;text-shadow:0 0 8px rgba(124,255,107,.5)}
 body.desktop .deskdate b{font-family:var(--num);font-size:34px;color:#fff;letter-spacing:2px;text-shadow:-2px 0 var(--cyan),3px 3px var(--mag);font-weight:400}
 body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
+
+/* ===== ?! pop-outs (Persona IM style) ===== */
+.bubble{overflow:visible}
+.punct{position:absolute;top:-22px;right:-14px;font-family:var(--num);font-size:34px;line-height:1;color:var(--white);-webkit-text-stroke:2px var(--night);text-shadow:3px 3px 0 var(--night);transform:rotate(12deg);pointer-events:none;z-index:3;animation:punctpop .35s cubic-bezier(.2,1.6,.4,1) both}
+.msg.me .punct{right:auto;left:-14px;transform:rotate(-12deg);color:var(--volt)}
+.punct.loud{font-size:44px;top:-30px;color:var(--mag);-webkit-text-stroke:2px var(--night)}
+.msg.me .punct.loud{color:var(--volt)}
+@keyframes punctpop{from{transform:scale(.2) rotate(30deg);opacity:0}}
+.msg.me .punct{animation-name:punctpopme}
+@keyframes punctpopme{from{transform:scale(.2) rotate(-30deg);opacity:0}to{transform:rotate(-12deg)}}
 </style>
 </head>
 <body>
@@ -2534,7 +2544,8 @@ function buildMsg(m,index,noAnim){
   if(m.kind==="sticker"&&STICKERS[m.sticker]) bub.append(stickerEl(m.sticker));
   if(m.kind==="poll") bub.append(pollEl(m));
   else if(m.kind==="game") bub.append(gameCard(m));
-  else if(m.text){ const t=el("div"); renderTextWithDates(t,m.text,m.mentions,m); bub.append(t); const trb=translationBlock(m); if(trb) bub.append(trb); if(!noAnim||!node.querySelector(".lpcard")) setTimeout(()=>attachPreview(bub,m),0);
+  else if(m.text){ const t=el("div"); renderTextWithDates(t,m.text,m.mentions,m); bub.append(t);
+    const pm=m.text.trim().match(/[?!]+$/); if(pm&&(m.kind||"text")==="text"){ const cluster=pm[0]; const marks=cluster.includes("?")&&cluster.includes("!")?"?!":(cluster.includes("?")?"?":"!"); const p=el("span","punct"+(cluster.length>2?" loud":""),marks); p.setAttribute("aria-hidden","true"); bub.append(p); } const trb=translationBlock(m); if(trb) bub.append(trb); if(!noAnim||!node.querySelector(".lpcard")) setTimeout(()=>attachPreview(bub,m),0);
     if(/el psy (k|c)ongroo|(^|[^a-z])world ?line([^a-z]|$)/i.test(m.text)&&typeof m.id==="number") bub.append(el("div","d20chip wlchip",`⚗️ world line ${worldLineFor(m)}`));
     if(typeof m.id==="number"&&diceIn(m.text)){ const n=diceIn(m.text), r=dNFor(m,n); bub.append(el("div","d20chip"+(r===n&&n>1?" nat20":r===1&&n>1?" nat1":""),n===2?`🪙 d2 → ${r===1?"heads":"tails"}`:`🎲 d${n} → ${r}${r===n&&n>1?" MAX!":""}`)); }
     if(/(^|[^a-z])roll(s|ed|ing)? (a |the |me a )?d20([^a-z0-9]|$)/i.test(m.text)&&typeof m.id==="number"){ const n=d20For(m); bub.append(el("div","d20chip"+(n===20?" nat20":n===1?" nat1":""),`🎲 d20 → ${n}${n===20?" NAT 20!":n===1?" crit fail":""}`)); } }
