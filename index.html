@@ -1504,9 +1504,10 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .missed-actions{display:flex;gap:8px;width:100%;margin-top:6px}
 .missed-actions button{flex:1;padding:8px;font-size:13px}
 
-/* ===== bigger, punchier "!" ===== */
-.punct.bang{font-size:40px;-webkit-text-stroke:3px var(--night);filter:drop-shadow(0 0 4px rgba(0,0,0,.5))}
-.punct.bang::before{content:"";position:absolute;left:50%;top:52%;width:2.1em;height:2.1em;transform:translate(-50%,-50%) rotate(-8deg);z-index:-1;
+/* ===== bigger, punchier "!" (kept tight so it can't bleed into a neighboring message) ===== */
+.punct.bang{font-size:32px;top:-16px;-webkit-text-stroke:2.5px var(--night);filter:drop-shadow(0 0 3px rgba(0,0,0,.5))}
+.msg.me .punct.bang{top:-16px}
+.punct.bang::before{content:"";position:absolute;left:50%;top:56%;width:1.3em;height:1.3em;transform:translate(-50%,-50%) rotate(-8deg);z-index:-1;
   background:var(--mag);clip-path:polygon(50% 0%,63% 30%,93% 15%,75% 42%,100% 50%,75% 58%,93% 85%,63% 70%,50% 100%,37% 70%,7% 85%,25% 58%,0% 50%,25% 42%,7% 15%,37% 30%)}
 .msg.me .punct.bang::before{background:var(--cyan)}
 </style>
