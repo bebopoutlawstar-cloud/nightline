@@ -2282,6 +2282,7 @@ const live = {
   async unblock(uid){ must(await sb.from("blocks").delete().eq("blocked",uid)); },
   async savePush(json){ must(await sb.from("push_subscriptions").upsert({endpoint:json.endpoint,p256dh:json.keys.p256dh,auth:json.keys.auth},{onConflict:"endpoint"})); },
   async deletePush(endpoint){ await sb.from("push_subscriptions").delete().eq("endpoint",endpoint); },
+  async testPush(){ const {data,error}=await sb.functions.invoke("notify",{body:{selfTest:true}}); if(error){ let msg=error.message; try{ const jj=await error.context?.json(); if(jj?.error) msg=jj.error; }catch(e){} throw new Error(msg); } return data; },
   subscribe(room,h){
     const pub=sb.channel("room-"+room)
       .on("postgres_changes",{event:"INSERT",schema:"public",table:"messages",filter:`room=eq.${room}`},p=>h.msg(p.new))
@@ -2453,7 +2454,7 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     async react(message_id,_room,emoji){ const r={message_id,user_id:"me",emoji}; reacts.push(r); setTimeout(()=>fire("reaction",r,true),30); },
     async unreact(message_id,uid,emoji){ const i=reacts.findIndex(r=>r.message_id===message_id&&r.user_id===uid&&r.emoji===emoji); if(i>=0) reacts.splice(i,1); setTimeout(()=>fire("reaction",{message_id,user_id:uid,emoji},false),30); },
     async blocks(){ return [...blocked]; }, async block(uid){ blocked.add(uid); }, async unblock(uid){ blocked.delete(uid); },
-    async savePush(){}, async deletePush(){},
+    async savePush(){}, async deletePush(){}, async testPush(){ return {sent:1,devices:1,demo:true}; },
     subscribe(_room,h){ H=h; h.status("Demo mode"); const stop=()=>{H=null}; stop.typing=()=>{}; return stop; }
   };
 })();
@@ -2561,6 +2562,7 @@ async function handleAuth(u){
   await loadContacts(); await loadInbox(); startPresence();
   await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));   // let the real front screen actually paint first
   hideSplash();
+  refreshPushSubscription();
   if(q.get("friend")){ const tok=q.get("friend"); history.replaceState(null,"",location.pathname); setTimeout(()=>handleFriendInvite(tok),400); }
   try{ const t=localStorage.getItem("nl-front-tab"); if(["chats","dms","contacts"].includes(t)) setFrontTab(t); }catch(e){}
   celebrateMyBirthday(); seasonalCheck("login"); hintNudge(); dailyXP(); setTimeout(checkUnlocks,4000);
@@ -3594,6 +3596,18 @@ async function pushOn(){
   const sub=await swReg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToBytes(VAPID_PUBLIC_KEY)});
   await api.savePush(sub.toJSON());
 }
+// iOS in particular can silently invalidate a push subscription (OS update, long idle, etc.) without
+// telling the page. Browsers hand back the SAME subscription if it's still good, so re-subscribing on
+// every app open is a safe, cheap way to catch a dead one and quietly re-save a fresh one.
+async function refreshPushSubscription(){
+  try{
+    if(!sb||!VAPID_PUBLIC_KEY||!swReg||!("PushManager" in window)) return;
+    if(Notification.permission!=="granted") return;
+    const had=await currentSub(); if(!had) return;   // only refresh if notifications were actually turned on
+    const sub=await swReg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToBytes(VAPID_PUBLIC_KEY)});
+    await api.savePush(sub.toJSON());
+  }catch(e){ /* best-effort; the manual toggle in profile still works as a fallback */ }
+}
 async function pushOff(){ const sub=await currentSub(); if(!sub) return; await api.deletePush(sub.endpoint); await sub.unsubscribe(); }
 $("notifBtn").onclick=async()=>{
   if($("notifBtn").dataset.install){ show($("profile"),false); openInstallSheet(); return; }
@@ -3920,11 +3934,14 @@ navigator.serviceWorker?.addEventListener("message",e=>{
   if(e.data?.type==="which-room"&&e.ports?.[0]) e.ports[0].postMessage({room: (!document.hidden&&!$("chat").classList.contains("hidden"))?room:null});
 });
 $("notifTest").onclick=async()=>{
+  $("notifTest").disabled=true; say("profMsg","Sending a real test push through your phone's notification system…");
   try{
-    const reg=swReg||await navigator.serviceWorker.getRegistration();
-    await reg.showNotification("NightLine test 🌙",{body:"Notifications are working on this device.",icon:"icon-192.png",badge:"badge-96.png",tag:"test"});
-    say("profMsg","Test sent. If you didn't see it, check your phone's notification settings for this app.");
-  }catch(err){ say("profMsg","Couldn't show a test: "+err.message,true); }
+    const r=await api.testPush();
+    if(r?.demo){ const reg=swReg||await navigator.serviceWorker.getRegistration(); await reg.showNotification("NightLine test 🌙",{body:"Demo mode: this just shows locally.",icon:"icon-192.png",badge:"badge-96.png",tag:"test"}); say("profMsg","Demo mode: shown locally, since there's no server here to round-trip through."); }
+    else if(!r?.sent){ say("profMsg","No working device found to send to. Turn notifications off and back on below, then try again.",true); }
+    else { say("profMsg","Sent for real — it should arrive any second. If it never shows up, the problem is on your phone's side (check this app's notification settings), not the app itself."); }
+  }catch(err){ say("profMsg","The test push failed to send: "+err.message,true); }
+  finally{ $("notifTest").disabled=false; }
 };
 
 /* ================= GAMES ================= */
