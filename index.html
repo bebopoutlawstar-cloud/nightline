@@ -1193,8 +1193,8 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
 .srsnip mark{background:var(--volt);color:var(--night);padding:0 2px}
 .sscope{color:var(--muted);font-size:14px;margin-top:-8px}
 /* ===== presence ===== */
-.face.online::after{content:"";position:absolute;right:-4px;bottom:-4px;width:12px;height:12px;background:#2ee66b;border:2px solid var(--night);border-radius:50%;z-index:4;box-shadow:0 0 6px #2ee66b}
-.face.sm.online::after,.mini-faces .face.online::after{width:9px;height:9px;right:-3px;bottom:-3px}
+
+
 .receipt .mini-faces .face.online::after{display:none}
 .lastseen{font-size:12px;color:var(--muted);margin-left:6px}
 /* ===== link previews ===== */
@@ -1302,7 +1302,7 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
 .onlinechip .face{width:40px;height:40px;font-size:18px}
 .onlinechip span{max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .onlinechip small{font-size:10px;color:#2ee66b;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.face.here::after{background:var(--volt)!important;box-shadow:0 0 8px var(--volt)!important}
+
 /* ===== DESKTOP: netrunner terminal mode ===== */
 body.desktop{--term:#7CFF6B}
 body.desktop .sky canvas{opacity:.55}
@@ -1510,6 +1510,45 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .punct.bang::before{content:"";position:absolute;left:50%;top:56%;width:1.3em;height:1.3em;transform:translate(-50%,-50%) rotate(-8deg);z-index:-1;
   background:var(--mag);clip-path:polygon(50% 0%,63% 30%,93% 15%,75% 42%,100% 50%,75% 58%,93% 85%,63% 70%,50% 100%,37% 70%,7% 85%,25% 58%,0% 50%,25% 42%,7% 15%,37% 30%)}
 .msg.me .punct.bang::before{background:var(--cyan)}
+
+/* ===== status symbol: online (green) / idle (yellow) / do-not-disturb (red); 5 shapes to pick from ===== */
+.face.has-status::after{content:"";position:absolute;right:-4px;bottom:-4px;width:12px;height:12px;z-index:4;border:2px solid var(--night);box-sizing:border-box}
+.face.sm.has-status::after,.mini-faces .face.has-status::after{width:9px;height:9px;right:-3px;bottom:-3px}
+.receipt .mini-faces .face.has-status::after{display:none}
+.face.status-online::after{background:#2ee66b;box-shadow:0 0 6px #2ee66b}
+.face.status-idle::after{background:#ffcf3d;box-shadow:0 0 6px #ffcf3d}
+.face.status-dnd::after{background:#ff3d3d;box-shadow:0 0 6px #ff3d3d}
+/* being in the exact same room as the viewer brightens the ring, whatever color the status is */
+.face.here.has-status::after{border-color:var(--volt);box-shadow:0 0 0 1px var(--volt),0 0 8px currentColor}
+/* shapes: default is a plain dot (border-radius above already rounds it); these override for the others */
+.face.shape-star::after{border-radius:0;border:none;clip-path:polygon(50% 0%,63% 35%,100% 35%,69% 57%,82% 91%,50% 70%,18% 91%,31% 57%,0% 35%,37% 35%)}
+.face.shape-diamond::after{border-radius:0;border:none;clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%)}
+.face.shape-heart::after{border-radius:0;border:none;clip-path:polygon(50% 25%,61% 10%,78% 10%,92% 24%,92% 42%,50% 90%,8% 42%,8% 24%,22% 10%,39% 10%)}
+.face.shape-ring::after{border-radius:50%;background:none!important;border:3px solid currentColor;box-sizing:border-box}
+.face.shape-ring.status-online::after{color:#2ee66b}
+.face.shape-ring.status-idle::after{color:#ffcf3d}
+.face.shape-ring.status-dnd::after{color:#ff3d3d}
+.face.shape-dot::after{border-radius:50%}
+/* status shape picker (Theme & colors) */
+.statusrow{display:flex;flex-wrap:wrap;gap:10px;width:100%;justify-content:center}
+.statuspick{background:var(--deep);border:2px solid #3b2d80;padding:8px 10px;font-family:var(--tech);font-size:11px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:5px}
+.statuspick.on{border-color:var(--volt);box-shadow:3px 3px 0 var(--mag);color:var(--white)}
+.statuspick i{width:14px;height:14px;background:#2ee66b;display:block}
+.statuspick[data-shape="dot"] i{border-radius:50%}
+.statuspick[data-shape="star"] i{clip-path:polygon(50% 0%,63% 35%,100% 35%,69% 57%,82% 91%,50% 70%,18% 91%,31% 57%,0% 35%,37% 35%)}
+.statuspick[data-shape="diamond"] i{clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%)}
+.statuspick[data-shape="heart"] i{clip-path:polygon(50% 25%,61% 10%,78% 10%,92% 24%,92% 42%,50% 90%,8% 42%,8% 24%,22% 10%,39% 10%)}
+.statuspick[data-shape="ring"] i{border-radius:50%;background:none;border:3px solid #2ee66b}
+/* Do Not Disturb toggle (Profile) */
+.dndrow{display:flex;align-items:center;justify-content:space-between;width:100%;border:2px solid #3b2d80;padding:10px 14px}
+.dndrow.on{border-color:#ff3d3d;background:rgba(255,61,61,.08)}
+.dndlabel{text-align:left}
+.dndlabel b{display:block;color:var(--white);font-size:15px}
+.dndlabel small{color:var(--muted);font-size:12px}
+.dndswitch{width:46px;height:26px;border:2px solid var(--muted);border-radius:14px;position:relative;background:none;flex:none;padding:0}
+.dndswitch::after{content:"";position:absolute;top:1px;left:1px;width:18px;height:18px;border-radius:50%;background:var(--muted);transition:transform .15s,background .15s}
+.dndswitch.on{border-color:#ff3d3d}
+.dndswitch.on::after{transform:translateX(20px);background:#ff3d3d;box-shadow:0 0 6px #ff3d3d}
 </style>
 </head>
 <body>
@@ -1685,6 +1724,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     <input type="file" id="avatarPicker" accept="image/*" class="sr">
     <button class="go" type="button" id="changePhoto">Change photo</button>
     <button class="ghost" type="button" id="openTheme">Theme &amp; colors 🎨</button>
+    <div class="dndrow" id="dndRow"><div class="dndlabel"><b>🔕 Do Not Disturb</b><small>Shows red to friends. Hides you from "who's online."</small></div><button type="button" class="dndswitch" id="dndSwitch" role="switch" aria-checked="false" aria-label="Do Not Disturb"></button></div>
     <h3>Birthday 🎂</h3>
     <div class="bdayrow">
       <label for="bdMonth" class="sr">Birth month</label><select class="field" id="bdMonth"></select>
@@ -1812,6 +1852,9 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     <h3>Profile frame</h3>
     <p class="sub">Everyone sees your frame. Unlock more with secrets and levels.</p>
     <div class="framerow" id="frameRow"></div>
+    <h3>Status symbol</h3>
+    <p class="sub">Shown on your picture when you're online, idle, or on Do Not Disturb.</p>
+    <div class="statusrow" id="statusRow"></div>
     <h3>Your bubble color</h3>
     <div class="swatches" id="bubbleSwatches"></div>
     <label class="colorpick left"><span>Custom bubble</span><input type="color" id="colBubble" value="#2A1B4A"></label>
@@ -2664,7 +2707,9 @@ function paintFxSettings(){
   FX_TRIGGERS.forEach(t=>{ const li=el("li"); li.append(el("b","",t.label+": ")); li.append([...t.words.map(w=>`"${w}"`),...t.emoji].join(", ")); ul.append(li); });
 }
 $("fxBtn").onclick=()=>{ try{ localStorage.setItem("nl-fx",fxEnabled()?"off":"on"); }catch(e){} paintFxSettings(); if(fxEnabled()) FX.play("confetti"); };
-const openProfile=()=>{ say("profMsg",""); paintNotif(); paintBlocked(); paintFxSettings(); fillBirthdayPicker(); paintSecrets(); paintLangPicker(); show($("profile")); $("closeProfile").focus({preventScroll:true}); };
+const openProfile=()=>{ say("profMsg",""); paintNotif(); paintBlocked(); paintFxSettings(); fillBirthdayPicker(); paintSecrets(); paintLangPicker(); paintDND(); show($("profile")); $("closeProfile").focus({preventScroll:true}); };
+function paintDND(){ const on=dndOn(); $("dndSwitch").classList.toggle("on",on); $("dndSwitch").setAttribute("aria-checked",String(on)); $("dndRow").classList.toggle("on",on); }
+$("dndSwitch").onclick=()=>{ setDND(!dndOn()); paintDND(); if(user) applyStatusDot($("meFace"),user.id,meProfile); };
 $("openProfile1").onclick=openProfile; $("openProfile2").onclick=openProfile; $("meFace").onclick=openProfile;
 $("joinToggle").onclick=()=>{ const open=$("joinPanel").classList.contains("hidden"); show($("joinPanel"),open); $("joinToggle").setAttribute("aria-expanded",String(open)); $("joinToggle").textContent=open?"✕":"＋"; if(open) setTimeout(()=>$("room").focus(),60); };
 $("closeProfile").onclick=()=>show($("profile"),false);
@@ -5419,6 +5464,18 @@ function paintFrameRow(){
   const none=el("button","framepick"+(cur===""?" on":""),"none"); none.type="button"; none.onclick=()=>{ draftTheme={...draftTheme,frame:null}; paintThemeSheet(); }; row.append(none);
   Object.entries(FRAMES).forEach(([id,label])=>{ if(!unlockOk("frame",id)) return; const b=el("button","framepick"+(cur===id?" on":"")); b.type="button"; b.title=label; const f=el("span","face frame-"+id); f.append(el("span","fi","★")); b.append(f); b.onclick=()=>{ draftTheme={...draftTheme,frame:id}; paintThemeSheet(); }; row.append(b); });
   const pf=$("themePreviewFace"); [...pf.classList].filter(c=>c.startsWith("frame-")).forEach(c=>pf.classList.remove(c)); if(draftTheme.frame&&FRAMES[draftTheme.frame]) pf.classList.add("frame-"+draftTheme.frame);
+  paintStatusRow();
+}
+const STATUS_SHAPES=[["dot","Dot"],["star","Star"],["diamond","Diamond"],["heart","Heart"],["ring","Ring"]];
+function paintStatusRow(){
+  const row=$("statusRow"); if(!row) return; row.innerHTML="";
+  const cur=draftTheme.statusShape||"dot";
+  STATUS_SHAPES.forEach(([id,label])=>{
+    const b=el("button","statuspick"+(cur===id?" on":"")); b.type="button"; b.dataset.shape=id;
+    b.append(el("i",""),el("span","",label));
+    b.onclick=()=>{ draftTheme={...draftTheme,statusShape:id}; paintThemeSheet(); };
+    row.append(b);
+  });
 }
 
 /* ================= SEARCH ================= */
@@ -5455,10 +5512,17 @@ async function jumpToMessage(code,id){
 }
 
 /* ================= PRESENCE ================= */
-const online=new Map();   // user id -> {room, typing, at}
-let presenceCh=null, presenceTimer=null;
-const myPresence=()=>({at:Date.now(),room:room||null,typing:!!(room&&$("box").value.trim())});
-function pushPresence(){ if(presenceCh&&!document.hidden) presenceCh.track(myPresence()).catch(()=>{}); }
+const online=new Map();   // user id -> {room, typing, at, dnd, idle}
+let presenceCh=null, presenceTimer=null, idleTimer=null;
+const IDLE_AFTER_MS=4*60000;   // 4 minutes with no touch/click/key = idle
+let lastActivityAt=Date.now();
+const dndOn=()=>{ try{ return localStorage.getItem("nl-dnd")==="1"; }catch(e){ return false; } };
+function setDND(on){ try{ localStorage.setItem("nl-dnd",on?"1":"0"); }catch(e){} pushPresence(); }
+function markActive(){ lastActivityAt=Date.now(); if(document.hidden) return; if(online.get(user?.id)?.idle) pushPresence(); }
+["pointerdown","keydown","touchstart","wheel"].forEach(ev=>addEventListener(ev,markActive,{passive:true}));
+const computeIdle=()=>document.hidden||(Date.now()-lastActivityAt>IDLE_AFTER_MS);
+const myPresence=()=>({at:Date.now(),room:room||null,typing:!!(room&&$("box").value.trim()),dnd:dndOn(),idle:computeIdle()});
+function pushPresence(){ if(presenceCh) presenceCh.track(myPresence()).catch(()=>{}); }
 function startPresence(){
   if(!sb||!user||presenceCh) return;
   presenceCh=sb.channel("presence:all",{config:{presence:{key:user.id}}});
@@ -5466,24 +5530,36 @@ function startPresence(){
     .subscribe(async s=>{ if(s==="SUBSCRIBED") await presenceCh.track(myPresence()); });
   const touch=()=>{ if(!document.hidden) api.touchSeen().catch(()=>{}); };
   touch(); clearInterval(presenceTimer); presenceTimer=setInterval(touch,90000);
-  document.addEventListener("visibilitychange",()=>{ if(document.hidden){ presenceCh?.untrack(); } else { pushPresence(); touch(); } });
+  clearInterval(idleTimer); idleTimer=setInterval(()=>{ const now=computeIdle(); if(!!online.get(user?.id)?.idle!==now) pushPresence(); },20000);
+  document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ markActive(); touch(); } pushPresence(); });
 }
-function stopPresence(){ if(presenceCh){ sb.removeChannel(presenceCh); presenceCh=null; } clearInterval(presenceTimer); online.clear(); }
+function stopPresence(){ if(presenceCh){ sb.removeChannel(presenceCh); presenceCh=null; } clearInterval(presenceTimer); clearInterval(idleTimer); online.clear(); }
 let demoPresenceOverride=false;   // tests can set this true to fully control isOnline/whereIs via the `online` Map
 const isOnline=uid=>online.has(uid)||(!sb&&!demoPresenceOverride&&["vee"].includes(uid));
 const whereIs=uid=>{ if(online.has(uid)) return online.get(uid); if(!sb&&!demoPresenceOverride) return uid==="vee"?{room:"5959",typing:false}:uid==="rook"?{room:null,typing:false}:null; return null; };
+// "online" | "idle" | "dnd" | null(offline) — this is what the little status symbol reflects everywhere
+function statusOf(uid){
+  if(uid&&user&&uid===user.id&&isOnline(uid)){ if(dndOn()) return "dnd"; if(computeIdle()) return "idle"; return "online"; }   // never wait on a round-trip for your own dot
+  if(!isOnline(uid)) return null;
+  const w=whereIs(uid)||{};
+  if(w.dnd) return "dnd";
+  if(w.idle) return "idle";
+  return "online";
+}
+const STATUS_WORD={online:"online",idle:"idle",dnd:"on Do Not Disturb"};
 // only name rooms the viewer is also in
 function presenceLine(uid){
-  if(!isOnline(uid)) return lastSeenText(uid);
-  const w=whereIs(uid); if(!w||!w.room) return "active now";
-  const mine=inboxRows.find(r=>r.code===w.room); if(!mine) return "active now";
+  const st=statusOf(uid);
+  if(!st) return lastSeenText(uid);
+  const w=whereIs(uid); if(!w||!w.room) return st==="online"?"active now":STATUS_WORD[st];
+  const mine=inboxRows.find(r=>r.code===w.room); if(!mine) return st==="online"?"active now":STATUS_WORD[st];
   const label=mine.is_dm?(mine.dm_user===user.id?"a private chat":(mine.dm_user===uid?"your chat":"a private chat")):(mine.name||"#"+w.room);
-  if(mine.is_dm&&mine.dm_user!==uid) return "active now";
+  if(mine.is_dm&&mine.dm_user!==uid) return st==="online"?"active now":STATUS_WORD[st];
   return (w.typing?"typing in ":"in ")+label;
 }
 function paintOnlineStrip(){
   const strip=$("onlineStrip"); if(!strip) return;
-  const ids=[...new Set([...online.keys(),...(!sb?["vee"]:[])])].filter(id=>id!==user?.id&&cache.has(id)&&!blocked.has(id)&&(contactIds.includes(id)||inboxRows.some(r=>r.is_dm&&r.dm_user===id)||members.has(id)));
+  const ids=[...new Set([...online.keys(),...(!sb?["vee"]:[])])].filter(id=>id!==user?.id&&cache.has(id)&&!blocked.has(id)&&statusOf(id)&&statusOf(id)!=="dnd"&&(contactIds.includes(id)||inboxRows.some(r=>r.is_dm&&r.dm_user===id)||members.has(id)));
   strip.innerHTML=""; show(strip,ids.length>0); if(!ids.length) return;
   strip.append(el("span","onlinelbl",`${ids.length} online`));
   ids.slice(0,12).forEach(id=>{ const bt=el("button","onlinechip"); bt.type="button"; const f=el("span","face"); paintFace(f,cache.get(id)); const w=whereIs(id); const t=el("small","",w?.typing?"typing…":w?.room&&inboxRows.find(r=>r.code===w.room&&!r.is_dm)?(inboxRows.find(r=>r.code===w.room).name||"#"+w.room):"online"); bt.append(f,el("span","",nameOf(id)),t); bt.onclick=()=>openPerson(id); strip.append(bt); });
@@ -5497,7 +5573,7 @@ function paintRoomOnline(){
     return;
   }
   show($("dmPresence"),false);
-  const here=[...members.keys()].filter(id=>id!==user.id&&isOnline(id)&&whereIs(id)?.room===room);
+  const here=[...members.keys()].filter(id=>id!==user.id&&statusOf(id)&&statusOf(id)!=="dnd"&&whereIs(id)?.room===room);
   const bar=$("hereBar");
   if(!here.length){ show(bar,false); return; }
   bar.innerHTML="";
@@ -5513,14 +5589,20 @@ function lastSeenText(uid){
   const t=cache.get(uid)?.last_seen; if(!t) return "";
   const m=Math.round((Date.now()-new Date(t))/60000); if(m<1) return "active just now"; if(m<60) return `active ${m}m ago`; const h=Math.round(m/60); if(h<24) return `active ${h}h ago`; const d=Math.round(h/24); return d===1?"active yesterday":`active ${d}d ago`;
 }
+function applyStatusDot(node,uid,p){
+  const st=statusOf(uid); ["online","idle","dnd"].forEach(s=>node.classList.toggle("status-"+s,st===s));
+  node.classList.toggle("has-status",!!st);
+  const shape=(p?.theme?.statusShape)||"dot";
+  ["dot","star","diamond","heart","ring"].forEach(s=>node.classList.toggle("shape-"+s,shape===s));
+  const w=whereIs(uid); node.classList.toggle("here",!!(st&&st!=="dnd"&&w&&room&&w.room===room&&uid!==user?.id));
+}
 function paintPresence(){
-  document.querySelectorAll(".face[data-uid]").forEach(f=>{ const w=whereIs(f.dataset.uid); f.classList.toggle("online",isOnline(f.dataset.uid)); f.classList.toggle("here",!!(w&&room&&w.room===room&&f.dataset.uid!==user?.id)); });
+  document.querySelectorAll(".face[data-uid]").forEach(f=>applyStatusDot(f,f.dataset.uid,cache.get(f.dataset.uid)));
   document.querySelectorAll("[data-presence]").forEach(n=>{ n.textContent=presenceLine(n.dataset.presence); });
   paintOnlineStrip(); paintRoomOnline();
-
 }
 const _paintFace2=paintFace;
-paintFace=function(node,p){ _paintFace2(node,p); if(p?.id){ node.dataset.uid=p.id; node.classList.toggle("online",isOnline(p.id)); } };
+paintFace=function(node,p){ _paintFace2(node,p); if(p?.id){ node.dataset.uid=p.id; applyStatusDot(node,p.id,p); } };
 
 /* ================= LINK PREVIEWS ================= */
 const previewCache=new Map();
