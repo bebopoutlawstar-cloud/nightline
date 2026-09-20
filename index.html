@@ -1374,7 +1374,10 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 @keyframes punctpopmebang{from{transform:scale(.2) rotate(-30deg);opacity:0}to{transform:rotate(-12deg)}}
 .msg.me .punct.flip{animation-name:punctpopmebang}
 /* ===== pack 15 ===== */
-.p15-cap{color:#ffd27a}
+.p15-scene{position:absolute;inset:0;background:#000;opacity:0;animation:dgin .6s ease forwards;transition:opacity .8s}
+.p15-scene.out{opacity:0!important}
+.p15-scene svg{position:absolute;inset:0;width:100%;height:100%}
+.p15-cap{color:#ffd27a;position:absolute;left:0;right:0;top:14%;text-align:center}
 .p15-flicker{animation:p15flick 1.8s ease-in-out infinite alternate}
 @keyframes p15flick{to{opacity:.55}}
 .p15-hand{transform-origin:66px 176px;animation:p15type .3s ease-in-out infinite alternate}
@@ -5665,17 +5668,17 @@ async function handleFriendInvite(token){
   const bg=(cls,html,ms)=>{ const w=document.createElement("div"); w.className="sx-city "+cls; w.innerHTML=html; $("chat").prepend(w); chatClass("sx-see",ms); later(()=>w.remove(),ms); return w; };
   const chime=(notes)=>{ try{ const ac=window.__sxac||(window.__sxac=new (window.AudioContext||window.webkitAudioContext)()); notes.forEach(([f,at,len,type])=>{ const o=ac.createOscillator(), g=ac.createGain(); o.type=type||"sine"; o.frequency.value=f; g.gain.setValueAtTime(.0001,ac.currentTime+at); g.gain.exponentialRampToValueAtTime(.06,ac.currentTime+at+.02); g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+at+len); o.connect(g); g.connect(ac.destination); o.start(ac.currentTime+at); o.stop(ac.currentTime+at+len+.05); }); }catch(e){} };
   QX.jay=function(){
-    bg("p15-sunset",`<svg viewBox="0 0 200 300" preserveAspectRatio="xMidYMax slice">
+    const w=add("p15-scene p15-sunset-scene",`<svg viewBox="0 0 200 300" preserveAspectRatio="xMidYMax slice">
       <defs><linearGradient id="p15sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b1055"/><stop offset=".45" stop-color="#c2417a"/><stop offset=".72" stop-color="#ff9a3d"/><stop offset="1" stop-color="#ffd27a"/></linearGradient></defs>
       <rect width="200" height="300" fill="url(#p15sky)"/><circle cx="100" cy="205" r="34" fill="#fff1b0"/><rect x="0" y="205" width="200" height="95" fill="#1a0b2e"/>
       <g fill="#0a0414"><rect x="0" y="230" width="200" height="70"/><ellipse cx="100" cy="232" rx="120" ry="14"/>
         <circle cx="86" cy="196" r="11"/><path d="M72 206 Q86 200 100 206 L98 236 L74 236Z"/><path d="M74 236 L70 268 L80 268 L86 244 L92 268 L102 268 L98 236Z"/>
         <circle cx="116" cy="202" r="9"/><path d="M104 211 Q116 206 128 211 L126 236 L106 236Z"/><path d="M106 236 L102 266 L111 266 L116 246 L121 266 L130 266 L126 236Z"/>
-        <path d="M100 214 L106 214 L108 224 L98 224Z"/></g></svg>`,7000);
-    const cap=add("sx-caption px-center p15-cap","brothers. 🌇"); cap.style.top="14%"; later(()=>cap.remove(),3000);
+        <path d="M100 214 L106 214 L108 224 L98 224Z"/></g></svg><div class="sx-caption p15-cap">brothers. 🌇</div>`);
+    later(()=>w.classList.add("out"),6200); later(()=>w.remove(),7000);
   };
   QX.writer=function(){
-    bg("p15-study",`<svg viewBox="0 0 200 300" preserveAspectRatio="xMidYMid slice">
+    const w=add("p15-scene p15-study-scene",`<svg viewBox="0 0 200 300" preserveAspectRatio="xMidYMid slice">
       <rect width="200" height="300" fill="#140c05"/><rect x="0" y="0" width="200" height="140" fill="#1e1308"/>
       <g fill="#3a2410">${[...Array(6)].map((_,i)=>`<rect x="${10+i*32}" y="20" width="26" height="110"/>`).join("")}</g>
       <g fill="#7a4a1e">${[...Array(18)].map((_,i)=>`<rect x="${12+(i%6)*32+(i%3)*3}" y="${24+Math.floor(i/6)*36}" width="${5+(i%3)*2}" height="30"/>`).join("")}</g>
@@ -5684,8 +5687,9 @@ async function handleFriendInvite(token){
       <rect x="20" y="190" width="160" height="12" fill="#3a2410"/><rect x="26" y="202" width="8" height="60" fill="#2a1a0a"/><rect x="166" y="202" width="8" height="60" fill="#2a1a0a"/>
       <rect x="60" y="176" width="46" height="14" fill="#0a0604"/><g fill="#d9c9a5">${[...Array(12)].map((_,i)=>`<rect x="${64+(i%6)*7}" y="${178+Math.floor(i/6)*5}" width="4" height="3"/>`).join("")}</g>
       <g fill="#0a0604"><circle cx="82" cy="150" r="14"/><path d="M62 166 Q82 156 102 166 L106 192 L58 192Z"/><path d="M66 176 L60 186 L92 184Z" class="p15-hand"/></g>
-      <text x="100" y="230" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="11" fill="#d9c9a5">...and the night kept typing back.</text></svg>`,6500);
+      <text x="100" y="230" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="11" fill="#d9c9a5">...and the night kept typing back.</text></svg>`);
     chime([[880,0,.05,"square"],[880,.25,.05,"square"],[880,.45,.05,"square"],[880,.6,.05,"square"],[1200,1.1,.3,"triangle"]]);
+    later(()=>w.classList.add("out"),5700); later(()=>w.remove(),6500);
   };
   QX.kingdomHearts=function(){
     const w=add("kh-wrap",`<div class="kh-sky"></div><div class="kh-moon"></div><div class="kh-city">${[...Array(14)].map((_,i)=>`<i style="left:${i*7.3}%;height:${20+((i*37)%50)}%"></i>`).join("")}</div><div class="sx-caption kh-cap">the heart-shaped moon rises…</div>`);
