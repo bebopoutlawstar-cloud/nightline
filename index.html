@@ -5538,7 +5538,7 @@ const isOnline=uid=>online.has(uid)||(!sb&&!demoPresenceOverride&&["vee"].includ
 const whereIs=uid=>{ if(online.has(uid)) return online.get(uid); if(!sb&&!demoPresenceOverride) return uid==="vee"?{room:"5959",typing:false}:uid==="rook"?{room:null,typing:false}:null; return null; };
 // "online" | "idle" | "dnd" | null(offline) — this is what the little status symbol reflects everywhere
 function statusOf(uid){
-  if(uid&&user&&uid===user.id&&isOnline(uid)){ if(dndOn()) return "dnd"; if(computeIdle()) return "idle"; return "online"; }   // never wait on a round-trip for your own dot
+  if(uid&&user&&uid===user.id&&(sb?presenceCh:demoPresenceOverride?online.has(uid):true)){ if(dndOn()) return "dnd"; if(computeIdle()) return "idle"; return "online"; }   // you always know your own status instantly — never wait on the server to echo it back
   if(!isOnline(uid)) return null;
   const w=whereIs(uid)||{};
   if(w.dnd) return "dnd";
