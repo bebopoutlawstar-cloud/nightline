@@ -5537,7 +5537,12 @@ function startPresence(){
     .subscribe(async s=>{ if(s==="SUBSCRIBED") await presenceCh.track(myPresence()); });
   const touch=()=>{ if(!document.hidden) api.touchSeen().catch(()=>{}); };
   touch(); clearInterval(presenceTimer); presenceTimer=setInterval(touch,90000);
-  clearInterval(idleTimer); idleTimer=setInterval(()=>{ const now=computeIdle(); if(!!online.get(user?.id)?.idle!==now) pushPresence(); },20000);
+  clearInterval(idleTimer); idleTimer=setInterval(()=>{
+    const now=computeIdle(); if(!!online.get(user?.id)?.idle!==now) pushPresence();
+    paintPresence();   // belt-and-suspenders: a status dot only repaints when someone's presence *changes*; if you
+                        // opened a chat with someone whose status hadn't changed since, their dot could be stuck
+                        // showing nothing until something did. This just re-checks everyone on-screen periodically.
+  },20000);
   document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ markActive(); touch(); } pushPresence(); });
 }
 function stopPresence(){ if(presenceCh){ sb.removeChannel(presenceCh); presenceCh=null; } clearInterval(presenceTimer); clearInterval(idleTimer); online.clear(); }
