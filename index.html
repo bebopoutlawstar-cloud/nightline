@@ -1512,7 +1512,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 /* ===== bigger, punchier "!" (kept tight so it can't bleed into a neighboring message) ===== */
 .punct.bang{right:-4px;left:auto;font-size:36px;top:5px;-webkit-text-stroke:1px var(--night);text-shadow:0 0 5px rgba(0,0,0,.85),1px 1px 0 var(--night),-1px -1px 0 var(--night),1px -1px 0 var(--night),-1px 1px 0 var(--night)}
 /* own "!" mirrors the received one exactly — floats out past the LEFT edge instead of the right, well clear of your own avatar */
-.msg.me .punct.bang{right:auto;left:-4px;top:5px;transform:rotate(-12deg)}
+.msg.me .punct.bang{left:auto;right:100%;margin-right:4px;top:5px;transform:rotate(-12deg)}
 .msg.me .punct.bang.loud{top:-3px}
 .punct.bang::before{content:"";position:absolute;left:50%;top:56%;width:.95em;height:.95em;transform:translate(-50%,-50%) rotate(-8deg);z-index:-1;
   background:#1a0a24;box-shadow:0 0 0 3px var(--night);clip-path:polygon(50% 0%,63% 30%,93% 15%,75% 42%,100% 50%,75% 58%,93% 85%,63% 70%,50% 100%,37% 70%,7% 85%,25% 58%,0% 50%,25% 42%,7% 15%,37% 30%)}
