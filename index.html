@@ -1365,14 +1365,11 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .msg.me .punct.loud{top:-30px;right:-2px}
 .punct.loud{font-size:44px;top:-30px;color:var(--mag);-webkit-text-stroke:2px var(--night)}
 .msg.me .punct.loud{color:var(--volt)}
-/* any mark that includes "!" mirrors to the left on your own messages, clear of your avatar — same rule the single "!" uses */
-.msg.me .punct.flip{right:auto;left:-14px;transform:rotate(-12deg)}
-.msg.me .punct.flip.loud{left:-2px}
 @keyframes punctpop{from{transform:scale(.2) rotate(30deg);opacity:0}}
 .msg.me .punct{animation-name:punctpopme}
 @keyframes punctpopme{from{transform:scale(.2) rotate(30deg);opacity:0}to{transform:rotate(12deg)}}
 @keyframes punctpopmebang{from{transform:scale(.2) rotate(-30deg);opacity:0}to{transform:rotate(-12deg)}}
-.msg.me .punct.flip{animation-name:punctpopmebang}
+.msg.me .punct.bang{animation-name:punctpopmebang}
 /* ===== pack 15 ===== */
 .p15-scene{position:absolute;inset:0;background:#000;opacity:0;animation:dgin .6s ease forwards;transition:opacity .8s}
 .p15-scene.out{opacity:0!important}
@@ -2948,7 +2945,7 @@ function buildMsg(m,index,noAnim){
   if(m.kind==="poll") bub.append(pollEl(m));
   else if(m.kind==="game") bub.append(gameCard(m));
   else if(m.text){ const t=el("div"); renderTextWithDates(t,m.text,m.mentions,m); bub.append(t);
-    const pm=m.text.trim().match(/[?!]+$/); if(pm&&(m.kind||"text")==="text"){ const cluster=pm[0]; const marks=cluster.includes("?")&&cluster.includes("!")?"?!":(cluster.includes("?")?"?":"!"); const solo=marks==="!"&&cluster.length<=2; const hasBang=cluster.includes("!"); const p=el("span","punct"+(cluster.length>2?" loud":"")+(solo?" bang":"")+(hasBang?" flip":""),marks); p.setAttribute("aria-hidden","true"); bub.append(p); } const trb=translationBlock(m); if(trb) bub.append(trb); if(!noAnim||!node.querySelector(".lpcard")) setTimeout(()=>attachPreview(bub,m),0);
+    const pm=m.text.trim().match(/[?!]+$/); if(pm&&(m.kind||"text")==="text"){ const cluster=pm[0]; const marks=cluster.includes("?")&&cluster.includes("!")?"?!":(cluster.includes("?")?"?":"!"); const hasBang=cluster.includes("!"); const p=el("span","punct"+(cluster.length>2?" loud":"")+(hasBang?" bang":""),marks); p.setAttribute("aria-hidden","true"); bub.append(p); } const trb=translationBlock(m); if(trb) bub.append(trb); if(!noAnim||!node.querySelector(".lpcard")) setTimeout(()=>attachPreview(bub,m),0);
     if(/el psy (k|c)ongroo|(^|[^a-z])world ?line([^a-z]|$)/i.test(m.text)&&typeof m.id==="number") bub.append(el("div","d20chip wlchip",`⚗️ world line ${worldLineFor(m)}`));
     if(typeof m.id==="number"&&diceIn(m.text)){ const n=diceIn(m.text), r=dNFor(m,n); bub.append(el("div","d20chip"+(r===n&&n>1?" nat20":r===1&&n>1?" nat1":""),n===2?`🪙 d2 → ${r===1?"heads":"tails"}`:`🎲 d${n} → ${r}${r===n&&n>1?" MAX!":""}`)); }
     if(/(^|[^a-z])roll(s|ed|ing)? (a |the |me a )?d20([^a-z0-9]|$)/i.test(m.text)&&typeof m.id==="number"){ const n=d20For(m); bub.append(el("div","d20chip"+(n===20?" nat20":n===1?" nat1":""),`🎲 d20 → ${n}${n===20?" NAT 20!":n===1?" crit fail":""}`)); } }
