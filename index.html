@@ -242,6 +242,13 @@ button:disabled{opacity:.5;cursor:default}
 .fx-shake{animation:fxshake .5s linear 2}
 @keyframes fxshake{0%,100%{transform:translate(0)}20%{transform:translate(-6px,3px)}40%{transform:translate(5px,-4px)}60%{transform:translate(-4px,-2px)}80%{transform:translate(4px,4px)}}
 .fx-list{justify-self:stretch;text-align:left;font-size:15px;color:var(--muted)}
+.proflist{justify-self:stretch;text-align:left;width:100%}
+.proflist summary{font-family:var(--tech);font-size:13px;color:var(--cyan);cursor:pointer;padding:10px 12px;background:rgba(0,0,0,.25);border:2px solid #3b2d80;list-style:none}
+.proflist summary::-webkit-details-marker{display:none}
+.proflist summary::after{content:"▸";float:right;transition:transform .15s}
+.proflist[open] summary::after{transform:rotate(90deg)}
+.proflist[open] summary{border-bottom-color:transparent}
+.proflist>div{border:2px solid #3b2d80;border-top:none;padding:12px}
 .fx-list summary{font-family:var(--tech);font-size:12px;color:var(--cyan);cursor:pointer}
 .fx-list ul{list-style:none;display:grid;gap:4px;margin-top:8px}
 .fx-list b{color:var(--white)}
@@ -1851,8 +1858,22 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     <div class="email" id="profEmail"></div>
     <input type="file" id="avatarPicker" accept="image/*" class="sr">
     <button class="go" type="button" id="changePhoto">Change photo</button>
+    <div class="xpbox"><div class="xphead"><b id="xpLevel">LV 1</b><span id="xpTitle">Newcomer</span></div><div class="xpbar"><i id="xpFill"></i></div><div class="xptext" id="xpText"></div><div class="xpways" id="xpWays"></div></div>
+
+    <h3>Appearance</h3>
     <button class="ghost" type="button" id="openTheme">Theme &amp; colors 🎨</button>
     <div class="dndrow" id="dndRow"><div class="dndlabel"><b>🔕 Do Not Disturb</b><small>Shows red to friends. Hides you from "who's online."</small></div><button type="button" class="dndswitch" id="dndSwitch" role="switch" aria-checked="false" aria-label="Do Not Disturb"></button></div>
+
+    <h3>Growth</h3>
+    <button type="button" class="ghost" id="openHabits">🎯 Habits &amp; Stats</button>
+    <button type="button" class="ghost" id="openQuiz">🃏 Who are you? (personality quiz)</button>
+    <details class="proflist"><summary id="unlockSummary">🎁 Unlockables</summary><div class="unlockbox"><div id="unlockList"></div></div></details>
+    <details class="proflist"><summary id="secretSummary">🔒 Secrets found: 0</summary><div class="secretbox">
+      <div class="hintbox" id="hintBox"></div>
+      <div class="secretlist" id="secretList"></div>
+      <button type="button" class="linkbtn hidden" id="motionBtn">Enable motion secrets</button>
+    </div></details>
+
     <h3>Birthday 🎂</h3>
     <div class="bdayrow">
       <label for="bdMonth" class="sr">Birth month</label><select class="field" id="bdMonth"></select>
@@ -1862,21 +1883,14 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     <p class="sub left">Just the month and day. On your birthday, everyone sees a cake on your picture.</p>
     <button type="button" class="linkbtn hidden" id="bdClear">Remove my birthday</button>
     <p class="msgline" id="bdMsg" role="status"></p>
+
+    <h3>Notifications &amp; effects</h3>
     <button class="ghost" type="button" id="notifBtn">Turn on notifications</button>
-    <label class="colorpick left"><span>🌐 Translate messages to</span><select class="field" id="langPick"></select></label>
     <button class="ghost hidden" type="button" id="notifTest">Send a test notification</button>
+    <label class="colorpick left"><span>🌐 Translate messages to</span><select class="field" id="langPick"></select></label>
     <button class="ghost" type="button" id="fxBtn">Screen effects: On</button>
     <details class="fx-list"><summary>Words and emoji that trigger effects</summary><ul id="fxList"></ul></details>
-    <div class="xpbox"><div class="xphead"><b id="xpLevel">LV 1</b><span id="xpTitle">Newcomer</span></div><div class="xpbar"><i id="xpFill"></i></div><div class="xptext" id="xpText"></div><div class="xpways" id="xpWays"></div></div>
-    <button type="button" class="ghost" id="openHabits">🎯 Habits & Stats</button>
-    <button type="button" class="ghost" id="openQuiz">🃏 Who are you? (personality quiz)</button>
-    <div class="unlockbox"><div class="unlockcount" id="unlockCount"></div><div id="unlockList"></div></div>
-    <div class="secretbox">
-      <div class="secretcount" id="secretCount">🔓 Secrets found: 0</div>
-      <div class="hintbox" id="hintBox"></div>
-      <div class="secretlist" id="secretList"></div>
-      <button type="button" class="linkbtn hidden" id="motionBtn">Enable motion secrets</button>
-    </div>
+
     <p class="msgline" id="profMsg" role="status"></p>
     <h3 class="hidden" id="blockedTitle">Blocked people</h3>
     <div class="members" id="blockedList"></div>
@@ -4873,7 +4887,7 @@ function playSecretFromMessage(m,s,force){
 function paintSecrets(){
   paintHint(); paintXP(); paintUnlocks();
   const f=foundSecrets();
-  $("secretCount").textContent=`🔓 Secrets found: ${f.length}/${SECRET_LIST.length}`;
+  $("secretSummary").textContent=`🔒 Secrets found: ${f.length}/${SECRET_LIST.length}`;
   const box=$("secretList"); box.innerHTML="";
   SECRET_LIST.forEach(s=>{ const got=f.includes(s.id); box.append(el("span","sx-chip"+(got?" got":""),got?s.name:"???")); });
   show($("motionBtn"), typeof DeviceMotionEvent!=="undefined" && typeof DeviceMotionEvent.requestPermission==="function" && !motionOn);
@@ -5735,7 +5749,7 @@ function checkUnlocks(){
 }
 function paintUnlocks(){
   const box=$("unlockList"); box.innerHTML="";
-  const got=UNLOCKS.filter(unlockMet).length; $("unlockCount").textContent=`🎁 Unlockables: ${got}/${UNLOCKS.length}`;
+  const got=UNLOCKS.filter(unlockMet).length; $("unlockSummary").textContent=`🎁 Unlockables: ${got}/${UNLOCKS.length}`;
   const groups={theme:"Themes",frame:"Profile frames",bg:"Chat backgrounds",sticker:"Stickers"};
   Object.entries(groups).forEach(([type,title])=>{
     const h=el("div","unlockgroup",title); box.append(h);
@@ -6446,7 +6460,7 @@ addEventListener("resize",applyDesktop); applyDesktop();
 addEventListener("keydown",e=>{
   if(!document.body.classList.contains("desktop")) return;
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){ e.preventDefault(); if(user) openSearch(room?"room":"all"); }
-  if((e.ctrlKey||e.metaKey)&&e.key==="/"){ e.preventDefault(); if(user){ openProfile(); setTimeout(()=>$("secretCount").scrollIntoView({behavior:"smooth",block:"center"}),300); } }
+  if((e.ctrlKey||e.metaKey)&&e.key==="/"){ e.preventDefault(); if(user){ openProfile(); setTimeout(()=>{ const d=$("secretSummary")?.closest("details"); if(d) d.open=true; $("secretSummary").scrollIntoView({behavior:"smooth",block:"center"}); },300); } }
 });
 /* boot sequence: once per session, desktop only */
 function bootSequence(){
