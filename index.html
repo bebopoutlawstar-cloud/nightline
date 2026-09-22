@@ -1602,11 +1602,34 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .habitform .row2{display:flex;gap:8px}
 .habitform select,.habitform input[type="time"]{flex:1;background:var(--deep);border:2px solid var(--cyan);color:var(--white);padding:8px;font-family:var(--body)}
 /* quiz */
-.quizq{width:100%;text-align:left;margin-bottom:14px}
-.quizqtext{font-size:15px;color:var(--white);margin-bottom:8px}
-.quizopts{display:grid;gap:6px}
-.quizopt{background:var(--deep);border:2px solid #3b2d80;color:var(--white);padding:9px 12px;text-align:left;font-size:14px}
-.quizopt.on{border-color:var(--volt);background:rgba(243,255,58,.1)}
+/* one card at a time, with a progress trail and a snap-in/snap-out transition */
+.quizdots{display:flex;gap:6px;justify-content:center;margin-bottom:14px}
+.quizdot{width:9px;height:9px;border-radius:50%;border:2px solid #3b2d80;background:none}
+.quizdot.on{background:var(--volt);border-color:var(--volt);box-shadow:0 0 6px var(--volt)}
+.quizdot.done{background:#3b2d80;border-color:#3b2d80}
+.quizq{width:100%;text-align:left;margin-bottom:14px;animation:quizin .3s ease both}
+.quizq-out{animation:quizout .35s ease both}
+@keyframes quizin{from{opacity:0;transform:translateX(24px) rotate(2deg)}}
+@keyframes quizout{to{opacity:0;transform:translateX(-24px) rotate(-2deg)}}
+.quizqnum{font-family:var(--tech);font-size:11px;color:var(--cyan);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.quizqtext{font-size:16px;color:var(--white);margin-bottom:10px;line-height:1.35}
+.quizopts{display:grid;gap:8px}
+.quizopt{background:var(--deep);border:2px solid #3b2d80;color:var(--white);padding:11px 14px;text-align:left;font-size:14px;transition:transform .15s,opacity .2s}
+.quizopt:active:not(:disabled){transform:scale(.97)}
+.quizopt.on{border-color:var(--volt);background:rgba(243,255,58,.15);box-shadow:3px 3px 0 var(--mag)}
+.quizopt.fade{opacity:.25}
+.quizopt:disabled{cursor:default}
+/* shuffle suspense */
+.quizshuffle{display:grid;justify-items:center;gap:14px;padding:30px 0}
+.qs-cards{position:relative;width:90px;height:120px}
+.qs-cards i{position:absolute;inset:0;border:3px solid var(--cyan);background:linear-gradient(135deg,var(--deep),#1a0f3d);border-radius:6px;box-shadow:0 0 12px rgba(0,240,255,.4)}
+.qs-cards i::after{content:"✦";position:absolute;inset:0;display:grid;place-items:center;font-size:24px;color:var(--volt)}
+.qs-cards i:nth-child(1){animation:qsshuffle1 1.1s ease-in-out infinite}
+.qs-cards i:nth-child(2){animation:qsshuffle2 1.1s ease-in-out infinite .12s}
+.qs-cards i:nth-child(3){animation:qsshuffle3 1.1s ease-in-out infinite .24s}
+@keyframes qsshuffle1{0%,100%{transform:translateX(0) rotate(0)}50%{transform:translateX(-22px) rotate(-10deg)}}
+@keyframes qsshuffle2{0%,100%{transform:translateY(0) rotate(0) scale(1)}50%{transform:translateY(-10px) rotate(3deg) scale(1.03)}}
+@keyframes qsshuffle3{0%,100%{transform:translateX(0) rotate(0)}50%{transform:translateX(22px) rotate(10deg)}}
 .quizresult{text-align:center;display:grid;gap:6px;justify-items:center}
 .quizarcana{font-family:var(--num);font-size:40px;color:var(--volt);text-shadow:3px 3px 0 var(--night)}
 .myarcana{display:inline-block;font-family:var(--tech);font-size:11px;color:var(--volt);border:1.5px solid var(--volt);padding:2px 8px;margin-top:4px}
@@ -1625,6 +1648,24 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .sl-sub{font-family:var(--tech);font-size:13px;color:var(--cyan);margin-top:4px}
 .face.frame-guts .fi{box-shadow:0 0 0 3px #ff7a1a,0 0 14px 4px rgba(255,122,26,.7)}
 .face.frame-bonded .fi{box-shadow:0 0 0 3px #ff5aa8,0 0 14px 4px rgba(255,90,168,.7)}
+/* ===== full-screen Arcana reveal ===== */
+.arcana-reveal{position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,rgba(60,20,90,.55),rgba(7,4,26,.94));animation:sxfadein .3s ease both;perspective:1000px}
+.arcana-card{position:relative;width:min(70vw,280px);aspect-ratio:.62;transform-style:preserve-3d;transition:transform 1s cubic-bezier(.3,.9,.4,1);animation:arcanadrop .7s cubic-bezier(.2,1.1,.4,1) both}
+@keyframes arcanadrop{from{transform:translateY(-50vh) rotate(-8deg);opacity:0}to{transform:translateY(0) rotate(0);opacity:1}}
+.arcana-reveal.flip .arcana-card{transform:rotateY(180deg)}
+.arcana-back,.arcana-front{position:absolute;inset:0;border-radius:10px;backface-visibility:hidden;border:4px solid var(--cyan)}
+.arcana-back{background:repeating-linear-gradient(45deg,#1a0f3d,#1a0f3d 8px,#241454 8px,#241454 16px);display:grid;place-items:center;font-size:54px;color:var(--volt);text-shadow:0 0 14px var(--volt)}
+.arcana-front{background:linear-gradient(160deg,#1a0f3d,#07041A);transform:rotateY(180deg);display:grid;place-items:center;gap:14px;padding:20px;box-shadow:0 0 30px rgba(243,255,58,.35)}
+.arcana-name{font-family:var(--num);font-size:clamp(28px,9vw,42px);color:var(--volt);text-shadow:3px 3px 0 var(--night);text-align:center}
+.arcana-flavor{font-size:14px;color:var(--white);text-align:center;line-height:1.4;opacity:.9}
+.arcana-actions{position:absolute;left:0;right:0;bottom:12%;display:grid;gap:8px;justify-items:center;opacity:0;animation:arcanaactin .5s ease .95s both}
+@keyframes arcanaactin{to{opacity:1}}
+.arcana-again{color:var(--cyan);background:none;border:none;font-size:13px;text-decoration:underline}
+.arcana-burst{position:absolute;left:50%;top:50%;width:0;height:0;pointer-events:none}
+.arcana-burst i{position:absolute;left:0;top:0;width:4px;height:22px;background:var(--volt);box-shadow:0 0 8px var(--volt);transform:rotate(var(--a));transform-origin:50% 0;opacity:0}
+.arcana-burst.go i{animation:arcanaspark .7s ease-out both}
+@keyframes arcanaspark{0%{opacity:1;transform:rotate(var(--a)) translateY(0)}100%{opacity:0;transform:rotate(var(--a)) translateY(-120px)}}
+.arcana-reveal{pointer-events:auto}
 </style>
 </head>
 <body>
@@ -2072,10 +2113,9 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     <h2 id="quizTitle">Who are you?</h2>
     <p class="sub">Answer honestly. Your Arcana shows on your profile.</p>
     <div id="quizBody"></div>
-    <div class="quizresult hidden" id="quizResult">
-      <div class="quizarcana" id="quizArcanaName"></div>
-      <p class="sub">That's your Arcana now.</p>
-      <button class="ghost" type="button" id="quizRetake">Retake the quiz</button>
+    <div class="quizshuffle hidden" id="quizShuffle">
+      <div class="qs-cards"><i></i><i></i><i></i></div>
+      <p class="sub">Reading the cards…</p>
     </div>
     <button class="ghost" type="button" id="quizClose">Close</button>
   </div></div>
@@ -2661,7 +2701,7 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     async bumpSocialLink(otherId,amount){
       const a="me"<otherId?"me":otherId, b="me"<otherId?otherId:"me", key=a+"|"+b;
       let row=demoSocialLinks.get(key);
-      const arcanas=["Fool","Magician","Priestess","Empress","Emperor","Hierophant","Lovers","Chariot","Justice","Hermit","Fortune","Strength","Hanged Man","Temperance","Star","Moon"];
+      const arcanas=["Fool","Magician","Priestess","Empress","Emperor","Hierophant","Lovers","Chariot","Strength","Hermit","Fortune","Justice","Hanged Man","Death","Temperance","Devil","Tower","Star","Moon","Sun","Judgement","World"];
       if(!row){ let h=0; for(const c of key) h=(h*31+c.charCodeAt(0))>>>0; row={user_a:a,user_b:b,xp:0,today_xp:0,today_date:null,arcana:arcanas[h%arcanas.length]}; demoSocialLinks.set(key,row); }
       const today=iso().slice(0,10); if(row.today_date!==today) row.today_xp=0;
       const grant=Math.max(0,Math.min(amount||3,24-row.today_xp)); row.xp+=grant; row.today_xp+=grant; row.today_date=today;
@@ -6154,40 +6194,106 @@ function checkHabitReminders(){
 
 /* ================= PERSONALITY QUIZ → ARCANA ================= */
 const QUIZ=[
-  {q:"A friend needs help moving apartments this weekend. You:",a:[["Show up with a truck and snacks.","Emperor"],["Organize everyone else to help too.","Hierophant"],["Show up, but mostly for the company.","Lovers"],["Offer, but secretly hope they don't need you.","Hermit"]]},
-  {q:"Your group chat is arguing about where to eat. You:",a:[["Pick a place and own the decision.","Chariot"],["Find the compromise everyone can live with.","Justice"],["Say 'whatever's fine' and mean it.","Star"],["Mute the chat and see what's left standing.","Hermit"]]},
-  {q:"Something unfair happens to a stranger nearby. You:",a:[["Step in immediately.","Strength"],["Say something, calmly but firmly.","Justice"],["Feel it hard, even if you don't act.","Empress"],["Watch closely, remember it later.","Hanged Man"]]},
-  {q:"Big life decision, no clear right answer. You:",a:[["Go with your gut and move fast.","Fool"],["Research it to death first.","Magician"],["Ask everyone you trust.","Lovers"],["Sit with it alone until it's clear.","Moon"]]},
-  {q:"A secret gets handed to you that isn't yours to keep. You:",a:[["Guard it like a vault.","Priestess"],["It eats at you, but you hold it.","Hanged Man"],["You tell the one person it protects.","Temperance"],["You're honestly a little thrilled.","Magician"]]},
-  {q:"How do people usually describe you first?",a:[["Intense.","Emperor"],["Warm.","Empress"],["Unpredictable.","Fool"],["Hard to read.","Priestess"]]},
+  {q:"Your friend wants to try something completely new together. You:",a:[["Say yes before they finish the sentence.","Fool"],["Start figuring out exactly how to make it work.","Magician"],["Ask a few quiet questions before deciding.","Priestess"],["Just want everyone to feel good about doing it.","Empress"]]},
+  {q:"A group project has no leader and it's falling apart. You:",a:[["Take charge and assign the work.","Emperor"],["Quietly keep everyone talking to each other.","Hierophant"],["Check in on how everyone's actually doing.","Lovers"],["Just start doing your part and let it pull others in.","Chariot"]]},
+  {q:"Something's genuinely hard right now. Your first move is:",a:[["Push through it, no drama.","Strength"],["Step back and deal with it alone for a while.","Hermit"],["Trust it'll work itself out in time.","Fortune"],["Figure out exactly what's fair here.","Justice"]]},
+  {q:"You realize something in your life needs to change. You:",a:[["Sit with it, even if it's uncomfortable, before acting.","Hanged Man"],["Cut it off clean, no half-measures.","Death"],["Look for the balance instead of the extreme.","Temperance"],["You already know exactly what you want instead.","Devil"]]},
+  {q:"Everything you had planned falls apart at once. You:",a:[["Honestly? A little relieved it's over.","Tower"],["Hold onto hope that it gets better.","Star"],["Go quiet and process it your own way.","Moon"],["Treat it as a real chance to start over.","Judgement"]]},
+  {q:"People who know you well would say you're the one who:",a:[["Always gives people a second chance.","Judgement"],["Finishes what everyone else gives up on.","World"],["Keeps hope alive for the group.","Star"],["Makes hard days feel a little lighter.","Sun"]]},
+  {q:"On your best days, you're the person who:",a:[["Lights up whatever room you're in.","Sun"],["Notices what nobody else does.","Moon"],["Actually finishes the thing.","World"],["Isn't afraid to blow it up and start over.","Tower"]]},
+  {q:"When you really want something, you:",a:[["Go get it, no apologies.","Devil"],["Find a way that doesn't cost you everything else.","Temperance"],["Let go of whatever's in the way, completely.","Death"],["Wait it out, even if it's painful.","Hanged Man"]]},
+  {q:"Someone asks you to pick a side in something messy. You:",a:[["Look at the facts and call it straight.","Justice"],["Figure the truth comes out eventually anyway.","Fortune"],["Stay out of it — not your fight.","Hermit"],["Say what you think, calmly, once.","Strength"]]},
+  {q:"You've set your sights on something big. You:",a:[["Go straight at it, full speed.","Chariot"],["Bring the people you care about along for it.","Lovers"],["Build the community that'll get you there.","Hierophant"],["Build the plan first, then execute it.","Emperor"]]},
+  {q:"The energy you bring into a room is usually:",a:[["Warm — people just relax around you.","Empress"],["Quiet, but people can tell you're paying attention.","Priestess"],["Sharp — you make things happen.","Magician"],["Unpredictable, in a good way.","Fool"]]},
 ];
-let quizAnswers=[];
+const ARCANA_FLAVOR={
+  Fool:"You leap first and figure out the landing later.",
+  Magician:"You turn raw will into results.",
+  Priestess:"You know more than you let on.",
+  Empress:"You make people feel safe just by being there.",
+  Emperor:"You build the structure everyone else leans on.",
+  Hierophant:"You hold the group together, quietly, constantly.",
+  Lovers:"You choose people, over and over, on purpose.",
+  Chariot:"You don't wait for permission to move.",
+  Strength:"Calm isn't the absence of feeling — it's choosing anyway.",
+  Hermit:"You do your best thinking alone.",
+  Fortune:"You trust the timing, even when it's messy.",
+  Justice:"You can't let an unfair thing just sit there.",
+  "Hanged Man":"You carry weight others never see.",
+  Death:"You let things end so something else can start.",
+  Temperance:"You find the middle path nobody else can see.",
+  Devil:"You know exactly what you want, and you don't apologize for it.",
+  Tower:"Sometimes you just have to let it all fall down.",
+  Star:"You're the reason people still have hope.",
+  Moon:"What you show isn't always what's true underneath.",
+  Sun:"You make ordinary moments feel bigger.",
+  Judgement:"You're always one conversation away from starting over.",
+  World:"You finish what you start, completely.",
+};
+const quizChime=(notes)=>{ try{ const ac=window.__sxac||(window.__sxac=new (window.AudioContext||window.webkitAudioContext)()); notes.forEach(([f,at,len,type])=>{ const o=ac.createOscillator(), g=ac.createGain(); o.type=type||"sine"; o.frequency.value=f; g.gain.setValueAtTime(.0001,ac.currentTime+at); g.gain.exponentialRampToValueAtTime(.06,ac.currentTime+at+.02); g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+at+len); o.connect(g); g.connect(ac.destination); o.start(ac.currentTime+at); o.stop(ac.currentTime+at+len+.05); }); }catch(e){} };
+let quizAnswers=[], quizIdx=0;
 function paintQuiz(){
-  quizAnswers=[]; const box=$("quizBody"); box.innerHTML=""; show($("quizResult"),false); show($("quizBody"));
-  QUIZ.forEach((item,qi)=>{
-    const card=el("div","quizq"); card.append(el("div","quizqtext",item.q));
-    const opts=el("div","quizopts");
-    item.a.forEach(([label,arc],ai)=>{
-      const b=el("button","quizopt"); b.type="button"; b.textContent=label;
-      b.onclick=()=>{ quizAnswers[qi]=arc; [...opts.children].forEach(c=>c.classList.remove("on")); b.classList.add("on"); maybeFinishQuiz(); };
-      opts.append(b);
-    });
-    card.append(opts); box.append(card);
-  });
+  quizAnswers=[]; quizIdx=0; show($("quizShuffle"),false); show($("quizBody"),true);
+  renderQuizQuestion();
 }
-async function maybeFinishQuiz(){
-  if(quizAnswers.filter(Boolean).length<QUIZ.length) return;
+function renderQuizQuestion(){
+  const box=$("quizBody"); box.innerHTML="";
+  const dots=el("div","quizdots");
+  QUIZ.forEach((_,i)=>dots.append(el("span","quizdot"+(i<quizIdx?" done":i===quizIdx?" on":""))));
+  box.append(dots);
+  const item=QUIZ[quizIdx];
+  const card=el("div","quizq quizq-in");
+  card.append(el("div","quizqnum",`Card ${quizIdx+1} of ${QUIZ.length}`));
+  card.append(el("div","quizqtext",item.q));
+  const opts=el("div","quizopts");
+  item.a.forEach(([label,arc])=>{
+    const btn=el("button","quizopt"); btn.type="button"; btn.textContent=label;
+    btn.onclick=()=>selectQuizAnswer(arc,card,btn);
+    opts.append(btn);
+  });
+  card.append(opts); box.append(card);
+  quizChime([[440,0,.06,"triangle"]]);
+}
+function selectQuizAnswer(arc,card,btn){
+  quizAnswers[quizIdx]=arc;
+  [...card.querySelectorAll(".quizopt")].forEach(b=>{ b.disabled=true; if(b!==btn) b.classList.add("fade"); });
+  btn.classList.add("on");
+  card.classList.add("quizq-out");
+  quizChime([[660,0,.08,"triangle"]]);
+  setTimeout(()=>{ quizIdx++; if(quizIdx>=QUIZ.length) startQuizShuffle(); else renderQuizQuestion(); },420);
+}
+function startQuizShuffle(){
+  show($("quizBody"),false); show($("quizShuffle"),true);
+  quizChime([[220,0,.1,"square"],[220,.15,.1,"square"],[220,.3,.1,"square"],[220,.45,.1,"square"]]);
+  setTimeout(finishQuiz,2000);
+}
+async function finishQuiz(){
   const tally={}; quizAnswers.forEach(a=>tally[a]=(tally[a]||0)+1);
   const winner=Object.entries(tally).sort((a,b)=>b[1]-a[1])[0][0];
   try{ await api.saveArcana(winner); meProfile.arcana=winner; cache.set(user.id,meProfile); }catch(e){}
-  show($("quizBody"),false);
-  $("quizArcanaName").textContent=winner;
-  show($("quizResult")); paintArcanaBadge();
+  show($("quizSheet"),false); show($("quizShuffle"),false); show($("profile"),false);
+  revealArcana(winner);
+  paintArcanaBadge();
+}
+function revealArcana(arcana){
+  const layer=$("sfx"), w=document.createElement("div"); w.className="arcana-reveal";
+  w.innerHTML=`<div class="arcana-burst"></div>
+    <div class="arcana-card"><div class="arcana-back"><span>✦</span></div>
+      <div class="arcana-front"><div class="arcana-name">${arcana}</div><div class="arcana-flavor">${ARCANA_FLAVOR[arcana]||""}</div></div>
+    </div>
+    <div class="arcana-actions"><button type="button" class="send arcana-done">Nice.</button><button type="button" class="linkbtn arcana-again">Retake the quiz</button></div>`;
+  layer.append(w);
+  const burst=w.querySelector(".arcana-burst");
+  for(let i=0;i<16;i++){ const s=document.createElement("i"); s.style.setProperty("--a",(i*(360/16))+"deg"); burst.append(s); }
+  setTimeout(()=>{ w.classList.add("flip"); quizChime([[523,0,.15,"sine"],[659,.1,.15,"sine"],[784,.2,.1,"sine"],[1047,.32,.35,"sine"]]); if(navigator.vibrate) navigator.vibrate([20,30,20,30,120]); burst.classList.add("go"); },850);
+  w.querySelector(".arcana-done").onclick=()=>w.remove();
+  w.querySelector(".arcana-again").onclick=()=>{ w.remove(); openQuiz(); };
+  setTimeout(()=>{ if(w.isConnected) w.remove(); },10000);
 }
 function openQuiz(){ paintQuiz(); show($("quizSheet")); }
 $("openQuiz").onclick=openQuiz;
 $("quizClose").onclick=()=>show($("quizSheet"),false);
-$("quizRetake").onclick=paintQuiz;
+
 function paintArcanaBadge(){ const n=$("myArcana"); if(!n) return; n.textContent=meProfile?.arcana?("🃏 "+meProfile.arcana):""; show(n,!!meProfile?.arcana); }
 
 /* ================= SOCIAL LINKS ================= */
