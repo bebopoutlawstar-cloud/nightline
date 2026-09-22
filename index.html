@@ -1605,6 +1605,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .habitmid{flex:1;min-width:0;text-align:left}
 .habitlabel{font-size:15px;color:var(--white)}
 .habitmid small{color:var(--muted);font-size:12px}
+.habitminus{flex:none;width:30px;height:30px;border:2px solid var(--mag);background:none;color:var(--mag);font-size:18px;line-height:1;border-radius:50%;padding:0}
 .habitdel{flex:none;background:none;border:none;color:var(--mag);font-size:14px;padding:4px}
 .habitform{display:grid;gap:8px;width:100%;border-top:2px dashed #3b2d80;padding-top:12px;margin-top:4px}
 .habitform .row2{display:flex;gap:8px}
@@ -2109,7 +2110,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 <div class="overlay hidden" id="habitsSheet" role="dialog" aria-modal="true" aria-labelledby="habitsTitle">
   <div class="sheet"><div class="sheetbody">
     <h2 id="habitsTitle">Habits & Stats</h2>
-    <p class="sub">Check off a habit once a day. Each one feeds a stat — and your overall level.</p>
+    <p class="sub">Tap a habit each time you do it. Every tap feeds a stat — and your overall level.</p>
     <div class="statbars" id="statBars"></div>
     <h3>Today</h3>
     <p class="sub" id="habitSummary"></p>
@@ -2260,14 +2261,12 @@ function kcBotPath(state,mark){
   return null;
 }
 function kcAllChains(b,start,mark){
-  const results=[]; const walk=(board,path)=>{
-    const jumps=kcJumpTargets(board,path[path.length-1]).filter(j=>true);
+  const results=[]; const walk=(board,path,seen)=>{
+    const jumps=kcJumpTargets(board,path[path.length-1]).filter(j=>!seen.has(j.land));
     if(!jumps.length){ if(path.length>1) results.push(path.slice()); return; }
-    let any=false;
-    for(const j of jumps){ const nb=board.slice(); nb[j.land]=mark; nb[path[path.length-1]]=""; any=true; walk(nb,[...path,j.land]); }
-    if(!any&&path.length>1) results.push(path.slice());
+    for(const j of jumps){ const nb=board.slice(); nb[j.land]=mark; nb[path[path.length-1]]=""; walk(nb,[...path,j.land],new Set([...seen,j.land])); }
   };
-  walk(b,[start]);
+  walk(b,[start],new Set([start]));
   return results;
 }
 function kcCourtCount(b,mark){ return b.reduce((n,v,i)=>n+(v===mark&&kcInCourt(i)?1:0),0); }
@@ -2540,8 +2539,9 @@ const live = {
   async habits(){ return must(await sb.from("habits").select("*").eq("archived",false).order("created_at")); },
   async createHabit(label,stat,reminder_time){ return must(await sb.from("habits").insert({label,stat,reminder_time:reminder_time||null}).select().single()); },
   async archiveHabit(id){ must(await sb.from("habits").update({archived:true}).eq("id",id)); },
-  async habitLogs(since){ return must(await sb.from("habit_logs").select("habit_id,done_on").gte("done_on",since)); },
+  async habitLogs(since){ return must(await sb.from("habit_logs").select("habit_id,done_on,count").gte("done_on",since)); },
   async toggleHabit(id,date){ return must(await sb.rpc("toggle_habit",{p_habit:id,...(date?{p_date:date}:{})})); },
+  async bumpHabit(id,date,delta){ return must(await sb.rpc("bump_habit",{p_habit:id,p_date:date,p_delta:delta})); },
   async socialLinks(){ return must(await sb.from("social_links").select("*")); },
   async bumpSocialLink(otherId,amount){ return must(await sb.rpc("bump_social_link",{p_other:otherId,...(amount?{p_amount:amount}:{})})); },
   async saveArcana(arcana){ must(await sb.from("profiles").update({arcana}).eq("id",user.id)); },
@@ -2618,7 +2618,7 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     async unpin(id){ const p=pins[id]; delete pins[id]; setTimeout(()=>fire("pin",{message_id:id},false),30); },
     async games(ids){ return ids.map(i=>games[i]).filter(Boolean).map(g=>JSON.parse(JSON.stringify(g))); },
     async createGame(room,type){
-      const r=rooms[room], m={id:nextId++,room,user_id:"me",kind:"game",text:"Tic-tac-toe",created_at:iso()}; r.msgs.push(m);
+      const r=rooms[room], m={id:nextId++,room,user_id:"me",kind:"game",text:type==="kingscourt"?"King's Court":"Tic-tac-toe",created_at:iso()}; r.msgs.push(m);
       const other=r.is_dm?Object.keys(r.members).find(u=>u!=="me"):null;
       const st0 = type==="kingscourt" ? {board:kcInitialBoard(),turn:"x",winner:null,line:[],first_x:false,first_o:false,last:[]} : {board:Array(9).fill(""),turn:"x",winner:null,line:[]};
       games[m.id]={message_id:m.id,room,type,player_x:"me",player_o:other,status:other?"active":"waiting",state:st0,moves:0};
@@ -2728,13 +2728,14 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     async habitLogs(since){ return demoHabitLogs.filter(l=>l.done_on>=since); },
     async toggleHabit(id){ const today=iso().slice(0,10); const i=demoHabitLogs.findIndex(l=>l.habit_id===id&&l.done_on===today);
       if(i>=0){ demoHabitLogs.splice(i,1); return false; } demoHabitLogs.push({habit_id:id,user_id:"me",done_on:today}); return true; },
+          async bumpHabit(id,date,delta){ const log=demoHabitLogs.find(l=>l.habit_id===id&&l.done_on===date); if(!log){ if(delta<0) return 0; demoHabitLogs.push({habit_id:id,user_id:"me",done_on:date,count:1}); return 1; } log.count=(log.count||1)+delta; if(log.count<=0){ demoHabitLogs.splice(demoHabitLogs.indexOf(log),1); return 0; } return log.count; },
     async socialLinks(){ return [...demoSocialLinks.values()]; },
     async bumpSocialLink(otherId,amount){
       const a="me"<otherId?"me":otherId, b="me"<otherId?otherId:"me", key=a+"|"+b;
       let row=demoSocialLinks.get(key);
       const arcanas=["Fool","Magician","Priestess","Empress","Emperor","Hierophant","Lovers","Chariot","Strength","Hermit","Fortune","Justice","Hanged Man","Death","Temperance","Devil","Tower","Star","Moon","Sun","Judgement","World"];
       if(!row){ let h=0; for(const c of key) h=(h*31+c.charCodeAt(0))>>>0; row={user_a:a,user_b:b,xp:0,today_xp:0,today_date:null,arcana:arcanas[h%arcanas.length]}; demoSocialLinks.set(key,row); }
-      const today=iso().slice(0,10); if(row.today_date!==today) row.today_xp=0;
+      const today=localDay(new Date()); if(row.today_date!==today) row.today_xp=0;
       const grant=Math.max(0,Math.min(amount||3,24-row.today_xp)); row.xp+=grant; row.today_xp+=grant; row.today_date=today;
       return {...row};
     },
@@ -3954,6 +3955,7 @@ $("lbNext").onclick=e=>{ e.stopPropagation(); lbStep(1); };
 $("lightbox").onclick=()=>show($("lightbox"),false);
 ["profile","roomSheet","msgMenu","pollSheet","summarySheet","calSheet","searchSheet"].forEach(id=>$(id).addEventListener("click",e=>{ if(e.target.id===id) show($(id),false); }));
 addEventListener("keydown",e=>{
+  if(e.key==="Escape") closeTray();
   if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu","pollSheet","tray","themeSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","installSheet","habitsSheet","quizSheet","slSheet"].forEach(id=>{ const n=$(id); if(n) show(n,false); });
   if(!$("lightbox").classList.contains("hidden")&&lbAlbum){ if(e.key==="ArrowLeft") lbStep(-1); if(e.key==="ArrowRight") lbStep(1); }
 });
@@ -5208,9 +5210,9 @@ const DAY_ABBR="sun|mon|tues?|wed|thu(?:rs)?|fri|sat";
 const DAY_RE=DAY_FULL+"|"+DAY_ABBR;
 const TIME_RE="(?:\\d{1,2}(?::\\d{2})?\\s?(?:am|pm)|\\d{1,2}:\\d{2}|noon|midnight)";
 const DATE_PATTERNS=[
-  new RegExp(`(?<![a-z])(?:(?:this|next|on|every)\\s+)?(?:${DAY_FULL})(?![a-z])(?:\\s+(?:at\\s+)?${TIME_RE})?`,"i"),
-  new RegExp(`(?<![a-z])(?:this|next|on|every)\\s+(?:${DAY_ABBR})(?![a-z])(?:\\s+(?:at\\s+)?${TIME_RE})?`,"i"),
-  new RegExp(`(?<![a-z])(?:${DAY_ABBR})(?![a-z])\\s+(?:(?:at\\s+)?${TIME_RE}|at\\s+\\d{1,2}(?![0-9:]))`,"i"),
+  new RegExp(`\\b(?:(?:this|next|on|every)\\s+)?(?:${DAY_FULL})(?![a-z])(?:\\s+(?:at\\s+)?${TIME_RE})?`,"i"),
+  new RegExp(`\\b(?:this|next|on|every)\\s+(?:${DAY_ABBR})(?![a-z])(?:\\s+(?:at\\s+)?${TIME_RE})?`,"i"),
+  new RegExp(`\\b(?:${DAY_ABBR})(?![a-z])\\s+(?:(?:at\\s+)?${TIME_RE}|at\\s+\\d{1,2}(?![0-9:]))`,"i"),
   new RegExp(`\\b(?:tomorrow|tonight|today)\\b(?:\\s+(?:at\\s+)?${TIME_RE})?`,"i"),
   new RegExp(`\\b(?:${MONTH_RE})\\.?\\s+\\d{1,2}(?:st|nd|rd|th)?(?:,?\\s+\\d{4})?\\b(?:\\s+(?:at\\s+)?${TIME_RE})?`,"i"),
   new RegExp(`\\b\\d{1,2}\\/\\d{1,2}(?:\\/\\d{2,4})?\\b(?:\\s+(?:at\\s+)?${TIME_RE})?`,"i"),
@@ -5416,7 +5418,7 @@ SECRET_LIST.splice(SECRET_LIST.findIndex(s=>s.id==="konami"),0,
   {id:"hyperspace", name:"Hyperspace", re:/hyperspace|punch it|warp speed|lightspeed/i, play:()=>QX.hyperspace()},
   {id:"force", name:"The Force", re:/(may )?the force( be with you)?/i, play:()=>QX.force()},
   {id:"assimilate", name:"Assimilated", re:/resistance is futile/i, play:()=>QX.assimilate()},
-  {id:"fortytwo", name:"42", re:/(the )?answer (is|to everything)|(^|[^a-z0-9])42([^a-z0-9]|$)|don'?t panic/i, play:()=>QX.fortytwo()},
+  {id:"fortytwo", name:"42", re:/the answer to (life|everything)|^\s*42\s*$|don'?t panic/i, play:()=>QX.fortytwo()},
   {id:"spacecowboy", name:"Space cowboy", re:/space cowboy/i, play:()=>QX.spacecowboy()},
   {id:"terminate", name:"Hasta la vista", re:/hasta la vista/i, play:m=>QX.terminate(m)},
   {id:"yippee", name:"Yippee ki-yay", re:/yippee?[- ]?ki[- ]?yay/i, play:()=>QX.yippee()},
@@ -6113,7 +6115,7 @@ SECRET_LIST.splice(SECRET_LIST.findIndex(s=>s.id==="konami"),0,
   {id:"nonstop", name:"Non-stop Debate", re:/non-?stop debate/i, play:m=>QX.nonstop(m)},
   {id:"despair", name:"Despair", re:/(^|[^a-z])despair([^a-z]|$)/i, play:()=>QX.despair()},
   {id:"notguilty", name:"Not guilty verdict", re:/not guilty([^a-z]|$)/i, play:()=>QX.notGuilty()},
-  {id:"guilty", name:"Guilty verdict", re:/(^|[^a-z])guilty([^a-z]|$)/i, play:m=>QX.guilty(m)}
+  {id:"guilty", name:"Guilty verdict", re:/(^|[^a-z])guilty(?! pleasure)([^a-z]|$)/i, play:m=>QX.guilty(m)}
 );
 Object.assign(HINTS,{
   monokuma:"A two-toned bear headmaster, half kind, half cruel. Say his name, or his laugh.",
@@ -6188,13 +6190,20 @@ async function loadHabits(){
   try{ [myHabits,myHabitLogs]=await Promise.all([api.habits(),api.habitLogs("2000-01-01")]); habitsLoaded=true; }
   catch(e){ myHabits=[]; myHabitLogs=[]; }
 }
-function statCount(stat){ const ids=new Set(myHabits.filter(h=>h.stat===stat).map(h=>h.id)); return myHabitLogs.filter(l=>ids.has(l.habit_id)).length; }
-function doneToday(habitId){ const today=new Date().toISOString().slice(0,10); return myHabitLogs.some(l=>l.habit_id===habitId&&l.done_on===today); }
+function statCount(stat){ const ids=new Set(myHabits.filter(h=>h.stat===stat).map(h=>h.id)); return myHabitLogs.filter(l=>ids.has(l.habit_id)).reduce((n,l)=>n+(l.count||1),0); }
+function countToday(habitId){ const today=localDay(new Date()); const log=myHabitLogs.find(l=>l.habit_id===habitId&&l.done_on===today); return log?(log.count||1):0; }
+function localDay(d = new Date()){
+  const year  = d.getFullYear();
+  const month = (d.getMonth() + 1).toString().padStart(2, '0');
+  const day   = d.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+function doneToday(habitId){ const today=localDay(new Date()); return myHabitLogs.some(l=>l.habit_id===habitId&&l.done_on===today); }
 function habitStreak(habitId){
   const days=new Set(myHabitLogs.filter(l=>l.habit_id===habitId).map(l=>l.done_on));
   let n=0, d=new Date();
-  if(!days.has(d.toISOString().slice(0,10))) d.setDate(d.getDate()-1);
-  while(days.has(d.toISOString().slice(0,10))){ n++; d.setDate(d.getDate()-1); }
+  if(!days.has(localDay(d))) d.setDate(d.getDate()-1);
+  while(days.has(localDay(d))){ n++; d.setDate(d.getDate()-1); }
   return n;
 }
 
@@ -6212,30 +6221,38 @@ async function paintHabits(){
     row.append(mid); row.append(el("span","statnum",String(count)));
     bars.append(row);
   });
-  const total=myHabitLogs.filter(l=>myHabits.some(h=>h.id===l.habit_id)).length;
+  const total=myHabitLogs.filter(l=>myHabits.some(h=>h.id===l.habit_id)).reduce((n,l)=>n+(l.count||1),0);
   $("habitSummary").textContent=myHabits.length?`${myHabits.length} habit${myHabits.length===1?"":"s"} · ${total} total completion${total===1?"":"s"}`:"";
   const list=$("habitList"); list.innerHTML="";
   if(!myHabits.length) list.append(el("p","note","No habits yet. Add one below — each check-in builds a stat."));
-  myHabits.forEach(h=>{
-    const row=el("div","habitrow"+(doneToday(h.id)?" done":""));
-    const chk=el("button","habitchk"); chk.type="button"; chk.setAttribute("aria-label",(doneToday(h.id)?"Mark not done":"Mark done")+": "+h.label);
-    chk.textContent=doneToday(h.id)?"✓":""; chk.onclick=()=>toggleHabitUI(h);
+    myHabits.forEach(h=>{
+    const n=countToday(h.id);
+    const row=el("div","habitrow"+(n>0?" done":""));
+    const chk=el("button","habitchk"); chk.type="button";
+    chk.setAttribute("aria-label","Add one: "+h.label+(n?` (${n} today)`:""));
+    chk.textContent=n>1?String(n):n===1?"✓":"";
+    chk.onclick=()=>bumpHabitUI(h,1);
     const mid=el("div","habitmid");
-    const streak=habitStreak(h.id), lifetime=myHabitLogs.filter(l=>l.habit_id===h.id).length;
+    const streak=habitStreak(h.id), lifetime=myHabitLogs.filter(l=>l.habit_id===h.id).reduce((t,l)=>t+(l.count||1),0);
     mid.append(el("div","habitlabel",`${STAT_ICON[h.stat]} ${h.label}`));
-    const bits=[]; if(streak>0) bits.push(`🔥 ${streak} day streak`); bits.push(`${lifetime} total`); if(h.reminder_time) bits.push(`reminds at ${h.reminder_time}`);
+    const bits=[]; if(n>1) bits.push(`×${n} today`); if(streak>0) bits.push(`🔥 ${streak} day streak`); bits.push(`${lifetime} total`); if(h.reminder_time) bits.push(`reminds at ${h.reminder_time}`);
     mid.append(el("small","",bits.join(" · ")));
+    row.append(chk,mid);
+    if(n>0){ const minus=el("button","habitminus","−"); minus.type="button"; minus.setAttribute("aria-label","Remove one: "+h.label); minus.onclick=()=>bumpHabitUI(h,-1); row.append(minus); }
     const del=el("button","habitdel","✕"); del.type="button"; del.setAttribute("aria-label","Remove "+h.label);
     del.onclick=async()=>{ try{ await api.archiveHabit(h.id); myHabits=myHabits.filter(x=>x.id!==h.id); paintHabits(); }catch(e){} };
-    row.append(chk,mid,del); list.append(row);
+    row.append(del); list.append(row);
   });
 }
-async function toggleHabitUI(h){
+async function bumpHabitUI(h,delta){
   try{
-    const now=await api.toggleHabit(h.id);
-    const today=new Date().toISOString().slice(0,10);
-    if(now){ myHabitLogs.push({habit_id:h.id,user_id:user.id,done_on:today}); gainXP("habit"); }
+    const today=localDay(new Date());
+    const newCount=await api.bumpHabit(h.id,today,delta);
+    const log=myHabitLogs.find(l=>l.habit_id===h.id&&l.done_on===today);
+    if(newCount>0){ if(log) log.count=newCount; else myHabitLogs.push({habit_id:h.id,user_id:user.id,done_on:today,count:newCount}); }
     else myHabitLogs=myHabitLogs.filter(l=>!(l.habit_id===h.id&&l.done_on===today));
+        const xpKey="nl-habitxp-"+today+"-"+h.id;
+    if(delta>0&&newCount===1&&!localStorage.getItem(xpKey)){ gainXP("habit"); try{ localStorage.setItem(xpKey,"1"); }catch(e){} }
     paintHabits();
   }catch(e){ say("habitMsg",e.message,true); }
 }
@@ -6256,11 +6273,11 @@ function checkHabitReminders(){
   const now=new Date(), hm=String(now.getHours()).padStart(2,"0")+":"+String(now.getMinutes()).padStart(2,"0");
   const due=myHabits.find(h=>h.reminder_time&&h.reminder_time<=hm&&!doneToday(h.id));
   if(!due) return;
-  const key="nl-habit-nudged-"+new Date().toDateString()+"-"+due.id;
+  const key="nl-habit-nudged-"+localDay(new Date())+"-"+due.id;
   try{ if(localStorage.getItem(key)) return; localStorage.setItem(key,"1"); }catch(e){}
   const t=el("div","toast mention"); const body=el("span","tbody");
   body.append(el("div","ttitle","🎯 "+due.label), el("div","ttext","Still on your list for today."));
-  const btn=el("button","send","Mark done"); btn.type="button"; btn.onclick=()=>{ toggleHabitUI(due); t.remove(); };
+  const btn=el("button","send","Mark done"); btn.type="button"; btn.onclick=()=>{ bumpHabitUI(due,1); t.remove(); };
   t.append(el("span","sx-lock","🎯"),body,btn); $("toasts").prepend(t);
   setTimeout(()=>{ if(t.isConnected){ t.classList.add("out"); setTimeout(()=>t.remove(),260); } },8000);
 }
@@ -6520,7 +6537,7 @@ function applyDesktop(){
     const bar=document.createElement("div"); bar.className="termbar"; bar.id="termbar"; document.body.append(bar); }
   if(d){ $("chat").dataset.idle="▮ NIGHTLINE TERMINAL\n\nno channel open.\nselect a room on the left, or press  Ctrl+K  to search.\n\n> _"; paintTermBar(); }
 }
-function paintDeskDate(){ const n=$("deskDate"); if(!n) return; const d=new Date(); const wd=d.toLocaleDateString([],{weekday:"short"}), md=`${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")}`; const ph=(typeof phaseName==="function"?phaseName(d.getHours()):""); n.innerHTML=`<b>${md}</b><span>${wd}</span><span>· ${ph||d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}</span><span class="blink">_</span>`; }
+function paintDeskDate(){ const n=$("deskDate"); if(!n) return; const d=new Date(); const wd=d.toLocaleDateString([],{weekday:"short"}), md=`${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")}`; const ph=(typeof phaseOf==="function"?phaseOf(d.getHours()):""); n.innerHTML=`<b>${md}</b><span>${wd}</span><span>· ${ph||d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}</span><span class="blink">_</span>`; }
 setInterval(()=>{ if(document.body.classList.contains("desktop")) paintDeskDate(); },30000);
 function paintTermBar(){ paintDeskDate();
   const bar=$("termbar"); if(!bar) return;
@@ -6554,9 +6571,11 @@ bootSequence();
 setMode("in");
 api.onAuth((u,event)=>{
   if(event==="PASSWORD_RECOVERY"){ say("recMsg",""); show($("recover")); setTimeout(()=>$("newPass").focus(),50); }
-  if((u?.id||null)!==(user?.id||null)) handleAuth(u);
+  syncAuth(u);
 });
-api.session().then(handleAuth);
+let authSeen;
+function syncAuth(u){ const id=u?.id||null; if(id===authSeen) return; authSeen=id; handleAuth(u); }
+api.session().then(syncAuth);
 </script>
 </body>
 </html>
