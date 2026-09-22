@@ -1646,6 +1646,9 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .myarcana .ma-eyebrow{font-family:var(--tech);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--cyan)}
 .myarcana .ma-name{display:inline-block;font-family:var(--num);font-size:30px;line-height:1.1;color:var(--volt);text-shadow:2px 2px 0 var(--night),0 0 14px rgba(243,255,58,.5);letter-spacing:.5px;transform:rotate(-2deg)}
 /* social bond badge on friend rows + detail sheet */
+.theirarcana{cursor:default;margin:0 0 4px}
+.ta-flavor{font-size:13px;color:var(--muted);font-style:italic;margin-top:2px;max-width:26ch;text-align:center}
+.personbond{background:none;border:1.5px solid var(--cyan);color:var(--cyan);font-family:var(--tech);font-size:11px;letter-spacing:.5px;padding:6px 10px;margin-bottom:4px}
 .linkbadge{display:inline-flex;align-items:center;gap:4px;font-family:var(--tech);font-size:10px;color:var(--cyan);border:1px solid var(--cyan);padding:1px 6px;margin-left:6px}
 .sllink{display:grid;gap:10px;text-align:center;justify-items:center}
 .sl-eyebrow{font-family:var(--tech);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--cyan)}
@@ -2093,6 +2096,8 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     <h2 id="personName"></h2>
     <p class="sub" id="personSub"></p>
     <p class="friendtag hidden" id="personTag"></p>
+    <div class="myarcana theirarcana hidden" id="personArcana"></div>
+    <button type="button" class="personbond hidden" id="personBond"></button>
     <button class="go" type="button" id="personFriend">Add friend</button>
     <button class="ghost" type="button" id="personDm">Message privately</button>
     <p class="msgline" id="personMsg" role="status"></p>
@@ -2624,7 +2629,7 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     {id:5,room,user_id:"rook",kind:"poll",text:"Arcade or movies tonight?",created_at:iso(45000)},
     {id:6,room,user_id:"vee",kind:"sticker",sticker:"omw",created_at:iso(30000)}]};
   polls[5]={message_id:5,options:["Arcade","Movies","Both 😎"],multi:false}; votes.push({message_id:5,user_id:"vee",option_index:0});
-  people.vee.bubble_color="#0E3B4A";
+  people.vee.bubble_color="#0E3B4A"; people.vee.arcana="Priestess";
   { const d=new Date(); people.vee.birthday=String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
   reacts.push({message_id:2,user_id:"rook",emoji:"😂"});
   const fire=(f,...a)=>H&&H[f](...a);
@@ -2884,7 +2889,7 @@ async function handleAuth(u){
   maybeShowWhatsNew();
   refreshPushSubscription();
   loadHabits().then(()=>{ checkHabitReminders(); setInterval(checkHabitReminders,300000); });
-  loadSocialLinks().then(()=>{ if(user) loadContacts(); });
+  checkBondNews().then(()=>{ if(user) loadContacts(); });
   paintArcanaBadge();
   if(q.get("friend")){ const tok=q.get("friend"); history.replaceState(null,"",location.pathname); setTimeout(()=>handleFriendInvite(tok),400); }
   try{ const t=localStorage.getItem("nl-front-tab"); if(["chats","dms","contacts"].includes(t)) setFrontTab(t); }catch(e){}
@@ -4307,6 +4312,10 @@ function paintPerson(){
   const f=isFriend(uid), back=addedMe(uid);
   $("personTag").textContent = f&&back?"🤝 You're friends": f?"✓ On your friends list": back?"👋 Added you as a friend":"";
   show($("personTag"),f||back);
+  const pa=$("personArcana"); pa.innerHTML=""; show(pa,!!p.arcana);
+  if(p.arcana){ pa.append(el("span","ma-eyebrow",`🃏 ${p.username}'s Arcana`), el("span","ma-name",p.arcana)); if(ARCANA_FLAVOR[p.arcana]) pa.append(el("span","ta-flavor",ARCANA_FLAVOR[p.arcana])); }
+  const bond=socialLinks.get(uid), pb=$("personBond"); show(pb,!!bond);
+  if(bond){ const {rank}=rankFromXp(bond.xp); pb.textContent=`💫 Your Social Bond: ${bond.arcana} · Rank ${rank}`; pb.onclick=()=>{ show($("personSheet"),false); openSocialLink(uid); }; }
   $("personFriend").textContent = f?"Remove friend": back?"Add back 🤝":"Add friend";
   $("personFriend").className = f?"ghost":"go";
   show($("personDm"),!(isDm&&dmUser===uid));
@@ -4353,6 +4362,7 @@ const toastSeen=new Set();
 async function onAnyMessage(m){
   if(!user||!m||m.user_id===user.id||blocked.has(m.user_id)||toastSeen.has(m.id)) return;
   toastSeen.add(m.id);
+  if(String(m.room).startsWith("dm-")) bondCheckSoon();
   const viewingIt = m.room===room && !$("chat").classList.contains("hidden") && !document.hidden;
   if(!$("front").classList.contains("hidden")) loadInboxSoon();
   if(viewingIt) return;
@@ -6505,11 +6515,49 @@ function linkBadge(uid){
   const {rank}=rankFromXp(row.xp);
   const b=el("span","linkbadge",`${row.arcana} · Rank ${rank}`); return b;
 }
+/* Each phone remembers the last rank it saw for every bond. Anything new since then (a bond someone
+   else started, or a rank-up their messages caused) gets announced when you open the app or get a DM. */
+const bondKey=()=>"nl-bond-ranks-"+(user?.id||"");
+function bondSeen(){ try{ return JSON.parse(localStorage.getItem(bondKey())); }catch(e){ return null; } }
+function bondRemember(map){ try{ localStorage.setItem(bondKey(),JSON.stringify(map)); }catch(e){} }
+function bondRememberOne(uid,rank){ const m=bondSeen(); if(!m) return; m[uid]=rank; bondRemember(m); }
+let bondChecking=false, bondTimer=null;
+function bondCheckSoon(ms=4000){ clearTimeout(bondTimer); bondTimer=setTimeout(checkBondNews,ms); }
+async function checkBondNews(){
+  if(!user||bondChecking) return; bondChecking=true;
+  try{
+    await loadSocialLinks();
+    const seen=bondSeen(), now={}, news=[];
+    socialLinks.forEach((r,uid)=>{ const rank=rankFromXp(r.xp).rank; now[uid]=rank;
+      if(seen&&seen[uid]===undefined) news.push({uid,r,rank,fresh:true});
+      else if(seen&&rank>seen[uid]) news.push({uid,r,rank}); });
+    bondRemember(now);                                  // first run on a device just learns quietly
+    if(!news.length) return;
+    await ensureProfiles(news.map(n=>n.uid));
+    news.forEach((n,i)=>setTimeout(()=>bondToast(n),600+i*900));
+    const up=news.find(n=>!n.fresh);
+    if(up&&fxEnabled()&&!reducedMotion()) setTimeout(()=>QX.rankup(nameOf(up.uid),up.r.arcana,up.rank),400);
+    if(!$("contactsPane").classList.contains("hidden")) loadContacts();
+  }finally{ bondChecking=false; }
+}
+function bondToast(n){
+  const name=cache.get(n.uid)?.username||"a friend";
+  const t=el("button","toast mention"); t.type="button";
+  const f=el("span","face"); paintFace(f,cache.get(n.uid));
+  const body=el("span","tbody");
+  body.append(el("div","ttitle",n.fresh?"💫 New Social Bond":"💫 Social Bond ranked up"),
+              el("div","ttext",n.fresh?`${n.r.arcana} with ${name} · Rank ${n.rank}`:`${name} · ${n.r.arcana} Rank ${n.rank}`));
+  t.append(f,body); t.onclick=()=>{ t.remove(); openSocialLink(n.uid); };
+  $("toasts").prepend(t); setTimeout(()=>{ if(t.isConnected){ t.classList.add("out"); setTimeout(()=>t.remove(),260); } },7000);
+  if(navigator.vibrate) navigator.vibrate([20,40,20]);
+}
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden&&user) bondCheckSoon(1500); });
+
 async function bumpLink(otherUid){
   if(!otherUid||otherUid===user.id) return;
   try{
     const before=socialLinks.get(otherUid), beforeRank=before?rankFromXp(before.xp).rank:0;
-    const row=await api.bumpSocialLink(otherUid); socialLinks.set(otherUid,row);
+    const row=await api.bumpSocialLink(otherUid); socialLinks.set(otherUid,row); bondRememberOne(otherUid,rankFromXp(row.xp).rank);
     const {rank}=rankFromXp(row.xp);
     if(rank>beforeRank&&fxEnabled()&&typeof QX!=="undefined"&&QX.rankup) QX.rankup(nameOf(otherUid),row.arcana,rank);
     if(rank>beforeRank) setTimeout(checkUnlocks,900);
@@ -6530,8 +6578,13 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.22c";
+const APP_VERSION="2026.09.22d";
 const CHANGELOG=[
+  {v:"2026.09.22d", title:"Bonds & Arcana 💫", items:[
+    "💫 You'll now get a heads-up when a friend starts a Social Bond with you or ranks it up, even if their messages did it while you were away.",
+    "🃏 Tap anyone's picture to see their own Arcana from the quiz, plus your Social Bond with them.",
+    "🤔 Quick tip: your Social Bond card belongs to your friendship, so it can be different from each person's own quiz Arcana.",
+  ]},
   {v:"2026.09.22c", title:"Glitch squashed 🧹", items:[
     "🧹 Fixed weird lines getting stuck on screen after an effect (like GG) if you left the app mid-effect. (Found by Xen!)",
   ]},
