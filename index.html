@@ -1588,7 +1588,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .lbnav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;background:rgba(7,4,26,.7);border:2px solid var(--cyan);color:var(--white);font-size:18px;z-index:2;border-radius:50%}
 .lbprev{left:10px}
 .lbnext{right:10px}
-/* ===== habits, stats, quiz, social links ===== */
+/* ===== habits, stats, quiz, social bonds ===== */
 .statbars{display:grid;gap:10px;width:100%}
 .statrow{display:flex;align-items:center;gap:10px}
 .staticon{font-size:20px;flex:none;width:26px;text-align:center}
@@ -1644,9 +1644,10 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .myarcana:active .ma-name{transform:rotate(-2deg) scale(.96)}
 .myarcana .ma-eyebrow{font-family:var(--tech);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--cyan)}
 .myarcana .ma-name{display:inline-block;font-family:var(--num);font-size:30px;line-height:1.1;color:var(--volt);text-shadow:2px 2px 0 var(--night),0 0 14px rgba(243,255,58,.5);letter-spacing:.5px;transform:rotate(-2deg)}
-/* social link badge on friend rows + detail sheet */
+/* social bond badge on friend rows + detail sheet */
 .linkbadge{display:inline-flex;align-items:center;gap:4px;font-family:var(--tech);font-size:10px;color:var(--cyan);border:1px solid var(--cyan);padding:1px 6px;margin-left:6px}
 .sllink{display:grid;gap:10px;text-align:center;justify-items:center}
+.sl-eyebrow{font-family:var(--tech);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--cyan)}
 .slarcananame{font-family:var(--num);font-size:34px;color:var(--volt);text-shadow:3px 3px 0 var(--night)}
 .slrank{font-family:var(--tech);font-size:14px;color:var(--cyan)}
 .slbar{width:100%;height:12px;border:2px solid var(--cyan);background:var(--deep)}
@@ -2144,10 +2145,11 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
   </div></div>
 </div>
 
-<!-- ============ SOCIAL LINK DETAIL ============ -->
+<!-- ============ SOCIAL BOND DETAIL ============ -->
 <div class="overlay hidden" id="slSheet" role="dialog" aria-modal="true" aria-labelledby="slName">
   <div class="sheet"><div class="sheetbody">
     <div class="sllink">
+      <div class="sl-eyebrow">💫 Social Bond</div>
       <h2 id="slName"></h2>
       <div class="slarcananame" id="slArcana"></div>
       <div class="slrank" id="slRank"></div>
@@ -6122,7 +6124,7 @@ function checkMissedSecret(){
   },1400);
 }
 
-/* ================= HABITS, STATS, SOCIAL LINKS, ARCANA ================= */
+/* ================= HABITS, STATS, SOCIAL BONDS, ARCANA ================= */
 const STATS=["guts","knowledge","charm","kindness","proficiency"];
 const STAT_LABEL={guts:"Guts",knowledge:"Knowledge",charm:"Charm",kindness:"Kindness",proficiency:"Proficiency"};
 const STAT_ICON={guts:"🔥",knowledge:"📘",charm:"💫",kindness:"💚",proficiency:"🛠️"};
@@ -6330,7 +6332,8 @@ function paintArcanaBadge(){
   n.onclick=openQuiz;
 }
 
-/* ================= SOCIAL LINKS ================= */
+/* ================= SOCIAL BONDS ================= */
+// "Social Bond" is our own name for this feature (kept generic, not tied to any game’s specific term).
 const RANK_STEPS=[0,30,70,120,180,250,330,420,520,630];
 function rankFromXp(xp){ let r=1; for(let i=1;i<RANK_STEPS.length;i++) if(xp>=RANK_STEPS[i]) r=i+1; const into=xp-RANK_STEPS[r-1], need=r>=10?0:RANK_STEPS[r]-RANK_STEPS[r-1]; return {rank:Math.min(r,10),into,need}; }
 let socialLinks=new Map();   // other uid -> row
