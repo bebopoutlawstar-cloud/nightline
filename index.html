@@ -1580,6 +1580,51 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .lbnav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;background:rgba(7,4,26,.7);border:2px solid var(--cyan);color:var(--white);font-size:18px;z-index:2;border-radius:50%}
 .lbprev{left:10px}
 .lbnext{right:10px}
+/* ===== habits, stats, quiz, social links ===== */
+.statbars{display:grid;gap:10px;width:100%}
+.statrow{display:flex;align-items:center;gap:10px}
+.staticon{font-size:20px;flex:none;width:26px;text-align:center}
+.statmid{flex:1;min-width:0;display:grid;gap:3px}
+.statname{font-size:13px;color:var(--white);text-align:left}
+.statbar{height:10px;border:2px solid var(--cyan);background:var(--deep)}
+.statfill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--volt))}
+.statnum{font-family:var(--num);font-size:16px;color:var(--volt);flex:none;width:28px;text-align:right}
+.habitlist{display:grid;gap:8px;width:100%}
+.habitrow{display:flex;align-items:center;gap:10px;border:2px solid #3b2d80;padding:8px 10px;background:rgba(0,0,0,.25)}
+.habitrow.done{border-color:#2ee66b;background:rgba(46,230,107,.08)}
+.habitchk{flex:none;width:30px;height:30px;border:2px solid var(--cyan);background:none;color:var(--volt);font-size:16px;border-radius:50%}
+.habitrow.done .habitchk{background:#2ee66b;border-color:#2ee66b;color:#07041A}
+.habitmid{flex:1;min-width:0;text-align:left}
+.habitlabel{font-size:15px;color:var(--white)}
+.habitmid small{color:var(--muted);font-size:12px}
+.habitdel{flex:none;background:none;border:none;color:var(--mag);font-size:14px;padding:4px}
+.habitform{display:grid;gap:8px;width:100%;border-top:2px dashed #3b2d80;padding-top:12px;margin-top:4px}
+.habitform .row2{display:flex;gap:8px}
+.habitform select,.habitform input[type="time"]{flex:1;background:var(--deep);border:2px solid var(--cyan);color:var(--white);padding:8px;font-family:var(--body)}
+/* quiz */
+.quizq{width:100%;text-align:left;margin-bottom:14px}
+.quizqtext{font-size:15px;color:var(--white);margin-bottom:8px}
+.quizopts{display:grid;gap:6px}
+.quizopt{background:var(--deep);border:2px solid #3b2d80;color:var(--white);padding:9px 12px;text-align:left;font-size:14px}
+.quizopt.on{border-color:var(--volt);background:rgba(243,255,58,.1)}
+.quizresult{text-align:center;display:grid;gap:6px;justify-items:center}
+.quizarcana{font-family:var(--num);font-size:40px;color:var(--volt);text-shadow:3px 3px 0 var(--night)}
+.myarcana{display:inline-block;font-family:var(--tech);font-size:11px;color:var(--volt);border:1.5px solid var(--volt);padding:2px 8px;margin-top:4px}
+/* social link badge on friend rows + detail sheet */
+.linkbadge{display:inline-flex;align-items:center;gap:4px;font-family:var(--tech);font-size:10px;color:var(--cyan);border:1px solid var(--cyan);padding:1px 6px;margin-left:6px}
+.sllink{display:grid;gap:10px;text-align:center;justify-items:center}
+.slarcananame{font-family:var(--num);font-size:34px;color:var(--volt);text-shadow:3px 3px 0 var(--night)}
+.slrank{font-family:var(--tech);font-size:14px;color:var(--cyan)}
+.slbar{width:100%;height:12px;border:2px solid var(--cyan);background:var(--deep)}
+.slbar i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--volt))}
+/* rank-up celebration */
+.sl-rankup{position:absolute;inset:0;background:rgba(7,4,26,.55);animation:sxfadein .2s ease both}
+.sl-card{position:absolute;left:50%;top:42%;width:min(84vw,340px);background:#07041A;border:5px solid var(--volt);box-shadow:10px 10px 0 var(--mag);padding:18px 26px;text-align:center;animation:sxslam 2.6s cubic-bezier(.2,1.4,.4,1) both}
+.sl-rankt{font-family:var(--num);font-size:clamp(32px,11vw,52px);color:var(--volt)}
+.sl-arcana{font-family:var(--num);font-size:clamp(20px,7vw,30px);color:#fff;margin-top:2px}
+.sl-sub{font-family:var(--tech);font-size:13px;color:var(--cyan);margin-top:4px}
+.face.frame-guts .fi{box-shadow:0 0 0 3px #ff7a1a,0 0 14px 4px rgba(255,122,26,.7)}
+.face.frame-bonded .fi{box-shadow:0 0 0 3px #ff5aa8,0 0 14px 4px rgba(255,90,168,.7)}
 </style>
 </head>
 <body>
@@ -1772,6 +1817,9 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     <button class="ghost" type="button" id="fxBtn">Screen effects: On</button>
     <details class="fx-list"><summary>Words and emoji that trigger effects</summary><ul id="fxList"></ul></details>
     <div class="xpbox"><div class="xphead"><b id="xpLevel">LV 1</b><span id="xpTitle">Newcomer</span></div><div class="xpbar"><i id="xpFill"></i></div><div class="xptext" id="xpText"></div><div class="xpways" id="xpWays"></div></div>
+    <span class="myarcana hidden" id="myArcana"></span>
+    <button type="button" class="ghost" id="openHabits">🎯 Habits & Stats</button>
+    <button type="button" class="ghost" id="openQuiz">🃏 Who are you? (personality quiz)</button>
     <div class="unlockbox"><div class="unlockcount" id="unlockCount"></div><div id="unlockList"></div></div>
     <div class="secretbox">
       <div class="secretcount" id="secretCount">🔓 Secrets found: 0</div>
@@ -1987,6 +2035,65 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 </div>
 
 <div class="toasts" id="toasts" aria-live="polite"></div>
+<!-- ============ HABITS & STATS ============ -->
+<div class="overlay hidden" id="habitsSheet" role="dialog" aria-modal="true" aria-labelledby="habitsTitle">
+  <div class="sheet"><div class="sheetbody">
+    <h2 id="habitsTitle">Habits & Stats</h2>
+    <p class="sub">Check off a habit once a day. Each one feeds a stat — and your overall level.</p>
+    <div class="statbars" id="statBars"></div>
+    <h3>Today</h3>
+    <div class="habitlist" id="habitList"></div>
+    <form class="habitform" id="habitForm">
+      <label for="habitLabel" class="sr">New habit</label>
+      <input class="field" id="habitLabel" maxlength="40" placeholder="e.g. Drink water" autocomplete="off">
+      <div class="row2">
+        <label for="habitStat" class="sr">Stat</label>
+        <select id="habitStat">
+          <option value="guts">🔥 Guts</option>
+          <option value="knowledge">📘 Knowledge</option>
+          <option value="charm">💫 Charm</option>
+          <option value="kindness">💚 Kindness</option>
+          <option value="proficiency">🛠️ Proficiency</option>
+        </select>
+        <label for="habitTime" class="sr">Daily reminder (optional)</label>
+        <input type="time" id="habitTime">
+      </div>
+      <button class="send" type="submit">Add habit</button>
+    </form>
+    <p class="msgline" id="habitMsg" role="status"></p>
+    <button class="ghost" type="button" id="habitsClose">Close</button>
+  </div></div>
+</div>
+
+<!-- ============ PERSONALITY QUIZ ============ -->
+<div class="overlay hidden" id="quizSheet" role="dialog" aria-modal="true" aria-labelledby="quizTitle">
+  <div class="sheet"><div class="sheetbody">
+    <h2 id="quizTitle">Who are you?</h2>
+    <p class="sub">Answer honestly. Your Arcana shows on your profile.</p>
+    <div id="quizBody"></div>
+    <div class="quizresult hidden" id="quizResult">
+      <div class="quizarcana" id="quizArcanaName"></div>
+      <p class="sub">That's your Arcana now.</p>
+      <button class="ghost" type="button" id="quizRetake">Retake the quiz</button>
+    </div>
+    <button class="ghost" type="button" id="quizClose">Close</button>
+  </div></div>
+</div>
+
+<!-- ============ SOCIAL LINK DETAIL ============ -->
+<div class="overlay hidden" id="slSheet" role="dialog" aria-modal="true" aria-labelledby="slName">
+  <div class="sheet"><div class="sheetbody">
+    <div class="sllink">
+      <h2 id="slName"></h2>
+      <div class="slarcananame" id="slArcana"></div>
+      <div class="slrank" id="slRank"></div>
+      <div class="slbar"><i id="slFill"></i></div>
+      <p class="sub" id="slText"></p>
+    </div>
+    <button class="ghost" type="button" id="slClose">Close</button>
+  </div></div>
+</div>
+
 <!-- ============ SEARCH SHEET ============ -->
 <div class="overlay hidden" id="searchSheet" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
   <div class="sheet"><div class="sheetbody">
@@ -2358,6 +2465,14 @@ const live = {
   async block(uid){ must(await sb.from("blocks").insert({blocked:uid})); },
   async unblock(uid){ must(await sb.from("blocks").delete().eq("blocked",uid)); },
   async savePush(json){ must(await sb.from("push_subscriptions").upsert({endpoint:json.endpoint,p256dh:json.keys.p256dh,auth:json.keys.auth},{onConflict:"endpoint"})); },
+  async habits(){ return must(await sb.from("habits").select("*").eq("archived",false).order("created_at")); },
+  async createHabit(label,stat,reminder_time){ return must(await sb.from("habits").insert({label,stat,reminder_time:reminder_time||null}).select().single()); },
+  async archiveHabit(id){ must(await sb.from("habits").update({archived:true}).eq("id",id)); },
+  async habitLogs(since){ return must(await sb.from("habit_logs").select("habit_id,done_on").gte("done_on",since)); },
+  async toggleHabit(id,date){ return must(await sb.rpc("toggle_habit",{p_habit:id,...(date?{p_date:date}:{})})); },
+  async socialLinks(){ return must(await sb.from("social_links").select("*")); },
+  async bumpSocialLink(otherId,amount){ return must(await sb.rpc("bump_social_link",{p_other:otherId,...(amount?{p_amount:amount}:{})})); },
+  async saveArcana(arcana){ must(await sb.from("profiles").update({arcana}).eq("id",user.id)); },
   async deletePush(endpoint){ await sb.from("push_subscriptions").delete().eq("endpoint",endpoint); },
   async testPush(){ const {data,error}=await sb.functions.invoke("notify",{body:{selfTest:true}}); if(error){ let msg=error.message; try{ const jj=await error.context?.json(); if(jj?.error) msg=jj.error; }catch(e){} throw new Error(msg); } return data; },
   subscribe(room,h){
@@ -2392,6 +2507,9 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
   const iso=(ago=0)=>new Date(Date.now()-ago).toISOString();
   const people={rook:{id:"rook",username:"Rook",avatar_url:null},vee:{id:"vee",username:"Vee",avatar_url:null}};
   const games={};
+  const demoHabits=[{id:1,user_id:"me",label:"Drink water",stat:"guts",reminder_time:null,archived:false,created_at:iso(9e7)},{id:2,user_id:"me",label:"Read 10 pages",stat:"knowledge",reminder_time:null,archived:false,created_at:iso(9e7)}];
+  let demoHabitId=3; const demoHabitLogs=[{habit_id:1,user_id:"me",done_on:new Date(Date.now()-864e5).toISOString().slice(0,10)}];
+  const demoSocialLinks=new Map([["me|vee",{user_a:"me",user_b:"vee",xp:9,today_xp:9,today_date:iso().slice(0,10),arcana:"Star"}]]);
   function demoBot(id){ const g=games[id]; if(!g||g.status!=="active") return; const mark=g.player_x==="me"?"o":"x"; if(g.state.turn!==mark) return;
     const cell=tttBotMove(g.state.board,mark); applyTTT(g,cell,mark); fire("game",JSON.parse(JSON.stringify(g))); }
   const rooms={}, reacts=[], blocked=new Set(), polls={}, votes=[], pins={}, contacts=new Set(["vee"]); let ALL=null, FRIEND=null;
@@ -2532,6 +2650,25 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     async unreact(message_id,uid,emoji){ const i=reacts.findIndex(r=>r.message_id===message_id&&r.user_id===uid&&r.emoji===emoji); if(i>=0) reacts.splice(i,1); setTimeout(()=>fire("reaction",{message_id,user_id:uid,emoji},false),30); },
     async blocks(){ return [...blocked]; }, async block(uid){ blocked.add(uid); }, async unblock(uid){ blocked.delete(uid); },
     async savePush(){}, async deletePush(){}, async testPush(){ return {sent:1,devices:1,demo:true}; },
+    async habits(){ return demoHabits.filter(h=>!h.archived); },
+    async createHabit(label,stat,reminder_time){ const h={id:demoHabitId++,user_id:"me",label,stat,reminder_time:reminder_time||null,archived:false,created_at:iso()}; demoHabits.push(h); return h; },
+    async archiveHabit(id){ const h=demoHabits.find(h=>h.id===id); if(h) h.archived=true; },
+    async habitLogs(since){ return demoHabitLogs.filter(l=>l.done_on>=since); },
+    async toggleHabit(id){ const today=iso().slice(0,10); const i=demoHabitLogs.findIndex(l=>l.habit_id===id&&l.done_on===today);
+      if(i>=0){ demoHabitLogs.splice(i,1); return false; } demoHabitLogs.push({habit_id:id,user_id:"me",done_on:today}); return true; },
+    async socialLinks(){ return [...demoSocialLinks.values()]; },
+    async bumpSocialLink(otherId,amount){
+      const a="me"<otherId?"me":otherId, b="me"<otherId?otherId:"me", key=a+"|"+b;
+      let row=demoSocialLinks.get(key);
+      const arcanas=["Fool","Magician","Priestess","Empress","Emperor","Hierophant","Lovers","Chariot","Justice","Hermit","Fortune","Strength","Hanged Man","Temperance","Star","Moon"];
+      if(!row){ let h=0; for(const c of key) h=(h*31+c.charCodeAt(0))>>>0; row={user_a:a,user_b:b,xp:0,today_xp:0,today_date:null,arcana:arcanas[h%arcanas.length]}; demoSocialLinks.set(key,row); }
+      const today=iso().slice(0,10); if(row.today_date!==today) row.today_xp=0;
+      const grant=Math.max(0,Math.min(amount||3,24-row.today_xp)); row.xp+=grant; row.today_xp+=grant; row.today_date=today;
+      return {...row};
+    },
+    async saveArcana(arcana){ people.me.arcana=arcana; },
+    _setLinkXp(otherId,xp){ const a="me"<otherId?"me":otherId, b="me"<otherId?otherId:"me", key=a+"|"+b; const row=demoSocialLinks.get(key); if(row){ row.xp=xp; row.today_xp=0; row.today_date=null; } },
+    _seedHabitLogs(n){ demoHabitLogs.length=0; for(let i=0;i<n;i++) demoHabitLogs.push({habit_id:1,user_id:"me",done_on:new Date(Date.now()-i*864e5).toISOString().slice(0,10)}); },
     subscribe(_room,h){ H=h; h.status("Demo mode"); const stop=()=>{H=null}; stop.typing=()=>{}; return stop; }
   };
 })();
@@ -2642,6 +2779,9 @@ async function handleAuth(u){
   await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));   // let the real front screen actually paint first
   hideSplash();
   refreshPushSubscription();
+  loadHabits().then(()=>{ checkHabitReminders(); setInterval(checkHabitReminders,300000); });
+  loadSocialLinks().then(()=>{ if(user) loadContacts(); });
+  paintArcanaBadge();
   if(q.get("friend")){ const tok=q.get("friend"); history.replaceState(null,"",location.pathname); setTimeout(()=>handleFriendInvite(tok),400); }
   try{ const t=localStorage.getItem("nl-front-tab"); if(["chats","dms","contacts"].includes(t)) setFrontTab(t); }catch(e){}
   celebrateMyBirthday(); seasonalCheck("login"); hintNudge(); dailyXP(); setTimeout(checkUnlocks,4000);
@@ -2743,7 +2883,7 @@ function paintFxSettings(){
   FX_TRIGGERS.forEach(t=>{ const li=el("li"); li.append(el("b","",t.label+": ")); li.append([...t.words.map(w=>`"${w}"`),...t.emoji].join(", ")); ul.append(li); });
 }
 $("fxBtn").onclick=()=>{ try{ localStorage.setItem("nl-fx",fxEnabled()?"off":"on"); }catch(e){} paintFxSettings(); if(fxEnabled()) FX.play("confetti"); };
-const openProfile=()=>{ say("profMsg",""); paintNotif(); paintBlocked(); paintFxSettings(); fillBirthdayPicker(); paintSecrets(); paintLangPicker(); paintDND(); show($("profile")); $("closeProfile").focus({preventScroll:true}); };
+const openProfile=()=>{ say("profMsg",""); paintNotif(); paintBlocked(); paintFxSettings(); fillBirthdayPicker(); paintSecrets(); paintLangPicker(); paintDND(); paintArcanaBadge(); show($("profile")); $("closeProfile").focus({preventScroll:true}); };
 function paintDND(){ const on=dndOn(); $("dndSwitch").classList.toggle("on",on); $("dndSwitch").setAttribute("aria-checked",String(on)); $("dndRow").classList.toggle("on",on); }
 $("dndSwitch").onclick=()=>{ setDND(!dndOn()); paintDND(); if(user) applyStatusDot($("meFace"),user.id,meProfile); };
 $("openProfile1").onclick=openProfile; $("openProfile2").onclick=openProfile; $("meFace").onclick=openProfile;
@@ -3706,7 +3846,7 @@ $("lbNext").onclick=e=>{ e.stopPropagation(); lbStep(1); };
 $("lightbox").onclick=()=>show($("lightbox"),false);
 ["profile","roomSheet","msgMenu","pollSheet","summarySheet","calSheet","searchSheet"].forEach(id=>$(id).addEventListener("click",e=>{ if(e.target.id===id) show($(id),false); }));
 addEventListener("keydown",e=>{
-  if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu","pollSheet","tray","themeSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","installSheet"].forEach(id=>{ const n=$(id); if(n) show(n,false); });
+  if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu","pollSheet","tray","themeSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","installSheet","habitsSheet","quizSheet","slSheet"].forEach(id=>{ const n=$(id); if(n) show(n,false); });
   if(!$("lightbox").classList.contains("hidden")&&lbAlbum){ if(e.key==="ArrowLeft") lbStep(-1); if(e.key==="ArrowRight") lbStep(1); }
 });
 
@@ -3941,6 +4081,7 @@ async function loadContacts(){
     const n=el("span","cname",p.username);
     if(addedMe(uid)) n.append(el("span","tagline","🤝 mutual friends"));
     const dm=inboxRows.find(r=>r.is_dm&&r.dm_user===uid); if(dm&&+dm.unread>0) n.append(el("small","",`${dm.unread} unread`));
+    const badge=linkBadge(uid); if(badge){ badge.onclick=e=>{ e.stopPropagation(); openSocialLink(uid); }; badge.style.cursor="pointer"; n.append(badge); }
     const go=el("button","send","Message"); go.type="button"; go.onclick=()=>openDm(uid);
     const rm=el("button","rm","✕"); rm.type="button"; rm.setAttribute("aria-label",`Remove ${p.username} from friends`);
     rm.onclick=async()=>{ if(!confirm(`Remove ${p.username} from your friends?`)) return; try{ await removeFriend(uid); }catch(err){ say("contactMsg",err.message,true); } };
@@ -4863,6 +5004,7 @@ let myRecentSends=[];
 async function afterMySend(m){
   gainXP(m.kind==="image"?"photo":m.kind==="audio"||m.kind==="video"?"voice":m.kind==="sticker"?"sticker":m.kind==="poll"?"poll":m.kind==="game"?"game":"message");
   if(m.reply_to) gainXP("reply");
+  if(isDm&&dmUser) bumpLink(dmUser);
   const now=Date.now(); myRecentSends=myRecentSends.filter(t=>now-t<10000); myRecentSends.push(now);
   if(myRecentSends.length>=5&&fxEnabled()){ PX.combo(myRecentSends.length); if(myRecentSends.length===5) discoverSecret("combo"); }
   if(isShiny(m)) discoverSecret("shiny");
@@ -5359,7 +5501,7 @@ HINTS.dragon="A winged silhouette crosses the moon when you say it.";
 
 /* ---------- XP & levels ---------- */
 const XP_KEY="nl-xp";
-const XP_RULES={secret:50,message:2,photo:6,voice:6,sticker:3,poll:10,vote:2,game:5,gamewin:30,friend:15,daily:20,reply:3,reaction:1,task:4,pin:2,rename:5,theme:10};
+const XP_RULES={secret:50,message:2,photo:6,voice:6,sticker:3,poll:10,vote:2,game:5,gamewin:30,friend:15,daily:20,reply:3,reaction:1,task:4,pin:2,rename:5,theme:10,habit:8};
 const LEVEL_TITLES=["Newcomer","Regular","Night Owl","Neon Runner","Chatterbox","Phantom","Netrunner","Legend","Choom Supreme","Creator's Favorite","Mythic"];
 const xpData=()=>{ try{ return JSON.parse(localStorage.getItem(XP_KEY))||{xp:0,log:{}}; }catch(e){ return {xp:0,log:{}}; } };
 const xpNeed=lvl=>100+Math.round(60*(lvl-1)*(lvl-1)*.6+40*(lvl-1));   // xp to go from lvl → lvl+1
@@ -5488,6 +5630,8 @@ Object.assign(HINTS,{
 
 /* ================= UNLOCKABLES ================= */
 const UNLOCKS=[
+  {id:"frame:guts",     type:"frame", label:"Blazing frame",        by:{stat:"guts",stat_n:12}},
+  {id:"frame:bonded",   type:"frame", label:"Bonded frame",         by:{linkRank:5}},
   {id:"theme:phantom",  type:"theme", label:"🎭 Phantom theme",     by:{secret:"konami"}},
   {id:"theme:pipboy",   type:"theme", label:"☢️ Pip-Boy theme",     by:{secret:"pipboy"}},
   {id:"theme:redrum",   type:"theme", label:"🩸 Redrum theme",      by:{secret:"redrum"}},
@@ -5517,9 +5661,9 @@ const UNLOCKS=[
   {id:"frame:gold",     type:"frame", label:"Gold crown frame",      by:{level:6}},
   {id:"frame:mythic",   type:"frame", label:"Mythic rainbow frame",  by:{level:11}},
 ];
-const FRAMES={neon:"Neon ring",glitch:"Glitch",flame:"Flame",phantom:"Phantom",pixel:"Pixel",gold:"Gold crown",mythic:"Mythic"};
+const FRAMES={neon:"Neon ring",glitch:"Glitch",flame:"Flame",phantom:"Phantom",pixel:"Pixel",gold:"Gold crown",mythic:"Mythic",guts:"Blazing",bonded:"Bonded"};
 const myLevel=()=>xpLevel(xpData().xp).lvl;
-function unlockMet(u){ return u.by.secret?hasSecret(u.by.secret):u.by.level?myLevel()>=u.by.level:true; }
+function unlockMet(u){ return u.by.secret?hasSecret(u.by.secret):u.by.level?myLevel()>=u.by.level:u.by.stat?statCount(u.by.stat)>=u.by.stat_n:u.by.linkRank?[...socialLinks.values()].some(r=>rankFromXp(r.xp).rank>=u.by.linkRank):true; }
 const unlockOk=(type,key)=>{ const u=UNLOCKS.find(x=>x.id===type+":"+key); return !u||unlockMet(u); };
 const UNLOCK_KEY="nl-unlocked";
 const seenUnlocks=()=>{ try{ return JSON.parse(localStorage.getItem(UNLOCK_KEY)||"[]"); }catch(e){ return []; } };
@@ -5910,6 +6054,177 @@ function checkMissedSecret(){
   },1400);
 }
 
+/* ================= HABITS, STATS, SOCIAL LINKS, ARCANA ================= */
+const STATS=["guts","knowledge","charm","kindness","proficiency"];
+const STAT_LABEL={guts:"Guts",knowledge:"Knowledge",charm:"Charm",kindness:"Kindness",proficiency:"Proficiency"};
+const STAT_ICON={guts:"🔥",knowledge:"📘",charm:"💫",kindness:"💚",proficiency:"🛠️"};
+const STAT_TITLES={
+  guts:["Faint of Heart","Milquetoast","Steady","Bold","Fearless","Lionhearted"],
+  knowledge:["Oblivious","Studious","Sharp","Scholarly","Brilliant","Erudite"],
+  charm:["Awkward","Existent","Likeable","Magnetic","Captivating","Debonair"],
+  kindness:["Prickly","Inoffensive","Warm","Caring","Compassionate","Angelic"],
+  proficiency:["Clumsy","Bumbling","Capable","Skilled","Masterful","Transcendent"],
+};
+const STAT_TIERS=[0,5,12,22,35,50];
+function statTier(count){ let i=0; for(let k=0;k<STAT_TIERS.length;k++) if(count>=STAT_TIERS[k]) i=k; return i; }
+function statNext(count){ const i=statTier(count); return i>=STAT_TIERS.length-1?null:STAT_TIERS[i+1]; }
+
+let myHabits=[], myHabitLogs=[], habitsLoaded=false;
+async function loadHabits(){
+  try{ [myHabits,myHabitLogs]=await Promise.all([api.habits(),api.habitLogs(new Date(Date.now()-70*864e5).toISOString().slice(0,10))]); habitsLoaded=true; }
+  catch(e){ myHabits=[]; myHabitLogs=[]; }
+}
+function statCount(stat){ const ids=new Set(myHabits.filter(h=>h.stat===stat).map(h=>h.id)); return myHabitLogs.filter(l=>ids.has(l.habit_id)).length; }
+function doneToday(habitId){ const today=new Date().toISOString().slice(0,10); return myHabitLogs.some(l=>l.habit_id===habitId&&l.done_on===today); }
+function habitStreak(habitId){
+  const days=new Set(myHabitLogs.filter(l=>l.habit_id===habitId).map(l=>l.done_on));
+  let n=0, d=new Date();
+  if(!days.has(d.toISOString().slice(0,10))) d.setDate(d.getDate()-1);
+  while(days.has(d.toISOString().slice(0,10))){ n++; d.setDate(d.getDate()-1); }
+  return n;
+}
+
+async function paintHabits(){
+  if(!habitsLoaded) await loadHabits();
+  const bars=$("statBars"); bars.innerHTML="";
+  STATS.forEach(s=>{
+    const count=statCount(s), tier=statTier(count), next=statNext(count);
+    const row=el("div","statrow");
+    row.append(el("span","staticon",STAT_ICON[s]));
+    const mid=el("div","statmid");
+    mid.append(el("div","statname",`${STAT_LABEL[s]} · ${STAT_TITLES[s][tier]}`));
+    const bar=el("div","statbar"); const pct=next?Math.round(100*(count-STAT_TIERS[tier])/(next-STAT_TIERS[tier])):100;
+    const fill=el("div","statfill"); fill.style.width=pct+"%"; bar.append(fill); mid.append(bar);
+    row.append(mid); row.append(el("span","statnum",String(count)));
+    bars.append(row);
+  });
+  const list=$("habitList"); list.innerHTML="";
+  if(!myHabits.length) list.append(el("p","note","No habits yet. Add one below — each check-in builds a stat."));
+  myHabits.forEach(h=>{
+    const row=el("div","habitrow"+(doneToday(h.id)?" done":""));
+    const chk=el("button","habitchk"); chk.type="button"; chk.setAttribute("aria-label",(doneToday(h.id)?"Mark not done":"Mark done")+": "+h.label);
+    chk.textContent=doneToday(h.id)?"✓":""; chk.onclick=()=>toggleHabitUI(h);
+    const mid=el("div","habitmid");
+    const streak=habitStreak(h.id);
+    mid.append(el("div","habitlabel",`${STAT_ICON[h.stat]} ${h.label}`));
+    mid.append(el("small","",streak>0?`🔥 ${streak} day streak`+(h.reminder_time?` · reminds at ${h.reminder_time}`:""):(h.reminder_time?`Reminds at ${h.reminder_time}`:"")));
+    const del=el("button","habitdel","✕"); del.type="button"; del.setAttribute("aria-label","Remove "+h.label);
+    del.onclick=async()=>{ try{ await api.archiveHabit(h.id); myHabits=myHabits.filter(x=>x.id!==h.id); paintHabits(); }catch(e){} };
+    row.append(chk,mid,del); list.append(row);
+  });
+}
+async function toggleHabitUI(h){
+  try{
+    const now=await api.toggleHabit(h.id);
+    const today=new Date().toISOString().slice(0,10);
+    if(now){ myHabitLogs.push({habit_id:h.id,user_id:user.id,done_on:today}); gainXP("habit"); }
+    else myHabitLogs=myHabitLogs.filter(l=>!(l.habit_id===h.id&&l.done_on===today));
+    paintHabits();
+  }catch(e){ say("habitMsg",e.message,true); }
+}
+$("habitForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const label=$("habitLabel").value.trim(), stat=$("habitStat").value, time=$("habitTime").value||null;
+  if(!label) return;
+  try{ const h=await api.createHabit(label,stat,time); myHabits.push(h); $("habitLabel").value=""; $("habitTime").value=""; paintHabits(); checkUnlocks?.(); }
+  catch(err){ say("habitMsg",err.message,true); }
+});
+function openHabits(){ say("habitMsg",""); paintHabits(); show($("habitsSheet")); }
+$("openHabits").onclick=openHabits;
+$("habitsClose").onclick=()=>show($("habitsSheet"),false);
+
+/* ---------- daily reminder nudge ---------- */
+function checkHabitReminders(){
+  if(!myHabits.length) return;
+  const now=new Date(), hm=String(now.getHours()).padStart(2,"0")+":"+String(now.getMinutes()).padStart(2,"0");
+  const due=myHabits.find(h=>h.reminder_time&&h.reminder_time<=hm&&!doneToday(h.id));
+  if(!due) return;
+  const key="nl-habit-nudged-"+new Date().toDateString()+"-"+due.id;
+  try{ if(localStorage.getItem(key)) return; localStorage.setItem(key,"1"); }catch(e){}
+  const t=el("div","toast mention"); const body=el("span","tbody");
+  body.append(el("div","ttitle","🎯 "+due.label), el("div","ttext","Still on your list for today."));
+  const btn=el("button","send","Mark done"); btn.type="button"; btn.onclick=()=>{ toggleHabitUI(due); t.remove(); };
+  t.append(el("span","sx-lock","🎯"),body,btn); $("toasts").prepend(t);
+  setTimeout(()=>{ if(t.isConnected){ t.classList.add("out"); setTimeout(()=>t.remove(),260); } },8000);
+}
+
+/* ================= PERSONALITY QUIZ → ARCANA ================= */
+const QUIZ=[
+  {q:"A friend needs help moving apartments this weekend. You:",a:[["Show up with a truck and snacks.","Emperor"],["Organize everyone else to help too.","Hierophant"],["Show up, but mostly for the company.","Lovers"],["Offer, but secretly hope they don't need you.","Hermit"]]},
+  {q:"Your group chat is arguing about where to eat. You:",a:[["Pick a place and own the decision.","Chariot"],["Find the compromise everyone can live with.","Justice"],["Say 'whatever's fine' and mean it.","Star"],["Mute the chat and see what's left standing.","Hermit"]]},
+  {q:"Something unfair happens to a stranger nearby. You:",a:[["Step in immediately.","Strength"],["Say something, calmly but firmly.","Justice"],["Feel it hard, even if you don't act.","Empress"],["Watch closely, remember it later.","Hanged Man"]]},
+  {q:"Big life decision, no clear right answer. You:",a:[["Go with your gut and move fast.","Fool"],["Research it to death first.","Magician"],["Ask everyone you trust.","Lovers"],["Sit with it alone until it's clear.","Moon"]]},
+  {q:"A secret gets handed to you that isn't yours to keep. You:",a:[["Guard it like a vault.","Priestess"],["It eats at you, but you hold it.","Hanged Man"],["You tell the one person it protects.","Temperance"],["You're honestly a little thrilled.","Magician"]]},
+  {q:"How do people usually describe you first?",a:[["Intense.","Emperor"],["Warm.","Empress"],["Unpredictable.","Fool"],["Hard to read.","Priestess"]]},
+];
+let quizAnswers=[];
+function paintQuiz(){
+  quizAnswers=[]; const box=$("quizBody"); box.innerHTML=""; show($("quizResult"),false); show($("quizBody"));
+  QUIZ.forEach((item,qi)=>{
+    const card=el("div","quizq"); card.append(el("div","quizqtext",item.q));
+    const opts=el("div","quizopts");
+    item.a.forEach(([label,arc],ai)=>{
+      const b=el("button","quizopt"); b.type="button"; b.textContent=label;
+      b.onclick=()=>{ quizAnswers[qi]=arc; [...opts.children].forEach(c=>c.classList.remove("on")); b.classList.add("on"); maybeFinishQuiz(); };
+      opts.append(b);
+    });
+    card.append(opts); box.append(card);
+  });
+}
+async function maybeFinishQuiz(){
+  if(quizAnswers.filter(Boolean).length<QUIZ.length) return;
+  const tally={}; quizAnswers.forEach(a=>tally[a]=(tally[a]||0)+1);
+  const winner=Object.entries(tally).sort((a,b)=>b[1]-a[1])[0][0];
+  try{ await api.saveArcana(winner); meProfile.arcana=winner; cache.set(user.id,meProfile); }catch(e){}
+  show($("quizBody"),false);
+  $("quizArcanaName").textContent=winner;
+  show($("quizResult")); paintArcanaBadge();
+}
+function openQuiz(){ paintQuiz(); show($("quizSheet")); }
+$("openQuiz").onclick=openQuiz;
+$("quizClose").onclick=()=>show($("quizSheet"),false);
+$("quizRetake").onclick=paintQuiz;
+function paintArcanaBadge(){ const n=$("myArcana"); if(!n) return; n.textContent=meProfile?.arcana?("🃏 "+meProfile.arcana):""; show(n,!!meProfile?.arcana); }
+
+/* ================= SOCIAL LINKS ================= */
+const RANK_STEPS=[0,30,70,120,180,250,330,420,520,630];
+function rankFromXp(xp){ let r=1; for(let i=1;i<RANK_STEPS.length;i++) if(xp>=RANK_STEPS[i]) r=i+1; const into=xp-RANK_STEPS[r-1], need=r>=10?0:RANK_STEPS[r]-RANK_STEPS[r-1]; return {rank:Math.min(r,10),into,need}; }
+let socialLinks=new Map();   // other uid -> row
+async function loadSocialLinks(){ try{ const rows=await api.socialLinks(); socialLinks=new Map(rows.map(r=>[r.user_a===user.id?r.user_b:r.user_a,r])); }catch(e){} }
+function linkBadge(uid){
+  const row=socialLinks.get(uid); if(!row) return null;
+  const {rank}=rankFromXp(row.xp);
+  const b=el("span","linkbadge",`${row.arcana} · Rank ${rank}`); return b;
+}
+async function bumpLink(otherUid){
+  if(!otherUid||otherUid===user.id) return;
+  try{
+    const before=socialLinks.get(otherUid), beforeRank=before?rankFromXp(before.xp).rank:0;
+    const row=await api.bumpSocialLink(otherUid); socialLinks.set(otherUid,row);
+    const {rank}=rankFromXp(row.xp);
+    if(rank>beforeRank&&fxEnabled()&&typeof QX!=="undefined"&&QX.rankup) QX.rankup(nameOf(otherUid),row.arcana,rank);
+    if(rank>beforeRank) setTimeout(checkUnlocks,900);
+  }catch(e){}
+}
+function openSocialLink(uid){
+  const row=socialLinks.get(uid); if(!row){ say("personMsg","No bond yet — send a message to start one."); return; }
+  const {rank,into,need}=rankFromXp(row.xp);
+  $("slArcana").textContent=row.arcana; $("slRank").textContent="RANK "+rank+(rank>=10?" · MAX":"");
+  $("slName").textContent=nameOf(uid);
+  const pct=rank>=10?100:Math.round(100*into/need);
+  $("slFill").style.width=pct+"%"; $("slText").textContent=rank>=10?"Bond maxed out.":`${into} / ${need} to next rank`;
+  show($("slSheet"));
+}
+$("slClose").onclick=()=>show($("slSheet"),false);
+QX.rankup=function(name,arcana,rank){
+  const layer=$("sfx"), w=document.createElement("div"); w.className="sl-rankup";
+  w.innerHTML=`<div class="sl-card"><div class="sl-rankt">RANK UP!</div><div class="sl-arcana">${arcana}</div><div class="sl-sub">${name} · Rank ${rank}</div><div class="px-stars">${[...Array(10)].map((_,i)=>`<i style="animation-delay:${.3+i*.1}s">★</i>`).join("")}</div></div>`;
+  layer.append(w);
+  try{ const ac=window.__sxac||(window.__sxac=new (window.AudioContext||window.webkitAudioContext)()); [[523,0,.15],[659,.12,.15],[784,.24,.3]].forEach(([f,at,len])=>{ const o=ac.createOscillator(),g=ac.createGain(); o.frequency.value=f; g.gain.setValueAtTime(.05,ac.currentTime+at); g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+at+len); o.connect(g); g.connect(ac.destination); o.start(ac.currentTime+at); o.stop(ac.currentTime+at+len+.05); }); }catch(e){}
+  if(navigator.vibrate) navigator.vibrate([30,40,30,40,120]);
+  setTimeout(()=>w.remove(),3000);
+};
+
 /* ================= STAYING CONNECTED ================= */
 let liveStatus=null, catchingUp=false, lastCatchUp=0;
 async function catchUp(reason){
@@ -5950,7 +6265,7 @@ feed.addEventListener("click",e=>{
 /* ================= BACK BUTTON (Android / browser back) ================= */
 // Each chat or sheet you open adds a history step, so Back closes the top one instead of leaving the app.
 (function(){
-  const LAYERS=["chat","profile","roomSheet","msgMenu","themeSheet","pollSheet","installSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","lightbox"];
+  const LAYERS=["chat","profile","roomSheet","msgMenu","themeSheet","pollSheet","installSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","lightbox","habitsSheet","quizSheet","slSheet"];
   const stack=[]; let popping=false, ignorePops=0, pendingBack=0, flushQueued=false;
   const isOpen=id=>!$(id).classList.contains("hidden");
   function queueBack(){
