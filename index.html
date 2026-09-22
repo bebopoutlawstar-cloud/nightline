@@ -1688,6 +1688,16 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 /* ===== arcana card art (Rider-Waite-Smith, public domain, pixelated + theme-recolored) ===== */
 .arcana-art{width:62%;max-width:170px;image-rendering:pixelated;image-rendering:-moz-crisp-edges;border:2px solid rgba(243,255,58,.4);box-shadow:0 0 16px rgba(0,240,255,.35)}
 .slartimg{width:52%;max-width:140px;image-rendering:pixelated;image-rendering:-moz-crisp-edges;border:2px solid rgba(0,240,255,.4);box-shadow:0 0 14px rgba(198,90,174,.4);margin:2px 0}
+/* ===== what's new ===== */
+.newsbody{display:grid;gap:14px;width:100%;text-align:left}
+.newsrel{border-left:3px solid var(--cyan);padding:2px 0 2px 12px}
+.newsrel.latest{border-left-color:var(--volt)}
+.newsver{font-family:var(--tech);font-size:11px;letter-spacing:1px;color:var(--cyan);text-transform:uppercase}
+.newsrel.latest .newsver{color:var(--volt)}
+.newshead{font-family:var(--num);font-size:24px;color:var(--white);text-shadow:2px 2px 0 var(--mag);margin:2px 0 6px}
+.newsitems{list-style:none;display:grid;gap:7px}
+.newsitems li{font-size:16px;line-height:1.3;color:var(--white)}
+.newsolder{font-family:var(--tech);font-size:11px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -1873,6 +1883,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     <h3>Growth</h3>
     <button type="button" class="ghost" id="openHabits">🎯 Habits &amp; Stats</button>
     <button type="button" class="ghost" id="openQuiz">🃏 Who are you? (personality quiz)</button>
+    <button type="button" class="ghost" id="openNews">📰 What's new</button>
     <details class="proflist"><summary id="unlockSummary">🎁 Unlockables</summary><div class="unlockbox"><div id="unlockList"></div></div></details>
     <details class="proflist"><summary id="secretSummary">🔒 Secrets found: 0</summary><div class="secretbox">
       <div class="hintbox" id="hintBox"></div>
@@ -2108,6 +2119,15 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 
 <div class="toasts" id="toasts" aria-live="polite"></div>
 <!-- ============ HABITS & STATS ============ -->
+<!-- ============ WHAT'S NEW ============ -->
+<div class="overlay hidden" id="newsSheet" role="dialog" aria-modal="true" aria-labelledby="newsTitle">
+  <div class="sheet"><div class="sheetbody">
+    <h2 id="newsTitle">What's New</h2>
+    <div class="newsbody" id="newsBody"></div>
+    <button class="go" type="button" id="newsClose">Got it</button>
+  </div></div>
+</div>
+
 <div class="overlay hidden" id="habitsSheet" role="dialog" aria-modal="true" aria-labelledby="habitsTitle">
   <div class="sheet"><div class="sheetbody">
     <h2 id="habitsTitle">Habits & Stats</h2>
@@ -2188,6 +2208,8 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 
 
 <script>
+// Checked before anything else runs (startup saves some settings, which would make everyone look "returning")
+const NL_RETURNING=(()=>{ try{ return ["nl-xp","nl-secrets","nl-front-tab","nl-room","nl-uisound","nl-fx"].some(k=>localStorage.getItem(k)!==null); }catch(e){ return false; } })();
 /* ================= KING'S COURT ================= */
 function kcInCourt(i){ const r=(i/8)|0, c=i%8; return r>=2&&r<=5&&c>=2&&c<=5; }
 function kcInitialBoard(){ const b=Array(64).fill(""); for(let i=0;i<64;i++){ if(kcInCourt(i)) continue; const r=(i/8)|0, c=i%8; b[i]=((r+c)%2===0)?"x":"o"; } return b; }
@@ -2452,7 +2474,7 @@ const live = {
   async resetPassword(email){ must(await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname})); },
   async updatePassword(pw){ must(await sb.auth.updateUser({password:pw})); },
   async deleteAccount(){ must(await sb.rpc("delete_my_account")); await sb.auth.signOut(); },
-  async profiles(ids){ return must(await sb.from("profiles").select("id,username,avatar_url,theme,bubble_color,birthday,last_seen,invite_token").in("id",ids)); },
+  async profiles(ids){ return must(await sb.from("profiles").select("id,username,avatar_url,theme,bubble_color,birthday,last_seen,invite_token,arcana").in("id",ids)); },
   async search(q,roomCode){ return must(await sb.rpc("search_messages",{p_query:q,p_room:roomCode||null,p_limit:40})); },
   async touchSeen(){ await sb.rpc("touch_seen"); },
   async acceptFriendInvite(token){ return must(await sb.rpc("accept_friend_invite",{p_token:token})); },
@@ -2856,6 +2878,7 @@ async function handleAuth(u){
   await loadContacts(); await loadInbox(); startPresence(); owlBack();
   await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));   // let the real front screen actually paint first
   hideSplash();
+  maybeShowWhatsNew();
   refreshPushSubscription();
   loadHabits().then(()=>{ checkHabitReminders(); setInterval(checkHabitReminders,300000); });
   loadSocialLinks().then(()=>{ if(user) loadContacts(); });
@@ -3977,7 +4000,7 @@ $("lightbox").onclick=()=>show($("lightbox"),false);
 ["profile","roomSheet","msgMenu","pollSheet","summarySheet","calSheet","searchSheet"].forEach(id=>$(id).addEventListener("click",e=>{ if(e.target.id===id) show($(id),false); }));
 addEventListener("keydown",e=>{
   if(e.key==="Escape") closeTray();
-  if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu","pollSheet","tray","themeSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","installSheet","habitsSheet","quizSheet","slSheet"].forEach(id=>{ const n=$(id); if(n) show(n,false); });
+  if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu","pollSheet","tray","themeSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","installSheet","habitsSheet","quizSheet","slSheet","newsSheet"].forEach(id=>{ const n=$(id); if(n) show(n,false); });
   if(!$("lightbox").classList.contains("hidden")&&lbAlbum){ if(e.key==="ArrowLeft") lbStep(-1); if(e.key==="ArrowRight") lbStep(1); }
 });
 
@@ -6470,6 +6493,44 @@ function openSocialLink(uid){
   show($("slSheet"));
 }
 $("slClose").onclick=()=>show($("slSheet"),false);
+
+/* ================= WHAT'S NEW =================
+   HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
+   Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
+const APP_VERSION="2026.09.22";
+const CHANGELOG=[
+  {v:"2026.09.22", title:"The Night Owl arrives 🦉", items:[
+    "🦉 Close the app with habits left and the Night Owl DMs you a reminder (evenings only, once a day). Turn it off in Profile.",
+    "🕔 Habits now follow YOUR clock. Checking one off late at night no longer counts it for tomorrow. (Fixed by Cole!)",
+    "🃏 Your Arcana stays on your profile after updates now. No more retaking the quiz.",
+    "📰 This page! You'll see it once after every update.",
+  ]},
+];
+
+function paintNews(sinceVersion){
+  const box=$("newsBody"); box.innerHTML="";
+  const fresh=CHANGELOG.filter(r=>!sinceVersion||r.v>sinceVersion);
+  const list=fresh.length?fresh:CHANGELOG.slice(0,1);
+  list.forEach((r,i)=>{
+    const rel=el("div","newsrel"+(i===0?" latest":""));
+    rel.append(el("div","newsver",(i===0?"Latest · ":"")+"Update "+r.v), el("div","newshead",r.title));
+    const ul=el("ul","newsitems"); r.items.forEach(t=>ul.append(el("li","",t))); rel.append(ul);
+    box.append(rel);
+  });
+  if(!fresh.length&&CHANGELOG.length>1) box.append(el("p","newsolder",`${CHANGELOG.length-1} earlier update${CHANGELOG.length===2?"":"s"} not shown.`));
+}
+function openNews(sinceVersion){ paintNews(sinceVersion); show($("newsSheet")); }
+function maybeShowWhatsNew(){
+  let seen=null, usedBefore=false;
+  try{ seen=localStorage.getItem("nl-seen-version"); usedBefore=NL_RETURNING;
+       localStorage.setItem("nl-seen-version",APP_VERSION); }catch(e){ return; }
+  if(seen===APP_VERSION) return;
+  if(!seen&&!usedBefore) return;              // brand-new user: nothing is "new" to them yet
+  setTimeout(()=>openNews(seen),900);
+}
+$("newsClose").onclick=()=>show($("newsSheet"),false);
+$("newsSheet").addEventListener("click",e=>{ if(e.target.id==="newsSheet") show($("newsSheet"),false); });
+$("openNews").onclick=()=>{ show($("profile"),false); openNews(null); };
 QX.rankup=function(name,arcana,rank){
   const layer=$("sfx"), w=document.createElement("div"); w.className="sl-rankup";
   w.innerHTML=`<div class="sl-card"><div class="sl-rankt">RANK UP!</div><div class="sl-arcana">${arcana}</div><div class="sl-sub">${name} · Rank ${rank}</div><div class="px-stars">${[...Array(10)].map((_,i)=>`<i style="animation-delay:${.3+i*.1}s">★</i>`).join("")}</div></div>`;
@@ -6519,7 +6580,7 @@ feed.addEventListener("click",e=>{
 /* ================= BACK BUTTON (Android / browser back) ================= */
 // Each chat or sheet you open adds a history step, so Back closes the top one instead of leaving the app.
 (function(){
-  const LAYERS=["chat","profile","roomSheet","msgMenu","themeSheet","pollSheet","installSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","lightbox","habitsSheet","quizSheet","slSheet"];
+  const LAYERS=["chat","profile","roomSheet","msgMenu","themeSheet","pollSheet","installSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","lightbox","habitsSheet","quizSheet","slSheet","newsSheet"];
   const stack=[]; let popping=false, ignorePops=0, pendingBack=0, flushQueued=false;
   const isOpen=id=>!$(id).classList.contains("hidden");
   function queueBack(){
