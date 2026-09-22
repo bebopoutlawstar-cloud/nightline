@@ -1556,6 +1556,30 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .dndswitch::after{content:"";position:absolute;top:1px;left:1px;width:18px;height:18px;border-radius:50%;background:var(--muted);transition:transform .15s,background .15s}
 .dndswitch.on{border-color:#ff3d3d}
 .dndswitch.on::after{transform:translateX(20px);background:#ff3d3d;box-shadow:0 0 6px #ff3d3d}
+/* ===== multi-photo send ===== */
+.pendingmulti{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.pm-strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+.pm-strip .pm-tile{position:relative;flex:none;width:56px;height:56px;border:2px solid var(--cyan);overflow:hidden}
+.pm-strip .pm-tile img{width:100%;height:100%;object-fit:cover;display:block}
+.pm-strip .pm-tile button{position:absolute;top:-2px;right:-2px;width:18px;height:18px;background:var(--night);color:var(--white);border:1.5px solid var(--mag);border-radius:50%;font-size:11px;line-height:1;padding:0;display:grid;place-items:center}
+.pm-strip .pm-add{flex:none;width:56px;height:56px;border:2px dashed var(--muted);color:var(--muted);background:none;font-size:24px;display:grid;place-items:center}
+#pmLabel{font-size:13px;color:var(--muted)}
+#pmClear{align-self:flex-start;background:none;border:none;color:var(--mag);font-size:13px;text-decoration:underline;padding:0}
+/* photo album grid inside a bubble */
+.albumgrid{display:grid;gap:3px;width:min(64vw,240px);margin:2px 0 8px;border-radius:2px;overflow:hidden}
+.albumgrid.n1{grid-template-columns:1fr}
+.albumgrid.n2,.albumgrid.n4{grid-template-columns:1fr 1fr}
+.albumgrid.n3{grid-template-columns:1fr 1fr}
+.albumgrid.n3 .tile:first-child{grid-row:1/3}
+.albumgrid button.tile{position:relative;padding:0;border:none;background:#000;aspect-ratio:1;overflow:hidden}
+.albumgrid.n3 .tile:first-child{aspect-ratio:auto}
+.albumgrid .tile img{width:100%;height:100%;object-fit:cover;display:block}
+.albumgrid .tile .more{position:absolute;inset:0;background:rgba(7,4,26,.65);color:var(--white);font-family:var(--num);font-size:22px;display:grid;place-items:center}
+.msg.photo-only .albumgrid{margin:0}
+/* lightbox album nav */
+.lbnav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;background:rgba(7,4,26,.7);border:2px solid var(--cyan);color:var(--white);font-size:18px;z-index:2;border-radius:50%}
+.lbprev{left:10px}
+.lbnext{right:10px}
 </style>
 </head>
 <body>
@@ -1676,6 +1700,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
   <form class="compose" id="sendForm">
     <div class="replying hidden" id="replying"><b>Reply</b><span id="replyText"></span><button type="button" id="cancelReply">Cancel</button></div>
     <div class="pending hidden" id="pending"><img id="pendingImg" alt="Photo to send"><video id="pendingVid" muted playsinline class="hidden"></video><span id="pendingLabel">Photo ready</span><button type="button" id="unpick">Remove</button></div>
+    <div class="pendingmulti hidden" id="pendingMulti"><div class="pm-strip" id="pmStrip"></div><span id="pmLabel"></span><button type="button" id="pmClear">Remove all</button></div>
     <div class="mentions hidden" id="mentionList" role="listbox" aria-label="Mention someone"></div>
     <div class="tray hidden" id="tray">
       <div class="tray-tabs">
@@ -1713,7 +1738,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
       <button type="button" class="clip" id="micBtn" aria-label="Record a voice message">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></svg>
       </button>
-      <input type="file" id="picker" accept="image/*,video/*" class="sr">
+      <input type="file" id="picker" accept="image/*,video/*" multiple class="sr">
       <label for="box" class="sr">Message</label>
       <textarea id="box" rows="1" placeholder="Transmit…"></textarea>
       <button class="send" type="submit" id="sendBtn">Send</button>
@@ -1973,7 +1998,9 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
   </div></div>
 </div>
 
-<div class="overlay lightbox hidden" id="lightbox"><img id="lightImg" alt="Full size photo"></div>
+<div class="overlay lightbox hidden" id="lightbox">
+  <button type="button" class="lbnav lbprev hidden" id="lbPrev" aria-label="Previous photo">&#10094;</button>
+  <button type="button" class="lbnav lbnext hidden" id="lbNext" aria-label="Next photo">&#10095;</button><img id="lightImg" alt="Full size photo"></div>
 
 
 
@@ -2319,7 +2346,7 @@ const live = {
   async loadBefore(room,iso){ return must(await sb.from("messages").select("*").eq("room",room).lt("created_at",iso).order("created_at",{ascending:false}).limit(PAGE)).reverse(); },
   async fetchMessage(id){ return must(await sb.from("messages").select("*").eq("id",id).maybeSingle()); },
   async send(room,f){
-    const row={room,kind:f.kind||"text",text:f.text||null,image_url:f.image_url||null,media_url:f.media_url||null,media_type:f.media_type||null,media_duration:f.media_duration||null,sticker:f.sticker||null,reply_to:f.reply_to||null,mentions:f.mentions||[]};
+    const row={room,kind:f.kind||"text",text:f.text||null,image_url:f.image_url||null,image_urls:f.image_urls||null,media_url:f.media_url||null,media_type:f.media_type||null,media_duration:f.media_duration||null,sticker:f.sticker||null,reply_to:f.reply_to||null,mentions:f.mentions||[]};
     return must(await sb.from("messages").insert(row).select().single());
   },
   async deleteMessage(id){ must(await sb.from("messages").delete().eq("id",id)); },
@@ -2490,7 +2517,7 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     async loadBefore(){ return []; },
     async fetchMessage(id){ return Object.values(rooms).flatMap(r=>r.msgs).find(m=>m.id===id)||null; },
     async send(room,f){
-      const m={id:nextId++,room,user_id:"me",kind:f.kind||"text",text:f.text||null,image_url:f.image_url||null,media_url:f.media_url||null,media_type:f.media_type||null,media_duration:f.media_duration||null,sticker:f.sticker||null,reply_to:f.reply_to||null,mentions:f.mentions||[],created_at:iso(),expires_at:rooms[room].disappear?new Date(Date.now()+rooms[room].disappear*1000).toISOString():null}; rooms[room].msgs.push(m);
+      const m={id:nextId++,room,user_id:"me",kind:f.kind||"text",text:f.text||null,image_url:f.image_url||null,image_urls:f.image_urls||null,media_url:f.media_url||null,media_type:f.media_type||null,media_duration:f.media_duration||null,sticker:f.sticker||null,reply_to:f.reply_to||null,mentions:f.mentions||[],created_at:iso(),expires_at:rooms[room].disappear?new Date(Date.now()+rooms[room].disappear*1000).toISOString():null}; rooms[room].msgs.push(m);
       const others=Object.keys(rooms[room].members).filter(u=>u!=="me"); if(!others.length) return m;
       const who=others[Math.floor(Math.random()*others.length)];
       setTimeout(()=>{ rooms[room].members[who].read=iso(); fire("member",{user_id:who,last_read_at:iso()}); },700);
@@ -2526,6 +2553,8 @@ const pins=new Map();         // message id -> {pinned_by, created_at}
 const gamesById=new Map();    // message id -> game row
 let isDm=false, dmUser=null, myNotify="all", contactIds=[], addedMeIds=[], inboxRows=[], unsubAll=null;
 let pinCursor=0, roomBg=null, pendingKind=null, pendingDuration=null, mentionPicks=new Map();
+let pendingImages=[];   // multi-photo staging; when length>1 this takes over from the single pendingFile flow
+let lbAlbum=null, lbIndex=0;   // which album (if any) the lightbox is currently browsing
 const typers=new Map();       // user id -> {name,timer}
 let blocked=new Set();
 const feed=$("feed");
@@ -2933,11 +2962,24 @@ function buildMsg(m,index,noAnim){
     else q.append("Original message was deleted");
     bub.append(q);
   }
+  const albumUrls=(m.image_urls||[]).map(safeImg).filter(Boolean);
   const img=safeImg(m.image_url);
-  if(img){ const b=el("button","shot"); b.type="button"; b.setAttribute("aria-label","Open photo");
+  if(albumUrls.length>1){
+    const cap=Math.min(albumUrls.length,4), grid=el("div","albumgrid n"+cap);
+    albumUrls.slice(0,4).forEach((u,i)=>{
+      const b=el("button","tile"); b.type="button"; b.setAttribute("aria-label",`Open photo ${i+1} of ${albumUrls.length}`);
+      const im=document.createElement("img"); im.src=u; im.alt="Photo from "+p.username; im.loading="lazy";
+      b.append(im);
+      if(i===3&&albumUrls.length>4) b.append(el("span","more","+"+(albumUrls.length-4)));
+      b.onclick=e=>{ e.stopPropagation(); openLightbox(albumUrls,i); };
+      grid.append(b);
+    });
+    grid.firstChild?.querySelector?.("img")?.addEventListener?.("load",()=>{ if(feed.scrollHeight-feed.scrollTop-feed.clientHeight<400) feed.scrollTop=feed.scrollHeight; });
+    bub.append(grid);
+  } else if(img){ const b=el("button","shot"); b.type="button"; b.setAttribute("aria-label","Open photo");
     const i=document.createElement("img"); i.src=img; i.alt="Photo from "+p.username; i.loading="lazy";
     i.onload=()=>{ if(feed.scrollHeight-feed.scrollTop-feed.clientHeight<400) feed.scrollTop=feed.scrollHeight; };
-    b.append(i); b.onclick=e=>{ e.stopPropagation(); $("lightImg").src=img; show($("lightbox")); }; bub.append(b); }
+    b.append(i); b.onclick=e=>{ e.stopPropagation(); openLightbox([img],0); }; bub.append(b); }
   const media=safeImg(m.media_url);
   if(media&&m.media_type==="video"){ const v=document.createElement("video"); v.className="vid"; v.src=media; v.controls=true; v.playsInline=true; v.preload="metadata"; bub.append(v); }
   if(media&&m.media_type==="audio") bub.append(voicePlayer(media,m.media_duration));
@@ -2967,7 +3009,7 @@ function buildMsg(m,index,noAnim){
   }
   node.append(face,col);
   attachSwipe(node,m); attachLongPress(bub,m);
-  if(img&&!m.text&&!m.reply_to&&m.kind!=="sticker") node.classList.add("photo-only");
+  if((img||albumUrls.length>1)&&!m.text&&!m.reply_to&&m.kind!=="sticker") node.classList.add("photo-only");
   return node;
 }
 function jumpTo(id){
@@ -3291,10 +3333,42 @@ function sendTyping(on){
 }
 
 /* ---------- composer ---------- */
-function clearPending(){ pendingFile=null; pendingKind=null; pendingDuration=null; show($("pending"),false); show($("pendingImg")); show($("pendingVid"),false); $("pendingVid").removeAttribute("src"); }
+function clearPending(){ pendingFile=null; pendingKind=null; pendingDuration=null; show($("pending"),false); show($("pendingImg")); show($("pendingVid"),false); $("pendingVid").removeAttribute("src"); clearPendingImages(); }
+function clearPendingImages(){ pendingImages.forEach(f=>f._url&&URL.revokeObjectURL(f._url)); pendingImages=[]; paintPendingMulti(); }
+function paintPendingMulti(){
+  const wrap=$("pendingMulti"); show(wrap, pendingImages.length>1);
+  if(pendingImages.length<=1) return;
+  show($("pending"),false);
+  const strip=$("pmStrip"); strip.innerHTML="";
+  pendingImages.forEach((f,i)=>{
+    if(!f._url) f._url=URL.createObjectURL(f);
+    const tile=el("span","pm-tile"); const img=document.createElement("img"); img.src=f._url; img.alt="";
+    const x=el("button","",""); x.type="button"; x.setAttribute("aria-label","Remove this photo"); x.textContent="✕";
+    x.onclick=()=>{ URL.revokeObjectURL(f._url); pendingImages.splice(i,1); paintPendingMulti(); };
+    tile.append(img,x); strip.append(tile);
+  });
+  if(pendingImages.length<PENDING_MAX){ const add=el("button","pm-add","+"); add.type="button"; add.setAttribute("aria-label","Add another photo"); add.onclick=()=>$("picker").click(); strip.append(add); }
+  $("pmLabel").textContent=`${pendingImages.length} photo${pendingImages.length===1?"":"s"} ready`;
+}
+const PENDING_MAX=10;
+$("pmClear").onclick=clearPendingImages;
 $("pickBtn").onclick=()=>{ closeTray(); $("picker").click(); };
 function videoDuration(file){ return new Promise(res=>{ const v=document.createElement("video"); v.preload="metadata"; v.onloadedmetadata=()=>{ res(v.duration); URL.revokeObjectURL(v.src); }; v.onerror=()=>res(NaN); v.src=URL.createObjectURL(file); }); }
-$("picker").onchange=e=>{ const f=e.target.files[0]; e.target.value=""; if(f) takeFile(f); };
+$("picker").onchange=e=>{
+  const files=[...e.target.files]; e.target.value="";
+  if(!files.length) return;
+  if(files.length===1&&!pendingImages.length){ takeFile(files[0]); return; }
+  const imgs=files.filter(f=>f.type.startsWith("image/"));
+  if(imgs.length<files.length) $("status").textContent="Only photos can be sent together — videos need their own message.";
+  if(!imgs.length) return;
+  if(pendingFile){ clearPending(); }   // switching from a single video/photo into album mode
+  const room=PENDING_MAX-pendingImages.length;
+  if(room<=0){ $("status").textContent=`You can send up to ${PENDING_MAX} photos at once.`; return; }
+  const oversize=imgs.some(f=>f.size>15e6);
+  if(oversize) $("status").textContent="One or more photos are over 15 MB and were skipped.";
+  pendingImages.push(...imgs.filter(f=>f.size<=15e6).slice(0,room));
+  paintPendingMulti();
+};
 async function takeFile(f){
   if(!f.type.startsWith("image/")&&!f.type.startsWith("video/")){ $("status").textContent="Only photos and videos can be attached."; return; }
   if(f.type.startsWith("video/")){
@@ -3334,12 +3408,17 @@ async function sendFields(fields){
 }
 $("sendForm").addEventListener("submit",async e=>{
   e.preventDefault();
-  const text=$("box").value.trim(); if(!text&&!pendingFile) return;
+  const text=$("box").value.trim(); if(!text&&!pendingFile&&!pendingImages.length) return;
   $("sendBtn").disabled=true; hideMentions();
   try{
     const f={kind:"text",text,mentions:mentionsIn(text)};
-    if(pendingFile&&pendingKind==="video"){ $("status").textContent="Uploading video…"; f.media_url=await api.upload("chat-media",user.id,pendingFile); f.media_type="video"; f.media_duration=pendingDuration; f.kind="video"; }
-    else if(pendingFile){ $("status").textContent="Uploading photo…"; f.image_url=await api.upload("chat-images",user.id,await shrink(pendingFile,1280,false)); f.kind="image"; }
+    if(pendingImages.length>1){
+      $("status").textContent=`Uploading ${pendingImages.length} photos…`;
+      const urls=await Promise.all(pendingImages.map(async img=>api.upload("chat-images",user.id,await shrink(img,1280,false))));
+      f.image_urls=urls; f.image_url=urls[0]; f.kind="image";
+    }
+    else if(pendingFile&&pendingKind==="video"){ $("status").textContent="Uploading video…"; f.media_url=await api.upload("chat-media",user.id,pendingFile); f.media_type="video"; f.media_duration=pendingDuration; f.kind="video"; }
+    else if(pendingFile||pendingImages.length===1){ $("status").textContent="Uploading photo…"; const one=pendingFile||pendingImages[0]; f.image_url=await api.upload("chat-images",user.id,await shrink(one,1280,false)); f.kind="image"; }
     await sendFields(f);
     $("box").value=""; $("box").style.height=""; clearPending(); mentionPicks.clear();
   }catch(err){ $("status").textContent="Didn't send: "+err.message; }
@@ -3614,14 +3693,22 @@ function previewOf(m){
   if(m.kind==="sticker"||m.sticker) return "Sticker "+(STICKERS[m.sticker]?.label?`(${STICKERS[m.sticker].label})`:"");
   if(m.media_type==="audio"||m.kind==="audio") return "🎤 Voice message";
   if(m.media_type==="video"||m.kind==="video") return "🎬 Video"+(m.text?": "+m.text:"");
+  if(m.image_urls?.length>1&&!m.text) return `📷 ${m.image_urls.length} photos`;
   if(m.image_url&&!m.text) return "📷 Photo";
   return m.text||"";
 }
 
 /* ---------- overlays ---------- */
+function openLightbox(urls,i){ lbAlbum=urls.length>1?urls:null; lbIndex=i; $("lightImg").src=urls[i]; show($("lbPrev"),!!lbAlbum); show($("lbNext"),!!lbAlbum); show($("lightbox")); }
+function lbStep(d){ if(!lbAlbum) return; lbIndex=(lbIndex+d+lbAlbum.length)%lbAlbum.length; $("lightImg").src=lbAlbum[lbIndex]; }
+$("lbPrev").onclick=e=>{ e.stopPropagation(); lbStep(-1); };
+$("lbNext").onclick=e=>{ e.stopPropagation(); lbStep(1); };
 $("lightbox").onclick=()=>show($("lightbox"),false);
 ["profile","roomSheet","msgMenu","pollSheet","summarySheet","calSheet","searchSheet"].forEach(id=>$(id).addEventListener("click",e=>{ if(e.target.id===id) show($(id),false); }));
-addEventListener("keydown",e=>{ if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu","pollSheet","tray","themeSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","installSheet"].forEach(id=>{ const n=$(id); if(n) show(n,false); }); });
+addEventListener("keydown",e=>{
+  if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu","pollSheet","tray","themeSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","installSheet"].forEach(id=>{ const n=$(id); if(n) show(n,false); });
+  if(!$("lightbox").classList.contains("hidden")&&lbAlbum){ if(e.key==="ArrowLeft") lbStep(-1); if(e.key==="ArrowRight") lbStep(1); }
+});
 
 /* ================= PUSH NOTIFICATIONS ================= */
 let swReg=null;
