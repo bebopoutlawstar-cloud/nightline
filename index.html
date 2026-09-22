@@ -4147,14 +4147,24 @@ const FX=(()=>{
   function play(name,opts={}){
     if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const e=effects[name]; if(!e) return;
-    cancelAnimationFrame(raf); layer.innerHTML=""; ctx.clearRect(0,0,W,H);
-    const state=e.init(opts.text); const start=performance.now();
+    cancelAnimationFrame(raf); clearTimeout(endTimer); layer.innerHTML=""; ctx.clearRect(0,0,W,H);
+    const state=e.init(opts.text); const start=performance.now(); endsAt=Date.now()+e.dur;
+    canvas.style.display="block";
     const frame=now=>{ const t=now-start, k=Math.min(1,t/e.dur);
-      ctx.clearRect(0,0,W,H); e.step(state,t,k);
-      if(k<1) raf=requestAnimationFrame(frame); else ctx.clearRect(0,0,W,H); };
+      ctx.clearRect(0,0,W,H);
+      try{ e.step(state,t,k); }catch(err){ stop(); return; }
+      if(k<1) raf=requestAnimationFrame(frame); else stop(); };
     raf=requestAnimationFrame(frame);
+    endTimer=setTimeout(stop,e.dur+400);   // backup: iPhones can drop animation frames when the app is paused mid-effect
   }
-  return {play};
+  // Whatever happens, an effect can never leave lines frozen on screen: when it's over, the layer is wiped AND hidden.
+  let endTimer=0, endsAt=0;
+  function stop(){ cancelAnimationFrame(raf); clearTimeout(endTimer); ctx.clearRect(0,0,W,H); canvas.style.display="none"; }
+  canvas.style.display="none";
+  const sweep=()=>{ if(Date.now()>=endsAt) stop(); };
+  document.addEventListener("visibilitychange",()=>{ if(!document.hidden) sweep(); });
+  addEventListener("pageshow",sweep); addEventListener("focus",sweep);
+  return {play,stop};
 })();
 
 function hypeText(text){
@@ -4703,8 +4713,8 @@ const SX=(()=>{   // secret effects layer
     const size=()=>{ const r=host.getBoundingClientRect(); cv.width=r.width*dpr; cv.height=r.height*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); return r; };
     let box=size(), start=performance.now(), raf;
     const state=draw.init?draw.init(box):{};
-    const frame=now=>{ const t=now-start, k=Math.min(1,t/ms); ctx.clearRect(0,0,box.width,box.height); draw.step(ctx,box,state,t,k); if(k<1) raf=requestAnimationFrame(frame); else cv.remove(); };
-    raf=requestAnimationFrame(frame);
+    const frame=now=>{ if(!cv.isConnected) return; const t=now-start, k=Math.min(1,t/ms); ctx.clearRect(0,0,box.width,box.height); try{ draw.step(ctx,box,state,t,k); }catch(e){ cv.remove(); return; } if(k<1) raf=requestAnimationFrame(frame); else cv.remove(); };
+    raf=requestAnimationFrame(frame); setTimeout(()=>cv.remove(),ms+400);
   }
   return {
     showtime(){
@@ -5390,7 +5400,8 @@ const QX=(()=>{
     const cv=document.createElement("canvas"); cv.className="sfx-canvas"; layer.append(cv);
     const dpr=Math.min(devicePixelRatio||1,2), ctx=cv.getContext("2d"), W=innerWidth, H=innerHeight; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
     const st=draw.init?draw.init(W,H):{}; const start=performance.now();
-    const frame=now=>{ const t=now-start, k=Math.min(1,t/ms); ctx.clearRect(0,0,W,H); draw.step(ctx,W,H,st,t,k); if(k<1) requestAnimationFrame(frame); else cv.remove(); };
+    const frame=now=>{ if(!cv.isConnected) return; const t=now-start, k=Math.min(1,t/ms); ctx.clearRect(0,0,W,H); try{ draw.step(ctx,W,H,st,t,k); }catch(e){ cv.remove(); return; } if(k<1) requestAnimationFrame(frame); else cv.remove(); };
+    setTimeout(()=>cv.remove(),ms+400);
     requestAnimationFrame(frame);
   }
   const senderFaces=m=>[...feed.querySelectorAll(`.face[data-uid="${CSS.escape(m?.user_id||"")}"]`)];
@@ -6519,8 +6530,11 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.22b";
+const APP_VERSION="2026.09.22c";
 const CHANGELOG=[
+  {v:"2026.09.22c", title:"Glitch squashed 🧹", items:[
+    "🧹 Fixed weird lines getting stuck on screen after an effect (like GG) if you left the app mid-effect. (Found by Xen!)",
+  ]},
   {v:"2026.09.22b", title:"See who's online 🟢", items:[
     "🟢 Online, idle, and Do Not Disturb symbols now show on everyone's picture, not just your own. (Thanks Ren for the report!)",
     "👀 Friends only show up once they've updated too. If someone looks offline, tell them to fully close and reopen the app (or press Ctrl+Shift+R on a computer).",
