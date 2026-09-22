@@ -1650,8 +1650,13 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .face.frame-bonded .fi{box-shadow:0 0 0 3px #ff5aa8,0 0 14px 4px rgba(255,90,168,.7)}
 /* ===== full-screen Arcana reveal ===== */
 .arcana-reveal{position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,rgba(60,20,90,.55),rgba(7,4,26,.94));animation:sxfadein .3s ease both;perspective:1000px}
-.arcana-card{position:relative;width:min(70vw,280px);aspect-ratio:.62;transform-style:preserve-3d;transition:transform 1s cubic-bezier(.3,.9,.4,1);animation:arcanadrop .7s cubic-bezier(.2,1.1,.4,1) both}
-@keyframes arcanadrop{from{transform:translateY(-50vh) rotate(-8deg);opacity:0}to{transform:translateY(0) rotate(0);opacity:1}}
+/* the drop-in entrance and the flip must NOT both animate `transform` on the same element —
+   a fill-mode:both animation permanently pins transform and silently blocks a later transition
+   from ever visually applying, even though the class change itself works. Split them: the outer
+   wrapper handles the falling-in motion, the inner card handles only the flip. */
+.arcana-drop{opacity:0;animation:arcanadropfade .7s cubic-bezier(.2,1.1,.4,1) both}
+@keyframes arcanadropfade{from{transform:translateY(-50vh) rotate(-8deg);opacity:0}to{transform:translateY(0) rotate(0);opacity:1}}
+.arcana-card{position:relative;width:min(70vw,280px);aspect-ratio:.62;transform-style:preserve-3d;transition:transform 1s cubic-bezier(.3,.9,.4,1)}
 .arcana-reveal.flip .arcana-card{transform:rotateY(180deg)}
 .arcana-back,.arcana-front{position:absolute;inset:0;border-radius:10px;backface-visibility:hidden;border:4px solid var(--cyan)}
 .arcana-back{background:repeating-linear-gradient(45deg,#1a0f3d,#1a0f3d 8px,#241454 8px,#241454 16px);display:grid;place-items:center;font-size:54px;color:var(--volt);text-shadow:0 0 14px var(--volt)}
@@ -6278,9 +6283,9 @@ async function finishQuiz(){
 function revealArcana(arcana){
   const layer=$("sfx"), w=document.createElement("div"); w.className="arcana-reveal";
   w.innerHTML=`<div class="arcana-burst"></div>
-    <div class="arcana-card"><div class="arcana-back"><span>✦</span></div>
+    <div class="arcana-drop"><div class="arcana-card"><div class="arcana-back"><span>✦</span></div>
       <div class="arcana-front"><div class="arcana-name">${arcana}</div><div class="arcana-flavor">${ARCANA_FLAVOR[arcana]||""}</div></div>
-    </div>
+    </div></div>
     <div class="arcana-actions"><button type="button" class="send arcana-done">Nice.</button><button type="button" class="linkbtn arcana-again">Retake the quiz</button></div>`;
   layer.append(w);
   const burst=w.querySelector(".arcana-burst");
