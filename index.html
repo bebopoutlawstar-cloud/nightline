@@ -1633,7 +1633,10 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 @keyframes qsshuffle3{0%,100%{transform:translateX(0) rotate(0)}50%{transform:translateX(22px) rotate(10deg)}}
 .quizresult{text-align:center;display:grid;gap:6px;justify-items:center}
 .quizarcana{font-family:var(--num);font-size:40px;color:var(--volt);text-shadow:3px 3px 0 var(--night)}
-.myarcana{display:inline-block;font-family:var(--tech);font-size:11px;color:var(--volt);border:1.5px solid var(--volt);padding:2px 8px;margin-top:4px}
+.myarcana{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;padding:0;margin:4px 0 12px;cursor:pointer}
+.myarcana:active .ma-name{transform:rotate(-2deg) scale(.96)}
+.myarcana .ma-eyebrow{font-family:var(--tech);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--cyan)}
+.myarcana .ma-name{display:inline-block;font-family:var(--num);font-size:30px;line-height:1.1;color:var(--volt);text-shadow:2px 2px 0 var(--night),0 0 14px rgba(243,255,58,.5);letter-spacing:.5px;transform:rotate(-2deg)}
 /* social link badge on friend rows + detail sheet */
 .linkbadge{display:inline-flex;align-items:center;gap:4px;font-family:var(--tech);font-size:10px;color:var(--cyan);border:1px solid var(--cyan);padding:1px 6px;margin-left:6px}
 .sllink{display:grid;gap:10px;text-align:center;justify-items:center}
@@ -1844,6 +1847,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     <h2 id="profTitle">Your profile</h2>
     <div class="face lg" id="profFace"></div>
     <div class="uname" id="profName"></div>
+    <button type="button" class="myarcana hidden" id="myArcana"></button>
     <div class="email" id="profEmail"></div>
     <input type="file" id="avatarPicker" accept="image/*" class="sr">
     <button class="go" type="button" id="changePhoto">Change photo</button>
@@ -1864,7 +1868,6 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     <button class="ghost" type="button" id="fxBtn">Screen effects: On</button>
     <details class="fx-list"><summary>Words and emoji that trigger effects</summary><ul id="fxList"></ul></details>
     <div class="xpbox"><div class="xphead"><b id="xpLevel">LV 1</b><span id="xpTitle">Newcomer</span></div><div class="xpbar"><i id="xpFill"></i></div><div class="xptext" id="xpText"></div><div class="xpways" id="xpWays"></div></div>
-    <span class="myarcana hidden" id="myArcana"></span>
     <button type="button" class="ghost" id="openHabits">🎯 Habits & Stats</button>
     <button type="button" class="ghost" id="openQuiz">🃏 Who are you? (personality quiz)</button>
     <div class="unlockbox"><div class="unlockcount" id="unlockCount"></div><div id="unlockList"></div></div>
@@ -6304,7 +6307,14 @@ function openQuiz(){ paintQuiz(); show($("quizSheet")); }
 $("openQuiz").onclick=openQuiz;
 $("quizClose").onclick=()=>show($("quizSheet"),false);
 
-function paintArcanaBadge(){ const n=$("myArcana"); if(!n) return; n.textContent=meProfile?.arcana?("🃏 "+meProfile.arcana):""; show(n,!!meProfile?.arcana); }
+function paintArcanaBadge(){
+  const n=$("myArcana"); if(!n) return;
+  const arc=meProfile?.arcana;
+  show(n,!!arc); if(!arc) return;
+  n.innerHTML=""; n.append(el("span","ma-eyebrow","🃏 Your Arcana"), el("span","ma-name",arc));
+  n.setAttribute("aria-label","Your Arcana: "+arc+". Tap to retake the quiz.");
+  n.onclick=openQuiz;
+}
 
 /* ================= SOCIAL LINKS ================= */
 const RANK_STEPS=[0,30,70,120,180,250,330,420,520,630];
