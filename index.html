@@ -1121,9 +1121,10 @@ body.theme-pipboy .compose,body.theme-pipboy .top{background:rgba(6,16,8,.92)!im
 .unlockgroup{font-family:var(--tech);font-size:11px;color:var(--cyan);margin-top:6px;width:100%}
 #unlockList{display:flex;flex-wrap:wrap;gap:6px;width:100%}
 .framerow{display:flex;flex-wrap:wrap;gap:8px;width:100%;justify-content:center}
-.framepick{background:var(--deep);border:2px solid #3b2d80;padding:6px;font-family:var(--tech);font-size:11px;color:var(--muted)}
-.framepick.on{border-color:var(--volt);box-shadow:3px 3px 0 var(--mag)}
+.framepick{background:var(--deep);border:2px solid #3b2d80;padding:8px 6px 7px;font-family:var(--tech);font-size:10.5px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:5px;width:76px}
+.framepick.on{border-color:var(--volt);box-shadow:3px 3px 0 var(--mag);color:var(--white)}
 .framepick .face{width:40px;height:40px;font-size:18px;display:block}
+.framelabel{white-space:normal;text-align:center;line-height:1.2;max-width:100%;word-break:break-word}
 /* frames */
 .face[class*="frame-"] .fi{outline-offset:2px}
 .face.frame-neon .fi{box-shadow:0 0 0 3px var(--cyan),0 0 14px 4px var(--cyan)}
@@ -5745,8 +5746,12 @@ paintFace=function(node,p){ _paintFace(node,p); [...node.classList].filter(c=>c.
 function paintFrameRow(){
   const row=$("frameRow"); row.innerHTML="";
   const cur=draftTheme.frame||"";
-  const none=el("button","framepick"+(cur===""?" on":""),"none"); none.type="button"; none.onclick=()=>{ draftTheme={...draftTheme,frame:null}; paintThemeSheet(); }; row.append(none);
-  Object.entries(FRAMES).forEach(([id,label])=>{ if(!unlockOk("frame",id)) return; const b=el("button","framepick"+(cur===id?" on":"")); b.type="button"; b.title=label; const f=el("span","face frame-"+id); f.append(el("span","fi","★")); b.append(f); b.onclick=()=>{ draftTheme={...draftTheme,frame:id}; paintThemeSheet(); }; row.append(b); });
+  const none=el("button","framepick"+(cur===""?" on":"")); none.type="button";
+  const nf=el("span","face"); nf.append(el("span","fi","★")); none.append(nf,el("span","framelabel","None"));
+  none.onclick=()=>{ draftTheme={...draftTheme,frame:null}; paintThemeSheet(); }; row.append(none);
+  Object.entries(FRAMES).forEach(([id,label])=>{ if(!unlockOk("frame",id)) return; const b=el("button","framepick"+(cur===id?" on":"")); b.type="button";
+    const f=el("span","face frame-"+id); f.append(el("span","fi","★")); b.append(f,el("span","framelabel",label));
+    b.onclick=()=>{ draftTheme={...draftTheme,frame:id}; paintThemeSheet(); }; row.append(b); });
   const pf=$("themePreviewFace"); [...pf.classList].filter(c=>c.startsWith("frame-")).forEach(c=>pf.classList.remove(c)); if(draftTheme.frame&&FRAMES[draftTheme.frame]) pf.classList.add("frame-"+draftTheme.frame);
   paintStatusRow();
 }
