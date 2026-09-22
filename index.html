@@ -2042,6 +2042,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     <p class="sub">Check off a habit once a day. Each one feeds a stat — and your overall level.</p>
     <div class="statbars" id="statBars"></div>
     <h3>Today</h3>
+    <p class="sub" id="habitSummary"></p>
     <div class="habitlist" id="habitList"></div>
     <form class="habitform" id="habitForm">
       <label for="habitLabel" class="sr">New habit</label>
@@ -6071,7 +6072,7 @@ function statNext(count){ const i=statTier(count); return i>=STAT_TIERS.length-1
 
 let myHabits=[], myHabitLogs=[], habitsLoaded=false;
 async function loadHabits(){
-  try{ [myHabits,myHabitLogs]=await Promise.all([api.habits(),api.habitLogs(new Date(Date.now()-70*864e5).toISOString().slice(0,10))]); habitsLoaded=true; }
+  try{ [myHabits,myHabitLogs]=await Promise.all([api.habits(),api.habitLogs("2000-01-01")]); habitsLoaded=true; }
   catch(e){ myHabits=[]; myHabitLogs=[]; }
 }
 function statCount(stat){ const ids=new Set(myHabits.filter(h=>h.stat===stat).map(h=>h.id)); return myHabitLogs.filter(l=>ids.has(l.habit_id)).length; }
@@ -6098,6 +6099,8 @@ async function paintHabits(){
     row.append(mid); row.append(el("span","statnum",String(count)));
     bars.append(row);
   });
+  const total=myHabitLogs.filter(l=>myHabits.some(h=>h.id===l.habit_id)).length;
+  $("habitSummary").textContent=myHabits.length?`${myHabits.length} habit${myHabits.length===1?"":"s"} · ${total} total completion${total===1?"":"s"}`:"";
   const list=$("habitList"); list.innerHTML="";
   if(!myHabits.length) list.append(el("p","note","No habits yet. Add one below — each check-in builds a stat."));
   myHabits.forEach(h=>{
@@ -6105,9 +6108,10 @@ async function paintHabits(){
     const chk=el("button","habitchk"); chk.type="button"; chk.setAttribute("aria-label",(doneToday(h.id)?"Mark not done":"Mark done")+": "+h.label);
     chk.textContent=doneToday(h.id)?"✓":""; chk.onclick=()=>toggleHabitUI(h);
     const mid=el("div","habitmid");
-    const streak=habitStreak(h.id);
+    const streak=habitStreak(h.id), lifetime=myHabitLogs.filter(l=>l.habit_id===h.id).length;
     mid.append(el("div","habitlabel",`${STAT_ICON[h.stat]} ${h.label}`));
-    mid.append(el("small","",streak>0?`🔥 ${streak} day streak`+(h.reminder_time?` · reminds at ${h.reminder_time}`:""):(h.reminder_time?`Reminds at ${h.reminder_time}`:"")));
+    const bits=[]; if(streak>0) bits.push(`🔥 ${streak} day streak`); bits.push(`${lifetime} total`); if(h.reminder_time) bits.push(`reminds at ${h.reminder_time}`);
+    mid.append(el("small","",bits.join(" · ")));
     const del=el("button","habitdel","✕"); del.type="button"; del.setAttribute("aria-label","Remove "+h.label);
     del.onclick=async()=>{ try{ await api.archiveHabit(h.id); myHabits=myHabits.filter(x=>x.id!==h.id); paintHabits(); }catch(e){} };
     row.append(chk,mid,del); list.append(row);
