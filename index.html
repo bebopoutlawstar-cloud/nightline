@@ -1698,6 +1698,9 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .newsitems{list-style:none;display:grid;gap:7px}
 .newsitems li{font-size:16px;line-height:1.3;color:var(--white)}
 .newsolder{font-family:var(--tech);font-size:11px;color:var(--muted)}
+.xen-puff{position:absolute;bottom:-60px;width:90px;height:90px;border-radius:50%;background:radial-gradient(circle,rgba(200,210,230,.55),rgba(177,140,255,.18) 55%,transparent 72%);filter:blur(2px);animation:xenpuff 3.2s ease-out forwards}
+@keyframes xenpuff{0%{transform:translateY(0) scale(.4);opacity:0}20%{opacity:1}100%{transform:translateY(-75vh) scale(2.2);opacity:0}}
+.xen-cap{position:absolute;left:0;right:0;top:38%;text-align:center;color:#7CFF6B;animation:sxflash 2.6s ease both}
 </style>
 </head>
 <body>
@@ -3170,7 +3173,7 @@ async function addMessages(list){
   for(const m of list){ claimed.delete(m.id); if(byId.has(m.id)) continue; byId.set(m.id,m); msgs.push(m); }
   msgs.sort((a,b)=>a.created_at<b.created_at?-1:a.created_at>b.created_at?1:0);
   if(appendOnly && feed.querySelector(".msg,.empty,.older")) list.forEach(appendEl);
-  else renderAll();
+  else { renderAll(); list.forEach(m=>playFx(m)); }   // first message in an empty chat still gets its effect/secret (playFx skips anything older than 15s)
 }
 
 function visible(m){ return !blocked.has(m.user_id); }
@@ -3851,6 +3854,15 @@ const STICKERS={
   nanis:{label:"NANI?!",secret:"nani",svg:STAMP("NANI?!","#c00","#F4F7FF",32)},
   redrums:{label:"REDRUM",secret:"redrum",svg:STK(`<text x="60" y="76" text-anchor="middle" font-family="Brush Script MT,Segoe Script,cursive" font-size="34" fill="#ff1a1a" stroke="#07041A" stroke-width="2" paint-order="stroke" transform="scale(-1 1) translate(-120 0)">REDRUM</text>`,-8)},
   showtimes:{label:"SHOWTIME",secret:"showtime",svg:STAMP("SHOWTIME!","#E8182B","#F4F7FF",22)},
+  blunt:{label:"Blunt",secret:"xen",svg:STK(`<g transform="translate(4 4)"><path d="M14 78 L96 44 L104 58 L22 92 Z" fill="#07041A"/></g>
+    <path d="M14 78 L96 44 L104 58 L22 92 Z" fill="#8a5a2b" stroke="#07041A" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M22 80 L94 50 M26 86 L98 56" stroke="#6b4220" stroke-width="2.5"/>
+    <path d="M14 78 L22 92 L30 89 L22 75 Z" fill="#F4F7FF" stroke="#07041A" stroke-width="3"/>
+    <ellipse cx="100" cy="51" rx="6" ry="8" transform="rotate(-22 100 51)" fill="#FF8A3D" stroke="#07041A" stroke-width="3"/>
+    <circle cx="101" cy="50" r="3" fill="#F3FF3A"/>
+    <path d="M102 38 q-8 -8 0 -16 q8 -8 0 -16" fill="none" stroke="#B18CFF" stroke-width="5" stroke-linecap="round"/>
+    <path d="M114 36 q-6 -6 0 -12" fill="none" stroke="#00F0FF" stroke-width="4" stroke-linecap="round"/>
+    <path d="M60 24 l3 7 7 1 -5 5 2 7 -7 -4 -6 4 1 -7 -5 -5 7 -1z" fill="#7CFF6B" stroke="#07041A" stroke-width="2.5"/>`,-4)},
   zzz:{label:"Sleepy",svg:STK(`<text x="20" y="96" font-family="Anton,Impact,sans-serif" font-size="56" fill="#00F0FF" stroke="#07041A" stroke-width="5" paint-order="stroke">Z</text><text x="56" y="70" font-family="Anton,Impact,sans-serif" font-size="42" fill="#E07AC6" stroke="#07041A" stroke-width="5" paint-order="stroke">Z</text><text x="84" y="44" font-family="Anton,Impact,sans-serif" font-size="30" fill="#F3FF3A" stroke="#07041A" stroke-width="5" paint-order="stroke">Z</text>`,-8)},
 };
 function stickerEl(id){ const s=el("span","stk"); s.innerHTML=STICKERS[id].svg; s.setAttribute("role","img"); s.setAttribute("aria-label",STICKERS[id].label+" sticker"); return s; }
@@ -5808,6 +5820,7 @@ const UNLOCKS=[
   {id:"sticker:pog",    type:"sticker", label:"😮 POG sticker",         by:{secret:"pog"}},
   {id:"sticker:nani",   type:"sticker", label:"❗ NANI?! sticker",      by:{secret:"nani"}},
   {id:"sticker:redrum", type:"sticker", label:"🩸 REDRUM sticker",      by:{secret:"redrum"}},
+  {id:"sticker:blunt",   type:"sticker", label:"🌿 Blunt sticker",      by:{secret:"xen"}},
   {id:"sticker:showtime",type:"sticker",label:"🎭 SHOWTIME sticker",   by:{secret:"showtime"}},
   {id:"frame:neon",     type:"frame", label:"Neon ring frame",       by:{level:3}},
   {id:"frame:glitch",   type:"frame", label:"Glitch frame",          by:{secret:"netrunner"}},
@@ -6185,6 +6198,15 @@ QX.hifive=function(m){
 SECRET_LIST.splice(SECRET_LIST.findIndex(s=>s.id==="konami"),0,
   {id:"hifive", name:"Hi-five", re:/hi-?five|hi-?5\b|high[- ]?five/i, play:m=>QX.hifive(m)}
 );
+QX.xen=function(){
+  const layer=$("sfx");
+  for(let i=0;i<9;i++){ const d=document.createElement("div"); d.className="xen-puff"; d.style.left=(8+Math.random()*80)+"%"; d.style.animationDelay=(i*.18)+"s"; layer.append(d); setTimeout(()=>d.remove(),3600); }
+  const c=document.createElement("div"); c.className="sx-caption xen-cap"; c.textContent="🌿 puff puff pass"; layer.append(c); setTimeout(()=>c.remove(),2600);
+};
+SECRET_LIST.splice(SECRET_LIST.findIndex(s=>s.id==="konami"),0,
+  {id:"xen", name:"Xen's stash", re:/(^|[^a-z])xen([^a-z]|$)/i, when:()=>isDm, play:()=>QX.xen()}
+);
+Object.assign(HINTS,{ xen:"Say a certain little brother's name, but only in a private chat." });
 Object.assign(HINTS,{ hifive:"Two open hands meet in the middle. Say it as one word or two." });
 
 /* ================= MISSED-SECRET PROMPT ================= */
