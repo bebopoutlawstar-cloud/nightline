@@ -1704,6 +1704,14 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .xen-puff{position:absolute;bottom:-60px;width:90px;height:90px;border-radius:50%;background:radial-gradient(circle,rgba(200,210,230,.55),rgba(177,140,255,.18) 55%,transparent 72%);filter:blur(2px);animation:xenpuff 3.2s ease-out forwards}
 @keyframes xenpuff{0%{transform:translateY(0) scale(.4);opacity:0}20%{opacity:1}100%{transform:translateY(-75vh) scale(2.2);opacity:0}}
 .xen-cap{position:absolute;left:0;right:0;top:38%;text-align:center;color:#7CFF6B;animation:sxflash 2.6s ease both}
+/* ===== iPhone: no auto-zoom when tapping a text box (iOS zooms into anything under 16px) ===== */
+@supports (-webkit-touch-callout: none){
+  input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=file]):not([type=range]),textarea,select{font-size:max(16px,1em)!important}
+}
+/* ===== update-ready bar ===== */
+.updatebar{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 86px);transform:translateX(-50%) rotate(-1deg);z-index:35;max-width:calc(100% - 24px);
+  background:var(--volt);color:var(--night);border:3px solid var(--night);box-shadow:5px 5px 0 var(--mag);font-family:var(--tech);font-size:13px;padding:10px 16px;white-space:nowrap;animation:toastin .35s cubic-bezier(.2,1.5,.4,1) both}
+.updatebar b{text-decoration:underline}
 </style>
 </head>
 <body>
@@ -2126,6 +2134,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 </div>
 
 <div class="toasts" id="toasts" aria-live="polite"></div>
+<button type="button" class="updatebar hidden" id="updateBar">✨ New update ready · <b>Tap to refresh</b></button>
 <!-- ============ HABITS & STATS ============ -->
 <!-- ============ WHAT'S NEW ============ -->
 <div class="overlay hidden" id="newsSheet" role="dialog" aria-modal="true" aria-labelledby="newsTitle">
@@ -2380,7 +2389,7 @@ const DAYS=["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDA
 const COLORS=["#00F0FF","#E07AC6","#F3FF3A","#7CFF6B","#FF8A3D","#B18CFF"];
 const EMOJIS=["🔥","😂","😮","😢","👍","❤️"];
 const PAGE=50;
-const MAX_VIDEO_SECONDS=30, MAX_VIDEO_BYTES=25e6, MAX_VOICE_SECONDS=120;
+const MAX_VIDEO_SECONDS=30, MAX_VIDEO_BYTES=25e6, MAX_VOICE_SECONDS=120, MAX_PICK_BYTES=500e6;
 const BACKGROUNDS=[["stars","Stars"],["grid","Grid"],["rain","Rain"],["sunset","Sunset"],["aurora","Aurora"],["void","Void"],["burning","Burning City"],["darkhour","Dark Hour"],["wasteland","Wasteland"],["warp","Hyperspace"],["matrix","Code Rain"]];
 const THEMES={
   night:  {label:"Night Signal", main:"#00F0FF", accent:"#C65AAE", hi:"#F3FF3A"},
@@ -2578,6 +2587,8 @@ const live = {
   async saveArcana(arcana){ must(await sb.from("profiles").update({arcana}).eq("id",user.id)); },
   async deletePush(endpoint){ await sb.from("push_subscriptions").delete().eq("endpoint",endpoint); },
   // Night Owl: sent while the app is closing, so it uses a keepalive request the browser finishes even after the page freezes
+  async saveProgress(d){ return must(await sb.rpc("save_progress",{p_xp:d.xp,p_log:d.log,p_secrets:d.secrets,p_unlocks:d.unlocks})); },
+  saveProgressOnExit(d){ if(!owlToken) return; try{ fetch(SUPABASE_URL+"/rest/v1/rpc/save_progress",{method:"POST",keepalive:true,headers:{"apikey":SUPABASE_ANON_KEY,"Authorization":"Bearer "+owlToken,"Content-Type":"application/json"},body:JSON.stringify({p_xp:d.xp,p_log:d.log,p_secrets:d.secrets,p_unlocks:d.unlocks})}).catch(()=>{}); }catch(e){} },
   owlSchedule(tz){ if(!owlToken) return; try{ fetch(SUPABASE_URL+"/rest/v1/rpc/owl_schedule",{method:"POST",keepalive:true,headers:{"apikey":SUPABASE_ANON_KEY,"Authorization":"Bearer "+owlToken,"Content-Type":"application/json"},body:JSON.stringify({p_tz:tz})}).catch(()=>{}); }catch(e){} },
   async owlCancel(){ await sb.rpc("owl_cancel"); },
   async testPush(){ const {data,error}=await sb.functions.invoke("notify",{body:{selfTest:true}}); if(error){ let msg=error.message; try{ const jj=await error.context?.json(); if(jj?.error) msg=jj.error; }catch(e){} throw new Error(msg); } return data; },
@@ -2757,6 +2768,7 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     async blocks(){ return [...blocked]; }, async block(uid){ blocked.add(uid); }, async unblock(uid){ blocked.delete(uid); },
     async savePush(){}, async deletePush(){}, async testPush(){ return {sent:1,devices:1,demo:true}; },
     owlSchedule(){}, async owlCancel(){},
+    async saveProgress(d){ return {xp:d.xp,xp_log:d.log,secrets:d.secrets,unlocks:d.unlocks}; }, saveProgressOnExit(){},
     async habits(){ return demoHabits.filter(h=>!h.archived); },
     async createHabit(label,stat,reminder_time){ const h={id:demoHabitId++,user_id:"me",label,stat,reminder_time:reminder_time||null,archived:false,created_at:iso()}; demoHabits.push(h); return h; },
     async archiveHabit(id){ const h=demoHabits.find(h=>h.id===id); if(h) h.archived=true; },
@@ -2878,6 +2890,7 @@ async function handleAuth(u){
     return;
   }
   await refreshMe();
+  await syncProgress();
   blocked=new Set(await api.blocks().catch(()=>[]));
   await ensureProfiles([...blocked]);
   show($("authCard"),false); show($("roomCard"));
@@ -2996,6 +3009,33 @@ const uiSoundOn=()=>{ try{ return localStorage.getItem("nl-uisound")!=="off"; }c
    DMs you, and that DM arrives as a normal push. Opening the app again cancels it. */
 let owlToken=null;
 if(sb){ sb.auth.getSession().then(({data})=>{ owlToken=data.session?.access_token||null; }); sb.auth.onAuthStateChange((e,s)=>{ owlToken=s?.access_token||null; }); }
+/* ================= PROGRESS SYNC =================
+   XP, secrets, and unlocks are saved on the phone AND merged into your account, so iPhone Safari's 7-day
+   cleanup, reinstalling, or a new phone can't wipe them. The server only ever merges upward. */
+function localProgress(){
+  let x={xp:0,log:{}}, sec=[], un=[];
+  try{ x=JSON.parse(localStorage.getItem("nl-xp"))||x; }catch(e){}
+  try{ sec=JSON.parse(localStorage.getItem("nl-secrets")||"[]"); }catch(e){}
+  try{ un=JSON.parse(localStorage.getItem("nl-unlocked")||"[]"); }catch(e){}
+  return {xp:+x.xp||0, log:(x.log&&typeof x.log==="object")?x.log:{}, secrets:Array.isArray(sec)?sec:[], unlocks:Array.isArray(un)?un:[]};
+}
+function applyServerProgress(r){
+  if(!r) return;
+  try{
+    const mine=localProgress();
+    const log={...mine.log}; Object.entries(r.xp_log||{}).forEach(([k,v])=>{ log[k]=Math.max(+log[k]||0,+v||0); });
+    localStorage.setItem("nl-xp",JSON.stringify({xp:Math.max(mine.xp,+r.xp||0),log}));
+    localStorage.setItem("nl-secrets",JSON.stringify([...new Set([...mine.secrets,...(r.secrets||[])])]));
+    localStorage.setItem("nl-unlocked",JSON.stringify([...new Set([...mine.unlocks,...(r.unlocks||[])])]));
+  }catch(e){}
+  if(typeof paintHomeLevel==="function") paintHomeLevel();
+}
+let progressTimer=null, progressDirty=false;
+function progressChanged(){ progressDirty=true; clearTimeout(progressTimer); progressTimer=setTimeout(pushProgress,3000); }
+async function pushProgress(){ if(!user||!progressDirty) return; progressDirty=false; try{ applyServerProgress(await api.saveProgress(localProgress())); }catch(e){ progressDirty=true; } }
+async function syncProgress(){ if(!user) return; try{ applyServerProgress(await api.saveProgress(localProgress())); }catch(e){ /* SQL not installed yet, or offline: local progress still works */ } }
+document.addEventListener("visibilitychange",()=>{ if(document.hidden&&user&&progressDirty){ progressDirty=false; clearTimeout(progressTimer); api.saveProgressOnExit(localProgress()); } });
+
 const owlOn=()=>{ try{ return localStorage.getItem("nl-owl")!=="off"; }catch(e){ return true; } };
 const myTimeZone=()=>{ try{ return Intl.DateTimeFormat().resolvedOptions().timeZone||"UTC"; }catch(e){ return "UTC"; } };
 function owlLeaving(){ if(user&&owlOn()&&myHabits.length) api.owlSchedule(myTimeZone()); }
@@ -3654,6 +3694,60 @@ function paintPendingMulti(){
 const PENDING_MAX=10;
 $("pmClear").onclick=clearPendingImages;
 $("pickBtn").onclick=()=>{ closeTray(); $("picker").click(); };
+/* Re-records a video at 720p / ~2 Mbps so iPhone clips (often 30-100+ MB) fit the 25 MB upload limit.
+   It plays the video silently into a hidden canvas and records that, so it takes about as long as the clip.
+   Output is MP4 (H.264) where the browser supports it, which plays on every phone. */
+async function shrinkVideo(file,onProgress){
+  if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream) throw new Error("this browser can't shrink videos. Try a shorter clip.");
+  // H.264 only: it plays on every phone (VP9-in-MP4 doesn't play on iPhones)
+  const type=["video/mp4;codecs=avc1.42E01E,mp4a.40.2","video/mp4;codecs=avc1,mp4a","video/mp4;codecs=avc1","video/webm;codecs=h264,opus","video/webm;codecs=h264"].find(t=>MediaRecorder.isTypeSupported(t));
+  if(!type) throw new Error("this browser can't shrink videos. Try a shorter clip.");
+  const url=URL.createObjectURL(file), v=document.createElement("video");
+  v.src=url; v.playsInline=true; v.preload="auto"; v.muted=true;
+  let ac=null, dest=null, stream=null, snd=null;
+  try{
+    await new Promise((res,rej)=>{ v.onloadedmetadata=res; v.onerror=()=>rej(new Error("couldn't read that video.")); });
+    const short=Math.min(v.videoWidth,v.videoHeight)||720, k=Math.min(1,720/short);
+    const w=Math.max(2,Math.round(v.videoWidth*k/2)*2), h=Math.max(2,Math.round(v.videoHeight*k/2)*2);
+    const c=document.createElement("canvas"); c.width=w; c.height=h; const ctx=c.getContext("2d");
+    stream=c.captureStream(30);
+    // Sound: best is the video's own audio (stays in sync even if playback stutters). It's routed into a
+    // recorder, never the speaker. If the phone blocks un-muted playback, fall back to decoding the audio.
+    let elemAudio=false;
+    try{ ac=sfxCtx(); if(ac.state==="suspended") await ac.resume();
+         dest=ac.createMediaStreamDestination(); ac.createMediaElementSource(v).connect(dest);
+         dest.stream.getAudioTracks().forEach(t=>stream.addTrack(t)); v.muted=false; elemAudio=true; }catch(e){ dest=null; }
+    const rec=new MediaRecorder(stream,{mimeType:type,videoBitsPerSecond:2_000_000,audioBitsPerSecond:96_000});
+    const chunks=[]; rec.ondataavailable=e=>{ if(e.data.size) chunks.push(e.data); };
+    const stopped=new Promise(res=>{ rec.onstop=res; });
+    // if playback stalls, pause recording so frozen frames aren't saved
+    v.addEventListener("waiting",()=>{ if(rec.state==="recording") rec.pause(); });
+    v.addEventListener("playing",()=>{ if(rec.state==="paused") rec.resume(); });
+    let done=false;
+    const draw=()=>{ if(done) return; ctx.drawImage(v,0,0,w,h); if(v.duration) onProgress&&onProgress(Math.min(1,v.currentTime/v.duration));
+      v.requestVideoFrameCallback?v.requestVideoFrameCallback(draw):requestAnimationFrame(draw); };
+    const finished=new Promise(res=>{ v.onended=res; });
+    ctx.drawImage(v,0,0,w,h);
+    try{ await v.play(); }
+    catch(err){
+      if(!elemAudio) throw new Error("couldn't play that video to shrink it.");
+      v.muted=true; elemAudio=false;
+      try{ const buf=await ac.decodeAudioData(await file.arrayBuffer()); snd=ac.createBufferSource(); snd.buffer=buf; snd.connect(dest); }catch(e){ snd=null; }
+      await v.play();
+    }
+    rec.start(500); if(snd) snd.start(0,v.currentTime); draw();
+    await finished; done=true; ctx.drawImage(v,0,0,w,h);
+    if(rec.state==="paused") rec.resume();
+    await new Promise(r=>setTimeout(r,200)); rec.stop(); await stopped;
+    const out=new Blob(chunks,{type:type.split(";")[0]});
+    if(!out.size) throw new Error("couldn't shrink that video. Try a shorter clip.");
+    onProgress&&onProgress(1);
+    return out;
+  }finally{
+    try{ snd&&snd.stop(); }catch(e){} try{ stream&&stream.getTracks().forEach(t=>t.stop()); }catch(e){}
+    v.pause(); URL.revokeObjectURL(url); v.removeAttribute("src"); v.load();
+  }
+}
 function videoDuration(file){ return new Promise(res=>{ const v=document.createElement("video"); v.preload="metadata"; v.onloadedmetadata=()=>{ res(v.duration); URL.revokeObjectURL(v.src); }; v.onerror=()=>res(NaN); v.src=URL.createObjectURL(file); }); }
 $("picker").onchange=e=>{
   const files=[...e.target.files]; e.target.value="";
@@ -3673,7 +3767,7 @@ $("picker").onchange=e=>{
 async function takeFile(f){
   if(!f.type.startsWith("image/")&&!f.type.startsWith("video/")){ $("status").textContent="Only photos and videos can be attached."; return; }
   if(f.type.startsWith("video/")){
-    if(f.size>MAX_VIDEO_BYTES){ $("status").textContent="Video is over 25 MB. Try a shorter clip."; return; }
+    if(f.size>MAX_PICK_BYTES){ $("status").textContent="That video is too big (over 500 MB). Try a shorter clip."; return; }
     const d=await videoDuration(f);
     if(isFinite(d)&&d>MAX_VIDEO_SECONDS+0.5){ $("status").textContent=`Videos can be up to ${MAX_VIDEO_SECONDS} seconds. That one is ${Math.round(d)}.`; return; }
     pendingFile=f; pendingKind="video"; pendingDuration=isFinite(d)?Math.round(d*10)/10:null;
@@ -3718,7 +3812,15 @@ $("sendForm").addEventListener("submit",async e=>{
       const urls=await Promise.all(pendingImages.map(async img=>api.upload("chat-images",user.id,await shrink(img,1280,false))));
       f.image_urls=urls; f.image_url=urls[0]; f.kind="image";
     }
-    else if(pendingFile&&pendingKind==="video"){ $("status").textContent="Uploading video…"; f.media_url=await api.upload("chat-media",user.id,pendingFile); f.media_type="video"; f.media_duration=pendingDuration; f.kind="video"; }
+    else if(pendingFile&&pendingKind==="video"){
+      let vid=pendingFile;
+      if(vid.size>MAX_VIDEO_BYTES){
+        $("status").textContent="Shrinking video… 0%";
+        try{ vid=await shrinkVideo(vid,k=>{ $("status").textContent=`Shrinking video… ${Math.round(k*100)}%`; }); }
+        catch(err){ throw new Error(err.message||"couldn't shrink that video. Try a shorter clip."); }
+        if(vid.size>MAX_VIDEO_BYTES) throw new Error("even after shrinking it's over 25 MB. Try a shorter clip.");
+      }
+      $("status").textContent="Uploading video…"; f.media_url=await api.upload("chat-media",user.id,vid); f.media_type="video"; f.media_duration=pendingDuration; f.kind="video"; }
     else if(pendingFile||pendingImages.length===1){ $("status").textContent="Uploading photo…"; const one=pendingFile||pendingImages[0]; f.image_url=await api.upload("chat-images",user.id,await shrink(one,1280,false)); f.kind="image"; }
     await sendFields(f);
     $("box").value=""; $("box").style.height=""; clearPending(); mentionPicks.clear();
@@ -4982,7 +5084,7 @@ function secretFor(text){
 }
 function discoverSecret(id){
   const f=foundSecrets(); if(f.includes(id)) return false;
-  f.push(id); try{ localStorage.setItem(SECRETS_KEY,JSON.stringify(f)); }catch(e){}
+  f.push(id); try{ localStorage.setItem(SECRETS_KEY,JSON.stringify(f)); }catch(e){} progressChanged();
   const s=SECRET_LIST.find(x=>x.id===id); gainXP("secret"); setTimeout(checkUnlocks,900);
   const t=el("div","toast mention"); const body=el("span","tbody");
   body.append(el("div","ttitle",`🔓 Secret found (${f.length}/${SECRET_LIST.length})`), el("div","ttext",s?s.name:"???"));
@@ -5699,7 +5801,7 @@ let lastXpToast=0;
 function gainXP(kind,mult=1){
   const amt=(XP_RULES[kind]||0)*mult; if(!amt) return;
   const d=xpData(); const before=xpLevel(d.xp).lvl;
-  d.xp+=amt; d.log[kind]=(d.log[kind]||0)+1; try{ localStorage.setItem(XP_KEY,JSON.stringify(d)); }catch(e){}
+  d.xp+=amt; d.log[kind]=(d.log[kind]||0)+1; try{ localStorage.setItem(XP_KEY,JSON.stringify(d)); }catch(e){} progressChanged();
   const now=xpLevel(d.xp);
   if(!$("profile").classList.contains("hidden")) paintXP(); paintHomeLevel();
   if(now.lvl>before){ setTimeout(checkUnlocks,2500); if(fxEnabled()&&typeof QX!=="undefined"&&!reducedMotion()) QX.levelup();
@@ -5860,7 +5962,7 @@ const seenUnlocks=()=>{ try{ return JSON.parse(localStorage.getItem(UNLOCK_KEY)|
 function checkUnlocks(){
   const seen=seenUnlocks(); const fresh=UNLOCKS.filter(u=>unlockMet(u)&&!seen.includes(u.id));
   if(!fresh.length) return;
-  try{ localStorage.setItem(UNLOCK_KEY,JSON.stringify([...seen,...fresh.map(u=>u.id)])); }catch(e){}
+  try{ localStorage.setItem(UNLOCK_KEY,JSON.stringify([...seen,...fresh.map(u=>u.id)])); }catch(e){} progressChanged();
   if(seen.length===0&&fresh.length>2) return;            // first run: don't spam
   fresh.forEach((u,i)=>setTimeout(()=>{
     const where={theme:"Theme & colors",bg:"Room → Chat background",sticker:"the sticker tray",frame:"Theme & colors → Frame"}[u.type];
@@ -6578,8 +6680,14 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.22d";
+const APP_VERSION="2026.09.22e";
 const CHANGELOG=[
+  {v:"2026.09.22e", title:"iPhone glow-up 📱", items:[
+    "💾 Your XP, level, secrets, and unlocks now save to your account, so they're safe if Safari clears data, you reinstall, or you get a new phone.",
+    "🔍 No more surprise zoom-in when you tap a text box on iPhone.",
+    "🎬 Big videos (like iPhone clips) get shrunk automatically before sending, so they fit. Keep the app open while it says \"Shrinking video…\"",
+    "✨ When there's a new update, you'll see a \"Tap to refresh\" bar. No more closing and reopening the app.",
+  ]},
   {v:"2026.09.22d", title:"Bonds & Arcana 💫", items:[
     "💫 You'll now get a heads-up when a friend starts a Social Bond with you or ranks it up, even if their messages did it while you were away.",
     "🃏 Tap anyone's picture to see their own Arcana from the quiz, plus your Social Bond with them.",
@@ -6623,6 +6731,33 @@ function maybeShowWhatsNew(){
   setTimeout(()=>openNews(seen),900);
 }
 $("newsClose").onclick=()=>show($("newsSheet"),false);
+
+/* ================= AUTO-UPDATE =================
+   Every few minutes (and whenever you come back to the app) it peeks at the live index.html. If the
+   APP_VERSION there is newer, a "tap to refresh" bar appears. If you come back after 2+ minutes away and
+   you're just on the home screen (nothing typed or uploading), it refreshes by itself. */
+let updateReady=null, hiddenSince=0;
+async function checkForUpdate(){
+  if(updateReady||location.protocol==="file:"||!navigator.onLine) return;
+  try{
+    const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});
+    const m=(await r.text()).match(/const APP_VERSION="([^"]+)"/);
+    if(m&&m[1]>APP_VERSION){ updateReady=m[1]; show($("updateBar")); }
+  }catch(e){}
+}
+function busyRightNow(){
+  return !$("chat").classList.contains("hidden") || !!$("box").value.trim() || !!pendingFile || pendingImages.length>0 || !!rec
+      || [...document.querySelectorAll(".overlay")].some(o=>!o.classList.contains("hidden"));
+}
+$("updateBar").onclick=()=>location.reload();
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden){ hiddenSince=Date.now(); return; }
+  const away=hiddenSince?Date.now()-hiddenSince:0;
+  if(updateReady&&away>120000&&!busyRightNow()) return location.reload();
+  checkForUpdate();
+});
+setInterval(()=>{ if(!document.hidden) checkForUpdate(); },5*60*1000);
+setTimeout(checkForUpdate,15000);
 $("newsSheet").addEventListener("click",e=>{ if(e.target.id==="newsSheet") show($("newsSheet"),false); });
 $("openNews").onclick=()=>{ show($("profile"),false); openNews(null); };
 QX.rankup=function(name,arcana,rank){
