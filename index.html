@@ -20,7 +20,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Orbitron:wght@700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.0/dist/umd/supabase.min.js"></script>
 <style>
 :root{
   --night:#07041A; --deep:#140A3A; --cyan:#00F0FF; --mag:#C65AAE; --plum:#2A1B4A; --volt:#F3FF3A; --white:#F4F7FF; --muted:#A9A3D6; --red:#FF5A5A;
@@ -6519,8 +6519,13 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.22";
+const APP_VERSION="2026.09.22b";
 const CHANGELOG=[
+  {v:"2026.09.22b", title:"See who's online 🟢", items:[
+    "🟢 Online, idle, and Do Not Disturb symbols now show on everyone's picture, not just your own. (Thanks Ren for the report!)",
+    "👀 Friends only show up once they've updated too. If someone looks offline, tell them to fully close and reopen the app (or press Ctrl+Shift+R on a computer).",
+    "✨ Screen effects now play on the very first message in a brand-new chat.",
+  ]},
   {v:"2026.09.22", title:"The Night Owl arrives 🦉", items:[
     "🦉 Close the app with habits left and the Night Owl DMs you a reminder (evenings only, once a day). Turn it off in Profile.",
     "🕔 Habits now follow YOUR clock. Checking one off late at night no longer counts it for tomorrow. (Fixed by Cole!)",
