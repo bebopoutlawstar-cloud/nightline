@@ -1712,6 +1712,63 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .updatebar{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 86px);transform:translateX(-50%) rotate(-1deg);z-index:35;max-width:calc(100% - 24px);
   background:var(--volt);color:var(--night);border:3px solid var(--night);box-shadow:5px 5px 0 var(--mag);font-family:var(--tech);font-size:13px;padding:10px 16px;white-space:nowrap;animation:toastin .35s cubic-bezier(.2,1.5,.4,1) both}
 .updatebar b{text-decoration:underline}
+/* ===== media backlog ===== */
+.bltabs{width:100%}
+.bltabs button{white-space:nowrap;font-size:clamp(14px,4.4vw,18px)}
+.blbody{width:100%;text-align:left;display:grid;gap:12px}
+.blstats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.blstat{display:grid;justify-items:center;border:2px solid #3b2d80;padding:6px 2px;background:rgba(0,0,0,.25)}
+.blstat b{font-family:var(--num);font-size:20px;color:var(--volt);font-weight:400}
+.blstat span{font-family:var(--tech);font-size:clamp(7px,2.3vw,9px);letter-spacing:.3px;white-space:nowrap;color:var(--muted);text-transform:uppercase;text-align:center}
+.blfilters{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.blfilters .field{grid-column:1/-1;font-size:15px;padding:9px 12px}
+.blsel{min-width:0;width:100%;-webkit-appearance:none;appearance:none;color-scheme:dark;background:var(--deep) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2300F0FF'/%3E%3C/svg%3E") no-repeat right 8px center/9px 6px;color:var(--white);border:2px solid #3b2d80;border-radius:0;padding:7px 22px 7px 8px;font-family:var(--body);font-size:14px;text-overflow:ellipsis}
+.bllist{display:grid;gap:10px}
+.blcard{display:flex;gap:10px;border:2px solid #3b2d80;background:rgba(7,4,26,.7);padding:8px;align-items:flex-start}
+.blcard.done{border-color:rgba(46,230,107,.55)}
+.blcover,.blposter{flex:none;object-fit:cover;border:2px solid var(--cyan);background:#000}
+.blcover{width:84px;height:48px}
+.blposter{width:52px;height:74px}
+.blmid{flex:1;min-width:0;display:grid;gap:4px}
+.bltop{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.bltype{font-family:var(--tech);font-size:9px;letter-spacing:.5px;padding:1px 6px;border:1.5px solid var(--cyan);color:var(--cyan)}
+.bltype.anime{border-color:var(--mag);color:#e8a3d8}
+.blplat{font-size:12px;color:var(--muted)}
+.blname{font-size:17px;font-weight:700;line-height:1.15;overflow-wrap:anywhere}
+.blprog{font-size:13px;color:var(--muted)}
+.blstars{display:flex;gap:2px}
+.blstar{background:none;border:none;color:var(--muted);font-size:20px;line-height:1;padding:0 1px;cursor:pointer}
+.blstar.on{color:var(--volt);text-shadow:0 0 6px rgba(243,255,58,.5)}
+.blstar:disabled{cursor:default;opacity:1}
+.blstars.ro{font-size:18px;letter-spacing:1px;color:var(--volt);text-shadow:0 0 6px rgba(243,255,58,.4)}
+.me .blmsg .blstars.ro{color:inherit;text-shadow:none}
+.blactions{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:2px}
+.blactions .blsel{flex:1 1 118px;width:auto}
+.blbtn{background:var(--deep);border:2px solid var(--cyan);color:var(--cyan);font-family:var(--tech);font-size:11px;padding:6px 9px;cursor:pointer}
+.blbtn:disabled{opacity:.4;cursor:default}
+.blbtn.add{background:var(--cyan);color:var(--night)}
+.blbtn.bldel{border-color:var(--muted);color:var(--muted)}
+.blstatus{font-family:var(--tech);font-size:11px;color:var(--cyan)}
+.blstatus.completed{color:#2ee66b}.blstatus.planned{color:var(--muted)}
+.blsearch{display:flex;gap:6px}
+.blsearch .field{flex:1;min-width:0;font-size:15px;padding:9px 12px}
+.blresult{display:flex;gap:10px;align-items:center;border:2px solid #3b2d80;padding:6px;background:rgba(7,4,26,.7)}
+.blresult .blmid{gap:2px}
+.blresult .blname{font-size:15px}
+.blmanual{border-top:2px dashed #3b2d80;padding-top:10px;display:grid;gap:6px}
+.blmanual summary{font-family:var(--tech);font-size:12px;color:var(--cyan);cursor:pointer}
+.blmanual .row2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.blmanual .field{font-size:15px;padding:8px 10px}
+.blsharelist{width:100%;max-height:50dvh;overflow-y:auto}
+/* shared card in chat */
+.blmsg{display:flex;gap:10px;align-items:flex-start;min-width:220px;max-width:280px}
+.blmsg img{flex:none;width:64px;height:88px;object-fit:cover;border:2px solid var(--cyan);background:#000}
+.blmsg img.wide{width:96px;height:56px}
+.blmsg .blmid{gap:3px}
+.blmsg .bleye{font-family:var(--tech);font-size:9px;letter-spacing:.5px;opacity:.85}
+.blmsg .blname{font-size:16px}
+.blmsg .blstars{pointer-events:none}
+.blmsg .blbtn{justify-self:start;margin-top:4px}
 </style>
 </head>
 <body>
@@ -1895,6 +1952,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     <div class="dndrow" id="dndRow"><div class="dndlabel"><b>🔕 Do Not Disturb</b><small>Shows red to friends. Hides you from "who's online."</small></div><button type="button" class="dndswitch" id="dndSwitch" role="switch" aria-checked="false" aria-label="Do Not Disturb"></button></div>
 
     <h3>Growth</h3>
+    <button type="button" class="ghost" id="openBacklog">🎮 Media Backlog</button>
     <button type="button" class="ghost" id="openHabits">🎯 Habits &amp; Stats</button>
     <button type="button" class="ghost" id="openQuiz">🃏 Who are you? (personality quiz)</button>
     <button type="button" class="ghost" id="openNews">📰 What's new</button>
@@ -2107,6 +2165,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     <p class="friendtag hidden" id="personTag"></p>
     <div class="myarcana theirarcana hidden" id="personArcana"></div>
     <button type="button" class="personbond hidden" id="personBond"></button>
+    <button type="button" class="personbond" id="personBacklog">🎮 See their backlog</button>
     <button class="go" type="button" id="personFriend">Add friend</button>
     <button class="ghost" type="button" id="personDm">Message privately</button>
     <p class="msgline" id="personMsg" role="status"></p>
@@ -2187,6 +2246,27 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
       <p class="sub">Reading the cards…</p>
     </div>
     <button class="ghost" type="button" id="quizClose">Close</button>
+  </div></div>
+</div>
+
+<!-- ============ MEDIA BACKLOG ============ -->
+<div class="overlay hidden" id="backlogSheet" role="dialog" aria-modal="true" aria-labelledby="blTitle">
+  <div class="sheet"><div class="sheetbody">
+    <h2 id="blTitle">Media Backlog</h2>
+    <div class="segmented bltabs" id="blTabs" role="radiogroup" aria-label="Backlog sections">
+      <button type="button" role="radio" data-tab="library">Library</button><button type="button" role="radio" data-tab="game">+ Games</button><button type="button" role="radio" data-tab="anime">+ Anime</button>
+    </div>
+    <div class="blbody" id="blBody"></div>
+    <p class="msgline" id="blMsg" role="status"></p>
+    <button class="ghost" type="button" id="blClose">Close</button>
+  </div></div>
+</div>
+<div class="overlay hidden" id="blShareSheet" role="dialog" aria-modal="true" aria-labelledby="blShareTitle">
+  <div class="sheet"><div class="sheetbody">
+    <h2 id="blShareTitle">Share to…</h2>
+    <p class="sub" id="blShareWhat"></p>
+    <div class="inbox blsharelist" id="blShareList"></div>
+    <button class="ghost" type="button" id="blShareClose">Cancel</button>
   </div></div>
 </div>
 
@@ -2565,7 +2645,7 @@ const live = {
   async loadBefore(room,iso){ return must(await sb.from("messages").select("*").eq("room",room).lt("created_at",iso).order("created_at",{ascending:false}).limit(PAGE)).reverse(); },
   async fetchMessage(id){ return must(await sb.from("messages").select("*").eq("id",id).maybeSingle()); },
   async send(room,f){
-    const row={room,kind:f.kind||"text",text:f.text||null,image_url:f.image_url||null,image_urls:f.image_urls||null,media_url:f.media_url||null,media_type:f.media_type||null,media_duration:f.media_duration||null,sticker:f.sticker||null,reply_to:f.reply_to||null,mentions:f.mentions||[]};
+    const row={room,kind:f.kind||"text",text:f.text||null,image_url:f.image_url||null,image_urls:f.image_urls||null,media_url:f.media_url||null,media_type:f.media_type||null,media_duration:f.media_duration||null,sticker:f.sticker||null,reply_to:f.reply_to||null,mentions:f.mentions||[],...(f.card?{card:f.card}:{})};
     return must(await sb.from("messages").insert(row).select().single());
   },
   async deleteMessage(id){ must(await sb.from("messages").delete().eq("id",id)); },
@@ -2588,6 +2668,10 @@ const live = {
   async saveArcana(arcana){ must(await sb.from("profiles").update({arcana}).eq("id",user.id)); },
   async deletePush(endpoint){ await sb.from("push_subscriptions").delete().eq("endpoint",endpoint); },
   // Night Owl: sent while the app is closing, so it uses a keepalive request the browser finishes even after the page freezes
+  async backlog(uid){ return must(await sb.from("backlog_items").select("*").eq("user_id",uid).order("created_at",{ascending:false})); },
+  async addBacklog(it){ return must(await sb.from("backlog_items").insert(it).select().single()); },
+  async updateBacklog(id,patch){ must(await sb.from("backlog_items").update(patch).eq("id",id)); },
+  async deleteBacklog(id){ must(await sb.from("backlog_items").delete().eq("id",id)); },
   async saveProgress(d){ return must(await sb.rpc("save_progress",{p_xp:d.xp,p_log:d.log,p_secrets:d.secrets,p_unlocks:d.unlocks})); },
   saveProgressOnExit(d){ if(!owlToken) return; try{ fetch(SUPABASE_URL+"/rest/v1/rpc/save_progress",{method:"POST",keepalive:true,headers:{"apikey":SUPABASE_ANON_KEY,"Authorization":"Bearer "+owlToken,"Content-Type":"application/json"},body:JSON.stringify({p_xp:d.xp,p_log:d.log,p_secrets:d.secrets,p_unlocks:d.unlocks})}).catch(()=>{}); }catch(e){} },
   owlSchedule(tz){ if(!owlToken) return; try{ fetch(SUPABASE_URL+"/rest/v1/rpc/owl_schedule",{method:"POST",keepalive:true,headers:{"apikey":SUPABASE_ANON_KEY,"Authorization":"Bearer "+owlToken,"Content-Type":"application/json"},body:JSON.stringify({p_tz:tz})}).catch(()=>{}); }catch(e){} },
@@ -2642,6 +2726,9 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     {id:6,room,user_id:"vee",kind:"sticker",sticker:"omw",created_at:iso(30000)}]};
   polls[5]={message_id:5,options:["Arcade","Movies","Both 😎"],multi:false}; votes.push({message_id:5,user_id:"vee",option_index:0});
   people.vee.bubble_color="#0E3B4A"; people.vee.arcana="Priestess";
+  let demoBlId=500; const demoBl={me:[], vee:[
+    {id:1,user_id:"vee",type:"anime",title:"Cyberpunk: Edgerunners",status:"in-progress",progress:6,total:10,rating:5,platform:"Netflix",image:"https://media.kitsu.app/anime/poster_images/44242/small.jpg",source_id:"kitsu:44242",created_at:iso(9e6)},
+    {id:2,user_id:"vee",type:"game",title:"Persona 5 Royal",status:"planned",progress:0,total:null,rating:0,platform:"PC",image:null,source_id:"rawg:274755",created_at:iso(9e7)}]};
   { const d=new Date(); people.vee.birthday=String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
   reacts.push({message_id:2,user_id:"rook",emoji:"😂"});
   const fire=(f,...a)=>H&&H[f](...a);
@@ -2753,7 +2840,7 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     async loadBefore(){ return []; },
     async fetchMessage(id){ return Object.values(rooms).flatMap(r=>r.msgs).find(m=>m.id===id)||null; },
     async send(room,f){
-      const m={id:nextId++,room,user_id:"me",kind:f.kind||"text",text:f.text||null,image_url:f.image_url||null,image_urls:f.image_urls||null,media_url:f.media_url||null,media_type:f.media_type||null,media_duration:f.media_duration||null,sticker:f.sticker||null,reply_to:f.reply_to||null,mentions:f.mentions||[],created_at:iso(),expires_at:rooms[room].disappear?new Date(Date.now()+rooms[room].disappear*1000).toISOString():null}; rooms[room].msgs.push(m);
+      const m={id:nextId++,room,user_id:"me",kind:f.kind||"text",text:f.text||null,image_url:f.image_url||null,image_urls:f.image_urls||null,media_url:f.media_url||null,media_type:f.media_type||null,media_duration:f.media_duration||null,sticker:f.sticker||null,reply_to:f.reply_to||null,mentions:f.mentions||[],card:f.card||null,created_at:iso(),expires_at:rooms[room].disappear?new Date(Date.now()+rooms[room].disappear*1000).toISOString():null}; rooms[room].msgs.push(m);
       const others=Object.keys(rooms[room].members).filter(u=>u!=="me"); if(!others.length) return m;
       const who=others[Math.floor(Math.random()*others.length)];
       setTimeout(()=>{ rooms[room].members[who].read=iso(); fire("member",{user_id:who,last_read_at:iso()}); },700);
@@ -2769,6 +2856,11 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     async blocks(){ return [...blocked]; }, async block(uid){ blocked.add(uid); }, async unblock(uid){ blocked.delete(uid); },
     async savePush(){}, async deletePush(){}, async testPush(){ return {sent:1,devices:1,demo:true}; },
     owlSchedule(){}, async owlCancel(){},
+    async backlog(uid){ return (demoBl[uid]||[]).map(x=>({...x})); },
+    async addBacklog(it){ const list=(demoBl.me ||= []); if(it.source_id&&list.some(x=>x.source_id===it.source_id)) throw new Error('duplicate key value violates unique constraint "backlog_items_no_dupes"');
+      const row={id:demoBlId++,user_id:"me",status:"planned",progress:0,total:null,rating:0,platform:null,image:null,source_id:null,created_at:iso(),...it}; list.unshift(row); return {...row}; },
+    async updateBacklog(id,patch){ const r=(demoBl.me||[]).find(x=>x.id===id); if(r) Object.assign(r,patch); },
+    async deleteBacklog(id){ demoBl.me=(demoBl.me||[]).filter(x=>x.id!==id); },
     async saveProgress(d){ return {xp:d.xp,xp_log:d.log,secrets:d.secrets,unlocks:d.unlocks}; }, saveProgressOnExit(){},
     async habits(){ return demoHabits.filter(h=>!h.archived); },
     async createHabit(label,stat,reminder_time){ const h={id:demoHabitId++,user_id:"me",label,stat,reminder_time:reminder_time||null,archived:false,created_at:iso()}; demoHabits.push(h); return h; },
@@ -3325,7 +3417,7 @@ function buildMsg(m,index,noAnim){
     });
     grid.firstChild?.querySelector?.("img")?.addEventListener?.("load",()=>{ if(feed.scrollHeight-feed.scrollTop-feed.clientHeight<400) feed.scrollTop=feed.scrollHeight; });
     bub.append(grid);
-  } else if(img){ const b=el("button","shot"); b.type="button"; b.setAttribute("aria-label","Open photo");
+  } else if(img&&!isBlCard(m)){ const b=el("button","shot"); b.type="button"; b.setAttribute("aria-label","Open photo");
     const i=document.createElement("img"); i.src=img; i.alt="Photo from "+p.username; i.loading="lazy";
     i.onload=()=>{ if(feed.scrollHeight-feed.scrollTop-feed.clientHeight<400) feed.scrollTop=feed.scrollHeight; };
     b.append(i); b.onclick=e=>{ e.stopPropagation(); openLightbox([img],0); }; bub.append(b); }
@@ -3333,14 +3425,15 @@ function buildMsg(m,index,noAnim){
   if(media&&m.media_type==="video"){ const v=document.createElement("video"); v.className="vid"; v.src=media; v.controls=true; v.playsInline=true; v.preload="metadata"; bub.append(v); }
   if(media&&m.media_type==="audio") bub.append(voicePlayer(media,m.media_duration));
   if(m.kind==="sticker"&&STICKERS[m.sticker]) bub.append(stickerEl(m.sticker));
-  if(m.kind==="poll") bub.append(pollEl(m));
+  if(isBlCard(m)) bub.append(backlogMsgCard(m));
+  else if(m.kind==="poll") bub.append(pollEl(m));
   else if(m.kind==="game") bub.append(gameCard(m));
   else if(m.text){ const t=el("div"); renderTextWithDates(t,m.text,m.mentions,m); bub.append(t);
     const pm=m.text.trim().match(/[?!]+$/); if(pm&&(m.kind||"text")==="text"){ const cluster=pm[0]; const marks=cluster.includes("?")&&cluster.includes("!")?"?!":(cluster.includes("?")?"?":"!"); const hasBang=cluster.includes("!"); const p=el("span","punct"+(cluster.length>2?" loud":"")+(hasBang?" bang":""),marks); p.setAttribute("aria-hidden","true"); bub.append(p); } const trb=translationBlock(m); if(trb) bub.append(trb); if(!noAnim||!node.querySelector(".lpcard")) setTimeout(()=>attachPreview(bub,m),0);
     if(/el psy (k|c)ongroo|(^|[^a-z])world ?line([^a-z]|$)/i.test(m.text)&&typeof m.id==="number") bub.append(el("div","d20chip wlchip",`⚗️ world line ${worldLineFor(m)}`));
     if(typeof m.id==="number"&&diceIn(m.text)){ const n=diceIn(m.text), r=dNFor(m,n); bub.append(el("div","d20chip"+(r===n&&n>1?" nat20":r===1&&n>1?" nat1":""),n===2?`🪙 d2 → ${r===1?"heads":"tails"}`:`🎲 d${n} → ${r}${r===n&&n>1?" MAX!":""}`)); }
     if(/(^|[^a-z])roll(s|ed|ing)? (a |the |me a )?d20([^a-z0-9]|$)/i.test(m.text)&&typeof m.id==="number"){ const n=d20For(m); bub.append(el("div","d20chip"+(n===20?" nat20":n===1?" nat1":""),`🎲 d20 → ${n}${n===20?" NAT 20!":n===1?" crit fail":""}`)); } }
-  bub.onclick=e=>{ if(e.target.closest("a,video,.voice,.poll button,.gamecard button,.datechip,.trbox")) return; openMenu(m); };
+  bub.onclick=e=>{ if(e.target.closest("a,video,.voice,.poll button,.gamecard button,.datechip,.trbox,.blmsg button")) return; openMenu(m); };
   bub.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openMenu(m); } };
   col.append(tag,bub);
   const map=reactionsById.get(m.id);
@@ -4108,6 +4201,7 @@ $("themeSave").onclick=async()=>{
 /* ---------- previews for replies, pins, inbox ---------- */
 function previewOf(m){
   if(!m) return "";
+  if(isBlCard(m)) return m.text||"🎮 Backlog item";
   if(m.kind==="poll") return "📊 "+(m.text||"Poll");
   if(m.kind==="game") return "🎮 "+(m.text||"Game");
   if(m.kind==="sticker"||m.sticker) return "Sticker "+(STICKERS[m.sticker]?.label?`(${STICKERS[m.sticker].label})`:"");
@@ -4124,10 +4218,10 @@ function lbStep(d){ if(!lbAlbum) return; lbIndex=(lbIndex+d+lbAlbum.length)%lbAl
 $("lbPrev").onclick=e=>{ e.stopPropagation(); lbStep(-1); };
 $("lbNext").onclick=e=>{ e.stopPropagation(); lbStep(1); };
 $("lightbox").onclick=()=>show($("lightbox"),false);
-["profile","roomSheet","msgMenu","pollSheet","summarySheet","calSheet","searchSheet"].forEach(id=>$(id).addEventListener("click",e=>{ if(e.target.id===id) show($(id),false); }));
+["profile","roomSheet","msgMenu","pollSheet","summarySheet","calSheet","searchSheet","backlogSheet","blShareSheet"].forEach(id=>$(id).addEventListener("click",e=>{ if(e.target.id===id) show($(id),false); }));
 addEventListener("keydown",e=>{
   if(e.key==="Escape") closeTray();
-  if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu","pollSheet","tray","themeSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","installSheet","habitsSheet","quizSheet","slSheet","newsSheet"].forEach(id=>{ const n=$(id); if(n) show(n,false); });
+  if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu","pollSheet","tray","themeSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","installSheet","habitsSheet","quizSheet","slSheet","newsSheet","backlogSheet","blShareSheet"].forEach(id=>{ const n=$(id); if(n) show(n,false); });
   if(!$("lightbox").classList.contains("hidden")&&lbAlbum){ if(e.key==="ArrowLeft") lbStep(-1); if(e.key==="ArrowRight") lbStep(1); }
 });
 
@@ -4290,7 +4384,7 @@ function hypeText(text){
   return "LET'S GO!";
 }
 function playFx(m,force){
-  if(!m?.text||m.kind==="poll"||m.kind==="game") return;
+  if(!m?.text||m.kind==="poll"||m.kind==="game"||isBlCard(m)) return;   // a shared title like "Dragon Ball" shouldn't fire the dragon secret
   const s=secretFor(m.text), t=s?null:fxFor(m.text); if(!s&&!t) return;
   if(!force){ if(!fxEnabled()||document.hidden||fxPlayed.has(m.id)) return; if(Date.now()-new Date(m.created_at)>15000) return; }
   fxPlayed.add(m.id);
@@ -4424,6 +4518,7 @@ function paintPerson(){
   show($("personTag"),f||back);
   const pa=$("personArcana"); pa.innerHTML=""; show(pa,!!p.arcana);
   if(p.arcana){ pa.append(el("span","ma-eyebrow",`🃏 ${p.username}'s Arcana`), el("span","ma-name",p.arcana)); if(ARCANA_FLAVOR[p.arcana]) pa.append(el("span","ta-flavor",ARCANA_FLAVOR[p.arcana])); }
+  $("personBacklog").textContent=`🎮 See ${p.username}'s backlog`;
   const bond=socialLinks.get(uid), pb=$("personBond"); show(pb,!!bond);
   if(bond){ const {rank}=rankFromXp(bond.xp); pb.textContent=`💫 Your Social Bond: ${bond.arcana} · Rank ${rank}`; pb.onclick=()=>{ show($("personSheet"),false); openSocialLink(uid); }; }
   $("personFriend").textContent = f?"Remove friend": back?"Add back 🤝":"Add friend";
@@ -5800,7 +5895,7 @@ HINTS.dragon="A winged silhouette crosses the moon when you say it.";
 
 /* ---------- XP & levels ---------- */
 const XP_KEY="nl-xp";
-const XP_RULES={secret:50,message:2,photo:6,voice:6,sticker:3,poll:10,vote:2,game:5,gamewin:30,friend:15,daily:20,reply:3,reaction:1,task:4,pin:2,rename:5,theme:10,habit:8};
+const XP_RULES={secret:50,message:2,photo:6,voice:6,sticker:3,poll:10,vote:2,game:5,gamewin:30,friend:15,daily:20,reply:3,reaction:1,task:4,pin:2,rename:5,theme:10,habit:8,backlog:3,backlogdone:10};
 const LEVEL_TITLES=["Newcomer","Regular","Night Owl","Neon Runner","Chatterbox","Phantom","Netrunner","Legend","Choom Supreme","Creator's Favorite","Mythic"];
 const xpData=()=>{ try{ return JSON.parse(localStorage.getItem(XP_KEY))||{xp:0,log:{}}; }catch(e){ return {xp:0,log:{}}; } };
 const xpNeed=lvl=>100+Math.round(60*(lvl-1)*(lvl-1)*.6+40*(lvl-1));   // xp to go from lvl → lvl+1
@@ -6688,8 +6783,14 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.22f";
+const APP_VERSION="2026.09.22g";
 const CHANGELOG=[
+  {v:"2026.09.22g", title:"Media Backlog 🎮📺", items:[
+    "🎮 New: Media Backlog! Track games and anime in Profile → 🎮 Media Backlog. Search thousands of games and shows, rate them, and tap +1 as you play or watch.",
+    "👀 Tap a friend's picture to see their backlog. (Only friends you've added can see yours.)",
+    "💬 Share anything on your list into a chat. Friends can add it to their own backlog in one tap.",
+    "🏆 Finishing something gives XP and a little celebration.",
+  ]},
   {v:"2026.09.22f", title:"Feel the buzz 📳", items:[
     "📳 New messages now give a stronger double-buzz you can actually feel, and @mentions buzz three times. (Android)",
     "🔔 Group chat notifications now wake your phone and buzz right away, instead of showing up late and silent. (Android)",
@@ -6783,6 +6884,262 @@ QX.rankup=function(name,arcana,rank){
   setTimeout(()=>w.remove(),3000);
 };
 
+/* ================= MEDIA BACKLOG 🎮📺 =================
+   Cole's Media Backlog (the React class app), rebuilt inside NightLine: games + anime, statuses, +1 progress,
+   star ratings, stats, filters, RAWG/Kitsu search. Saved to your account; friends you've added can view it,
+   and any item can be shared into a chat as a card that friends can add to their own list. */
+const RAWG_KEY="bdc93c6f8ede4fb2b7427360172996ae";   // same key as the Media Backlog site
+const BL_STATUS={planned:"Planned","in-progress":"In Progress",completed:"Completed"};
+let blOwner=null, blItems=[], myBl=null, blTab="library", blFilters={q:"",type:"all",status:"all",sort:"default"}, blResults={game:null,anime:null}, blQuery={game:"",anime:""};
+const blMine=()=>blOwner===user?.id;
+const isBlCard=m=>m?.card&&typeof m.card==="object"&&m.card.kind==="backlog"&&typeof m.card.title==="string";
+const blKey=it=>it.source_id||("title:"+String(it.title||"").toLowerCase()+"|"+it.type);
+function blFriendlyError(err){
+  const m=String(err?.message||err);
+  if(/duplicate key|no_dupes/i.test(m)) return "That's already on your backlog.";
+  if(/relation|does not exist|schema cache|backlog_items/i.test(m)) return "The backlog isn't set up yet: run media-backlog.sql in Supabase.";
+  return m;
+}
+async function loadMyBacklog(){ try{ myBl=await api.backlog(user.id); }catch(e){ myBl=myBl||[]; } return myBl; }
+
+async function openBacklog(uid){
+  if(!user) return;
+  blOwner=uid||user.id; blTab="library"; blFilters={q:"",type:"all",status:"all",sort:"default"}; say("blMsg","");
+  $("blTitle").textContent=blMine()?"Media Backlog":`${cache.get(blOwner)?.username||"Friend"}'s Backlog`;
+  show($("blTabs"),blMine()); $("blBody").innerHTML='<p class="note">Loading…</p>'; show($("backlogSheet"));
+  try{ blItems=await api.backlog(blOwner); if(blMine()) myBl=blItems; else await loadMyBacklog(); }
+  catch(err){ blItems=[]; $("blBody").innerHTML=""; $("blBody").append(el("p","msgline bad",blFriendlyError(err))); return; }
+  paintBacklog();
+}
+function paintBacklog(){
+  $("blTabs").querySelectorAll("button").forEach(b=>b.setAttribute("aria-checked",String(b.dataset.tab===blTab)));
+  if(blTab==="library") paintBlLibrary(); else paintBlSearch(blTab);
+}
+$("blTabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{ blTab=b.dataset.tab; say("blMsg",""); paintBacklog(); });
+
+/* ---------- library ---------- */
+function paintBlLibrary(){
+  const box=$("blBody"); box.innerHTML="";
+  const anime=blItems.filter(i=>i.type==="anime"), games=blItems.filter(i=>i.type==="game");
+  const stats=[[blItems.length,"Total"],[blItems.filter(i=>i.status==="in-progress").length,"Active"],[blItems.filter(i=>i.status==="completed").length,"Done"],
+               [anime.reduce((n,i)=>n+(+i.progress||0),0),"Eps"],[games.reduce((n,i)=>n+(+i.progress||0),0),"Hours"]];
+  const st=el("div","blstats"); stats.forEach(([n,l])=>{ const d=el("div","blstat"); d.append(el("b","",String(n)),el("span","",l)); st.append(d); }); box.append(st);
+  if(!blItems.length){
+    box.append(el("p","note",blMine()?"Your backlog is empty. Tap + Games or + Anime to find something to add.":"Nothing to show. A backlog only shows to people its owner has added as a friend."));
+    if(blMine()) box.append(blManualForm());
+    return;
+  }
+  const fb=el("div","blfilters");
+  const q=el("input","field"); q.placeholder="Search this backlog…"; q.value=blFilters.q; q.setAttribute("aria-label","Search this backlog");
+  q.oninput=()=>{ blFilters.q=q.value; paintBlList(); };
+  const mk=(key,opts,label)=>{ const s=document.createElement("select"); s.className="blsel"; s.setAttribute("aria-label",label); opts.forEach(([v,t])=>s.append(new Option(t,v))); s.value=blFilters[key]; s.onchange=()=>{ blFilters[key]=s.value; paintBlList(); }; return s; };
+  fb.append(q, mk("type",[["all","All"],["game","Games"],["anime","Anime"]],"Type"),
+    mk("status",[["all","Status"],["planned","Planned"],["in-progress","In Progress"],["completed","Completed"]],"Status"),
+    mk("sort",[["default","Newest"],["title","A–Z"],["rating","Top rated"],["progress","Most progress"]],"Sort"));
+  box.append(fb, el("div","bllist"));
+  paintBlList();
+  if(blMine()) box.append(blManualForm());
+}
+function paintBlList(){
+  const list=$("blBody").querySelector(".bllist"); if(!list) return; list.innerHTML="";
+  const f=blFilters, q=f.q.trim().toLowerCase();
+  let items=blItems.filter(i=>(!q||i.title.toLowerCase().includes(q))&&(f.type==="all"||i.type===f.type)&&(f.status==="all"||i.status===f.status));
+  if(f.sort==="title") items=[...items].sort((a,b)=>a.title.localeCompare(b.title));
+  if(f.sort==="rating") items=[...items].sort((a,b)=>b.rating-a.rating);
+  if(f.sort==="progress") items=[...items].sort((a,b)=>b.progress-a.progress);
+  if(!items.length){ list.append(el("p","note","No items match your filters.")); return; }
+  items.forEach(it=>list.append(blCard(it)));
+}
+function blStars(rating,onRate){
+  if(!onRate){ const r=el("div","blstars ro","★".repeat(rating)+"☆".repeat(5-rating)); r.setAttribute("role","img"); r.setAttribute("aria-label",rating?`Rated ${rating} out of 5`:"Not rated"); return r; }
+  const row=el("div","blstars");
+  for(let s=1;s<=5;s++){ const b=el("button","blstar"+(s<=rating?" on":""),s<=rating?"★":"☆"); b.type="button"; b.setAttribute("aria-label",`Rate ${s} out of 5`);
+    if(onRate) b.onclick=()=>onRate(s===rating?0:s); else b.disabled=true; row.append(b); }
+  return row;
+}
+const blProgressText=it=>it.type==="anime"?`Episode ${it.progress} / ${it.total??"?"}`:`${it.progress} hrs played`;
+function blCover(it){ const u=safeImg(it.image); if(!u) return null; const i=document.createElement("img"); i.src=u; i.alt=""; i.loading="lazy"; i.className=it.type==="anime"?"blposter":"blcover"; i.onerror=()=>i.remove(); return i; }
+function blCard(it){
+  const c=el("article","blcard"+(it.status==="completed"?" done":""));
+  const cov=blCover(it); if(cov) c.append(cov);
+  const mid=el("div","blmid"), top=el("div","bltop");
+  top.append(el("span","bltype "+it.type,it.type==="anime"?"📺 ANIME":"🎮 GAME")); if(it.platform) top.append(el("span","blplat",it.platform));
+  mid.append(top, el("div","blname",it.title), el("div","blprog",blProgressText(it)), blStars(it.rating,blMine()?(r=>blUpdate(it,{rating:r})):null));
+  if(blMine()){
+    const row=el("div","blactions");
+    const sel=document.createElement("select"); sel.className="blsel"; sel.setAttribute("aria-label","Status for "+it.title);
+    Object.entries(BL_STATUS).forEach(([v,t])=>sel.append(new Option(t,v))); sel.value=it.status; sel.onchange=()=>blUpdate(it,{status:sel.value});
+    const plus=el("button","blbtn","+1"); plus.type="button"; plus.disabled=!!(it.total&&it.progress>=it.total); plus.setAttribute("aria-label",(it.type==="anime"?"Add an episode to ":"Add an hour to ")+it.title); plus.onclick=()=>blPlusOne(it);
+    const share=el("button","blbtn","Share"); share.type="button"; share.onclick=()=>openBlShare(it);
+    const del=el("button","blbtn bldel","✕"); del.type="button"; del.setAttribute("aria-label","Remove "+it.title); del.onclick=()=>blDelete(it);
+    row.append(sel,plus,share,del); mid.append(row);
+  } else {
+    mid.append(el("div","blstatus "+it.status,BL_STATUS[it.status]||it.status));
+    mid.append(blAddToMineButton(it));
+  }
+  c.append(mid); return c;
+}
+function blAddToMineButton(src){
+  const have=(myBl||[]).some(x=>blKey(x)===blKey(src));
+  const b=el("button","blbtn"+(have?"":" add"),have?"On your backlog ✓":"+ Add to my backlog"); b.type="button"; b.disabled=have;
+  b.onclick=async e=>{ e.stopPropagation(); b.disabled=true; b.textContent="Adding…";
+    try{ await blAdd({type:src.type,title:src.title,image:src.image,platform:src.platform,total:src.total,source_id:src.source_id}); b.textContent="On your backlog ✓"; b.classList.remove("add"); }
+    catch(err){ b.textContent=blFriendlyError(err).startsWith("That's already")?"On your backlog ✓":"Try again"; b.disabled=b.textContent!=="Try again"; } };
+  return b;
+}
+
+/* ---------- editing (instant on screen, saved in the background) ---------- */
+async function blUpdate(it,patch){
+  const before={...it}; Object.assign(it,patch); paintBlList(); paintBlStatsOnly();
+  try{ await api.updateBacklog(it.id,patch); if(patch.status==="completed"&&before.status!=="completed") blCompleted(it); }
+  catch(err){ Object.assign(it,before); paintBlList(); paintBlStatsOnly(); say("blMsg","Didn't save: "+blFriendlyError(err),true); }
+}
+function paintBlStatsOnly(){ if(blTab!=="library") return; const st=$("blBody").querySelector(".blstats"); if(!st) return;   // update just the numbers
+  const anime=blItems.filter(i=>i.type==="anime"), games=blItems.filter(i=>i.type==="game");
+  const nums=[blItems.length,blItems.filter(i=>i.status==="in-progress").length,blItems.filter(i=>i.status==="completed").length,anime.reduce((n,i)=>n+(+i.progress||0),0),games.reduce((n,i)=>n+(+i.progress||0),0)];
+  st.querySelectorAll("b").forEach((b,i)=>b.textContent=String(nums[i])); }
+function blPlusOne(it){
+  if(it.total&&it.progress>=it.total) return;
+  const patch={progress:it.progress+1};
+  if(it.status==="planned") patch.status="in-progress";
+  if(it.total&&patch.progress>=it.total) patch.status="completed";
+  blUpdate(it,patch);
+}
+function blCompleted(it){
+  gainXP("backlogdone");
+  const t=el("button","toast mention"); t.type="button"; const body=el("span","tbody");
+  body.append(el("div","ttitle",it.type==="anime"?"📺 Finished watching!":"🎮 Game complete!"), el("div","ttext",`${it.title} · tap to share it`));
+  t.append(el("span","sx-lock","🏆"),body); t.onclick=()=>{ t.remove(); openBlShare(it); };
+  $("toasts").prepend(t); setTimeout(()=>{ if(t.isConnected){ t.classList.add("out"); setTimeout(()=>t.remove(),260); } },6000);
+  if(fxEnabled()) FX.play("confetti");
+}
+async function blDelete(it){
+  if(!confirm(`Remove ${it.title} from your backlog?`)) return;
+  const i=blItems.indexOf(it); blItems.splice(i,1); paintBlLibrary();
+  try{ await api.deleteBacklog(it.id); }catch(err){ blItems.splice(i,0,it); paintBlLibrary(); say("blMsg","Couldn't remove it: "+blFriendlyError(err),true); }
+}
+async function blAdd(fields){
+  const clean={type:fields.type==="anime"?"anime":"game", title:String(fields.title||"").trim().slice(0,120),
+    image:safeImg(fields.image)&&String(fields.image).startsWith("https://")?String(fields.image).slice(0,500):null,
+    platform:fields.platform?String(fields.platform).slice(0,40):null,
+    total:Number.isInteger(+fields.total)&&+fields.total>0?+fields.total:null,
+    source_id:fields.source_id?String(fields.source_id).slice(0,40):null, status:"planned"};
+  if(!clean.title) throw new Error("Give it a title first.");
+  if(!clean.source_id&&(myBl||[]).some(x=>blKey(x)===blKey(clean))) throw new Error("duplicate key");
+  const row=await api.addBacklog(clean);
+  (myBl ||= []); if(!myBl.includes(row)) myBl.unshift(row);
+  if(blMine()&&!blItems.includes(row)&&blItems!==myBl) blItems.unshift(row);
+  gainXP("backlog");
+  return row;
+}
+
+/* ---------- manual add (for things the search can't find) ---------- */
+function blManualForm(){
+  const d=el("details","blmanual"); d.append(el("summary","","+ Add one manually"));
+  const t=el("input","field"); t.placeholder="Title"; t.maxLength=120; t.setAttribute("aria-label","Title");
+  const type=document.createElement("select"); type.className="blsel"; type.setAttribute("aria-label","Type"); type.append(new Option("Game","game"),new Option("Anime","anime"));
+  const plat=el("input","field"); plat.placeholder="Platform"; plat.maxLength=40; plat.setAttribute("aria-label","Platform");
+  const tot=el("input","field"); tot.type="number"; tot.min="1"; tot.placeholder="Episodes"; tot.setAttribute("aria-label","Total episodes");
+  type.onchange=()=>{ tot.style.visibility=type.value==="anime"?"visible":"hidden"; }; tot.style.visibility="hidden";
+  const go=el("button","blbtn add","Add"); go.type="button";
+  go.onclick=async()=>{ go.disabled=true; try{ await blAdd({title:t.value,type:type.value,platform:plat.value,total:type.value==="anime"?tot.value:null}); t.value=""; plat.value=""; tot.value=""; say("blMsg","Added!"); paintBlLibrary(); }catch(err){ say("blMsg",blFriendlyError(err),true); } go.disabled=false; };
+  const r=el("div","row2"); r.append(type,plat,tot);
+  d.append(t,r,go); return d;
+}
+
+/* ---------- search (RAWG for games, Kitsu for anime) ---------- */
+function paintBlSearch(type){
+  const box=$("blBody"); box.innerHTML="";
+  const form=document.createElement("form"); form.className="blsearch";
+  const q=el("input","field"); q.placeholder=type==="game"?"Search games…":"Search anime…"; q.value=blQuery[type]; q.setAttribute("aria-label",q.placeholder);
+  const go=el("button","blbtn add","Search"); go.type="submit";
+  form.append(q,go); form.onsubmit=e=>{ e.preventDefault(); blRunSearch(type,q.value); };
+  const res=el("div","bllist blresults"); box.append(form,res);
+  if(blResults[type]) paintBlResults(type); else res.append(el("p","note",type==="game"?"Find a game to add. Covers and platforms come from RAWG.":"Find an anime to add. Posters and episode counts come from Kitsu."));
+  setTimeout(()=>q.focus(),60);
+}
+async function blRunSearch(type,query){
+  query=String(query||"").trim(); blQuery[type]=query;
+  const res=$("blBody").querySelector(".blresults"); if(!res) return;
+  if(!query){ say("blMsg",type==="game"?"Type a game name to search.":"Type an anime name to search.",true); return; }
+  say("blMsg",""); res.innerHTML='<p class="note">Searching…</p>';
+  try{
+    if(type==="game"){
+      const r=await fetch(`https://api.rawg.io/api/games?key=${RAWG_KEY}&search=${encodeURIComponent(query)}&page_size=12`); if(!r.ok) throw new Error(r.status);
+      blResults.game=((await r.json()).results||[]).map(g=>({type:"game",title:g.name,image:g.background_image||null,platform:g.platforms?.[0]?.platform?.name||null,total:null,source_id:"rawg:"+g.id,meta:[g.released?.slice(0,4),(g.platforms||[]).slice(0,3).map(p=>p.platform.name).join(", ")].filter(Boolean).join(" · ")}));
+    } else {
+      const r=await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(query)}&page[limit]=12`); if(!r.ok) throw new Error(r.status);
+      blResults.anime=((await r.json()).data||[]).map(a=>{ const x=a.attributes||{}; return {type:"anime",title:x.titles?.en||x.canonicalTitle||"Untitled",image:x.posterImage?.small||null,platform:"Streaming",total:x.episodeCount||null,source_id:"kitsu:"+a.id,meta:[x.startDate?.slice(0,4),x.episodeCount?x.episodeCount+" eps":null,x.subtype?.toUpperCase()].filter(Boolean).join(" · ")}; });
+    }
+    if(blQuery[type]===query&&blTab===type) paintBlResults(type);
+  }catch(err){ res.innerHTML=""; res.append(el("p","msgline bad",`Couldn't reach the ${type==="game"?"game":"anime"} database. Wait a few seconds and try again.`)); }
+}
+function paintBlResults(type){
+  const res=$("blBody").querySelector(".blresults"); if(!res) return; res.innerHTML="";
+  const list=blResults[type]||[];
+  if(!list.length){ res.append(el("p","note","No results. Try a different spelling.")); return; }
+  list.forEach(item=>{
+    const row=el("div","blresult"); const cov=blCover(item); if(cov) row.append(cov);
+    const mid=el("div","blmid"); mid.append(el("div","blname",item.title)); if(item.meta) mid.append(el("div","blprog",item.meta));
+    row.append(mid,blAddToMineButton(item)); res.append(row);
+  });
+}
+
+/* ---------- sharing into a chat ---------- */
+let blSharing=null;
+function blShareText(it){
+  const verb=it.status==="completed"?"Finished":it.status==="in-progress"?(it.type==="anime"?"Watching":"Playing"):"On my backlog";
+  const stars=it.rating?" · "+"★".repeat(it.rating)+"☆".repeat(5-it.rating):"";
+  return `${it.type==="anime"?"📺":"🎮"} ${verb}: ${it.title}${stars}`;
+}
+async function openBlShare(it){
+  blSharing=it; $("blShareWhat").textContent=blShareText(it);
+  const box=$("blShareList"); box.innerHTML="";
+  if(!inboxRows.length) await loadInbox();
+  const rows=[...inboxRows].sort((a,b)=>(b.code===room)-(a.code===room));
+  if(!rows.length) box.append(el("p","note","Join a room or start a DM first."));
+  rows.forEach(r=>{
+    const b=el("button","roomrow"); b.type="button";
+    let icon; if(r.is_dm){ icon=el("span","face"); paintFace(icon,cache.get(r.dm_user)||{id:r.dm_user,username:r.dm_name}); } else icon=el("span","hash","#");
+    const info=el("span","info"); info.append(el("div","name",(r.code===room?"This chat · ":"")+(r.is_dm?(r.dm_name||"Private chat"):(r.name||"# "+r.code))));
+    b.append(icon,info); b.onclick=()=>blShareTo(r); box.append(b);
+  });
+  show($("blShareSheet"));
+}
+async function blShareTo(r){
+  const it=blSharing; if(!it) return; show($("blShareSheet"),false);
+  const card={kind:"backlog",type:it.type,title:it.title,image:safeImg(it.image)||null,status:it.status,rating:it.rating||0,platform:it.platform||null,progress:it.progress||0,total:it.total||null,src:it.source_id||null};
+  try{
+    const m=await api.send(r.code,{kind:"text",text:blShareText(it),image_url:card.image,card});
+    if(r.code===room) await addMessages([m]);
+    const where=r.is_dm?(r.dm_name||"your DM"):(r.name||"#"+r.code);
+    if($("backlogSheet").classList.contains("hidden")) $("status").textContent=`Shared to ${where}.`; else say("blMsg",`Shared to ${where} ✓`);
+  }catch(err){ say("blMsg","Couldn't share: "+blFriendlyError(err),true); }
+}
+$("blShareClose").onclick=()=>show($("blShareSheet"),false);
+
+/* ---------- the card friends see in chat ---------- */
+function backlogMsgCard(m){
+  const c=m.card, box=el("div","blmsg");
+  const type=c.type==="anime"?"anime":"game", img=safeImg(c.image);
+  if(img){ const i=document.createElement("img"); i.src=img; i.alt=""; i.loading="lazy"; if(type==="game") i.className="wide"; i.onerror=()=>i.remove(); box.append(i); }
+  const mid=el("div","blmid");
+  mid.append(el("div","bleye",`${type==="anime"?"📺 ANIME":"🎮 GAME"} · ${(BL_STATUS[c.status]||"Planned").toUpperCase()}`), el("div","blname",String(c.title).slice(0,120)));
+  const meta=[c.platform?String(c.platform).slice(0,40):null, c.status!=="planned"?blProgressText({type,progress:+c.progress||0,total:c.total||null}):null].filter(Boolean).join(" · ");
+  if(meta) mid.append(el("div","blprog",meta));
+  if(+c.rating>0) mid.append(blStars(Math.min(5,+c.rating),null));
+  if(m.user_id!==user.id){
+    const src={type,title:String(c.title),image:img,platform:c.platform,total:c.total,source_id:typeof c.src==="string"?c.src:null};
+    if(myBl===null) loadMyBacklog().then(()=>{ const nb=blAddToMineButton(src); btn.replaceWith(nb); btn=nb; });
+    let btn=blAddToMineButton(src); mid.append(btn);
+  }
+  box.append(mid); return box;
+}
+
+$("openBacklog").onclick=()=>{ show($("profile"),false); openBacklog(user.id); };
+$("personBacklog").onclick=()=>{ const uid=personUid; show($("personSheet"),false); openBacklog(uid); };
+$("blClose").onclick=()=>show($("backlogSheet"),false);
+
 /* ================= STAYING CONNECTED ================= */
 let liveStatus=null, catchingUp=false, lastCatchUp=0;
 async function catchUp(reason){
@@ -6823,7 +7180,7 @@ feed.addEventListener("click",e=>{
 /* ================= BACK BUTTON (Android / browser back) ================= */
 // Each chat or sheet you open adds a history step, so Back closes the top one instead of leaving the app.
 (function(){
-  const LAYERS=["chat","profile","roomSheet","msgMenu","themeSheet","pollSheet","installSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","lightbox","habitsSheet","quizSheet","slSheet","newsSheet"];
+  const LAYERS=["chat","profile","roomSheet","msgMenu","themeSheet","pollSheet","installSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","lightbox","habitsSheet","quizSheet","slSheet","newsSheet","backlogSheet","blShareSheet"];
   const stack=[]; let popping=false, ignorePops=0, pendingBack=0, flushQueued=false;
   const isOpen=id=>!$(id).classList.contains("hidden");
   function queueBack(){
