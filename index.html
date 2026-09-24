@@ -2577,8 +2577,8 @@ const live = {
   async session(){ const {data}=await sb.auth.getSession(); return data.session?.user||null; },
   onAuth(cb){ sb.auth.onAuthStateChange((e,s)=>cb(s?.user||null,e)); },
   async signUp(username,email,password){
-    const {data:taken}=await sb.from("profiles").select("id").ilike("username",username).maybeSingle();
-    if(taken) throw new Error("That username is taken.");
+    const {data:free,error:chk}=await sb.rpc("username_available",{p_username:username});
+    if(!chk&&free===false) throw new Error("That username is taken.");
     const data=must(await sb.auth.signUp({email,password,options:{data:{username},emailRedirectTo:location.origin+location.pathname}}));
     return data.session ? "in" : "confirm";
   },
@@ -2587,7 +2587,7 @@ const live = {
   async resetPassword(email){ must(await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname})); },
   async updatePassword(pw){ must(await sb.auth.updateUser({password:pw})); },
   async deleteAccount(){ must(await sb.rpc("delete_my_account")); await sb.auth.signOut(); },
-  async profiles(ids){ return must(await sb.from("profiles").select("id,username,avatar_url,theme,bubble_color,birthday,last_seen,invite_token,arcana").in("id",ids)); },
+  async profiles(ids){ return must(await sb.from("profiles").select("id,username,avatar_url,theme,bubble_color,birthday,last_seen,arcana").in("id",ids)); },
   async search(q,roomCode){ return must(await sb.rpc("search_messages",{p_query:q,p_room:roomCode||null,p_limit:40})); },
   async touchSeen(){ await sb.rpc("touch_seen"); },
   async acceptFriendInvite(token){ return must(await sb.rpc("accept_friend_invite",{p_token:token})); },
@@ -2604,6 +2604,7 @@ const live = {
   async myRooms(){ return must(await sb.rpc("my_rooms")); },
   async contacts(){ const rows=must(await sb.from("contacts").select("contact,created_at").eq("owner",user.id)); return rows.map(r=>r.contact); },
   async addedMe(){ const rows=must(await sb.from("contacts").select("owner,created_at").eq("contact",user.id)); return rows.map(r=>r.owner); },
+  async myInviteToken(){ return must(await sb.rpc("my_invite_token")); },
   async findUser(username){ return must(await sb.from("profiles").select("id,username,avatar_url,bubble_color").ilike("username",username).maybeSingle()); },
   async addContact(uid){ must(await sb.from("contacts").upsert({contact:uid},{onConflict:"owner,contact",ignoreDuplicates:true})); },
   async removeContact(uid){ must(await sb.from("contacts").delete().eq("contact",uid)); },
@@ -2810,6 +2811,7 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     async touchSeen(){}, async acceptFriendInvite(token){ if(token!=="demo-nix") throw new Error("invalid"); contacts.add("nix"); return {username:"Nix"}; },
     async linkPreview(url){ return {title:"Example Domain",description:"This domain is for use in illustrative examples in documents.",site:"example.com"}; },
     async addedMe(){ return ["rook","vee"]; },
+    async myInviteToken(){ return "demo-me-0000000000000000000000"; },
     async findUser(n){ return Object.values(people).find(p=>p.username.toLowerCase()===n.toLowerCase())||null; },
     async addContact(uid){ contacts.add(uid); },
     async removeContact(uid){ contacts.delete(uid); },
@@ -2985,6 +2987,7 @@ async function handleAuth(u){
   user=u;
   const q=new URLSearchParams(location.search);
   if(!u){
+    myInviteTok=null;
     hideSplash();
     if(unsub){unsub();unsub=null;} if(unsubAll){unsubAll();unsubAll=null;} if(typeof stopPresence==="function") stopPresence();
     if(q.get("friend")) say("authMsg","A friend invited you to NightLine. Log in or sign up to add them.");
@@ -6302,9 +6305,10 @@ function attachPreview(bub,m){
 }
 
 /* ================= PERSONAL INVITE LINKS ================= */
-function myInviteUrl(){ return meProfile?.invite_token ? `${location.origin}${location.pathname}?friend=${encodeURIComponent(meProfile.invite_token)}` : null; }
+let myInviteTok=null;   // your private friend code: fetched only for you, never stored on your public profile
+async function myInviteUrl(){ if(!myInviteTok){ try{ myInviteTok=await api.myInviteToken(); }catch(e){ return null; } } return myInviteTok?`${location.origin}${location.pathname}?friend=${encodeURIComponent(myInviteTok)}`:null; }
 $("inviteFriendBtn").onclick=async()=>{
-  const u=myInviteUrl(); if(!u){ say("contactMsg","Invite links aren't set up yet: run the search & friends SQL update.",true); return; }
+  const u=await myInviteUrl(); if(!u){ say("contactMsg","Couldn't get your invite link. Check your connection and try again.",true); return; }
   const text=`Come chat with me on NightLine 🌙 ${u}`;
   if(navigator.share){ try{ await navigator.share({title:"Join me on NightLine",text,url:u}); return; }catch(e){} }
   try{ await navigator.clipboard.writeText(u); say("contactMsg","Your invite link is copied. Anyone who opens it becomes your friend."); }catch(e){ say("contactMsg",u); }
@@ -6812,8 +6816,13 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.22i";
+const APP_VERSION="2026.09.22j";
 const CHANGELOG=[
+  {v:"2026.09.22j", title:"Security upgrade 🔒", items:[
+    "🔒 Fixed a security hole that could let a stranger add themselves as your friend. Your friend invite link is now private to you.",
+    "🔗 Everyone got a fresh friend invite link, so old ones you shared before today won't work anymore. Grab your new one from Friends → 📲.",
+    "🙈 Profiles (usernames, birthdays, last seen) are now only visible to people signed in to NightLine.",
+  ]},
   {v:"2026.09.22i", title:"Pop-ups fit the screen 📐", items:[
     "📐 Fixed pop-ups (like \"You missed a secret\") running off the edge of the screen. Longer ones now wrap onto a second line so you can read the whole thing.",
     "🕛 \"You missed a secret\" now only offers secrets friends triggered today, not old ones from days ago.",
