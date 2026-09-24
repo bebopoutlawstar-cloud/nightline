@@ -1769,6 +1769,13 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .blmsg .blname{font-size:16px}
 .blmsg .blstars{pointer-events:none}
 .blmsg .blbtn{justify-self:start;margin-top:4px}
+/* ===== pop-ups always fit the screen; longer ones wrap instead of running off the edge ===== */
+.toasts{grid-template-columns:minmax(0,1fr)}
+.toast{max-width:100%;box-sizing:border-box}
+.toast .ttext{white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere}
+.toast.missed-secret .ttext,.toast.long .ttext{-webkit-line-clamp:4}
+.toast .ttitle{white-space:normal;overflow-wrap:anywhere}
+.missed-actions button{min-width:0}
 </style>
 </head>
 <body>
@@ -2993,7 +3000,7 @@ async function handleAuth(u){
   await refreshMe();
   await syncProgress();
   if(!LS.ok&&!window.__lsWarned){ window.__lsWarned=true; setTimeout(()=>{
-    const t=el("div","toast"); const body=el("span","tbody");
+    const t=el("div","toast long"); const body=el("span","tbody");
     body.append(el("div","ttitle","⚠️ Your browser is blocking saved data"), el("div","ttext","Your progress still saves to your account, but settings reset each visit. Turn off Private Browsing or \"Block All Cookies\", or add NightLine to your Home Screen."));
     t.append(body); $("toasts").prepend(t); setTimeout(()=>{ t.classList.add("out"); setTimeout(()=>t.remove(),260); },10000); },3000); }
   blocked=new Set(await api.blocks().catch(()=>[]));
@@ -6466,7 +6473,8 @@ function markSecretAsked(id){
 function checkMissedSecret(){
   if(!fxEnabled()||reducedMotion()) return;
   const asked=missedAsked();
-  const hit=[...msgs].reverse().find(m=>m.kind==="text"&&m.user_id!==user.id&&!fxPlayed.has(m.id)&&!asked.has(m.id)&&secretFor(m.text));
+  const today=dayKey(Date.now());   // only offer secrets someone triggered TODAY (your local day), not old ones
+  const hit=[...msgs].reverse().find(m=>m.kind==="text"&&m.user_id!==user.id&&dayKey(m.created_at)===today&&!fxPlayed.has(m.id)&&!asked.has(m.id)&&secretFor(m.text));
   if(!hit) return;
   const s=secretFor(hit.text), roomAtPrompt=room;
   markSecretAsked(hit.id);
@@ -6804,8 +6812,12 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.22h";
+const APP_VERSION="2026.09.22i";
 const CHANGELOG=[
+  {v:"2026.09.22i", title:"Pop-ups fit the screen 📐", items:[
+    "📐 Fixed pop-ups (like \"You missed a secret\") running off the edge of the screen. Longer ones now wrap onto a second line so you can read the whole thing.",
+    "🕛 \"You missed a secret\" now only offers secrets friends triggered today, not old ones from days ago.",
+  ]},
   {v:"2026.09.22h", title:"Secrets stay found 🔒", items:[
     "🔒 Fixed secrets counting as \"found\" again on iPhone. Your app now checks your account every time you come back, so Safari and the Home Screen app (or two devices) stay in sync. (Found by Xen!)",
     "🛡️ If your browser blocks saved data, NightLine now warns you, and your XP and secrets still save to your account.",
