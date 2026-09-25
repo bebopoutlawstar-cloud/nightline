@@ -1779,6 +1779,11 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 /* ===== offline ===== */
 .offlinebar{display:flex;align-items:center;gap:8px;background:var(--night);border:2px solid #ffcf3d;box-shadow:4px 4px 0 var(--mag);padding:8px 12px;font-size:15px;color:var(--white);transform:rotate(-1deg)}
 .offlinebar span{flex:1;min-width:0}
+/* ===== new-messages pill (shown when you're scrolled up and something arrives) ===== */
+.newpill{position:absolute;left:50%;bottom:calc(100% + 10px);transform:translateX(-50%) rotate(-2deg);z-index:6;background:var(--volt);color:var(--night);border:3px solid var(--night);box-shadow:4px 4px 0 var(--mag);font-family:var(--tech);font-size:13px;padding:8px 14px;white-space:nowrap;cursor:pointer;animation:toastin .3s cubic-bezier(.2,1.5,.4,1) both}
+#sendForm{position:relative}
+/* while typing, camera + mic tuck away so the text box gets the room */
+.compose.typing #pickBtn,.compose.typing #micBtn{display:none}
 </style>
 </head>
 <body>
@@ -1898,6 +1903,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
   <main class="feed" id="feed" aria-live="polite"></main>
   <div class="typing" id="typing" aria-live="polite"></div>
   <form class="compose" id="sendForm">
+    <button type="button" class="newpill hidden" id="newPill" aria-live="polite">↓ <span id="newPillText">1 new message</span></button>
     <div class="replying hidden" id="replying"><b>Reply</b><span id="replyText"></span><button type="button" id="cancelReply">Cancel</button></div>
     <div class="pending hidden" id="pending"><img id="pendingImg" alt="Photo to send"><video id="pendingVid" muted playsinline class="hidden"></video><span id="pendingLabel">Photo ready</span><button type="button" id="unpick">Remove</button></div>
     <div class="pendingmulti hidden" id="pendingMulti"><div class="pm-strip" id="pmStrip"></div><span id="pmLabel"></span><button type="button" id="pmClear">Remove all</button></div>
@@ -3013,7 +3019,7 @@ async function handleAuth(u){
   user=u;
   const q=new URLSearchParams(location.search);
   if(!u){
-    myInviteTok=null;
+    myInviteTok=null; tellSwAuth(null); signedLinks.clear();
     hideSplash();
     if(unsub){unsub();unsub=null;} if(unsubAll){unsubAll();unsubAll=null;} if(typeof stopPresence==="function") stopPresence();
     say("authMsg","");   // clear any leftover "Logging in…"
@@ -3164,7 +3170,35 @@ const uiSoundOn=()=>{ try{ return LS.get("nl-uisound")!=="off"; }catch(e){ retur
    in 20 minutes (never before 5 PM your time). If habits are still unchecked then, the Night Owl
    DMs you, and that DM arrives as a normal push. Opening the app again cancels it. */
 let owlToken=null;
-if(sb){ sb.auth.getSession().then(({data})=>{ owlToken=data.session?.access_token||null; }); sb.auth.onAuthStateChange((e,s)=>{ owlToken=s?.access_token||null; }); }
+if(sb){ sb.auth.getSession().then(({data})=>{ owlToken=data.session?.access_token||null; tellSwAuth(owlToken); }); sb.auth.onAuthStateChange((e,s)=>{ owlToken=s?.access_token||null; tellSwAuth(owlToken); }); }
+/* ---- private chat files ----
+   Chat photos/videos/voice only open for people in that chat. The service worker attaches your login to
+   those requests; this hands it your current login (and clears it when you sign out). */
+function tellSwAuth(token){
+  if(!("serviceWorker" in navigator)) return;
+  const msg={type:"nl-auth",auth:token?{token,key:SUPABASE_ANON_KEY}:null};
+  try{ navigator.serviceWorker.controller?.postMessage(msg); }catch(e){}
+  navigator.serviceWorker.ready.then(r=>{ try{ r.active?.postMessage(msg); }catch(e){} }).catch(()=>{});
+}
+if("serviceWorker" in navigator) navigator.serviceWorker.addEventListener("controllerchange",()=>tellSwAuth(owlToken));
+// Backup (first visit before the helper's running, or a browser without one): swap in a short-lived private link.
+const PRIVATE_FILE_RE=/\/storage\/v1\/object\/public\/(chat-images|chat-media)\/([^?#]+)/;
+const signedLinks=new Map();
+async function privateLink(bucket,path){
+  const k=bucket+"/"+path, hit=signedLinks.get(k); if(hit&&hit.exp>Date.now()) return hit.url;
+  const {data,error}=await sb.storage.from(bucket).createSignedUrl(path,6*3600);
+  if(error||!data?.signedUrl) return null;
+  signedLinks.set(k,{url:data.signedUrl,exp:Date.now()+5.5*3600e3}); return data.signedUrl;
+}
+async function privateFallback(node){   // true if a private link was swapped in
+  if(!sb||!node||node.dataset.nlSigned) return false;
+  const m=(node.currentSrc||node.src||node.getAttribute?.("src")||"").match(PRIVATE_FILE_RE); if(!m) return false;
+  node.dataset.nlSigned="1";
+  const url=await privateLink(m[1],decodeURIComponent(m[2])); if(!url) return false;
+  node.src=url; if(node.tagName==="SOURCE") node.parentElement?.load?.();
+  return true;
+}
+document.addEventListener("error",e=>{ const t=e.target; if(t&&/^(IMG|VIDEO|AUDIO|SOURCE)$/.test(t.tagName)) privateFallback(t); },true);
 /* ================= PROGRESS SYNC =================
    XP, secrets, and unlocks are saved on the phone AND merged into your account, so iPhone Safari's 7-day
    cleanup, reinstalling, or a new phone can't wipe them. The server only ever merges upward. */
@@ -3320,7 +3354,7 @@ async function enterRoom(code,token){
   show($("joinPanel"),false); $("joinToggle").setAttribute("aria-expanded","false"); $("joinToggle").textContent="＋";
   show($("front"),false); show($("chat")); $("roomLabel").textContent="# "+room; $("status").textContent="Connecting…";
   msgs.length=0; byId.clear(); elById.clear(); claimed.clear(); contextById.clear(); reactionsById.clear(); members.clear(); pollsById.clear(); pins.clear(); gamesById.clear(); closeGame(); pinCursor=0; paintPinBar(); setRoomBackground(null); closeTray(); hideMentions();
-  typers.forEach(v=>clearTimeout(v.timer)); typers.clear(); paintTyping(); clearReply(); feed.innerHTML="";
+  typers.forEach(v=>clearTimeout(v.timer)); typers.clear(); paintTyping(); clearReply(); feed.innerHTML=""; newPillClear();
   try{
     const [latest,mem,info,pinRows]=await Promise.all([api.loadLatest(room),api.members(room).catch(()=>[]),api.roomInfo(room).catch(()=>null),api.pins(room).catch(()=>[])]);
     if(seq!==enterSeq) return;
@@ -3416,11 +3450,13 @@ function renderAll(keepBottom=true){
 
 function appendEl(m){
   if(!visible(m)) return;
+  const stick=feed.scrollHeight-feed.scrollTop-feed.clientHeight<150||m.user_id===user?.id;   // at the bottom already, or it's your own message
   feed.querySelector(".empty")?.remove();
   const prev=[...elById.keys()].map(id=>byId.get(id)).filter(Boolean).pop();
   if(!prev || dayKey(prev.created_at)!==dayKey(m.created_at)) feed.append(el("div","daybreak",dayLabel(m.created_at)));
   const node=buildMsg(m,elById.size); elById.set(m.id,node); feed.append(node);
-  paintReceipts(); feed.scrollTop=feed.scrollHeight;
+  paintReceipts();
+  if(stick) feed.scrollTop=feed.scrollHeight; else newPillAdd();
   if(m.user_id!==user.id&&myLang()) translateMsg(m);
   if(m.expires_at) scheduleExpiry();
   playFx(m);
@@ -3490,11 +3526,11 @@ function buildMsg(m,index,noAnim){
       b.onclick=e=>{ e.stopPropagation(); openLightbox(albumUrls,i); };
       grid.append(b);
     });
-    grid.firstChild?.querySelector?.("img")?.addEventListener?.("load",()=>{ if(feed.scrollHeight-feed.scrollTop-feed.clientHeight<400) feed.scrollTop=feed.scrollHeight; });
+    { const gi=grid.firstChild?.querySelector?.("img"); if(gi) gi.addEventListener("load",()=>{ if(feed.scrollHeight-feed.scrollTop-feed.clientHeight<150+gi.offsetHeight) feed.scrollTop=feed.scrollHeight; }); }   // a photo that just loaded only keeps you at the bottom if you were there
     bub.append(grid);
   } else if(img&&!isBlCard(m)){ const b=el("button","shot"); b.type="button"; b.setAttribute("aria-label","Open photo");
     const i=document.createElement("img"); i.src=img; i.alt="Photo from "+p.username; i.loading="lazy";
-    i.onload=()=>{ if(feed.scrollHeight-feed.scrollTop-feed.clientHeight<400) feed.scrollTop=feed.scrollHeight; };
+    i.onload=()=>{ if(feed.scrollHeight-feed.scrollTop-feed.clientHeight<150+i.offsetHeight) feed.scrollTop=feed.scrollHeight; };
     b.append(i); b.onclick=e=>{ e.stopPropagation(); openLightbox([img],0); }; bub.append(b); }
   const media=safeImg(m.media_url);
   if(media&&m.media_type==="video"){ const v=document.createElement("video"); v.className="vid"; v.src=media; v.controls=true; v.playsInline=true; v.preload="metadata"; bub.append(v); }
@@ -3985,6 +4021,7 @@ $("sendForm").addEventListener("submit",async e=>{
   sendingNow=true; $("sendBtn").disabled=true; hideMentions();
   const hadMedia=!!pendingFile||pendingImages.length>0;
   if(!hadMedia){ $("box").value=""; $("box").style.height=""; }   // text-only: clear right away so you can keep typing
+  paintComposeMode();
   try{
     const f={kind:"text",text,mentions:mentionsIn(text)};
     if(pendingImages.length>1){
@@ -4005,7 +4042,7 @@ $("sendForm").addEventListener("submit",async e=>{
     await sendFields(f);
     if(hadMedia&&$("box").value.trim()===text){ $("box").value=""; $("box").style.height=""; }   // only clear the caption you sent, never new typing
     if(hadMedia) clearPending();
-    mentionPicks.clear();
+    mentionPicks.clear(); paintComposeMode();
   }catch(err){
     if(text&&!hadMedia){ const now=$("box").value; $("box").value=now.trim()?text+"\n"+now:text; $("box").dispatchEvent(new Event("input")); }   // put your message back
     const offline=navigator.onLine===false||/failed to fetch|network|load failed|fetch/i.test(String(err?.message||err));
@@ -4018,7 +4055,13 @@ $("box").addEventListener("keydown",e=>{
   if(e.key==="Escape"){ hideMentions(); return; }
   if(e.key==="Enter"&&!e.shiftKey&&!matchMedia("(pointer: coarse)").matches){e.preventDefault();$("sendForm").requestSubmit();}
 });
-$("box").addEventListener("input",function(){ this.style.height="auto"; this.style.height=this.scrollHeight+"px"; sendTyping(this.value.trim().length>0); updateMentions(); });
+$("box").addEventListener("input",function(){ this.style.height="auto"; this.style.height=this.scrollHeight+"px"; sendTyping(this.value.trim().length>0); updateMentions(); paintComposeMode(); });
+function paintComposeMode(){ $("sendForm").classList.toggle("typing",$("box").value.length>0); }
+let newPillN=0;
+function newPillAdd(){ newPillN++; $("newPillText").textContent=newPillN===1?"1 new message":`${newPillN} new messages`; show($("newPill")); }
+function newPillClear(){ newPillN=0; show($("newPill"),false); }
+$("newPill").onclick=()=>{ feed.scrollTo({top:feed.scrollHeight,behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"}); newPillClear(); };
+feed.addEventListener("scroll",()=>{ if(newPillN&&feed.scrollHeight-feed.scrollTop-feed.clientHeight<80) newPillClear(); },{passive:true});
 $("box").addEventListener("blur",()=>{ sendTyping(false); setTimeout(hideMentions,200); });
 
 /* ---------- mentions ---------- */
@@ -4116,10 +4159,11 @@ function voicePlayer(url,duration){
   const paint=()=>{ const k=audio.duration&&isFinite(audio.duration)?audio.currentTime/audio.duration:(duration?audio.currentTime/duration:0); const on=Math.round(k*bars.length); bars.forEach((b,i)=>b.classList.toggle("on",i<on)); dur.textContent=fmtDur(audio.paused&&!audio.currentTime?duration:audio.currentTime); };
   audio.ontimeupdate=paint;
   audio.onended=()=>{ btn.innerHTML=playIcon; btn.setAttribute("aria-label","Play voice message"); audio.currentTime=0; paint(); };
-  audio.onerror=()=>{ dur.textContent="Can't play"; };
+  let wantPlay=false;   // you pressed play (so after swapping in a private link, keep playing)
+  audio.onerror=async()=>{ if(await privateFallback(audio)){ if(wantPlay) audio.play().catch(()=>{ dur.textContent="Can't play"; }); return; } dur.textContent="Can't play"; };
   btn.onclick=e=>{ e.stopPropagation();
-    if(audio.paused){ if(playingAudio&&playingAudio!==audio) playingAudio.pause(); playingAudio=audio; audio.play().catch(()=>{ dur.textContent="Can't play"; }); btn.innerHTML=pauseIcon; btn.setAttribute("aria-label","Pause voice message"); }
-    else { audio.pause(); btn.innerHTML=playIcon; btn.setAttribute("aria-label","Play voice message"); } };
+    if(audio.paused){ if(playingAudio&&playingAudio!==audio) playingAudio.pause(); playingAudio=audio; wantPlay=true; audio.play().catch(()=>{ /* a load failure is handled by audio.onerror (it retries with a private link first) */ }); btn.innerHTML=pauseIcon; btn.setAttribute("aria-label","Pause voice message"); }
+    else { wantPlay=false; audio.pause(); btn.innerHTML=playIcon; btn.setAttribute("aria-label","Play voice message"); } };
   audio.onpause=()=>{ btn.innerHTML=playIcon; };
   wave.onclick=e=>{ e.stopPropagation(); const d=audio.duration&&isFinite(audio.duration)?audio.duration:duration; if(!d) return; const r=wave.getBoundingClientRect(); audio.currentTime=Math.max(0,Math.min(d,(e.clientX-r.left)/r.width*d)); paint(); };
   wrap.append(btn,wave,dur); return wrap;
@@ -6871,8 +6915,13 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.25a";
+const APP_VERSION="2026.09.25b";
 const CHANGELOG=[
+  {v:"2026.09.25b", title:"Private photos & smoother scrolling 🔒", items:[
+    "🔒 Photos, videos, and voice messages are now private to the chat they're sent in. Links don't work for anyone outside it, and deleting a message makes its file stop opening.",
+    "📜 Reading older messages? New ones no longer yank you to the bottom. Tap the \"↓ new messages\" button when you're ready.",
+    "⌨️ More room to type: the camera and mic buttons tuck away while you're writing a message.",
+  ]},
   {v:"2026.09.25a", title:"NightLine is now NightLane 🌃", items:[
     "🌃 New name, new home: nightlane.chat. Same app, same account. Your chats, XP, secrets, Social Bonds, habits, and backlog all came with you.",
     "📲 On your phone: remove the old NightLine icon and add NightLane to your Home Screen from nightlane.chat.",

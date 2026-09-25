@@ -1,14 +1,45 @@
-// NightLane service worker (v13): push notifications + fast repeat loads.
-const CACHE="nightlane-v13";
+// NightLane service worker (v14): push notifications + fast repeat loads.
+const CACHE="nightlane-v14";
 // Outside files the app needs to start: the server library (a fixed version, so it never changes) and the fonts.
 const LIB="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.0/dist/umd/supabase.min.js";
 const OUTSIDE=u=>u.hostname==="cdn.jsdelivr.net"||u.hostname==="fonts.googleapis.com"||u.hostname==="fonts.gstatic.com";
 const STATIC=["icon-192.png","icon-512.png","apple-touch-icon.png","favicon.ico","manifest.json","badge-96.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(async c => { await c.addAll(STATIC).catch(()=>{}); try { const lr = await fetch(LIB, { mode: "cors" }); if (lr.ok) await c.put(LIB, lr); } catch (e) {} try { const r = await fetch("./", { cache: "no-store" }); if (r.ok) await c.put("shell", r); } catch (e) {} }).then(()=>self.skipWaiting())); });
 self.addEventListener("activate", e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())));
+// ---- private chat photos / videos / voice ----
+// Those files only open for people in the chat. When the app asks for one, attach the viewer's login
+// (sent here by the app) so the server can check. If anything's off, fall back to the plain request and
+// the app retries with a short-lived private link.
+let AUTH = null;
+self.addEventListener("message", e => {
+  if (e.data && e.data.type === "nl-auth") {
+    AUTH = e.data.auth || null;
+    caches.open(CACHE).then(c => AUTH ? c.put("__nl_auth", new Response(JSON.stringify(AUTH))) : c.delete("__nl_auth"));
+  }
+});
+async function getAuth() {
+  if (AUTH) return AUTH;
+  const r = await caches.match("__nl_auth"); if (r) { try { AUTH = await r.json(); } catch (e) {} }
+  return AUTH;
+}
+const PRIVATE_FILE = /\/storage\/v1\/object\/public\/chat-(images|media)\//;
+async function privateFile(req, url) {
+  const a = await getAuth();
+  if (a && a.token) {
+    const h = new Headers({ Authorization: "Bearer " + a.token, apikey: a.key || "" });
+    const range = req.headers.get("range"); if (range) h.set("range", range);
+    try {
+      const r = await fetch(url.href.replace("/object/public/", "/object/authenticated/"), { headers: h, mode: "cors", credentials: "omit" });
+      if (r.ok || r.status === 206) return r;
+    } catch (e) {}
+  }
+  return fetch(req);
+}
+
 self.addEventListener("fetch", e => {
   const req = e.request; if (req.method !== "GET") return;
   const url = new URL(req.url);
+  if (PRIVATE_FILE.test(url.pathname)) { e.respondWith(privateFile(req, url)); return; }
   if (url.origin !== location.origin) {
     if (!OUTSIDE(url)) return;
     // library + fonts: use the saved copy (works offline), fetch and save it the first time
