@@ -1981,6 +1981,68 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
   text-shadow:0 0 1px #000,3px 3px 0 #1a1208,0 0 18px rgba(0,0,0,.8);transition:opacity .8s}
 .war-film.out,.war-hand.out,.war-cap.out{opacity:0}.war-hand.out{transform:translate(-20%,30%)}
 @media (prefers-reduced-motion:reduce){.war-film{animation:none}.war-smoke{display:none}.war-hand{animation:none}}
+/* ===== game + horror secret scenes ===== */
+.sxscene{position:fixed;inset:0;z-index:62;pointer-events:none;overflow:hidden;transition:opacity .7s}
+.sxscene.out{opacity:0}
+.sxcap{position:fixed;left:50%;top:26%;transform:translateX(-50%);z-index:3;white-space:nowrap;font-family:var(--num);font-size:clamp(28px,9vw,54px);color:var(--white);text-shadow:3px 3px 0 var(--night),0 0 18px rgba(0,0,0,.8);animation:sxcapin .5s cubic-bezier(.2,1.4,.4,1) both}
+.sxcap.small{font-size:clamp(18px,5.4vw,28px)}
+@keyframes sxcapin{from{opacity:0;transform:translateX(-50%) scale(.4)}to{opacity:1;transform:translateX(-50%) scale(1)}}
+/* Metro gas mask */
+.gm-visor{position:absolute;inset:-4%;border-radius:46% 46% 40% 40%/50% 50% 42% 42%;box-shadow:0 0 0 60vmax #050505,inset 0 0 60px 20px rgba(0,0,0,.9);animation:gmin .6s ease-out}
+@keyframes gmin{from{transform:scale(1.6)}to{transform:none}}
+.gm-fog{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 90%,rgba(230,235,240,.8),rgba(230,235,240,0) 60%);animation:gmbreath 1.6s ease-in-out infinite}
+@keyframes gmbreath{0%,100%{opacity:.1}50%{opacity:.85}}
+.sxscene.swap .gm-fog{animation:none;opacity:0;transition:opacity .4s}
+.gm-crack{position:absolute;inset:0;width:100%;height:100%}.gm-crack path{fill:none;stroke:rgba(255,255,255,.8);stroke-width:.5;stroke-dasharray:200;stroke-dashoffset:200;animation:gmcrack .9s ease-out 1.2s forwards}
+@keyframes gmcrack{to{stroke-dashoffset:0}}
+.gm-watch{position:absolute;left:8%;bottom:10%;display:grid;justify-items:center;background:#111;border:4px solid #3a3a3a;border-radius:10px;padding:6px 12px;box-shadow:0 0 0 3px #07041a}
+.gm-watch b{font-family:var(--tech);font-size:26px;color:#ff3b3b;text-shadow:0 0 10px #ff0000}.gm-watch span{font-family:var(--tech);font-size:9px;color:#9a9a9a;letter-spacing:2px}
+/* For Honor clash */
+.fh-blade{position:absolute;top:50%;width:min(16vw,70px);transform-origin:50% 90%}
+.fh-blade svg{width:100%;display:block;filter:drop-shadow(4px 4px 0 rgba(0,0,0,.5))}
+.fh-blade.left{left:calc(50% - min(16vw,70px));margin-top:-40vh;animation:fhl .55s cubic-bezier(.5,0,.6,1.4) both}
+.fh-blade.right{left:50%;margin-top:-40vh;animation:fhr .55s cubic-bezier(.5,0,.6,1.4) both}
+@keyframes fhl{from{transform:rotate(-110deg) translateY(-40px)}to{transform:rotate(-28deg)}}
+@keyframes fhr{from{transform:rotate(110deg) translateY(-40px)}to{transform:rotate(28deg)}}
+.fh-flash{position:absolute;inset:0;background:radial-gradient(circle at 50% 42%,#fff,rgba(255,240,180,.4) 20%,transparent 50%);animation:fhflash .5s ease-out both}
+@keyframes fhflash{from{opacity:1}to{opacity:0}}
+.fh-spark{position:absolute;left:50%;top:42%;width:4px;height:14px;background:linear-gradient(#fff,#ffb020);border-radius:2px;transform:rotate(var(--a));animation:fhspark .7s ease-out both}
+@keyframes fhspark{from{transform:rotate(var(--a)) translateY(0);opacity:1}to{transform:rotate(var(--a)) translateY(calc(var(--d) * -1));opacity:0}}
+.fh-cap{color:#ffd66b;top:62%}
+/* Monster Hunter */
+.mh-spit{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);display:grid;justify-items:center}
+.mh-meat{font-size:clamp(90px,30vw,150px);animation:mhspin .5s linear infinite;filter:drop-shadow(4px 6px 0 rgba(0,0,0,.4))}
+.mh-meat.done{animation:mhdone .5s cubic-bezier(.2,1.6,.4,1) both;filter:drop-shadow(0 0 20px #ffb020) sepia(.4)}
+@keyframes mhspin{from{transform:rotateX(0)}to{transform:rotateX(360deg)}}
+@keyframes mhdone{from{transform:scale(.8)}to{transform:scale(1.25) rotate(-8deg)}}
+.mh-fire{font-size:clamp(36px,11vw,56px);margin-top:-14px;animation:mhfire .3s steps(2) infinite}
+@keyframes mhfire{50%{transform:scaleY(1.15) translateY(-3px)}}
+.mh-cap{top:18%;color:#ffd66b}
+.mh-paw{position:absolute;font-size:clamp(26px,8vw,42px);opacity:0;animation:mhpaw 2.8s ease-out both}
+@keyframes mhpaw{0%{opacity:0;transform:scale(.4)}15%{opacity:1;transform:scale(1.1)}100%{opacity:0;transform:scale(1)}}
+.mh-cat{position:absolute;left:50%;bottom:-4%;font-size:clamp(80px,26vw,130px);transform:translateX(-50%);animation:mhcat .7s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes mhcat{from{transform:translate(-50%,70%)}to{transform:translate(-50%,0)}}
+/* Here's Johnny */
+.jh-crack{position:absolute;inset:0;width:100%;height:100%;background:repeating-linear-gradient(92deg,rgba(92,54,24,.28) 0 7px,rgba(70,40,16,.28) 7px 15px)}
+.jh-crack path{fill:none;stroke:#f3dcb4;stroke-width:.55;stroke-linecap:round;stroke-linejoin:miter;filter:drop-shadow(.3px .4px 0 #2a1608)}
+.jh-hole{position:absolute;left:56%;top:44%;width:34vmin;height:20vmin;transform:translate(-50%,-50%) rotate(-12deg);background:#050302;
+  clip-path:polygon(0 48%,14% 30%,22% 40%,34% 8%,44% 30%,56% 0,62% 26%,78% 12%,80% 40%,100% 44%,84% 58%,92% 82%,70% 70%,60% 100%,48% 74%,34% 96%,28% 70%,8% 78%,16% 58%);
+  filter:drop-shadow(0 -2px 0 #f3dcb4) drop-shadow(0 2px 0 #f3dcb4) drop-shadow(2px 0 0 #c9a06a)}
+.jh-cap{top:70%;color:#fff}
+/* It balloon */
+.sxscene.dim{background:rgba(3,3,6,.55)}
+.it-balloon{position:absolute;left:46%;bottom:-30%;width:min(22vw,100px);animation:itfloat 5.6s ease-in both}
+@keyframes itfloat{0%{transform:translate(0,0) rotate(-4deg)}25%{transform:translate(-18px,-30vh) rotate(4deg)}50%{transform:translate(14px,-62vh) rotate(-5deg)}100%{transform:translate(-6px,-140vh) rotate(3deg)}}
+.it-cap{top:70%;font-size:clamp(20px,6vw,32px);color:#e8e0d0;font-style:italic}
+/* Poltergeist static */
+.tv-static{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;opacity:.85;animation:tvon .25s ease-out}
+@keyframes tvon{from{transform:scaleY(.01);filter:brightness(3)}to{transform:none}}
+.tv-scan{position:absolute;inset:0;background:repeating-linear-gradient(transparent 0 3px,rgba(0,0,0,.35) 3px 4px);animation:tvroll 2s linear infinite}
+@keyframes tvroll{from{background-position:0 0}to{background-position:0 40px}}
+.tv-hand{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(1.8);font-size:clamp(60px,20vw,110px);opacity:0;filter:grayscale(1) contrast(1.4) blur(1px);animation:tvhand 2.4s ease-in both}
+@keyframes tvhand{to{opacity:.55;transform:translate(-50%,-50%) scale(2.2)}}
+.tv-cap{top:72%;font-size:clamp(20px,6vw,32px);font-family:var(--tech);letter-spacing:2px}
+@media (prefers-reduced-motion:reduce){.sxscene *{animation:none!important}}
 </style>
 </head>
 <body>
@@ -7913,6 +7975,82 @@ QX.war=function(){
   setTimeout(()=>{ [film,hand,cap].forEach(n=>n.classList.add("out")); },4600);
   setTimeout(()=>layer.remove(),5400);
 };
+/* ===== Game + horror secrets (original visuals: nods to the vibe and famous lines, no copyrighted art) ===== */
+function sxLayer(id,ms){   // each scene gets its own layer so other effects can't cut it short
+  document.getElementById(id)?.remove();
+  const L=document.createElement("div"); L.id=id; L.className="sxscene"; document.body.append(L);
+  setTimeout(()=>L.classList.add("out"),ms-700); setTimeout(()=>L.remove(),ms); return L;
+}
+const sxCap=(L,text,cls="")=>{ const c=el("div","sxcap "+cls,text); L.append(c); return c; };
+QX.artyom=function(){   // Metro: gas-mask visor fogs, cracks, filter timer runs out, hiss
+  const L=sxLayer("sxArtyom",6200);
+  L.innerHTML=`<div class="gm-visor"></div><div class="gm-fog"></div>
+    <svg class="gm-crack" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M78 8 L70 22 L74 30 L64 44 L68 50 L58 62 M70 22 L82 30 M64 44 L52 46 M68 50 L80 58" /></svg>
+    <div class="gm-watch"><b>00:05</b><span>FILTER</span></div>`;
+  let t=5; const w=L.querySelector(".gm-watch b");
+  const iv=setInterval(()=>{ t--; w.textContent="00:0"+Math.max(0,t); if(t<=0){ clearInterval(iv); L.classList.add("swap"); sxCap(L,"🫁 *hiss* Filter changed"); if(navigator.vibrate) navigator.vibrate([10,40,10,40,120]); } },800);
+};
+QX.forhonor=function(){   // For Honor: two blades clash with sparks
+  const L=sxLayer("sxHonor",3600);
+  const blade=`<svg viewBox="0 0 40 240"><path d="M20 0 L30 150 L20 170 L10 150 Z" fill="#dfe6f0" stroke="#07041a" stroke-width="4"/><rect x="0" y="168" width="40" height="12" fill="#b08a3a" stroke="#07041a" stroke-width="4"/><rect x="14" y="180" width="12" height="46" fill="#4a2e1a" stroke="#07041a" stroke-width="4"/><circle cx="20" cy="232" r="8" fill="#b08a3a" stroke="#07041a" stroke-width="4"/></svg>`;
+  L.innerHTML=`<div class="fh-blade left">${blade}</div><div class="fh-blade right">${blade}</div>`;
+  setTimeout(()=>{ document.body.animate([{transform:"translate(0,0)"},{transform:"translate(-9px,5px)"},{transform:"translate(8px,-6px)"},{transform:"translate(-4px,3px)"},{transform:"none"}],{duration:380});
+    const fl=el("div","fh-flash"); L.append(fl);
+    for(let i=0;i<22;i++){ const sp=el("i","fh-spark"); sp.style.setProperty("--a",(Math.random()*360)+"deg"); sp.style.setProperty("--d",(60+Math.random()*120)+"px"); sp.style.animationDelay=(Math.random()*.08)+"s"; L.append(sp); }
+    sxCap(L,"⚔️ FOR HONOR!","fh-cap"); if(navigator.vibrate) navigator.vibrate(90); },520);
+};
+QX.steak=function(){   // Monster Hunter: meat on the spit, then WELL DONE!
+  const L=sxLayer("sxSteak",4200);
+  L.innerHTML=`<div class="mh-spit"><div class="mh-meat">🍖</div><div class="mh-fire">🔥🔥🔥</div></div>`;
+  setTimeout(()=>{ L.querySelector(".mh-meat").classList.add("done"); sxCap(L,"WELL DONE! ✨","mh-cap"); if(navigator.vibrate) navigator.vibrate([30,30,60]); },2300);
+};
+QX.palico=function(){   // Monster Hunter: paw prints trot across, a cat peeks up
+  const L=sxLayer("sxPalico",4400);
+  for(let i=0;i<9;i++){ const pw=el("span","mh-paw","🐾"); pw.style.left=(4+i*11)+"%"; pw.style.top=(62-i*5+(i%2?6:0))+"%"; pw.style.animationDelay=(i*.22)+"s"; L.append(pw); }
+  setTimeout(()=>{ L.append(el("div","mh-cat","🐱")); sxCap(L,"Meow! Ready to hunt, meowster!","mh-cap small"); },2100);
+};
+QX.johnny=function(){   // The Shining: three axe hits crack the screen
+  const L=sxLayer("sxJohnny",4400);
+  const cracks=[`M55 38 L56 24 L54 12 L55 0 M61 40 L62 28 L60 16`,`M55 50 L56 64 L54 78 L55 100 M49 42 L48 28 L50 14 M62 50 L63 66 L61 80`,`M47 50 L46 64 L48 76 M66 44 L67 30 M66 50 L68 62 L67 74 M44 44 L43 34`];   // wood splits along the grain
+  L.innerHTML=`<svg class="jh-crack" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>`;
+  const svg=L.querySelector("svg");
+  cracks.forEach((d,i)=>setTimeout(()=>{ const pth=document.createElementNS("http://www.w3.org/2000/svg","path"); pth.setAttribute("d",d); svg.append(pth);
+    document.body.animate([{transform:"none"},{transform:"translate(10px,-6px) rotate(.6deg)"},{transform:"translate(-8px,5px)"},{transform:"none"}],{duration:260});
+    if(navigator.vibrate) navigator.vibrate(70);
+    if(i===2){ L.append(el("div","jh-hole")); sxCap(L,"HERE'S JOHNNY!","jh-cap"); } },300+i*700));
+};
+QX.balloon=function(){   // It: one red balloon drifts up a darkened screen
+  const L=sxLayer("sxBalloon",6000); L.classList.add("dim");
+  L.innerHTML=`<svg class="it-balloon" viewBox="0 0 60 150"><ellipse cx="30" cy="34" rx="24" ry="30" fill="#d4141f" stroke="#5a0006" stroke-width="3"/><ellipse cx="21" cy="22" rx="6" ry="9" fill="rgba(255,255,255,.35)"/><path d="M26 63 L34 63 L30 70 Z" fill="#8f0a12"/><path d="M30 70 C22 90 38 104 28 122 C22 134 32 142 30 150" fill="none" stroke="#e8e0d0" stroke-width="2"/></svg>`;
+  setTimeout(()=>sxCap(L,"🎈 we all float down here…","it-cap"),1800);
+};
+QX.theyrehere=function(){   // Poltergeist: TV static with a handprint on the glass
+  const L=sxLayer("sxStatic",4400);
+  const cv=document.createElement("canvas"); cv.className="tv-static"; cv.width=160; cv.height=280; L.append(cv);
+  const ctx=cv.getContext("2d"), img=ctx.createImageData(160,280); let on=true;
+  const draw=()=>{ if(!on) return; for(let i=0;i<img.data.length;i+=4){ const v=Math.random()*255|0; img.data[i]=img.data[i+1]=img.data[i+2]=v; img.data[i+3]=255; } ctx.putImageData(img,0,0); requestAnimationFrame(draw); }; draw();
+  L.append(el("div","tv-scan"));
+  setTimeout(()=>{ L.append(el("div","tv-hand","🖐️")); sxCap(L,"they're here…","tv-cap"); },1400);
+  setTimeout(()=>{ on=false; },4400);
+};
+SECRET_LIST.splice(SECRET_LIST.findIndex(s=>s.id==="konami"),0,
+  {id:"artyom",     name:"Filter change",     re:/(^|[^a-z])artyom([^a-z]|$)/i, play:()=>QX.artyom()},
+  {id:"forhonor",   name:"For honor",         re:/(^|[^a-z])for honou?r([^a-z]|$)/i, play:()=>QX.forhonor()},
+  {id:"steak",      name:"Well done",         re:/(^|[^a-z])(gourmet|well[- ]done) steak([^a-z]|$)/i, play:()=>QX.steak()},
+  {id:"palico",     name:"Palico",            re:/(^|[^a-z])(palico|felyne)s?([^a-z]|$)/i, play:()=>QX.palico()},
+  {id:"johnny",     name:"Here's Johnny",     re:/(^|[^a-z])here'?s johnn?y([^a-z]|$)/i, play:()=>QX.johnny()},
+  {id:"floatdown",  name:"We all float",      re:/we all float(\s+down\s+here)?/i, play:()=>QX.balloon()},
+  {id:"theyrehere", name:"They're here",      re:/(^|[^a-z])they'?re\s+he{2,}re+([^a-z]|$)/i, play:()=>QX.theyrehere()}
+);
+Object.assign(HINTS,{
+  artyom:"Down in the tunnels, a young ranger's name. Say it and check your mask.",
+  forhonor:"Knights, vikings, and samurai all shout the same two-word battle cry.",
+  steak:"Hunters know the perfect way to cook meat on a spit. Order that kind of steak.",
+  palico:"A hunter's loyal little cat companion has a name. Call for them.",
+  johnny:"An axe, a door, and a famous greeting. Who's here?",
+  floatdown:"A red balloon in a storm drain says: we all… what?",
+  theyrehere:"A little girl at a staticky TV whispers who arrived. Stretch the last word out."
+});
 SECRET_LIST.splice(SECRET_LIST.findIndex(s=>s.id==="konami"),0,
   {id:"warchanged", name:"War has changed", re:/(^|[^a-z])war\s+has\s+changed([^a-z]|$)/i, play:()=>QX.war()}
 );
@@ -8268,8 +8406,12 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.26j";
+const APP_VERSION="2026.09.26k";
 const CHANGELOG=[
+  {v:"2026.09.26k", title:"7 new secrets 👀", items:[
+    "🎮 Seven new secrets are hiding in the chat: some for gamers who've been down in the tunnels, crossed blades, or cooked meat on a spit…",
+    "🩸 …and some for horror fans. Check the hints if you get stuck.",
+  ]},
   {v:"2026.09.26j", title:"A new secret 🚬", items:[
     "🎖️ There's a new secret hiding in the chat. Old soldiers might know the words…",
   ]},
