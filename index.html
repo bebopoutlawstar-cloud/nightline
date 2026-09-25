@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#07041A">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>NightLine</title>
-<meta name="description" content="Tap to join the chat on NightLine 🌙">
+<title>NightLane</title>
+<meta name="description" content="Tap to join the chat on NightLane 🌙">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="NightLine">
-<meta property="og:title" content="Join me on NightLine 🌙">
+<meta property="og:site_name" content="NightLane">
+<meta property="og:title" content="Join me on NightLane 🌙">
 <meta property="og:description" content="Private rooms, voice messages, games and more. Tap to jump in.">
-<meta property="og:image" content="https://bebopoutlawstar-cloud.github.io/nightline/icon-512.png">
-<meta property="og:url" content="https://bebopoutlawstar-cloud.github.io/nightline/">
+<meta property="og:image" content="https://nightlane.chat/icon-512.png">
+<meta property="og:url" content="https://nightlane.chat/">
 <meta name="twitter:card" content="summary">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Orbitron:wght@700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.0/dist/umd/supabase.min.js"></script>
@@ -1675,7 +1675,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .arcana-card{position:relative;width:min(70vw,280px);aspect-ratio:.62;transform-style:preserve-3d;transition:transform 1s cubic-bezier(.3,.9,.4,1)}
 .arcana-reveal.flip .arcana-card{transform:rotateY(180deg)}
 .arcana-back,.arcana-front{position:absolute;inset:0;border-radius:10px;backface-visibility:hidden;border:4px solid var(--cyan)}
-/* original NightLine card back: drawn in-house (sun, moons, stars), no third-party art */
+/* original NightLane card back: drawn in-house (sun, moons, stars), no third-party art */
 .arcana-back{background:#07041A url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABnCAIAAAA/otMHAAAJUklEQVR42tVcT0sjSRSvSdIMtAQDbgj0sniwwdMcclVW2IsXT4LZg4IfQOYi+DEEL4sfQJgcRsGTFy8LQnLNwZPQHmSYQMgIihgYgrCHX+b5fFVdXd3pxGwhM51Kdf17/37vvap8+FgKFCsLc0tKqfvn21Q1+TZL9WIB/1HV/fPt/fMtVRpr0FHaFyfU/4ePpQC1vlcbDHv42vdq9LJe6VKTbzNjDahRwnL/qKxE0an6/5RgcQ0PJZADS/z42++cQOKBKEuMiGe9hj84NkvV/88f332vdq9uRzLAvxZj430uQMSI1EyvSdssQ/802xKvAi+drG/PLOf89fUzl4qFuaWSoMC3h7ZS29QuFWX1HXJ50b3/f//+hzqHyrl/vi1x3ST6paZ+pTYY9oReE830mjGb0biiJWc/pVQBT1yv0Xfduyuq971a9+5qOnxiGZe2mxZW0PeDasKwQbo1ik7DsDGdBbiMSyscaSGSCdEiDBudfrfT77b3zoUBmlCxjyvEzKCFSKr8Sm2m9I/AQiSTJb0RtfC9WhSdXu+cK6VWjjfDsClEahIl7bglQRRuF8F/uyO+bEbRKRlwneg5rg0CsHK8GYYNGldYbt+rfXtoj1gIOosTCJXB4tqAzS9u9p1+Vym1XCmKem4Qdy9dqcfFDFPn42JiXaGFEmlqGZtmebaxHzd7NHNUALRTYdgwbpkoBaFWdWGwl62Lo+udg3o12Lo40le1e9ncvWyKSkdNatw1zkKvaJSjJaGOHNdgr9+6ONJpkkgHRy1U0CU4kTUzrAoT4p1wcztOMbiUxnaQVMdCbCMqhWMVRafua+DqkXq4f74tGLWQ4J+bh5dURDCyby56VoeeBSPnUI3v1TB7EOHm4SUXug+GvTBsxElqqj0qcJdS10KDYW+5UrzeOVBK1avBcqWYl8Gya2c7oDCAOfG1oAkkcgo4woVRxWwLuktpfK1eDaYz+zhtoatRVEotBIAxIRF0nL2RCIIppBayuJTTKXzvO/0uByZxECHZpZxmgbbA83KlGGfdXV3K9yr1agCN5y7rZpfyvZY0GPbi9j4OKxTiXMrp6MQxXcqFuaXCFKRzov2bwdzsSIUFzCE/UIhzKXPZY7sPkIE4Zi00Jsdb3MVPXw7j1pDWxYllITuYc0T/3P77Xo2v59OXQ2N9p981ug2JoixcSicw54JsCXVbQAd9hcap4Ikxybcwt+QK5hINEN8VMJXv1cqPrfJjC8/EMGg2JjqkxZvzA9m66/S79WoQRacrSim1KQNVSim1iaBnBnSoB7Zc8wOJagRTwdRVpMKwgc3eujgCqyxXigBnu5fNKDotP6owbCjVyxbVQ2CLZlsyco4xrKIPhjgmeehP86tKqboKEEfxvdr1zrZSyvea8Oh9r4Y25ahFQXMxe/uSdDVaUvH5AWPY9ebhpV4N6P3BsHe2sY84Zl0FTEaxTYdKqc6rqIxYP1SNKDpt751z5ANEXa86EURmKQWYi9NCAL3w7s829rHNK8ebiOJDDCwBGP5te+985XgTPZxt7N88vHT63USfW9eZ5vyAvSxXir5X6/QPO0qVH1sUwRZTv945gKY/Wd8ma0CyvnvZROT5aX5VqUNO1bFcSne1U68G5ccWJjQY9vjsEb/YujhC6GHr4mi5UuR6E43xb/mxlTj7ZEtMFHAHcxjyaX61Xg3IioE+FEgUZyJ4CB50gEyPC+Z0XMUDW/QnwAJqRFqALFqcrRXt6WPcEPrEDGAurpxt7J+sb+uQCy9DjXATe71zAE1lN1XES51+1/dq7b1zWDq9PUaHtrD5A0aXkuICxMr6GiCjJKD4iNlbXFvRFd7S++fuJe2RAczZD0YZASNR9mR9W9i1bGhcZyE90A1Tm+BSOkIJUuefvhyKUekj15v2gpZ2A5JDfkAwMfgYTD+mw0WRYzs+FUye4FLafUISid3LppglXw9kNHFJJAPGvaAJiLNDb+yAMT9AzGdUAiQDXF51oE8pBZ5nEL2RDOhDkCLRRTE5PwAlQG8KJa2UCsPGyvHmYNijNqQ9BTOAv4nfiNdhgAEEjUNg6lCDGV1KLEPQFx+FJyl8RREkpDyssb3OQqRGxc4azo1mdimxB+XHFkABnxPcJUAg/BEU50tKpXYE66fODxij4SMPphpYWJ8EQKA9/Ft+bD3Nr+riPtn8AGaDBD0OJ0EQjayvK3g0O1nfxmESMBvWnIoOWfID5JFxtAzXxCU+jjXjGa8IvJ2YBXV1KS1Mv1wpwh+nyreuiapXm4NKESAPVhaezWDY870m+QAjn5iddwbe9r03h6ATXcpfYZW55OCu3il3wMOwUY5a8Hehv7cujm5+wUGKSsAHogwxJMQdUKU4cubu0zAjsMriQioMm3Dt4TcrHhfqjzwBd/wXe9gjxyQADFOwuNbeOweHIDKHLW/vnQeLa2Tm8sob5JMfEB4MOH4w7D3Nrz7Nr+KZDLawx7OSH+DOYSI+ReMZyg9wC8BBAVepAizUq8EM5QfiZHH3shlnFjhTzUR+wLK8bC9ONT8w/fIqA9nAXC7ESSz8xETCkbNs+YGJrsH3anrQQOfzWTnsYYTrumMtgrvKfn/gfVkctiIu4J5w2INTYAp3Bizxm8T8QMGeH8BJ+HdXNRnzAzT7uLjfO5LoTWzUmB/ge28hAqRtCmvQUeYIzMVpIX5hADDYXVdMdBnpjpzhfG1mXZGqZLvmlXDkzOV8bS5HSkHARDIa7g+M41JafGXHSqHo8GA8Uz1Zl9Ilph2H/nEQnDNtKm5M51K6s6kxsB7HIfzejOWQgdGltN1iMs6pe3flsknYb0p0uwA7l27pFlNCfmBMa8Uv/vALQTniVtf7Azz2hDZxNsHuLrrfIxPjJmshun2stFvg4BauK1wudtEakBBwiRPqkhY3rn7h2uZS5nIdN4OBM46bOj8wa9dxZ/3+QKrYBJ9t7JEzNadm8DqufhnUduTM8Tpu7sVl3IQjZzqKjruOO4liGTdFfuC1yZwhTqF3lPuv+IgIVbor6fwnKGa8GK6k//X1s/HHW+J+9cX9QWkHcDP3T1fSR78vBMGnX7dRE/jFJpXfDzt1767olv0bFvr54/urPdctvNHsZ6rJsVkJS/z20IbFhhpW7Aozv8vMv9UfRPvEF8fpn8qHYP5Pe35gTJYwGvgc+3e9kq47R6kaT67//wCXIx8iPa608gAAAABJRU5ErkJggg==") center/cover no-repeat;image-rendering:pixelated;image-rendering:-moz-crisp-edges;box-shadow:0 0 22px rgba(0,240,255,.35)}
 .arcana-front{background:linear-gradient(160deg,#1a0f3d,#07041A);transform:rotateY(180deg);display:grid;place-items:center;gap:14px;padding:20px;box-shadow:0 0 30px rgba(243,255,58,.35)}
 .arcana-name{font-family:var(--num);font-size:clamp(28px,9vw,42px);color:var(--volt);text-shadow:3px 3px 0 var(--night);text-align:center}
@@ -1786,7 +1786,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
   <div class="splash-sky"><canvas id="splashStars"></canvas></div>
   <div class="splash-moon"><span class="splash-ring"></span><span class="splash-glow"></span>
     <svg viewBox="0 0 100 100"><path d="M64 10a42 42 0 1 0 30 62a34 34 0 0 1-30-62z" fill="#F3FF3A"/></svg></div>
-  <div class="splash-word">NIGHT<b>LINE</b></div>
+  <div class="splash-word">NIGHT<b>LANE</b></div>
   <div class="splash-bar"><i></i></div>
   <div class="splash-msg" id="splashMsg">booting up…</div>
 </div>
@@ -1828,7 +1828,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     <p class="msgline" id="authMsg" role="status"></p>
     <button class="go" type="submit" id="authBtn">Log in</button>
     <p class="note" id="modeNote"></p>
-    <button type="button" class="linkbtn installlink hidden" id="installLink1">📲 Install NightLine as an app</button>
+    <button type="button" class="linkbtn installlink hidden" id="installLink1">📲 Install NightLane as an app</button>
   </form>
 
   <!-- logged in -->
@@ -1847,7 +1847,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
       <p class="msgline" id="roomMsg" role="status"></p>
     </div>
     <button type="button" class="ghost hidden" id="openProfile1" style="display:none">Profile</button>
-    <button type="button" class="linkbtn installlink hidden" id="installLink2">📲 Install NightLine as an app</button>
+    <button type="button" class="linkbtn installlink hidden" id="installLink2">📲 Install NightLane as an app</button>
     <div class="fronttabs" role="tablist">
       <button type="button" class="tab" role="tab" id="tabChats" aria-selected="true">Rooms<span class="tabbadge hidden" id="badgeRooms"></span></button>
       <button type="button" class="tab" role="tab" id="tabDms" aria-selected="false">DMs<span class="tabbadge hidden" id="badgeDms"></span></button>
@@ -1866,7 +1866,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
         <label for="contactName" class="sr">Username</label>
         <input class="field" id="contactName" maxlength="20" placeholder="Add by username" autocomplete="off">
         <button type="button" class="send" id="contactAdd">Add</button>
-        <button class="ghost iconbtn" type="button" id="inviteFriendBtn" aria-label="Invite a friend to NightLine" title="Invite a friend">📲</button>
+        <button class="ghost iconbtn" type="button" id="inviteFriendBtn" aria-label="Invite a friend to NightLane" title="Invite a friend">📲</button>
       </div>
       <p class="msgline" id="contactMsg" role="status"></p>
       <h3 class="hidden" id="requestsTitle">Added you</h3>
@@ -2132,12 +2132,12 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 <!-- ============ INSTALL SHEET ============ -->
 <div class="overlay hidden" id="installSheet" role="dialog" aria-modal="true" aria-labelledby="installTitle">
   <div class="sheet"><div class="sheetbody">
-    <h2 id="installTitle">Install NightLine</h2>
+    <h2 id="installTitle">Install NightLane</h2>
     <p class="sub" id="installIntro"></p>
     <button class="go hidden" type="button" id="installNow">Install now</button>
     <ol class="steps" id="installSteps"></ol>
     <div class="copyrow">
-      <label for="installUrl" class="sr">NightLine link</label>
+      <label for="installUrl" class="sr">NightLane link</label>
       <input class="field" id="installUrl" readonly>
       <button type="button" class="send" id="installCopy">Copy</button>
     </div>
@@ -2677,7 +2677,11 @@ const live = {
   async blocks(){ return must(await sb.from("blocks").select("blocked")).map(r=>r.blocked); },
   async block(uid){ must(await sb.from("blocks").insert({blocked:uid})); },
   async unblock(uid){ must(await sb.from("blocks").delete().eq("blocked",uid)); },
-  async savePush(json){ must(await sb.from("push_subscriptions").upsert({endpoint:json.endpoint,p256dh:json.keys.p256dh,auth:json.keys.auth},{onConflict:"endpoint"})); },
+  async savePush(json){
+    must(await sb.from("push_subscriptions").upsert({endpoint:json.endpoint,p256dh:json.keys.p256dh,auth:json.keys.auth,origin:location.origin},{onConflict:"endpoint"}));
+    // moved to a new address? your signups from the old one would make every notification arrive twice
+    await sb.from("push_subscriptions").delete().eq("user_id",user.id).or(`origin.is.null,origin.neq.${location.origin}`);
+  },
   async habits(){ return must(await sb.from("habits").select("*").eq("archived",false).order("created_at")); },
   async createHabit(label,stat,reminder_time){ return must(await sb.from("habits").insert({label,stat,reminder_time:reminder_time||null}).select().single()); },
   async archiveHabit(id){ must(await sb.from("habits").update({archived:true}).eq("id",id)); },
@@ -2917,7 +2921,7 @@ const offlineApi=new Proxy({},{ get:(t,k)=>{
   return ()=>{ const p=Promise.reject(new TypeError("Failed to fetch")); p.catch(()=>{}); return p; };
 }});
 const api = sb ? live : (LIB_MISSING ? offlineApi : demo);
-$("modeNote").textContent = sb ? "" : LIB_MISSING ? "Can't reach NightLine right now. Check your connection; it'll load as soon as you're back online." : "Demo mode: no server connected, so accounts and friends are simulated.";
+$("modeNote").textContent = sb ? "" : LIB_MISSING ? "Can't reach NightLane right now. Check your connection; it'll load as soon as you're back online." : "Demo mode: no server connected, so accounts and friends are simulated.";
 
 /* ================= STATE ================= */
 let user=null, meProfile=null, room="", roomName=null, roomOwner=null, unsub=null, pendingFile=null, replyTo=null, hasMore=false, menuMsg=null;
@@ -3012,7 +3016,9 @@ async function handleAuth(u){
     myInviteTok=null;
     hideSplash();
     if(unsub){unsub();unsub=null;} if(unsubAll){unsubAll();unsubAll=null;} if(typeof stopPresence==="function") stopPresence();
-    if(q.get("friend")) say("authMsg","A friend invited you to NightLine. Log in or sign up to add them.");
+    say("authMsg","");   // clear any leftover "Logging in…"
+    if(q.get("friend")) say("authMsg","A friend invited you to NightLane. Log in or sign up to add them.");
+    else if(location.hostname==="nightlane.chat"&&!LS.get("nl-welcomed-lane")) say("authMsg","🌃 NightLine is now NightLane! Same app, same account. Just log in with your usual email and password.");
     ["chat","profile","roomSheet","msgMenu"].forEach(id=>show($(id),false));
     show($("front")); show($("authCard")); show($("roomCard"),false); $("front").classList.remove("logged");
     if(q.get("join")){
@@ -3026,7 +3032,7 @@ async function handleAuth(u){
   await Promise.all([refreshMe(), syncProgress(), api.blocks().then(b=>{ blocked=new Set(b); }).catch(()=>{})]);
   if(!LS.ok&&!window.__lsWarned){ window.__lsWarned=true; setTimeout(()=>{
     const t=el("div","toast long"); const body=el("span","tbody");
-    body.append(el("div","ttitle","⚠️ Your browser is blocking saved data"), el("div","ttext","Your progress still saves to your account, but settings reset each visit. Turn off Private Browsing or \"Block All Cookies\", or add NightLine to your Home Screen."));
+    body.append(el("div","ttitle","⚠️ Your browser is blocking saved data"), el("div","ttext","Your progress still saves to your account, but settings reset each visit. Turn off Private Browsing or \"Block All Cookies\", or add NightLane to your Home Screen."));
     t.append(body); $("toasts").prepend(t); setTimeout(()=>{ t.classList.add("out"); setTimeout(()=>t.remove(),260); },10000); },3000); }
   show($("authCard"),false); show($("roomCard"));
   try{ const last=LS.get("nl-room")||""; $("room").value=last.startsWith("dm-")?"":last; }catch(e){}
@@ -3034,6 +3040,7 @@ async function handleAuth(u){
   await Promise.all([ensureProfiles([...blocked]), loadContacts(), loadInbox()]); startPresence(); owlBack();
   await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));   // let the real front screen actually paint first
   hideSplash();
+  try{ LS.set("nl-welcomed-lane","1"); }catch(e){}
   maybeShowWhatsNew();
   refreshPushSubscription();
   loadHabits().then(()=>{ checkHabitReminders(); setInterval(checkHabitReminders,300000); });
@@ -3081,7 +3088,7 @@ $("authCard").addEventListener("submit",async e=>{
     $("pass").value="";
   }catch(err){
     hideSplash();
-    say("authMsg",isNetworkError(err)?"Couldn't reach NightLine. Check your connection and try again.":/invalid login/i.test(err.message)?"Wrong email or password.":/already registered/i.test(err.message)?"That email already has an account. Log in instead.":err.message,true);
+    say("authMsg",isNetworkError(err)?"Couldn't reach NightLane. Check your connection and try again.":/invalid login/i.test(err.message)?"Wrong email or password.":/already registered/i.test(err.message)?"That email already has an account. Log in instead.":err.message,true);
   }finally{ $("authBtn").disabled=false; }
 });
 
@@ -3715,7 +3722,7 @@ $("invCopy").onclick=async()=>{
   try{ await navigator.clipboard.writeText(v); say("rsMsg","Link copied."); }
   catch(e){ $("invLink").select(); say("rsMsg","Press Ctrl+C (or long-press) to copy."); }
 };
-$("invShare").onclick=async()=>{ try{ await navigator.share({title:"Join me on NightLine",url:$("invLink").value}); }catch(e){} };
+$("invShare").onclick=async()=>{ try{ await navigator.share({title:"Join me on NightLane",url:$("invLink").value}); }catch(e){} };
 $("invReset").onclick=async()=>{
   $("invReset").disabled=true;
   try{ const t=await api.rotateInvite(room); $("invLink").value=inviteUrl(room,t); say("rsMsg","New link made. The old link no longer works."); }
@@ -4591,7 +4598,7 @@ function paintPerson(){
   const uid=personUid, p=cache.get(uid)||{username:"Someone"}, nick=room?members.get(uid)?.nick:null;
   paintFace($("personFace"),p);
   $("personName").textContent=nick||p.username;
-  $("personSub").textContent=(nick&&nick!==p.username?`@${p.username} · `:"@"+p.username+" · ")+(isBirthdayToday(p.birthday)?"🎂 birthday today! · "+(presenceLine(uid)||""):(presenceLine(uid)||(roomName&&!isDm?`in ${roomName}`:"NightLine")));
+  $("personSub").textContent=(nick&&nick!==p.username?`@${p.username} · `:"@"+p.username+" · ")+(isBirthdayToday(p.birthday)?"🎂 birthday today! · "+(presenceLine(uid)||""):(presenceLine(uid)||(roomName&&!isDm?`in ${roomName}`:"NightLane")));
   const f=isFriend(uid), back=addedMe(uid);
   $("personTag").textContent = f&&back?"🤝 You're friends": f?"✓ On your friends list": back?"👋 Added you as a friend":"";
   show($("personTag"),f||back);
@@ -4688,7 +4695,7 @@ $("notifTest").onclick=async()=>{
   $("notifTest").disabled=true; say("profMsg","Sending a real test push through your phone's notification system…");
   try{
     const r=await api.testPush();
-    if(r?.demo){ const reg=swReg||await navigator.serviceWorker.getRegistration(); await reg.showNotification("NightLine test 🌙",{body:"Demo mode: this just shows locally.",icon:"icon-192.png",badge:"badge-96.png",tag:"test"}); say("profMsg","Demo mode: shown locally, since there's no server here to round-trip through."); }
+    if(r?.demo){ const reg=swReg||await navigator.serviceWorker.getRegistration(); await reg.showNotification("NightLane test 🌙",{body:"Demo mode: this just shows locally.",icon:"icon-192.png",badge:"badge-96.png",tag:"test"}); say("profMsg","Demo mode: shown locally, since there's no server here to round-trip through."); }
     else if(!r?.sent){ say("profMsg","No working device found to send to. Turn notifications off and back on below, then try again.",true); }
     else { say("profMsg","Sent for real — it should arrive any second. If it never shows up, the problem is on your phone's side (check this app's notification settings), not the app itself."); }
   }catch(err){ say("profMsg","The test push failed to send: "+err.message,true); }
@@ -4834,7 +4841,7 @@ const SHARE_ICON='<span class="ico" aria-label="Share icon"><svg viewBox="0 0 24
 const DOTS_ICON='<span class="ico" aria-label="menu icon">⋮</span>';
 let deferredInstall=null;
 addEventListener("beforeinstallprompt",e=>{ e.preventDefault(); deferredInstall=e; paintInstallEntry(); });
-addEventListener("appinstalled",()=>{ deferredInstall=null; paintInstallEntry(); say("installMsg","Installed! Open NightLine from your home screen."); });
+addEventListener("appinstalled",()=>{ deferredInstall=null; paintInstallEntry(); say("installMsg","Installed! Open NightLane from your home screen."); });
 
 function detectBrowser(ua=navigator.userAgent){
   const ios=/iPad|iPhone|iPod/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);
@@ -4873,8 +4880,8 @@ function paintInstallEntry(){
   const stuck=notInstalled && !BROWSER.canInstall && (BROWSER.ios||BROWSER.android);
   if(stuck&&!dismissed){
     $("installBarText").textContent = BROWSER.ios
-      ? "This browser can't add NightLine to your home screen, so notifications won't work here."
-      : "This browser can't install NightLine. Open it in Chrome to get the app.";
+      ? "This browser can't add NightLane to your home screen, so notifications won't work here."
+      : "This browser can't install NightLane. Open it in Chrome to get the app.";
     show($("installBar"));
   } else show($("installBar"),false);
 }
@@ -4888,18 +4895,18 @@ function openInstallSheet(){
     $("installIntro").textContent="You're in Safari, so you're all set.";
     add(`Tap the <b>Share</b> button ${SHARE_ICON} at the bottom (or top) of Safari.`);
     add(`Scroll down and tap <b>Add to Home Screen</b>.`);
-    add(`Tap <b>Add</b>, then open NightLine from your home screen.`);
+    add(`Tap <b>Add</b>, then open NightLane from your home screen.`);
     add(`Log in, tap your picture, and turn on <b>notifications</b>.`);
   } else if(["chrome-ios","edge-ios","firefox-ios"].includes(B)&&BROWSER.canInstall){
-    $("installIntro").textContent="Your browser can add NightLine to your home screen.";
+    $("installIntro").textContent="Your browser can add NightLane to your home screen.";
     add(`Tap the <b>Share</b> button ${SHARE_ICON} (in Chrome it's next to the address bar; in Firefox and Edge it may be in the ${DOTS_ICON} menu).`);
     add(`Tap <b>Add to Home Screen</b>, then <b>Add</b>.`);
-    add(`Open NightLine from your home screen, log in, and turn on <b>notifications</b> in your profile.`);
+    add(`Open NightLane from your home screen, log in, and turn on <b>notifications</b> in your profile.`);
   } else if(BROWSER.ios){
     $("installIntro").textContent = B==="inapp"
-      ? "You opened NightLine inside another app, which can't install it."
+      ? "You opened NightLane inside another app, which can't install it."
       : "This browser can't add apps to your home screen. Safari can.";
-    add(`Tap <b>Copy</b> below to copy the NightLine link.`);
+    add(`Tap <b>Copy</b> below to copy the NightLane link.`);
     add(`Open <b>Safari</b> and paste the link into the address bar.${BROWSER.iosNew?" (Chrome, Edge, or Firefox work too.)":""}`);
     add(`Tap <b>Share</b> ${SHARE_ICON} → <b>Add to Home Screen</b> → <b>Add</b>.`);
     add(`If Safari is turned off in Screen Time, ask whoever manages it. You can still chat here, just without notifications.`);
@@ -4907,15 +4914,15 @@ function openInstallSheet(){
     $("installIntro").textContent = deferredInstall ? "Tap Install now, or use your browser menu." : "Install from your browser menu.";
     add(`Tap the ${DOTS_ICON} menu in the corner of your browser.`);
     add(`Tap <b>Install app</b> or <b>Add to Home screen</b>.`);
-    add(`Open NightLine from your home screen, log in, and turn on <b>notifications</b> in your profile.`);
+    add(`Open NightLane from your home screen, log in, and turn on <b>notifications</b> in your profile.`);
   } else if(BROWSER.android){
-    $("installIntro").textContent="This browser can't install NightLine. Chrome can.";
-    add(`Tap <b>Copy</b> below to copy the NightLine link.`);
+    $("installIntro").textContent="This browser can't install NightLane. Chrome can.";
+    add(`Tap <b>Copy</b> below to copy the NightLane link.`);
     add(`Open <b>Chrome</b> (or Samsung Internet) and paste the link.`);
     add(`Tap ${DOTS_ICON} → <b>Install app</b> or <b>Add to Home screen</b>.`);
   } else {
-    $("installIntro").textContent = BROWSER.canInstall ? "You can install NightLine on this computer." : "On a computer, Chrome or Edge can install NightLine.";
-    if(BROWSER.canInstall) add(`Click the <b>install</b> icon at the right end of the address bar, or use the browser menu → <b>Install NightLine</b>.`);
+    $("installIntro").textContent = BROWSER.canInstall ? "You can install NightLane on this computer." : "On a computer, Chrome or Edge can install NightLane.";
+    if(BROWSER.canInstall) add(`Click the <b>install</b> icon at the right end of the address bar, or use the browser menu → <b>Install NightLane</b>.`);
     add(`On your phone, open the link below in <b>Safari</b> (iPhone) or <b>Chrome</b> (Android) and add it to your home screen.`);
   }
   show($("installSheet"));
@@ -4924,7 +4931,7 @@ $("installNow").onclick=async()=>{
   if(!deferredInstall) return;
   deferredInstall.prompt();
   const {outcome}=await deferredInstall.userChoice.catch(()=>({outcome:"dismissed"}));
-  if(outcome==="accepted"){ say("installMsg","Installing… Open NightLine from your home screen."); deferredInstall=null; show($("installNow"),false); }
+  if(outcome==="accepted"){ say("installMsg","Installing… Open NightLane from your home screen."); deferredInstall=null; show($("installNow"),false); }
 };
 $("installCopy").onclick=async()=>{
   const v=$("installUrl").value;
@@ -5433,7 +5440,7 @@ const PX=(()=>{
     owl(){ const t=add("px-owl",`<div class="px-owlface">🦉</div><div>It's late… <b>go to bed</b>, night owl.</div>`); later(()=>t.remove(),4200); },
     credits(){
       const names=[...new Set([...contactIds,...members.keys()].map(id=>cache.get(id)?.username).filter(Boolean))].filter(n=>!CREATOR_USERNAMES.includes(n.toLowerCase()));
-      const c=add("px-credits",`<div class="px-roll"><h1>NightLine</h1><p>🌙</p><h2>Created by</h2><p>Cole</p><h2>Design & Neon</h2><p>Cole</p><h2>Special Thanks</h2>${(names.length?names:["everyone in the group chat"]).map(n=>`<p>${n.replace(/[<>&]/g,"")}</p>`).join("")}<h2>Built with</h2><p>late nights & good friends</p><p class="px-end">thanks for being here.</p></div>`);
+      const c=add("px-credits",`<div class="px-roll"><h1>NightLane</h1><p>🌙</p><h2>Created by</h2><p>Cole</p><h2>Design & Neon</h2><p>Cole</p><h2>Special Thanks</h2>${(names.length?names:["everyone in the group chat"]).map(n=>`<p>${n.replace(/[<>&]/g,"")}</p>`).join("")}<h2>Built with</h2><p>late nights & good friends</p><p class="px-end">thanks for being here.</p></div>`);
       c.style.pointerEvents="auto"; c.onclick=()=>c.remove(); later(()=>c.remove(),14000);
     },
     halloween(){ for(let i=0;i<22;i++){ const b=add("px-drift",i%3?"🦇":"🎃"); b.style.left=R(0,95)+"%"; b.style.animationDelay=R(0,2)+"s"; b.style.fontSize=R(22,44)+"px"; later(()=>b.remove(),5500); } },
@@ -5603,7 +5610,7 @@ function openCalendar(phrase,m){
   const {date,hasTime}=parseWhen(phrase);
   calDraft={m,phrase};
   const pad=n=>String(n).padStart(2,"0");
-  $("calTitle").value=(m.text||"NightLine plan").replace(/\s+/g," ").slice(0,60);
+  $("calTitle").value=(m.text||"NightLane plan").replace(/\s+/g," ").slice(0,60);
   $("calDate").value=`${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`;
   $("calTime").value=`${pad(date.getHours())}:${pad(date.getMinutes())}`;
   $("calWhere").value=roomName||("#"+room);
@@ -5613,13 +5620,13 @@ function openCalendar(phrase,m){
 function calEvent(){
   const [y,mo,da]=$("calDate").value.split("-").map(Number), [h,mi]=$("calTime").value.split(":").map(Number);
   const start=new Date(y,mo-1,da,h,mi), end=new Date(start.getTime()+3600e3);
-  return {title:$("calTitle").value.trim()||"NightLine plan",start,end,where:$("calWhere").value.trim(),desc:`Planned in NightLine${calDraft?.m?` by ${nameOf(calDraft.m.user_id)}: "${(calDraft.m.text||"").slice(0,200)}"`:""}`};
+  return {title:$("calTitle").value.trim()||"NightLane plan",start,end,where:$("calWhere").value.trim(),desc:`Planned in NightLane${calDraft?.m?` by ${nameOf(calDraft.m.user_id)}: "${(calDraft.m.text||"").slice(0,200)}"`:""}`};
 }
 const icsStamp=d=>d.toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"");
 $("calGoogle").onclick=()=>{ const e=calEvent(); const u=new URL("https://calendar.google.com/calendar/render"); u.searchParams.set("action","TEMPLATE"); u.searchParams.set("text",e.title); u.searchParams.set("dates",`${icsStamp(e.start)}/${icsStamp(e.end)}`); u.searchParams.set("details",e.desc); if(e.where) u.searchParams.set("location",e.where); window.open(u.toString(),"_blank","noopener"); };
 $("calIcs").onclick=()=>{
-  const e=calEvent(); const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//NightLine//EN","BEGIN:VEVENT",`UID:${Date.now()}@nightline`,`DTSTAMP:${icsStamp(new Date())}`,`DTSTART:${icsStamp(e.start)}`,`DTEND:${icsStamp(e.end)}`,`SUMMARY:${e.title.replace(/[,;\\]/g,"\\$&")}`,`LOCATION:${e.where.replace(/[,;\\]/g,"\\$&")}`,`DESCRIPTION:${e.desc.replace(/[,;\\]/g,"\\$&").replace(/\n/g,"\\n")}`,"END:VEVENT","END:VCALENDAR"].join("\r\n");
-  const blob=new Blob([ics],{type:"text/calendar;charset=utf-8"}), url=URL.createObjectURL(blob), a=document.createElement("a"); a.href=url; a.download="nightline-plan.ics"; document.body.append(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),4000);
+  const e=calEvent(); const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//NightLane//EN","BEGIN:VEVENT",`UID:${Date.now()}@nightline`,`DTSTAMP:${icsStamp(new Date())}`,`DTSTART:${icsStamp(e.start)}`,`DTEND:${icsStamp(e.end)}`,`SUMMARY:${e.title.replace(/[,;\\]/g,"\\$&")}`,`LOCATION:${e.where.replace(/[,;\\]/g,"\\$&")}`,`DESCRIPTION:${e.desc.replace(/[,;\\]/g,"\\$&").replace(/\n/g,"\\n")}`,"END:VEVENT","END:VCALENDAR"].join("\r\n");
+  const blob=new Blob([ics],{type:"text/calendar;charset=utf-8"}), url=URL.createObjectURL(blob), a=document.createElement("a"); a.href=url; a.download="nightlane-plan.ics"; document.body.append(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),4000);
   say("calMsg","Calendar file ready. Open it to add the event.");
 };
 $("calTask").onclick=async()=>{ const e=calEvent(); show($("calSheet"),false); await addTask(`${e.title} — ${e.start.toLocaleString([],{weekday:"short",month:"numeric",day:"numeric",hour:"numeric",minute:"2-digit"})}`); };
@@ -6357,8 +6364,8 @@ let myInviteTok=null;   // your private friend code: fetched only for you, never
 async function myInviteUrl(){ if(!myInviteTok){ try{ myInviteTok=await api.myInviteToken(); }catch(e){ return null; } } return myInviteTok?`${location.origin}${location.pathname}?friend=${encodeURIComponent(myInviteTok)}`:null; }
 $("inviteFriendBtn").onclick=async()=>{
   const u=await myInviteUrl(); if(!u){ say("contactMsg","Couldn't get your invite link. Check your connection and try again.",true); return; }
-  const text=`Come chat with me on NightLine 🌙 ${u}`;
-  if(navigator.share){ try{ await navigator.share({title:"Join me on NightLine",text,url:u}); return; }catch(e){} }
+  const text=`Come chat with me on NightLane 🌙 ${u}`;
+  if(navigator.share){ try{ await navigator.share({title:"Join me on NightLane",text,url:u}); return; }catch(e){} }
   try{ await navigator.clipboard.writeText(u); say("contactMsg","Your invite link is copied. Anyone who opens it becomes your friend."); }catch(e){ say("contactMsg",u); }
 };
 async function handleFriendInvite(token){
@@ -6864,10 +6871,16 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.22l";
+const APP_VERSION="2026.09.25a";
 const CHANGELOG=[
+  {v:"2026.09.25a", title:"NightLine is now NightLane 🌃", items:[
+    "🌃 New name, new home: nightlane.chat. Same app, same account. Your chats, XP, secrets, Social Bonds, habits, and backlog all came with you.",
+    "📲 On your phone: remove the old NightLine icon and add NightLane to your Home Screen from nightlane.chat.",
+    "🔔 Turn notifications back on (Profile → Notifications). Your phone treats the new address as a new app.",
+    "🖼️ Fresh icon with the new name on the ribbon.",
+  ]},
   {v:"2026.09.22l", title:"Works offline 📡", items:[
-    "📡 Opening NightLine with no signal (or in airplane mode) now shows your saved chats right away, instead of a long wait and a sign-in screen. It reconnects on its own when you're back.",
+    "📡 Opening NightLane with no signal (or in airplane mode) now shows your saved chats right away, instead of a long wait and a sign-in screen. It reconnects on its own when you're back.",
     "🔐 No more getting signed out just because your phone was offline when your login needed renewing.",
     "💬 Your chats list stays put when you lose signal, with a clear \"you're offline\" note instead of confusing errors.",
     "⚡ Signing in is faster, and the loading screen now covers it until everything's ready.",
@@ -6881,7 +6894,7 @@ const CHANGELOG=[
   {v:"2026.09.22j", title:"Security upgrade 🔒", items:[
     "🔒 Fixed a security hole that could let a stranger add themselves as your friend. Your friend invite link is now private to you.",
     "🔗 Everyone got a fresh friend invite link, so old ones you shared before today won't work anymore. Grab your new one from Friends → 📲.",
-    "🙈 Profiles (usernames, birthdays, last seen) are now only visible to people signed in to NightLine.",
+    "🙈 Profiles (usernames, birthdays, last seen) are now only visible to people signed in to NightLane.",
   ]},
   {v:"2026.09.22i", title:"Pop-ups fit the screen 📐", items:[
     "📐 Fixed pop-ups (like \"You missed a secret\") running off the edge of the screen. Longer ones now wrap onto a second line so you can read the whole thing.",
@@ -6889,7 +6902,7 @@ const CHANGELOG=[
   ]},
   {v:"2026.09.22h", title:"Secrets stay found 🔒", items:[
     "🔒 Fixed secrets counting as \"found\" again on iPhone. Your app now checks your account every time you come back, so Safari and the Home Screen app (or two devices) stay in sync. (Found by Xen!)",
-    "🛡️ If your browser blocks saved data, NightLine now warns you, and your XP and secrets still save to your account.",
+    "🛡️ If your browser blocks saved data, NightLane now warns you, and your XP and secrets still save to your account.",
   ]},
   {v:"2026.09.22g", title:"Media Backlog 🎮📺", items:[
     "🎮 New: Media Backlog! Track games and anime in Profile → 🎮 Media Backlog. Search thousands of games and shows, rate them, and tap +1 as you play or watch.",
@@ -6901,7 +6914,7 @@ const CHANGELOG=[
     "📳 New messages now give a stronger double-buzz you can actually feel, and @mentions buzz three times. (Android)",
     "🔔 Group chat notifications now wake your phone and buzz right away, instead of showing up late and silent. (Android)",
     "🔕 Don't want it? Turn it off in Profile → Notifications & effects. It also stays quiet while you're on Do Not Disturb.",
-    "💡 Notifications not buzzing when the app is closed? Check your phone isn't on Mute mode, and that NightLine's notifications are set to Alert, not Silent.",
+    "💡 Notifications not buzzing when the app is closed? Check your phone isn't on Mute mode, and that NightLane's notifications are set to Alert, not Silent.",
   ]},
   {v:"2026.09.22e", title:"iPhone glow-up 📱", items:[
     "💾 Your XP, level, secrets, and unlocks now save to your account, so they're safe if Safari clears data, you reinstall, or you get a new phone.",
@@ -6948,8 +6961,8 @@ function maybeShowWhatsNew(){
   try{ seen=LS.get("nl-seen-version"); usedBefore=NL_RETURNING;
        LS.set("nl-seen-version",APP_VERSION); }catch(e){ return; }
   if(seen===APP_VERSION) return;
-  if(!seen&&!usedBefore) return;              // brand-new user: nothing is "new" to them yet
-  setTimeout(()=>openNews(seen),900);
+  if(!seen&&!usedBefore&&!(user?.created_at&&user.created_at<"2026-09-26")) return;   // brand-new user: nothing is "new" to them yet (accounts from before the move still see the card)
+  setTimeout(()=>openNews(seen||CHANGELOG[1]?.v),900);   // no record of what they saw (e.g. new address): just the latest card
 }
 $("newsClose").onclick=()=>show($("newsSheet"),false);
 
@@ -6992,7 +7005,7 @@ QX.rankup=function(name,arcana,rank){
 };
 
 /* ================= MEDIA BACKLOG 🎮📺 =================
-   Cole's Media Backlog (the React class app), rebuilt inside NightLine: games + anime, statuses, +1 progress,
+   Cole's Media Backlog (the React class app), rebuilt inside NightLane: games + anime, statuses, +1 progress,
    star ratings, stats, filters, RAWG/Kitsu search. Saved to your account; friends you've added can view it,
    and any item can be shared into a chat as a card that friends can add to their own list. */
 const RAWG_KEY="bdc93c6f8ede4fb2b7427360172996ae";   // same key as the Media Backlog site
@@ -7284,7 +7297,7 @@ addEventListener("offline",()=>{ if(room) $("status").textContent="Offline · wi
 addEventListener("online",()=>{ if(room){ $("status").textContent="Reconnecting…"; catchUp("online"); } else if(user) loadInbox(); });
 document.addEventListener("visibilitychange",()=>{ if(!document.hidden&&room&&Date.now()-lastCatchUp>4000) catchUp("resume"); });
 
-/* invite and room links posted inside NightLine open right here instead of a new tab */
+/* invite and room links posted inside NightLane open right here instead of a new tab */
 feed.addEventListener("click",e=>{
   const a=e.target.closest("a"); if(!a) return;
   let u; try{ u=new URL(a.href); }catch(err){ return; }
@@ -7336,14 +7349,14 @@ function applyDesktop(){
   const d=isDesktop(); document.body.classList.toggle("desktop",d);
   if(d&&!document.querySelector(".deskframe")){ const f=document.createElement("div"); f.className="deskframe"; document.body.insertBefore(f,$("front")); f.append($("front"),$("chat"));
     const bar=document.createElement("div"); bar.className="termbar"; bar.id="termbar"; document.body.append(bar); }
-  if(d){ $("chat").dataset.idle="▮ NIGHTLINE TERMINAL\n\nno channel open.\nselect a room on the left, or press  Ctrl+K  to search.\n\n> _"; paintTermBar(); }
+  if(d){ $("chat").dataset.idle="▮ NIGHTLANE TERMINAL\n\nno channel open.\nselect a room on the left, or press  Ctrl+K  to search.\n\n> _"; paintTermBar(); }
 }
 function paintDeskDate(){ const n=$("deskDate"); if(!n) return; const d=new Date(); const wd=d.toLocaleDateString([],{weekday:"short"}), md=`${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")}`; const ph=(typeof phaseOf==="function"?phaseOf(d.getHours()):""); n.innerHTML=`<b>${md}</b><span>${wd}</span><span>· ${ph||d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}</span><span class="blink">_</span>`; }
 setInterval(()=>{ if(document.body.classList.contains("desktop")) paintDeskDate(); },30000);
 function paintTermBar(){ paintDeskDate();
   const bar=$("termbar"); if(!bar) return;
   const on=[...online.keys()].filter(id=>id!==user?.id).length;
-  bar.innerHTML=`<span>▮ NIGHTLINE<span class="blink">_</span></span><span>uplink: <b>${!sb?"DEMO":(navigator.onLine?(liveStatus||"IDLE"):"OFFLINE")}</b></span><span>user: <b>${meProfile?.username||"—"}</b></span><span>channel: <b>${room?(isDm?"private":(roomName||"#"+room)):"none"}</b></span><span>online: <b>${on}</b></span><span class="right"><span class="kbd">Ctrl+K</span> search · <span class="kbd">Esc</span> close · <span class="kbd">Ctrl+/</span> secrets</span>`;
+  bar.innerHTML=`<span>▮ NIGHTLANE<span class="blink">_</span></span><span>uplink: <b>${!sb?"DEMO":(navigator.onLine?(liveStatus||"IDLE"):"OFFLINE")}</b></span><span>user: <b>${meProfile?.username||"—"}</b></span><span>channel: <b>${room?(isDm?"private":(roomName||"#"+room)):"none"}</b></span><span>online: <b>${on}</b></span><span class="right"><span class="kbd">Ctrl+K</span> search · <span class="kbd">Esc</span> close · <span class="kbd">Ctrl+/</span> secrets</span>`;
 }
 setInterval(()=>{ if(document.body.classList.contains("desktop")) paintTermBar(); },4000);
 addEventListener("resize",applyDesktop); applyDesktop();
@@ -7356,8 +7369,8 @@ addEventListener("keydown",e=>{
 function bootSequence(){
   if(!isDesktop()) return;
   if(typeof hideSplash==="function") hideSplash(); try{ if(sessionStorage.getItem("nl-booted")) return; sessionStorage.setItem("nl-booted","1"); }catch(e){}
-  const lines=["NIGHTLINE//OS  v1.0  —  neon shell","> initializing uplink ......... OK","> resolving signal path ....... OK","> loading cutout renderer ..... OK","> mounting secret vault ....... 99 entries","> checking clearance .......... netrunner","",`> ${new Date().toLocaleString([],{weekday:"long",hour:"numeric",minute:"2-digit"})}`,"> welcome back. jack in when ready."];
-  const b=document.createElement("div"); b.className="boot"; b.innerHTML=`<h1>NIGHTLINE</h1><pre id="bootText"></pre><span class="cur"></span><div class="skip">click or press any key to skip</div>`; document.body.append(b);
+  const lines=["NIGHTLANE//OS  v1.0  —  neon shell","> initializing uplink ......... OK","> resolving signal path ....... OK","> loading cutout renderer ..... OK","> mounting secret vault ....... 99 entries","> checking clearance .......... netrunner","",`> ${new Date().toLocaleString([],{weekday:"long",hour:"numeric",minute:"2-digit"})}`,"> welcome back. jack in when ready."];
+  const b=document.createElement("div"); b.className="boot"; b.innerHTML=`<h1>NIGHTLANE</h1><pre id="bootText"></pre><span class="cur"></span><div class="skip">click or press any key to skip</div>`; document.body.append(b);
   const pre=b.querySelector("#bootText"); let li=0,ci=0,done=false;
   const chime=(f,len)=>{ try{ const ac=window.__sxac||(window.__sxac=new (window.AudioContext||window.webkitAudioContext)()); const o=ac.createOscillator(),g=ac.createGain(); o.type="square"; o.frequency.value=f; g.gain.value=.02; o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime+len); }catch(e){} };
   const finish=()=>{ if(done) return; done=true; b.classList.add("out"); setTimeout(()=>b.remove(),520); removeEventListener("keydown",finish); };
