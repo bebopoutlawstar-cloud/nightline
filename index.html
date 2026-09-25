@@ -1805,6 +1805,15 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .blpof{font-family:var(--tech);font-size:11px;color:var(--muted)}
 .blquick .blbtn.add{margin-left:auto}
 .blprow:first-child>.blbtn{font-size:20px;min-width:40px;padding:2px 10px;line-height:1.2}
+/* ===== spoiler photos ===== */
+.spoilerbtn{display:block;margin:0 0 8px;background:var(--deep);border:2px solid #3b2d80;color:var(--white);font-family:var(--tech);font-size:12px;padding:7px 12px;cursor:pointer}
+.spoilerbtn.on{border-color:var(--volt);color:var(--volt);box-shadow:3px 3px 0 var(--mag)}
+.spoiler{position:relative;overflow:hidden}
+.spoiler img{filter:blur(24px) saturate(.7);transform:scale(1.08)}
+.spoiler canvas.pixels{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges;opacity:0;pointer-events:none}
+.spoiler canvas.pixels.ready{opacity:1}
+.albumgrid.spoiler .tile{position:relative;overflow:hidden}
+.spoilerlabel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-3deg);background:var(--night);color:var(--volt);border:2px solid var(--volt);box-shadow:3px 3px 0 var(--mag);font-family:var(--tech);font-size:12px;padding:6px 10px;white-space:nowrap;pointer-events:none;z-index:2}
 </style>
 </head>
 <body>
@@ -1927,6 +1936,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     <button type="button" class="newpill hidden" id="newPill" aria-live="polite">↓ <span id="newPillText">1 new message</span></button>
     <div class="replying hidden" id="replying"><b>Reply</b><span id="replyText"></span><button type="button" id="cancelReply">Cancel</button></div>
     <div class="pending hidden" id="pending"><img id="pendingImg" alt="Photo to send"><video id="pendingVid" muted playsinline class="hidden"></video><span id="pendingLabel">Photo ready</span><button type="button" id="unpick">Remove</button></div>
+    <button type="button" class="spoilerbtn hidden" id="spoilerBtn" aria-pressed="false">🙈 Send as spoiler: <b>off</b></button>
     <div class="pendingmulti hidden" id="pendingMulti"><div class="pm-strip" id="pmStrip"></div><span id="pmLabel"></span><button type="button" id="pmClear">Remove all</button></div>
     <div class="mentions hidden" id="mentionList" role="listbox" aria-label="Mention someone"></div>
     <div class="tray hidden" id="tray">
@@ -2746,7 +2756,7 @@ const live = {
   async loadBefore(room,iso){ return must(await sb.from("messages").select("*").eq("room",room).lt("created_at",iso).order("created_at",{ascending:false}).limit(PAGE)).reverse(); },
   async fetchMessage(id){ return must(await sb.from("messages").select("*").eq("id",id).maybeSingle()); },
   async send(room,f){
-    const row={room,kind:f.kind||"text",text:f.text||null,image_url:f.image_url||null,image_urls:f.image_urls||null,media_url:f.media_url||null,media_type:f.media_type||null,media_duration:f.media_duration||null,sticker:f.sticker||null,reply_to:f.reply_to||null,mentions:f.mentions||[],...(f.card?{card:f.card}:{})};
+    const row={room,kind:f.kind||"text",text:f.text||null,image_url:f.image_url||null,image_urls:f.image_urls||null,media_url:f.media_url||null,media_type:f.media_type||null,media_duration:f.media_duration||null,sticker:f.sticker||null,reply_to:f.reply_to||null,mentions:f.mentions||[],...(f.card?{card:f.card}:{}),...(f.spoiler?{spoiler:true}:{})};
     return must(await sb.from("messages").insert(row).select().single());
   },
   async deleteMessage(id){ must(await sb.from("messages").delete().eq("id",id)); },
@@ -2951,7 +2961,7 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     async loadAfter(room,iso){ return (rooms[room]?.msgs||[]).filter(m=>m.created_at>=iso).sort((a,b)=>a.created_at<b.created_at?-1:1).slice(0,PAGE); },
     async fetchMessage(id){ return Object.values(rooms).flatMap(r=>r.msgs).find(m=>m.id===id)||null; },
     async send(room,f){
-      const m={id:nextId++,room,user_id:"me",kind:f.kind||"text",text:f.text||null,image_url:f.image_url||null,image_urls:f.image_urls||null,media_url:f.media_url||null,media_type:f.media_type||null,media_duration:f.media_duration||null,sticker:f.sticker||null,reply_to:f.reply_to||null,mentions:f.mentions||[],card:f.card||null,created_at:iso(),expires_at:rooms[room].disappear?new Date(Date.now()+rooms[room].disappear*1000).toISOString():null}; rooms[room].msgs.push(m);
+      const m={id:nextId++,room,user_id:"me",kind:f.kind||"text",text:f.text||null,image_url:f.image_url||null,image_urls:f.image_urls||null,media_url:f.media_url||null,media_type:f.media_type||null,media_duration:f.media_duration||null,sticker:f.sticker||null,reply_to:f.reply_to||null,mentions:f.mentions||[],card:f.card||null,spoiler:!!f.spoiler,created_at:iso(),expires_at:rooms[room].disappear?new Date(Date.now()+rooms[room].disappear*1000).toISOString():null}; rooms[room].msgs.push(m);
       const others=Object.keys(rooms[room].members).filter(u=>u!=="me"); if(!others.length) return m;
       const who=others[Math.floor(Math.random()*others.length)];
       setTimeout(()=>{ rooms[room].members[who].read=iso(); fire("member",{user_id:who,last_read_at:iso()}); },700);
@@ -3692,12 +3702,14 @@ function buildMsg(m,index,noAnim){
       b.onclick=e=>{ e.stopPropagation(); openLightbox(albumUrls,i); };
       grid.append(b);
     });
+    if(m.spoiler) makeSpoiler(grid,m.id);
     { const gi=grid.firstChild?.querySelector?.("img"); if(gi) gi.addEventListener("load",()=>{ if(feed.scrollHeight-feed.scrollTop-feed.clientHeight<150+gi.offsetHeight) feed.scrollTop=feed.scrollHeight; }); }   // a photo that just loaded only keeps you at the bottom if you were there
     bub.append(grid);
   } else if(img&&!isBlCard(m)){ const b=el("button","shot"); b.type="button"; b.setAttribute("aria-label","Open photo");
     const i=document.createElement("img"); i.src=img; i.alt="Photo from "+p.username; i.loading="lazy";
     i.onload=()=>{ if(feed.scrollHeight-feed.scrollTop-feed.clientHeight<150+i.offsetHeight) feed.scrollTop=feed.scrollHeight; };
-    b.append(i); b.onclick=e=>{ e.stopPropagation(); openLightbox([img],0); }; bub.append(b); }
+    b.append(i); b.onclick=e=>{ e.stopPropagation(); openLightbox([img],0); }; bub.append(b);
+    if(m.spoiler) makeSpoiler(b,m.id); }
   const media=safeImg(m.media_url);
   if(media&&m.media_type==="video"){ const v=document.createElement("video"); v.className="vid"; v.src=media; v.controls=true; v.playsInline=true; v.preload="metadata"; bub.append(v); }
   if(media&&m.media_type==="audio") bub.append(voicePlayer(media,m.media_duration));
@@ -4071,10 +4083,41 @@ function sendTyping(on){
 }
 
 /* ---------- composer ---------- */
-function clearPending(){ pendingFile=null; pendingKind=null; pendingDuration=null; show($("pending"),false); show($("pendingImg")); show($("pendingVid"),false); $("pendingVid").removeAttribute("src"); clearPendingImages(); }
-function clearPendingImages(){ pendingImages.forEach(f=>f._url&&URL.revokeObjectURL(f._url)); pendingImages=[]; paintPendingMulti(); }
+function clearPending(){ spoilerOn=false; pendingFile=null; pendingKind=null; pendingDuration=null; show($("pending"),false); show($("pendingImg")); show($("pendingVid"),false); $("pendingVid").removeAttribute("src"); clearPendingImages(); }
+function clearPendingImages(){ spoilerOn=false; pendingImages.forEach(f=>f._url&&URL.revokeObjectURL(f._url)); pendingImages=[]; paintPendingMulti(); }
+/* ---------- spoiler photos ---------- */
+let spoilerOn=false;
+new MutationObserver(()=>paintSpoilerBtn()).observe(document.getElementById("pending"),{attributes:true,attributeFilter:["class"]});
+document.getElementById("spoilerBtn").onclick=()=>{ spoilerOn=!spoilerOn; paintSpoilerBtn(); };
+const hasPendingPhoto=()=>pendingImages.length>0||(!!pendingFile&&pendingKind==="image");
+// Pixelates a spoiler photo (or album) until tapped. The photo is also blurred underneath, so it never
+// flashes clear while loading. Revealing is just for you, and sticks if the message gets redrawn.
+const spoilersSeen=new Set();
+function makeSpoiler(box,id){
+  if(spoilersSeen.has(id)) return;
+  box.classList.add("spoiler");
+  box.querySelectorAll("img").forEach(im=>{
+    const cv=document.createElement("canvas"); cv.className="pixels"; cv.setAttribute("aria-hidden","true");
+    const draw=()=>{ try{ const w=14, h=Math.max(1,Math.round(w*(im.naturalHeight||1)/(im.naturalWidth||1))); cv.width=w; cv.height=h; cv.getContext("2d").drawImage(im,0,0,w,h); cv.classList.add("ready"); }catch(e){} };
+    if(im.complete&&im.naturalWidth) draw(); else im.addEventListener("load",draw,{once:true});
+    im.insertAdjacentElement("afterend",cv);
+  });
+  const label=el("span","spoilerlabel","🙈 Spoiler · tap to see"); box.append(label);
+  box.setAttribute("aria-label","Spoiler photo. Tap to reveal");
+  box.addEventListener("click",function reveal(e){
+    if(!box.classList.contains("spoiler")) return;
+    e.stopPropagation(); e.preventDefault();
+    box.classList.remove("spoiler"); box.querySelectorAll("canvas.pixels").forEach(c=>c.remove()); label.remove();
+    box.removeAttribute("aria-label"); spoilersSeen.add(id); box.removeEventListener("click",reveal,true);
+  },true);
+}
+function paintSpoilerBtn(){
+  const b=$("spoilerBtn"); if(!b) return;
+  show(b,hasPendingPhoto()); b.setAttribute("aria-pressed",String(spoilerOn));
+  b.innerHTML=`🙈 Send as spoiler: <b>${spoilerOn?"on":"off"}</b>`; b.classList.toggle("on",spoilerOn);
+}
 function paintPendingMulti(){
-  const wrap=$("pendingMulti"); show(wrap, pendingImages.length>1);
+  const wrap=$("pendingMulti"); show(wrap, pendingImages.length>1); setTimeout(paintSpoilerBtn,0);
   if(pendingImages.length<=1) return;
   show($("pending"),false);
   const strip=$("pmStrip"); strip.innerHTML="";
@@ -4209,6 +4252,7 @@ $("sendForm").addEventListener("submit",async e=>{
   paintComposeMode();
   try{
     const f={kind:"text",text,mentions:mentionsIn(text)};
+    if(spoilerOn&&hasPendingPhoto()) f.spoiler=true;
     if(pendingImages.length>1){
       $("status").textContent=`Uploading ${pendingImages.length} photos…`;
       const urls=await Promise.all(pendingImages.map(async img=>api.upload("chat-images",user.id,await shrink(img,1280,false))));
@@ -7108,8 +7152,11 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.25i";
+const APP_VERSION="2026.09.25j";
 const CHANGELOG=[
+  {v:"2026.09.25j", title:"Spoiler photos 🙈", items:[
+    "🙈 Sending a photo that's a spoiler (or just not for everyone's eyes right away)? Flip \"Send as spoiler\" before sending. It shows pixelated until someone taps to see it.",
+  ]},
   {v:"2026.09.25i", title:"Tidy tabs ✨", items:[
     "✨ Fixed the unread count on the selected tab (Rooms / DMs / Friends) getting cut off at the top, and the counts on the other tabs looking blurry.",
   ]},
