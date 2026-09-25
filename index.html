@@ -1814,6 +1814,32 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .spoiler canvas.pixels.ready{opacity:1}
 .albumgrid.spoiler .tile{position:relative;overflow:hidden}
 .spoilerlabel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-3deg);background:var(--night);color:var(--volt);border:2px solid var(--volt);box-shadow:3px 3px 0 var(--mag);font-family:var(--tech);font-size:12px;padding:6px 10px;white-space:nowrap;pointer-events:none;z-index:2}
+/* ===== Crazy Eights ===== */
+.e8card{display:inline-grid;place-items:center;align-content:center;width:52px;height:74px;background:#f4f7ff;color:#07041a;border:2px solid #07041a;border-radius:6px;box-shadow:3px 3px 0 var(--mag);font-family:var(--num);line-height:1;gap:2px;user-select:none}
+.e8card b{font-size:22px;font-weight:400}.e8card i{font-style:normal;font-size:20px}
+.e8card.red{color:#d81b3c}
+.e8card.sm{width:30px;height:42px;border-radius:4px;box-shadow:2px 2px 0 var(--mag)}.e8card.sm b{font-size:13px}.e8card.sm i{font-size:12px}
+.e8card.back{background:repeating-linear-gradient(45deg,var(--mag) 0 6px,#2a1b4a 6px 12px);border-color:var(--cyan)}
+.gp-icon.e8-icon{display:flex;gap:2px;align-items:center;justify-content:center}.gp-icon.e8-icon .e8card{transform:rotate(-8deg)}.gp-icon.e8-icon .e8card+.e8card{transform:rotate(8deg);margin-left:-10px}
+.e8gc .gc-top .e8card{flex:none}.e8-gcicon{font-size:30px}
+.eights{width:100%;display:grid;gap:10px}
+.e8-players{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.e8p{display:flex;align-items:center;gap:6px;border:2px solid #3b2d80;padding:4px 8px 4px 4px;background:rgba(0,0,0,.25);font-size:13px}
+.e8p .face{width:26px;height:26px}.e8p.turn{border-color:var(--volt);box-shadow:0 0 12px rgba(243,255,58,.45)}.e8p.won{border-color:#2ee66b}
+.e8count{font-family:var(--tech);font-size:11px;color:var(--cyan)}
+.e8-last{margin:0;min-height:1.2em;text-align:center;font-size:14px;color:var(--muted)}
+.e8-table{display:flex;align-items:center;justify-content:center;gap:16px}
+.e8-pile .e8card{width:66px;height:94px;transform:rotate(-4deg)}.e8-pile .e8card b{font-size:28px}.e8-pile .e8card i{font-size:26px}
+.e8-suit{font-size:26px;min-width:40px;text-align:center;color:var(--white);font-family:var(--tech)}.e8-suit.red{color:#ff5a78}
+.e8-deck{display:grid;justify-items:center;gap:4px;background:none;border:none;color:var(--cyan);font-family:var(--tech);font-size:11px;cursor:pointer}
+.e8-deck:disabled{opacity:.45;cursor:default}
+.e8-suitpick{display:flex;align-items:center;justify-content:center;gap:8px}
+.e8suitbtn{font-size:26px;width:48px;height:48px;background:#f4f7ff;color:#07041a;border:2px solid #07041a;box-shadow:3px 3px 0 var(--mag);cursor:pointer}.e8suitbtn.red{color:#d81b3c}
+.e8-hand{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;padding-top:8px;min-height:84px}
+.e8play{background:none;border:none;padding:0;cursor:pointer;transition:transform .15s}
+.e8play.can{transform:translateY(-8px)}.e8play.can .e8card{border-color:var(--cyan);box-shadow:3px 3px 0 var(--volt)}
+.e8play.cant{opacity:.45}.e8play:disabled{cursor:default}
+.e8-actions{display:flex;justify-content:center;gap:8px}
 </style>
 </head>
 <body>
@@ -1956,6 +1982,10 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
         <button type="button" class="gamepick" data-game="kingscourt">
           <span class="gp-icon kc-icon" aria-hidden="true"><i class="x"></i><i class="o"></i><i class="x"></i><i class="o"></i><i class="ct"></i><i class="ct"></i><i class="o"></i><i class="x"></i><i class="o"></i></span>
           <span class="gp-text"><b>King's Court</b><small class="gp-hint">Fast checkers · everyone's a king</small></span>
+        </button>
+        <button type="button" class="gamepick" data-game="eights">
+          <span class="gp-icon e8-icon" aria-hidden="true"><span class="e8card sm red"><b>8</b><i>♥</i></span><span class="e8card sm"><b>8</b><i>♠</i></span></span>
+          <span class="gp-text"><b>Crazy Eights</b><small class="gp-hint">2–6 players · match suit or number · 8s are wild</small></span>
         </button>
         <p class="note">More games coming soon 👀</p>
       </div>
@@ -2201,6 +2231,19 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     <p class="gstatus" id="gameStatus" role="status"></p>
     <div class="board" id="board" role="grid" aria-label="Tic-tac-toe board"></div>
     <div class="kc-chainbar hidden" id="kcChainBar"><b>Chain continues…</b><button class="ghost" type="button" id="kcDone">Done</button></div>
+    <div class="eights hidden" id="e8Area">
+      <div class="e8-players" id="e8Players"></div>
+      <p class="e8-last" id="e8Last"></p>
+      <div class="e8-table">
+        <div class="e8-pile" id="e8Top" aria-live="polite"></div>
+        <div class="e8-suit" id="e8Suit"></div>
+        <button type="button" class="e8-deck" id="e8Draw"><span class="e8card back"></span><span id="e8DeckN"></span></button>
+      </div>
+      <div class="e8-suitpick hidden" id="e8SuitPick" role="group" aria-label="Pick a suit for your 8"><b>Pick a suit:</b></div>
+      <div class="e8-hand" id="e8Hand" aria-label="Your hand"></div>
+      <div class="e8-actions"><button type="button" class="ghost hidden" id="e8Pass">Pass</button><button type="button" class="ghost hidden" id="e8Skip">Skip their turn</button></div>
+      <button class="go hidden" type="button" id="e8Deal">Deal cards</button>
+    </div>
     <button class="go hidden" type="button" id="gameJoin">Join game</button>
     <button class="go hidden" type="button" id="gameRematch">Rematch 🔁</button>
     <p class="msgline" id="gameMsg" role="status"></p>
@@ -2744,6 +2787,12 @@ const live = {
   async playTicTacToe(id,cell){ must(await sb.rpc("play_tictactoe",{p_message:id,p_cell:cell})); },
   async playKingsCourt(id,path){ must(await sb.rpc("play_kingscourt",{p_message:id,p_path:path})); },
   async rematch(id){ return must(await sb.rpc("rematch_game",{p_message:id})); },
+  async eightsHand(id){ const r=must(await sb.from("game_hands").select("cards").eq("message_id",id).eq("user_id",user.id).maybeSingle()); return r?.cards||[]; },
+  async eightsStart(id){ must(await sb.rpc("eights_start",{p_message:id})); },
+  async eightsPlay(id,card,suit){ must(await sb.rpc("eights_play",{p_message:id,p_card:card,p_suit:suit||null})); },
+  async eightsDraw(id){ return must(await sb.rpc("eights_draw",{p_message:id})); },
+  async eightsPass(id){ must(await sb.rpc("eights_pass",{p_message:id})); },
+  async eightsSkip(id){ must(await sb.rpc("eights_skip",{p_message:id})); },
   async createPoll(room,question,options,multi){ return must(await sb.rpc("create_poll",{p_room:room,p_question:question,p_options:options,p_multi:multi})); },
   async vote(id,idx){ must(await sb.rpc("vote_poll",{p_message:id,p_option:idx})); },
   async renameRoom(room,name){ must(await sb.rpc("rename_room",{p_room:room,p_name:name})); },
@@ -2848,6 +2897,56 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
   { const d=new Date(); people.vee.birthday=String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
   reacts.push({message_id:2,user_id:"rook",emoji:"😂"});
   const fire=(f,...a)=>H&&H[f](...a);
+  // ---- Crazy Eights (demo mirror of the server rules) ----
+  const demoE8={};
+  function e8DemoDeal(g){
+    const deck=[]; for(const r of ["A","2","3","4","5","6","7","8","9","10","J","Q","K"]) for(const su of ["S","H","D","C"]) deck.push(r+su);
+    for(let i=deck.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
+    const P=g.state.players, size=P.length===2?7:5, hands={}; P.forEach(u=>hands[u]=deck.splice(0,size));
+    let k=deck.findIndex(c=>!c.startsWith("8")); const top=deck.splice(k,1)[0];
+    demoE8[g.message_id]={deck,discard:[top],hands};
+    Object.assign(g.state,{counts:P.map(u=>hands[u].length),turn:Math.floor(Math.random()*P.length),top,suit:top.slice(-1),deck:deck.length,drew:false,winner:null,last:null});
+    g.status="active";
+  }
+  function e8DemoMove(g,who,act){
+    const d=demoE8[g.message_id], st=g.state, P=st.players, seat=P.indexOf(who);
+    if(g.status!=="active") throw new Error("This game isn't being played right now.");
+    if(seat!==st.turn) throw new Error("It's not your turn.");
+    const hand=d.hands[who]; let drawn=null;
+    if(act.play){
+      const i=hand.indexOf(act.play); if(i<0) throw new Error("That card isn't in your hand.");
+      const c=act.play, r=c.slice(0,-1), su=c.slice(-1);
+      if(r==="8"){ if(!["S","H","D","C"].includes(act.suit)) throw new Error("Pick a suit for your 8."); }
+      else if(su!==st.suit&&r!==st.top.slice(0,-1)) throw new Error("That card doesn't match. Play the same suit or number, or an 8.");
+      hand.splice(i,1); d.discard.push(c);
+      st.top=c; st.suit=r==="8"?act.suit:su; st.drew=false; st.last={by:who,card:c,suit:st.suit}; st.counts[seat]=hand.length;
+      if(!hand.length){ g.status="done"; st.winner=who; } else st.turn=(seat+1)%P.length;
+    } else if(act.draw){
+      if(st.drew) throw new Error("You already drew. Play a card or pass.");
+      if(!d.deck.length){ const top=d.discard.pop(); d.deck=d.discard.sort(()=>Math.random()-.5); d.discard=[top]; }
+      if(!d.deck.length) throw new Error("No cards left to draw. Pass instead.");
+      drawn=d.deck.shift(); hand.push(drawn); st.drew=true; st.deck=d.deck.length; st.counts[seat]=hand.length; st.last={by:who,drew:true};
+    } else if(act.pass){
+      if(!st.drew&&d.deck.length+d.discard.length>1) throw new Error("Draw a card first. You can pass after drawing.");
+      st.drew=false; st.turn=(seat+1)%P.length; st.last={by:who,passed:true};
+    }
+    e8DemoAfter(g); return drawn;
+  }
+  function e8DemoAfter(g){
+    g.moves++; g.updated_at=iso(); const copy=JSON.parse(JSON.stringify(g)); setTimeout(()=>fire("game",copy),30);
+    const who=g.state.players[g.state.turn];
+    if(g.status==="active"&&who!=="me") setTimeout(()=>e8DemoBot(g,who),900);
+  }
+  function e8DemoBot(g,who){
+    if(g.status!=="active"||g.state.players[g.state.turn]!==who) return;
+    const hand=demoE8[g.message_id].hands[who], st=g.state;
+    const ok=c=>c.startsWith("8")||c.slice(-1)===st.suit||c.slice(0,-1)===st.top.slice(0,-1);
+    const best=()=>hand.filter(ok).sort((a,b)=>(a.startsWith("8")?1:0)-(b.startsWith("8")?1:0))[0];
+    const fav=()=>{ const n={}; hand.forEach(c=>{ if(!c.startsWith("8")) n[c.slice(-1)]=(n[c.slice(-1)]||0)+1; }); return Object.keys(n).sort((a,b)=>n[b]-n[a])[0]||"S"; };
+    let c=best();
+    if(!c&&!st.drew){ try{ e8DemoMove(g,who,{draw:true}); }catch(e){ e8DemoMove(g,who,{pass:true}); } return; }
+    if(c) e8DemoMove(g,who,{play:c,suit:c.startsWith("8")?fav():undefined}); else e8DemoMove(g,who,{pass:true});
+  }
   return {
     async session(){ return user; },
     onAuth(cb){ listeners.push(cb); },
@@ -2871,6 +2970,12 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     async unpin(id){ const p=pins[id]; delete pins[id]; setTimeout(()=>fire("pin",{message_id:id},false),30); },
     async games(ids){ return ids.map(i=>games[i]).filter(Boolean).map(g=>JSON.parse(JSON.stringify(g))); },
     async createGame(room,type){
+      if(type==="eights"){
+        const r=rooms[room], m={id:nextId++,room,user_id:"me",kind:"game",text:"Crazy Eights",created_at:iso()}; r.msgs.push(m);
+        games[m.id]={message_id:m.id,room,type:"eights",player_x:"me",player_o:null,status:"waiting",state:{players:["me"],host:"me"},moves:0,updated_at:iso()};
+        ["vee","rook"].forEach((b,i)=>setTimeout(()=>{ const g=games[m.id]; if(g.status!=="waiting"||g.state.players.includes(b)) return; g.state.players.push(b); g.moves++; fire("game",JSON.parse(JSON.stringify(g))); },700+i*700));
+        return m;
+      }
       const r=rooms[room], m={id:nextId++,room,user_id:"me",kind:"game",text:type==="kingscourt"?"King's Court":"Tic-tac-toe",created_at:iso()}; r.msgs.push(m);
       const other=r.is_dm?Object.keys(r.members).find(u=>u!=="me"):null;
       const st0 = type==="kingscourt" ? {board:kcInitialBoard(),turn:"x",winner:null,line:[],first_x:false,first_o:false,last:[]} : {board:Array(9).fill(""),turn:"x",winner:null,line:[]};
@@ -2878,7 +2983,7 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
       if(!other) setTimeout(()=>{ const g=games[m.id]; if(g.status!=="waiting") return; g.player_o=Object.keys(r.members).find(u=>u!=="me")||"rook"; g.status="active"; fire("game",JSON.parse(JSON.stringify(g))); if(type==="kingscourt"&&g.player_x!=="me") setTimeout(()=>kcBotTurn(m.id),900); },1500);
       return m;
     },
-    async joinGame(id){ const g=games[id]; g.player_o="me"; g.status="active"; setTimeout(()=>fire("game",JSON.parse(JSON.stringify(g))),30); setTimeout(()=>demoBot(id),900); },
+    async joinGame(id){ const g=games[id]; if(g.type==="eights"){ if(g.status!=="waiting") throw new Error("This game already started."); if(!g.state.players.includes("me")) g.state.players.push("me"); g.moves++; setTimeout(()=>fire("game",JSON.parse(JSON.stringify(g))),30); return; } g.player_o="me"; g.status="active"; setTimeout(()=>fire("game",JSON.parse(JSON.stringify(g))),30); setTimeout(()=>demoBot(id),900); },
     async playTicTacToe(id,cell){
       const g=games[id], mark=g.player_x==="me"?"x":"o";
       if(g.status!=="active"||g.state.turn!==mark||g.state.board[cell]) throw new Error("Not your turn.");
@@ -2893,7 +2998,15 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
       g.status=applied.done?"done":"active";
       setTimeout(()=>fire("game",JSON.parse(JSON.stringify(g))),30);
     },
+    async eightsHand(id){ return [...(demoE8[id]?.hands.me||[])]; },
+    async eightsStart(id){ const g=games[id]; if(g.state.host!=="me") throw new Error("Only the person who started the game can deal."); e8DemoDeal(g); e8DemoAfter(g); },
+    async eightsPlay(id,card,suit){ e8DemoMove(games[id],"me",{play:card,suit}); },
+    async eightsDraw(id){ return e8DemoMove(games[id],"me",{draw:true}); },
+    async eightsPass(id){ e8DemoMove(games[id],"me",{pass:true}); },
+    async eightsSkip(id){ const g=games[id]; if(Date.now()-new Date(g.updated_at).getTime()<120000) throw new Error("Give them a couple of minutes first."); const n=g.state.players.length; g.state.last={by:"me",skipped:g.state.players[g.state.turn]}; g.state.turn=(g.state.turn+1)%n; g.state.drew=false; e8DemoAfter(g); },
     async rematch(id){
+      if(games[id].type==="eights"){ const old=games[id], r=rooms[old.room]; const m={id:nextId++,room:old.room,user_id:"me",kind:"game",text:"Crazy Eights",created_at:iso()}; r.msgs.push(m);
+        games[m.id]={message_id:m.id,room:old.room,type:"eights",player_x:"me",player_o:null,status:"waiting",state:{players:[...old.state.players],host:"me"},moves:0,updated_at:iso()}; e8DemoDeal(games[m.id]); e8DemoAfter(games[m.id]); return m; }
       const old=games[id], r=rooms[old.room], label=old.type==="kingscourt"?"King's Court":"Tic-tac-toe";
       const m={id:nextId++,room:old.room,user_id:"me",kind:"game",text:label,created_at:iso()}; r.msgs.push(m);
       const st0 = old.type==="kingscourt" ? {board:kcInitialBoard(),turn:"x",winner:null,line:[],first_x:false,first_o:false,last:[]} : {board:Array(9).fill(""),turn:"x",winner:null,line:[]};
@@ -5024,7 +5137,9 @@ function kcMiniBoard(g){
   return box;
 }
 function gameCard(m){
-  const g=gamesById.get(m.id), card=el("div","gamecard");
+  const g=gamesById.get(m.id);
+  if(g?.type==="eights"||(!g&&m.text==="Crazy Eights")) return e8GameCard(m,g);
+  const card=el("div","gamecard");
   const top=el("div","gc-top"); top.append(g?.type==="kingscourt"?kcMiniBoard(g):miniGrid(g));
   const info=el("div"); info.append(el("div","gc-title",g?.type==="kingscourt"?"👑 KING'S COURT":"🎮 TIC-TAC-TOE"));
   if(!g){ info.append(el("div","gc-status","Loading…")); top.append(info); card.append(top); return card; }
@@ -5049,6 +5164,9 @@ function playerTile(node,uid,mark,active){
 }
 function paintGame(prev){
   const g=gamesById.get(openGameId); if(!g){ closeGame(); return; }
+  const e8=g.type==="eights";
+  show($("e8Area"),e8); document.querySelector("#gameSheet .versus").classList.toggle("hidden",e8); show($("board"),!e8);
+  if(e8){ paintEights(g,prev); return; }
   const isKC=g.type==="kingscourt";
   $("gameTitle").textContent=isKC?"King's Court":"Tic-tac-toe"; show($("gameSub"),isKC);
   const s=g.state, st=gameStatusText(g), me=myMark(g);
@@ -5098,7 +5216,9 @@ async function makeMove(i){
 $("gameJoin").onclick=async()=>{
   const g=gamesById.get(openGameId); if(!g) return;
   $("gameJoin").disabled=true;
-  try{ await api.joinGame(g.message_id); const before=JSON.parse(JSON.stringify(g)); g.player_o=user.id; g.status="active"; paintGame(before); refreshMsg(g.message_id); }
+  try{ await api.joinGame(g.message_id); const before=JSON.parse(JSON.stringify(g));
+    if(g.type==="eights"){ if(!g.state.players.includes(user.id)) g.state.players.push(user.id); } else { g.player_o=user.id; g.status="active"; }
+    paintGame(before); refreshMsg(g.message_id); }
   catch(err){ say("gameMsg","Couldn't join: "+err.message,true); }
   finally{ $("gameJoin").disabled=false; }
 };
@@ -5109,6 +5229,116 @@ $("gameRematch").onclick=async()=>{
   catch(err){ say("gameMsg","Couldn't start a rematch: "+err.message,true); }
   finally{ $("gameRematch").disabled=false; }
 };
+
+/* ================= CRAZY EIGHTS 🃏 =================
+   Classic public-domain card game for 2–6 players. The server deals, keeps everyone's hand private,
+   and checks every play; this draws the table and your hand. */
+const E8_SUITS={S:"♠",H:"♥",D:"♦",C:"♣"}, E8_SUIT_NAME={S:"spades",H:"hearts",D:"diamonds",C:"clubs"};
+const E8_RANK_NAME={A:"Ace",J:"Jack",Q:"Queen",K:"King"};
+const e8Rank=c=>String(c).slice(0,-1), e8Suit=c=>String(c).slice(-1);
+const e8CardName=c=>`${E8_RANK_NAME[e8Rank(c)]||e8Rank(c)} of ${E8_SUIT_NAME[e8Suit(c)]}`;
+const e8Pretty=c=>c?e8Rank(c)+E8_SUITS[e8Suit(c)]:"";
+function e8CardEl(c,{small=false,back=false}={}){
+  const d=el("span","e8card"+(small?" sm":"")+(back?" back":"")+(!back&&"HD".includes(e8Suit(c))?" red":""));
+  if(!back){ d.append(el("b","",e8Rank(c)),el("i","",E8_SUITS[e8Suit(c)])); d.setAttribute("aria-label",e8CardName(c)); }
+  return d;
+}
+const e8Seat=g=>(g.state.players||[]).indexOf(user.id);
+const e8CanPlay=(g,c)=>e8Rank(c)==="8"||e8Suit(c)===g.state.suit||e8Rank(c)===e8Rank(g.state.top);
+function e8LastText(g){
+  const l=g.state.last; if(!l) return "";
+  const who=l.by===user.id?"You":nameOf(l.by);
+  if(l.card) return `${who} played ${e8Pretty(l.card)}${e8Rank(l.card)==="8"?` → ${E8_SUITS[l.suit]} ${E8_SUIT_NAME[l.suit]}`:""}`;
+  if(l.passed) return `${who} drew and passed`;
+  if(l.drew) return `${who} drew a card`;
+  if(l.skipped) return `${l.skipped===user.id?"Your":nameOf(l.skipped)+"'s"} turn was skipped`;
+  return "";
+}
+function e8Status(g){
+  const s=g.state, P=s.players||[], me=e8Seat(g), host=s.host;
+  if(g.status==="waiting"){
+    if(me<0) return {text:`${nameOf(host)} wants to play! (${P.length}/6)`,turn:true};
+    return {text:host===user.id?`${P.length} player${P.length===1?"":"s"} in. Deal when everyone's here.`:`Waiting for ${nameOf(host)} to deal… (${P.length} in)`,turn:false};
+  }
+  if(g.status==="done") return s.winner===user.id?{text:"You won! 🏆",won:true}:{text:`${nameOf(s.winner)} won 🏆`};
+  const up=P[s.turn];
+  if(up===user.id) return {text:s.drew?"You drew. Play a card or pass.":`Your turn! Match ${E8_SUITS[s.suit]} or ${e8Rank(s.top)}, or play an 8.`,turn:true};
+  return {text:`${nameOf(up)}'s turn`};
+}
+const e8Hands=new Map();   // message id -> {moves, cards}
+async function e8Hand(g){
+  if(e8Seat(g)<0||g.status==="waiting") return [];
+  const hit=e8Hands.get(g.message_id); if(hit&&hit.moves===g.moves) return hit.cards;
+  const cards=await api.eightsHand(g.message_id).catch(()=>hit?.cards||[]);
+  e8Hands.set(g.message_id,{moves:g.moves,cards}); return cards;
+}
+function e8GameCard(m,g){
+  const card=el("div","gamecard e8gc"), top=el("div","gc-top");
+  top.append(g?.state?.top&&g.status!=="waiting"?e8CardEl(g.state.top,{small:true}):el("span","e8-gcicon","🃏"));
+  const info=el("div"); info.append(el("div","gc-title","🃏 CRAZY EIGHTS"));
+  if(!g){ info.append(el("div","gc-status","Loading…")); top.append(info); card.append(top); return card; }
+  const st=e8Status(g); info.append(el("div","gc-status"+(st.turn?" turn":""),st.text)); top.append(info); card.append(top);
+  const inIt=e8Seat(g)>=0;
+  const label=g.status==="waiting"?(inIt?(g.state.host===user.id?"Open lobby":"Open game"):"Join game"):g.status==="done"?(inIt?"See results · Rematch":"See results"):(st.turn?"Play your turn":"Watch game");
+  const btn=el("button","play"+(st.turn?" big":""),label); btn.type="button"; btn.onclick=e=>{ e.stopPropagation(); openGame(m.id); };
+  card.append(btn); return card;
+}
+let e8Busy=false, e8PendingEight=null;
+setInterval(()=>{ const g=gamesById.get(openGameId); if(g?.type==="eights"&&g.status==="active"&&!e8Busy) paintEights(g); },20000);
+async function e8Act(fn){
+  if(e8Busy) return; e8Busy=true; say("gameMsg","");
+  const id=openGameId;
+  try{ await fn(); const [fresh]=await api.games([id]); if(fresh){ const prev=gamesById.get(id); gamesById.set(id,fresh); refreshMsg(id); if(openGameId===id) paintGame(prev); } }
+  catch(err){ say("gameMsg",isNetworkError(err)?"You're offline. Try again when you're back.":err.message,true); }
+  finally{ e8Busy=false; }
+}
+async function paintEights(g,prev){
+  const s=g.state, P=s.players||[], me=e8Seat(g), st=e8Status(g), myTurn=g.status==="active"&&P[s.turn]===user.id;
+  show($("kcChainBar"),false);
+  $("gameTitle").textContent="Crazy Eights"; $("gameSub").textContent="Match the suit or number. 8s are wild. First to empty their hand wins."; show($("gameSub"),g.status==="waiting");
+  $("gameStatus").textContent=st.text; $("gameStatus").classList.toggle("good",!!(st.turn||st.won));
+  const row=$("e8Players"); row.innerHTML="";
+  P.forEach((u,i)=>{ const chip=el("div","e8p"+(g.status==="active"&&i===s.turn?" turn":"")+(g.status==="done"&&u===s.winner?" won":""));
+    const f=el("span","face"); paintFace(f,cache.get(u)); chip.append(f,el("span","pname",u===user.id?"You":nameOf(u)));
+    if(g.status!=="waiting") chip.append(el("span","e8count",`🂠 ${s.counts?.[i]??"?"}`)); row.append(chip); });
+  $("e8Last").textContent=g.status==="waiting"?"":e8LastText(g);
+  const playing=g.status!=="waiting";
+  show(document.querySelector("#e8Area .e8-table"),playing);
+  $("e8Top").innerHTML=""; if(playing&&s.top) $("e8Top").append(e8CardEl(s.top));
+  $("e8Suit").textContent=playing&&s.suit?`${E8_SUITS[s.suit]} ${e8Rank(s.top)==="8"?E8_SUIT_NAME[s.suit]:""}`:""; $("e8Suit").className="e8-suit"+("HD".includes(s.suit||"")?" red":"");
+  $("e8DeckN").textContent=playing?`Draw (${s.deck??0})`:""; $("e8Draw").disabled=!myTurn||!!s.drew||e8Busy;
+  show($("e8Pass"),myTurn&&!!s.drew);
+  const stale=g.status==="active"&&!myTurn&&me>=0&&Date.now()-new Date(g.updated_at||Date.now()).getTime()>120000;
+  show($("e8Skip"),stale); if(stale) $("e8Skip").textContent=`Skip ${nameOf(P[s.turn])}'s turn`;
+  show($("e8Deal"),g.status==="waiting"&&s.host===user.id); $("e8Deal").disabled=P.length<2; $("e8Deal").textContent=P.length<2?"Waiting for players…":`Deal cards (${P.length} players)`;
+  show($("gameJoin"),g.status==="waiting"&&me<0&&P.length<6);
+  show($("gameRematch"),g.status==="done"&&me>=0);
+  if(!myTurn) { show($("e8SuitPick"),false); e8PendingEight=null; }
+  // your hand
+  const handBox=$("e8Hand"); show(handBox,playing&&me>=0);
+  if(playing&&me>=0){
+    const cards=await e8Hand(g); if(openGameId!==g.message_id) return;
+    const order="SHDC", ranks=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+    const sorted=[...cards].sort((a,b)=>order.indexOf(e8Suit(a))-order.indexOf(e8Suit(b))||ranks.indexOf(e8Rank(a))-ranks.indexOf(e8Rank(b)));
+    handBox.innerHTML="";
+    sorted.forEach(c=>{ const can=myTurn&&e8CanPlay(g,c), b=el("button","e8play"+(can?" can":myTurn?" cant":"")); b.type="button";
+      b.append(e8CardEl(c)); b.setAttribute("aria-label",e8CardName(c)+(can?", playable":"")); b.disabled=!can;
+      b.onclick=()=>{ if(e8Rank(c)==="8"){ e8PendingEight=c; show($("e8SuitPick")); return; } e8Act(()=>api.eightsPlay(g.message_id,c)); };
+      handBox.append(b); });
+    if(!cards.length&&g.status==="active") handBox.append(el("p","note","No cards?"));
+  }
+  if(g.status==="done"&&prev&&prev.status!=="done"){
+    if(st.won){ gainXP("gamewin"); if(fxEnabled()) FX.play("confetti"); }
+    if(navigator.vibrate) navigator.vibrate(st.won?[40,60,40]:60);
+  } else if(prev?.state&&prev.state.turn!==s.turn&&myTurn&&navigator.vibrate) navigator.vibrate(25);
+}
+Object.entries(E8_SUITS).forEach(([k,v])=>{ const b=el("button","e8suitbtn"+("HD".includes(k)?" red":""),v); b.type="button"; b.setAttribute("aria-label",E8_SUIT_NAME[k]);
+  b.onclick=()=>{ const c=e8PendingEight, g=gamesById.get(openGameId); if(!c||!g) return; show($("e8SuitPick"),false); e8PendingEight=null; e8Act(()=>api.eightsPlay(g.message_id,c,k)); };
+  $("e8SuitPick").append(b); });
+$("e8Draw").onclick=()=>{ const g=gamesById.get(openGameId); if(g) e8Act(()=>api.eightsDraw(g.message_id)); };
+$("e8Pass").onclick=()=>{ const g=gamesById.get(openGameId); if(g) e8Act(()=>api.eightsPass(g.message_id)); };
+$("e8Skip").onclick=()=>{ const g=gamesById.get(openGameId); if(g) e8Act(()=>api.eightsSkip(g.message_id)); };
+$("e8Deal").onclick=()=>{ const g=gamesById.get(openGameId); if(g) e8Act(()=>api.eightsStart(g.message_id)); };
 
 /* ================= INSTALL HELPER ================= */
 const SHARE_ICON='<span class="ico" aria-label="Share icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 15V3M7 8l5-5 5 5M5 12v8h14v-8"/></svg></span>';
@@ -7183,8 +7413,13 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.25k";
+const APP_VERSION="2026.09.26a";
 const CHANGELOG=[
+  {v:"2026.09.26a", title:"New game: Crazy Eights 🃏", items:[
+    "🃏 Play Crazy Eights with 2–6 friends: ＋ → Games → Crazy Eights. Friends tap Join, then deal.",
+    "🎴 Match the suit or number. 8s are wild. First to empty their hand wins!",
+    "⏭️ Someone gone quiet? After 2 minutes on their turn, anyone can skip them.",
+  ]},
   {v:"2026.09.25k", title:"Online dots fixed 🟢", items:[
     "🟢 Fixed people sometimes looking offline to everyone after their connection hiccuped (switching Wi-Fi, locking the screen). Your online status now reconnects on its own.",
     "🔎 Profile now shows whether your online status is connected, and how many people you can see online.",
