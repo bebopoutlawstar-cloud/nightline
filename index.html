@@ -2658,6 +2658,7 @@ const live = {
   async members(room){ return must(await sb.from("room_members").select("user_id,last_read_at,last_joined,nickname,notify").eq("room",room)); },
   async markRead(room){ await sb.rpc("mark_read",{p_room:room}); },
   async loadLatest(room){ return must(await sb.from("messages").select("*").eq("room",room).order("created_at",{ascending:false}).limit(PAGE)).reverse(); },
+  async loadAfter(room,iso){ return must(await sb.from("messages").select("*").eq("room",room).gte("created_at",iso).order("created_at",{ascending:true}).limit(PAGE)); },
   async loadBefore(room,iso){ return must(await sb.from("messages").select("*").eq("room",room).lt("created_at",iso).order("created_at",{ascending:false}).limit(PAGE)).reverse(); },
   async fetchMessage(id){ return must(await sb.from("messages").select("*").eq("id",id).maybeSingle()); },
   async send(room,f){
@@ -2855,6 +2856,7 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     async markRead(room){ if(rooms[room]?.members.me) rooms[room].members.me.read=iso(); },
     async loadLatest(room){ return seed(room).msgs.slice(-PAGE); },
     async loadBefore(){ return []; },
+    async loadAfter(room,iso){ return (rooms[room]?.msgs||[]).filter(m=>m.created_at>=iso).sort((a,b)=>a.created_at<b.created_at?-1:1).slice(0,PAGE); },
     async fetchMessage(id){ return Object.values(rooms).flatMap(r=>r.msgs).find(m=>m.id===id)||null; },
     async send(room,f){
       const m={id:nextId++,room,user_id:"me",kind:f.kind||"text",text:f.text||null,image_url:f.image_url||null,image_urls:f.image_urls||null,media_url:f.media_url||null,media_type:f.media_type||null,media_duration:f.media_duration||null,sticker:f.sticker||null,reply_to:f.reply_to||null,mentions:f.mentions||[],card:f.card||null,created_at:iso(),expires_at:rooms[room].disappear?new Date(Date.now()+rooms[room].disappear*1000).toISOString():null}; rooms[room].msgs.push(m);
@@ -3261,11 +3263,13 @@ $("randomRoom").onclick=()=>{ show($("joinPanel")); $("joinToggle").setAttribute
   say("roomMsg","New room code ready. Tap Jump in, then use Room to invite friends."); $("room").focus();
 };
 
+let enterSeq=0;   // every room-open gets a ticket; if you tap another room mid-load, the older one stops
 async function enterRoom(code,token){
   const target=(code||"").trim().toLowerCase(); if(!target||!user) return;
+  const seq=++enterSeq;
   $("jumpBtn").disabled=true; say("roomMsg","Checking the room…");
   let result;
-  try{ result=await api.joinRoom(target,token); }
+  try{ result=await api.joinRoom(target,token); if(seq!==enterSeq) return; }
   catch(err){
     ["chat","roomSheet","msgMenu"].forEach(id=>show($(id),false)); show($("front")); show($("roomCard"));
     show($("joinPanel")); $("joinToggle").setAttribute("aria-expanded","true"); $("joinToggle").textContent="✕";
@@ -3282,8 +3286,9 @@ async function enterRoom(code,token){
   typers.forEach(v=>clearTimeout(v.timer)); typers.clear(); paintTyping(); clearReply(); feed.innerHTML="";
   try{
     const [latest,mem,info,pinRows]=await Promise.all([api.loadLatest(room),api.members(room).catch(()=>[]),api.roomInfo(room).catch(()=>null),api.pins(room).catch(()=>[])]);
+    if(seq!==enterSeq) return;
     roomOwner=info?.owner||null; isDm=!!info?.is_dm; dmUser=null; disappear=+info?.disappear_seconds||0; delete $("catchUp").dataset.dismissed; show($("catchUp"),false); translations.clear(); showOriginal.clear(); loadTasks();
-    if(isDm){ dmUser=(mem.find(x=>x.user_id!==user.id)||{}).user_id||null; await ensureProfiles([dmUser].filter(Boolean)); }
+    if(isDm){ dmUser=(mem.find(x=>x.user_id!==user.id)||{}).user_id||null; await ensureProfiles([dmUser].filter(Boolean)); if(seq!==enterSeq) return; }
     myNotify=(mem.find(x=>x.user_id===user.id)||{}).notify||"all";
     setRoomName(info?.name); setRoomBackground(info?.background);
     closeRoomNotifications(room);
@@ -3291,8 +3296,10 @@ async function enterRoom(code,token){
     mem.forEach(setMember);
     hasMore=latest.length>=PAGE;
     await addMessages(latest);
+    if(seq!==enterSeq) return;
     updateCatchUp(); scheduleExpiry(); checkMissedSecret();
     await loadPinnedContext(); paintPinBar(); seasonalCheck("room");
+    if(seq!==enterSeq) return;
     if(result==="created"&&!latest.length) feed.innerHTML='<p class="empty">You made a new private room. Tap Room to name it and invite friends.</p>';
     markReadSoon();
     unsub=api.subscribe(room,{
@@ -3933,10 +3940,14 @@ async function sendFields(fields){
   afterMySend(m);
   return m;
 }
+let sendingNow=false;
 $("sendForm").addEventListener("submit",async e=>{
   e.preventDefault();
+  if(sendingNow) return;                     // Enter pressed again while the last one is still sending
   const text=$("box").value.trim(); if(!text&&!pendingFile&&!pendingImages.length) return;
-  $("sendBtn").disabled=true; hideMentions();
+  sendingNow=true; $("sendBtn").disabled=true; hideMentions();
+  const hadMedia=!!pendingFile||pendingImages.length>0;
+  if(!hadMedia){ $("box").value=""; $("box").style.height=""; }   // text-only: clear right away so you can keep typing
   try{
     const f={kind:"text",text,mentions:mentionsIn(text)};
     if(pendingImages.length>1){
@@ -3955,9 +3966,16 @@ $("sendForm").addEventListener("submit",async e=>{
       $("status").textContent="Uploading video…"; f.media_url=await api.upload("chat-media",user.id,vid); f.media_type="video"; f.media_duration=pendingDuration; f.kind="video"; }
     else if(pendingFile||pendingImages.length===1){ $("status").textContent="Uploading photo…"; const one=pendingFile||pendingImages[0]; f.image_url=await api.upload("chat-images",user.id,await shrink(one,1280,false)); f.kind="image"; }
     await sendFields(f);
-    $("box").value=""; $("box").style.height=""; clearPending(); mentionPicks.clear();
-  }catch(err){ $("status").textContent="Didn't send: "+err.message; sfx("error"); }
-  finally{ $("sendBtn").disabled=false; }
+    if(hadMedia&&$("box").value.trim()===text){ $("box").value=""; $("box").style.height=""; }   // only clear the caption you sent, never new typing
+    if(hadMedia) clearPending();
+    mentionPicks.clear();
+  }catch(err){
+    if(text&&!hadMedia){ const now=$("box").value; $("box").value=now.trim()?text+"\n"+now:text; $("box").dispatchEvent(new Event("input")); }   // put your message back
+    const offline=navigator.onLine===false||/failed to fetch|network|load failed|fetch/i.test(String(err?.message||err));
+    $("status").textContent=offline?"You're offline. Your message is still in the box. Tap Send when you're back.":"Didn't send: "+err.message;
+    sfx("error");
+  }
+  finally{ sendingNow=false; $("sendBtn").disabled=false; }
 });
 $("box").addEventListener("keydown",e=>{
   if(e.key==="Escape"){ hideMentions(); return; }
@@ -6816,8 +6834,14 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.22j";
+const APP_VERSION="2026.09.22k";
 const CHANGELOG=[
+  {v:"2026.09.22k", title:"Rock-solid messaging 💬", items:[
+    "🧭 Fixed messages from one chat briefly showing up in another if you switched chats quickly.",
+    "📥 Coming back after a long time away now loads every message you missed, not just the last 50.",
+    "⌨️ Pressing Enter a few times on a slow connection no longer sends the same message twice, and you can keep typing while a message sends.",
+    "📡 Sending while offline now tells you clearly, and keeps your message in the box to send again.",
+  ]},
   {v:"2026.09.22j", title:"Security upgrade 🔒", items:[
     "🔒 Fixed a security hole that could let a stranger add themselves as your friend. Your friend invite link is now private to you.",
     "🔗 Everyone got a fresh friend invite link, so old ones you shared before today won't work anymore. Grab your new one from Friends → 📲.",
@@ -7191,14 +7215,26 @@ let liveStatus=null, catchingUp=false, lastCatchUp=0;
 async function catchUp(reason){
   if(!room||!user||catchingUp) return;
   const code=room; catchingUp=true; lastCatchUp=Date.now();
+  const newestKnown=msgs.length?msgs[msgs.length-1].created_at:null;
   try{
     const [latest,mem,pinRows]=await Promise.all([api.loadLatest(code),api.members(code).catch(()=>null),api.pins(code).catch(()=>null)]);
     if(room!==code) return;
+    // missed more than one page while away? fill the gap between what we had and the newest page
+    const fetched=new Set(latest.map(m=>m.id));   // everything this catch-up loaded is definitely NOT deleted
+    if(newestKnown&&latest.length>=PAGE&&latest[0].created_at>newestKnown){
+      let from=newestKnown;
+      for(let page=0;page<20;page++){
+        const chunk=await api.loadAfter(code,from); if(room!==code) return;
+        chunk.forEach(m=>fetched.add(m.id)); await addMessages(chunk);
+        const last=chunk[chunk.length-1];
+        if(chunk.length<PAGE||!last||last.created_at>=latest[0].created_at||last.created_at===from) break;
+        from=last.created_at;
+      }
+    }
     await addMessages(latest);
     // drop anything deleted while we were away (only within the loaded window)
-    { const ids=new Set(latest.map(m=>m.id));
-      const whole=latest.length<PAGE, oldest=latest[0]?.created_at;   // fewer than a page = we got the whole room
-      msgs.filter(m=>!ids.has(m.id)&&(whole||(oldest&&m.created_at>=oldest))).map(m=>m.id).forEach(removeMessage); }
+    { const whole=latest.length<PAGE, oldest=latest[0]?.created_at;   // fewer than a page = we got the whole room
+      msgs.filter(m=>!fetched.has(m.id)&&(whole||(oldest&&m.created_at>oldest))).map(m=>m.id).forEach(removeMessage); }
     if(mem) mem.forEach(setMember);
     if(pinRows){ pins.clear(); pinRows.forEach(p=>pins.set(p.message_id,p)); await loadPinnedContext(); paintPinBar(); }
     const gids=[...gamesById.keys()];
