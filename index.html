@@ -1905,6 +1905,28 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .ld-stamp{position:absolute;left:50%;top:38%;z-index:5;font-family:var(--num);font-size:clamp(54px,18vw,86px);color:#ff3b5c;border:6px solid #ff3b5c;padding:2px 16px;background:rgba(7,4,26,.85);text-shadow:3px 3px 0 var(--night);box-shadow:6px 6px 0 var(--night);pointer-events:none;white-space:nowrap}
 .ld-reveal .die{backface-visibility:hidden}
 @media (prefers-reduced-motion:reduce){.kccell.kcspark{animation:none}}
+/* ===== Mancala ===== */
+.mcboard-wrap{width:100%;display:block}
+.mcboard{display:flex;align-items:stretch;gap:4px;padding:10px 5px 16px;margin:0 -14px;width:calc(100% + 28px)!important;background:linear-gradient(160deg,#5b3a22,#3a2414 70%);border:3px solid #07041a;border-radius:22px;box-shadow:6px 6px 0 var(--mag);width:100%;box-sizing:border-box}
+.mcrows{flex:1;display:grid;gap:14px;min-width:0}
+.mcside{display:grid;grid-template-columns:repeat(6,1fr);gap:3px}
+.mcpit,.mcstore{position:relative;background:radial-gradient(circle at 40% 35%,#2a170b,#170c05 70%);border:2px solid #1a0e06;box-shadow:inset 0 3px 8px rgba(0,0,0,.6);color:var(--white);padding:0;overflow:visible}
+.mcpit{aspect-ratio:1;border-radius:50%;min-width:0}
+.mcstore{width:11%;min-width:28px;max-width:56px;border-radius:30px}
+.mcpit.can{border-color:var(--cyan);box-shadow:inset 0 3px 8px rgba(0,0,0,.6),0 0 0 2px var(--cyan),0 0 12px rgba(0,240,255,.5);cursor:pointer}
+.mcpit:disabled{cursor:default}
+.mcside.mine .mcpit:not(.can){opacity:.92}
+.mcstones{position:absolute;inset:6%;pointer-events:none}
+.mcstone{position:absolute;display:block;width:24%;min-width:5px;max-width:12px;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);box-shadow:inset -1px -2px 0 rgba(0,0,0,.35),inset 1px 1px 0 rgba(255,255,255,.5)}
+.mcstone.c0{background:var(--cyan)}.mcstone.c1{background:var(--volt)}.mcstone.c2{background:var(--mag)}.mcstone.c3{background:#f4f7ff}
+.mccount{position:absolute;left:50%;bottom:-11px;transform:translateX(-50%);font-family:var(--tech);font-size:10px;background:var(--night);color:var(--volt);border:1px solid var(--volt);border-radius:8px;padding:0 4px;line-height:1.4;z-index:1}
+.mcstore .mccount{bottom:-10px;font-size:12px}
+.mcflying{position:fixed;z-index:9999;width:12px;height:12px;pointer-events:none;transform:none}
+.mcpop{position:absolute;left:50%;top:-6px;z-index:5;white-space:nowrap;font-family:var(--tech);font-size:12px;color:var(--night);background:var(--volt);padding:3px 8px;border:2px solid var(--night);box-shadow:2px 2px 0 var(--mag);pointer-events:none}
+.gp-icon.mc-icon{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:6px;background:#4a2e1a;border-radius:10px}
+.gp-icon.mc-icon i{display:block;aspect-ratio:1;border-radius:50%;background:#1d0f06;box-shadow:inset 0 0 0 3px var(--cyan)}
+.mcmini{display:flex;align-items:center;gap:4px;background:#4a2e1a;border-radius:10px;padding:4px 6px;font-family:var(--tech);font-size:9px;color:var(--white)}
+.mcmini-s{background:#1d0f06;border-radius:8px;padding:6px 4px;color:var(--volt)}.mcmini-row{white-space:pre;line-height:1.5;text-align:center}
 </style>
 </head>
 <body>
@@ -2056,7 +2078,11 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
           <span class="gp-icon ld-icon" aria-hidden="true">🎲</span>
           <span class="gp-text"><b>Liar's Dice</b><small class="gp-hint">2–6 players · bid, bluff, call Liar!</small></span>
         </button>
-        <p class="rulelinks">📖 Rules: <button type="button" data-rules="tictactoe">Tic-tac-toe</button> · <button type="button" data-rules="kingscourt">King's Court</button> · <button type="button" data-rules="eights">Crazy Eights</button> · <button type="button" data-rules="liarsdice">Liar's Dice</button></p>
+        <button type="button" class="gamepick" data-game="mancala">
+          <span class="gp-icon mc-icon" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+          <span class="gp-text"><b>Mancala</b><small class="gp-hint">Sow stones, capture, fill your store</small></span>
+        </button>
+        <p class="rulelinks">📖 Rules: <button type="button" data-rules="tictactoe">Tic-tac-toe</button> · <button type="button" data-rules="kingscourt">King's Court</button> · <button type="button" data-rules="eights">Crazy Eights</button> · <button type="button" data-rules="liarsdice">Liar's Dice</button> · <button type="button" data-rules="mancala">Mancala</button></p>
         <p class="note">More games coming soon 👀</p>
       </div>
     </div>
@@ -2682,6 +2708,69 @@ function kcAnimateMove(g,prev){
   // stepping into the Court from outside sparkles
   if(kcInCourt(dest)&&!kcInCourt(path[0])){ setTimeout(()=>{ cells[dest].classList.add("kcspark"); setTimeout(()=>cells[dest]?.classList.remove("kcspark"),800); },per*hops); }
 }
+/* ===== Mancala board ===== your pits are always the bottom row, your store on the right */
+function mcSeatView(g){ const me=myMark(g)||"x"; return me==="x"?{bottom:[0,1,2,3,4,5],top:[12,11,10,9,8,7],myStore:6,oppStore:13,me}:{bottom:[7,8,9,10,11,12],top:[5,4,3,2,1,0],myStore:13,oppStore:6,me}; }
+function mcStones(n,seed){   // little pebbles, scattered the same way every time for the same pit
+  const box=el("span","mcstones"); let r=seed*9301+49297;
+  const rnd=()=>{ r=(r*9301+49297)%233280; return r/233280; };
+  for(let k=0;k<Math.min(n,14);k++){ const st=el("i","mcstone c"+(k%4)); st.style.left=(18+rnd()*56)+"%"; st.style.top=(18+rnd()*56)+"%"; box.append(st); }
+  return box;
+}
+function mcPitEl(g,i,kind){
+  const b=g.state.board, me=myMark(g), mine=me&&((me==="x"&&i<=5)||(me==="o"&&i>=7&&i<=12));
+  const canPlay=kind==="pit"&&g.status==="active"&&mine&&g.state.turn===me&&b[i]>0;
+  const n=el(kind==="store"?"div":"button","mc"+kind+(canPlay?" can":"")); n.dataset.i=i;
+  if(kind==="pit"){ n.type="button"; n.disabled=!canPlay; n.onclick=()=>mcMove(i); }
+  n.setAttribute("aria-label",`${kind==="store"?(i===(me==="o"?13:6)?"Your store":"Their store"):mine?"Your pit":"Their pit"}: ${b[i]} stone${b[i]===1?"":"s"}`);
+  n.append(mcStones(b[i],i+1),el("b","mccount",String(b[i])));
+  return n;
+}
+function mcBoardEl(g){
+  const v=mcSeatView(g), wrap=el("div","mcboard");
+  const opp=el("div","mcside opp"), mine=el("div","mcside mine");
+  v.top.forEach(i=>opp.append(mcPitEl(g,i,"pit"))); v.bottom.forEach(i=>mine.append(mcPitEl(g,i,"pit")));
+  const rows=el("div","mcrows"); rows.append(opp,mine);
+  wrap.append(mcPitEl(g,v.oppStore,"store"),rows,mcPitEl(g,v.myStore,"store"));
+  return wrap;
+}
+function mcMini(g){
+  const b=g?.state?.board||MC_START, box=el("div","mcmini");
+  box.append(el("span","mcmini-s",String(b[13])),el("span","mcmini-row",b.slice(7,13).reverse().join(" ")+"\n"+b.slice(0,6).join(" ")),el("span","mcmini-s",String(b[6])));
+  return box;
+}
+async function mcMove(pit){
+  const g=gamesById.get(openGameId), me=g&&myMark(g);
+  if(!g||g.status!=="active"||g.state.turn!==me) return;
+  const before=JSON.parse(JSON.stringify(g));
+  try{ const r=mcApply(g.state,me,pit); g.state=r.state; g.status=r.done?"done":"active"; }catch(err){ say("gameMsg",err.message,true); return; }
+  paintGame(before); refreshMsg(g.message_id);
+  try{ await api.playMancala(g.message_id,pit); }
+  catch(err){ gamesById.set(g.message_id,before); paintGame(); refreshMsg(g.message_id); say("gameMsg",isNetworkError(err)?"You're offline. Try again when you're back.":"Move didn't go through: "+err.message,true); }
+}
+// sowing animation: a stone hops pit to pit, each pit bumps as it lands; captures fly to the store
+function mcAnimate(g,prev){
+  if(!e8Motion()) return;
+  const l=g.state.last; if(!l||prev.state?.board?.[l.from]==null) return;
+  let r; try{ r=mcApply(prev.state,l.by,l.from); }catch(e){ return; }
+  const cellOf=i=>$("board").querySelector(`[data-i="${i}"]`), center=e=>{ const q=e.getBoundingClientRect(); return {x:q.left+q.width/2,y:q.top+q.height/2}; };
+  const hop=150, seq=[l.from,...r.path];
+  const gh=el("i","mcstone c1 mcflying"); document.body.append(gh);
+  const pts=seq.map(i=>cellOf(i)).filter(Boolean).map(center);
+  if(pts.length<2){ gh.remove(); return; }
+  gh.style.left=(pts[0].x-6)+"px"; gh.style.top=(pts[0].y-6)+"px";
+  const frames=[]; pts.forEach((p,k)=>{ frames.push({transform:`translate(${p.x-pts[0].x}px,${p.y-pts[0].y}px) scale(1)`,offset:k/(pts.length-1)});
+    if(k<pts.length-1){ const q=pts[k+1]; frames.push({transform:`translate(${(p.x+q.x)/2-pts[0].x}px,${(p.y+q.y)/2-pts[0].y-16}px) scale(1.5)`,offset:(k+.5)/(pts.length-1)}); } });
+  gh.animate(frames,{duration:hop*(pts.length-1),easing:"linear"}).onfinish=()=>gh.remove();
+  r.path.forEach((i,k)=>{ const c=cellOf(i); c?.animate([{transform:"scale(1)"},{transform:"scale(1.14)",filter:"brightness(1.5)"},{transform:"scale(1)"}],{duration:260,delay:hop*(k+1)-60}); });
+  cellOf(l.from)?.animate([{filter:"brightness(1.8)"},{filter:"none"}],{duration:400});
+  const end=hop*r.path.length;
+  if(l.captured!=null){ const from=cellOf(l.captured), to=cellOf(l.by==="x"?6:13);
+    if(from&&to) setTimeout(()=>{ const a=center(from), b=center(to); for(let k=0;k<4;k++){ const s2=el("i","mcstone c"+k+" mcflying"); s2.style.left=(a.x-6+k*3)+"px"; s2.style.top=(a.y-6)+"px"; document.body.append(s2);
+      s2.animate([{transform:"none"},{transform:`translate(${b.x-a.x}px,${b.y-a.y-30}px) scale(1.4)`,offset:.5},{transform:`translate(${b.x-a.x}px,${b.y-a.y}px) scale(1)`}],{duration:520,delay:k*60,easing:"ease-in-out"}).onfinish=()=>s2.remove(); }
+      const pop=el("span","mcpop","Capture!"); to.append(pop); pop.animate([{opacity:0,transform:"translate(-50%,0) scale(.6)"},{opacity:1,transform:"translate(-50%,-14px) scale(1.1)",offset:.3},{opacity:0,transform:"translate(-50%,-30px)"}],{duration:1100}).onfinish=()=>pop.remove(); },end); }
+  if(l.extra){ const st=cellOf(l.by==="x"?6:13); if(st) setTimeout(()=>{ const pop=el("span","mcpop","Extra turn!"); st.append(pop);
+    pop.animate([{opacity:0,transform:"translate(-50%,0) scale(.6)"},{opacity:1,transform:"translate(-50%,-14px) scale(1.1)",offset:.3},{opacity:0,transform:"translate(-50%,-30px)"}],{duration:1200}).onfinish=()=>pop.remove(); },end); }
+}
 function kcTap(g,i){
   const s=g.state, me=myMark(g), board=kcPreview||s.board;
   if(kcChaining){
@@ -2710,6 +2799,29 @@ async function kcFinish(g){
   g.status=applied.done?"done":"active"; paintGame(before); refreshMsg(g.message_id);
   try{ await api.playKingsCourt(g.message_id,path); if(!sb) setTimeout(()=>kcBotTurn(g.message_id),900); }
   catch(err){ gamesById.set(g.message_id,before); paintGame(); refreshMsg(g.message_id); say("gameMsg","Move didn't go through: "+err.message,true); }
+}
+/* ===== Mancala rules (mirrors play_mancala() in Postgres exactly) =====
+   Spots 0–5: X's pits · 6: X's store · 7–12: O's pits · 13: O's store. Sowing goes up the numbers (counter-clockwise). */
+const MC_START=[4,4,4,4,4,4,0,4,4,4,4,4,4,0];
+function mcApply(state,mark,pit){
+  const b=state.board.slice(), myStore=mark==="x"?6:13, oppStore=mark==="x"?13:6, lo=mark==="x"?0:7;
+  if(pit<lo||pit>lo+5) throw new Error("Pick one of the pits on your side.");
+  let n=b[pit]; if(!n) throw new Error("That pit is empty. Pick one with stones.");
+  const sown=n, path=[]; b[pit]=0; let i=pit;
+  while(n){ i=(i+1)%14; if(i===oppStore) continue; b[i]++; n--; path.push(i); }
+  let extra=i===myStore, captured=null;
+  if(!extra&&i>=lo&&i<=lo+5&&b[i]===1&&b[12-i]>0){ captured=12-i; b[myStore]+=b[12-i]+1; b[12-i]=0; b[i]=0; }
+  const xs=b.slice(0,6).reduce((a,c)=>a+c,0), os=b.slice(7,13).reduce((a,c)=>a+c,0), done=xs===0||os===0;
+  let winner=null;
+  if(done){ b[6]+=xs; b[13]+=os; for(let j=0;j<6;j++){ b[j]=0; b[j+7]=0; } winner=b[6]>b[13]?"x":b[13]>b[6]?"o":"draw"; }
+  return {state:{board:b,line:[],winner,turn:done||extra?mark:(mark==="x"?"o":"x"),last:{by:mark,from:pit,to:i,extra:extra&&!done,captured,sown}},done,path};
+}
+function mcBotPit(state,mark){   // demo bot: grab an extra turn, else the biggest capture, else anything
+  const lo=mark==="x"?0:7, opts=[...Array(6)].map((_,k)=>lo+k).filter(p=>state.board[p]>0);
+  let best=null, score=-1;
+  opts.forEach(p=>{ const r=mcApply(state,mark,p), st=mark==="x"?6:13, gain=r.state.board[st]-state.board[st]+(r.state.last.extra?3:0)+Math.random();
+    if(gain>score){ score=gain; best=p; } });
+  return best;
 }
 function kcBotTurn(id){
   const g=gamesById.get(id); if(!g||g.status!=="active"||myMark(g)===g.state.turn) return;
@@ -2905,6 +3017,7 @@ const live = {
   async joinGame(id){ must(await sb.rpc("join_game",{p_message:id})); },
   async playTicTacToe(id,cell){ must(await sb.rpc("play_tictactoe",{p_message:id,p_cell:cell})); },
   async playKingsCourt(id,path){ must(await sb.rpc("play_kingscourt",{p_message:id,p_path:path})); },
+  async playMancala(id,pit){ must(await sb.rpc("play_mancala",{p_message:id,p_pit:pit})); },
   async rematch(id){ return must(await sb.rpc("rematch_game",{p_message:id})); },
   async eightsHand(id){ const r=must(await sb.from("game_hands").select("cards").eq("message_id",id).eq("user_id",user.id).maybeSingle()); return r?.cards||[]; },
   async eightsStart(id){ must(await sb.rpc("eights_start",{p_message:id})); },
@@ -3090,6 +3203,11 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     if(q>total){ ldDemoMove(g,who,{call:true}); return; }
     ldDemoMove(g,who,{bid:[q,f]});
   }
+  function mcDemoBot(g,human){   // Mancala practice bot: keeps going while it earns extra turns
+    if(g.status!=="active"||g.state.turn===human) return; const bm=g.state.turn, rr=mcApply(g.state,bm,mcBotPit(g.state,bm));
+    g.state=rr.state; g.status=rr.done?"done":"active"; g.moves=(g.moves||0)+1; fire("game",JSON.parse(JSON.stringify(g)));
+    if(g.status==="active"&&g.state.turn===bm) setTimeout(()=>mcDemoBot(g,human),1600);
+  }
   function e8DemoAfter(g){
     g.moves++; g.updated_at=iso(); const copy=JSON.parse(JSON.stringify(g)); setTimeout(()=>fire("game",copy),30);
     const who=g.state.players[g.state.turn];
@@ -3134,9 +3252,9 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
         ["vee","rook"].forEach((b,i)=>setTimeout(()=>{ const g=games[m.id]; if(g.status!=="waiting"||g.state.players.includes(b)) return; g.state.players.push(b); g.moves++; fire("game",JSON.parse(JSON.stringify(g))); },700+i*700));
         return m;
       }
-      const r=rooms[room], m={id:nextId++,room,user_id:"me",kind:"game",text:type==="kingscourt"?"King's Court":"Tic-tac-toe",created_at:iso()}; r.msgs.push(m);
+      const r=rooms[room], m={id:nextId++,room,user_id:"me",kind:"game",text:type==="kingscourt"?"King's Court":type==="mancala"?"Mancala":"Tic-tac-toe",created_at:iso()}; r.msgs.push(m);
       const other=r.is_dm?Object.keys(r.members).find(u=>u!=="me"):null;
-      const st0 = type==="kingscourt" ? {board:kcInitialBoard(),turn:"x",winner:null,line:[],first_x:false,first_o:false,last:[]} : {board:Array(9).fill(""),turn:"x",winner:null,line:[]};
+      const st0 = type==="kingscourt" ? {board:kcInitialBoard(),turn:"x",winner:null,line:[],first_x:false,first_o:false,last:[]} : type==="mancala" ? {board:[...MC_START],turn:"x",winner:null,line:[],last:null} : {board:Array(9).fill(""),turn:"x",winner:null,line:[]};
       games[m.id]={message_id:m.id,room,type,player_x:"me",player_o:other,status:other?"active":"waiting",state:st0,moves:0};
       if(!other) setTimeout(()=>{ const g=games[m.id]; if(g.status!=="waiting") return; g.player_o=Object.keys(r.members).find(u=>u!=="me")||"rook"; g.status="active"; fire("game",JSON.parse(JSON.stringify(g))); if(type==="kingscourt"&&g.player_x!=="me") setTimeout(()=>kcBotTurn(m.id),900); },1500);
       return m;
@@ -3147,6 +3265,13 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
       if(g.status!=="active"||g.state.turn!==mark||g.state.board[cell]) throw new Error("Not your turn.");
       applyTTT(g,cell,mark); setTimeout(()=>fire("game",JSON.parse(JSON.stringify(g))),30);
       if(g.status==="active") setTimeout(()=>demoBot(id),900);
+    },
+    async playMancala(id,pit){
+      const g=games[id], mark=g.player_x==="me"?"x":"o";
+      if(g.status!=="active"||g.state.turn!==mark) throw new Error("It's not your turn.");
+      const r=mcApply(g.state,mark,pit); g.state=r.state; g.status=r.done?"done":"active"; g.moves=(g.moves||0)+1;
+      setTimeout(()=>fire("game",JSON.parse(JSON.stringify(g))),30);
+      setTimeout(()=>mcDemoBot(g,mark),1700);
     },
     async playKingsCourt(id,path){
       const g=games[id], mark=g.player_x==="me"?"x":"o";
@@ -3170,11 +3295,11 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
       if(games[id].type==="eights"||games[id].type==="liarsdice"){ const old=games[id], r=rooms[old.room]; const m={id:nextId++,room:old.room,user_id:"me",kind:"game",text:old.type==="eights"?"Crazy Eights":"Liar's Dice",created_at:iso()}; r.msgs.push(m);
         games[m.id]={message_id:m.id,room:old.room,type:old.type,player_x:"me",player_o:null,status:"waiting",state:{players:[...old.state.players],host:"me"},moves:0,updated_at:iso()};
         if(old.type==="eights") e8DemoDeal(games[m.id]); else ldDemoBegin(games[m.id]); e8DemoAfter(games[m.id]); return m; }
-      const old=games[id], r=rooms[old.room], label=old.type==="kingscourt"?"King's Court":"Tic-tac-toe";
+      const old=games[id], r=rooms[old.room], label=old.type==="kingscourt"?"King's Court":old.type==="mancala"?"Mancala":"Tic-tac-toe";
       const m={id:nextId++,room:old.room,user_id:"me",kind:"game",text:label,created_at:iso()}; r.msgs.push(m);
-      const st0 = old.type==="kingscourt" ? {board:kcInitialBoard(),turn:"x",winner:null,line:[],first_x:false,first_o:false,last:[]} : {board:Array(9).fill(""),turn:"x",winner:null,line:[]};
+      const st0 = old.type==="kingscourt" ? {board:kcInitialBoard(),turn:"x",winner:null,line:[],first_x:false,first_o:false,last:[]} : old.type==="mancala" ? {board:[...MC_START],turn:"x",winner:null,line:[],last:null} : {board:Array(9).fill(""),turn:"x",winner:null,line:[]};
       games[m.id]={message_id:m.id,room:old.room,type:old.type,player_x:old.player_o,player_o:old.player_x,status:"active",state:st0,moves:0};
-      if(games[m.id].player_x!=="me") setTimeout(()=>old.type==="kingscourt"?kcBotTurn(m.id):demoBot(m.id),900);
+      if(games[m.id].player_x!=="me") setTimeout(()=>old.type==="kingscourt"?kcBotTurn(m.id):old.type==="mancala"?mcDemoBot(games[m.id],"o"):demoBot(m.id),900);
       return m;
     },
     async polls(ids){ return {polls:ids.map(i=>polls[i]).filter(Boolean),votes:votes.filter(v=>ids.includes(v.message_id))}; },
@@ -5304,8 +5429,9 @@ function gameCard(m){
   if(g?.type==="eights"||(!g&&m.text==="Crazy Eights")) return e8GameCard(m,g);
   if(g?.type==="liarsdice"||(!g&&m.text==="Liar's Dice")) return ldGameCard(m,g);
   const card=el("div","gamecard");
-  const top=el("div","gc-top"); top.append(g?.type==="kingscourt"?kcMiniBoard(g):miniGrid(g));
-  const info=el("div"); info.append(el("div","gc-title",g?.type==="kingscourt"?"👑 KING'S COURT":"🎮 TIC-TAC-TOE"));
+  const isMC=g?.type==="mancala"||(!g&&m.text==="Mancala");
+  const top=el("div","gc-top"); top.append(isMC?mcMini(g):g?.type==="kingscourt"?kcMiniBoard(g):miniGrid(g));
+  const info=el("div"); info.append(el("div","gc-title",isMC?"🟤 MANCALA":g?.type==="kingscourt"?"👑 KING'S COURT":"🎮 TIC-TAC-TOE"));
   if(!g){ info.append(el("div","gc-status","Loading…")); top.append(info); card.append(top); return card; }
   const st=gameStatusText(g); info.append(el("div","gc-status"+(st.turn?" turn":""),st.text));
   top.append(info); card.append(top);
@@ -5333,8 +5459,10 @@ function paintGame(prev){
   show($("e8Area"),e8); show($("ldArea"),ld); document.querySelector("#gameSheet .versus").classList.toggle("hidden",e8||ld); show($("board"),!e8&&!ld);
   if(e8){ paintEights(g,prev); return; }
   if(ld){ paintDice(g,prev); return; }
-  const isKC=g.type==="kingscourt";
-  $("gameTitle").textContent=isKC?"King's Court":"Tic-tac-toe"; show($("gameSub"),isKC);
+  const isKC=g.type==="kingscourt", isMC=g.type==="mancala";
+  $("gameTitle").textContent=isKC?"King's Court":isMC?"Mancala":"Tic-tac-toe"; show($("gameSub"),isKC||isMC);
+  $("gameSub").textContent=isKC?"Pieces move one square up, down, left, or right. Get into the glowing Court and always keep a piece there."
+    :"Tap a pit on your side to sow its stones counter-clockwise. Most stones in your store wins.";
   const s=g.state, st=gameStatusText(g), me=myMark(g);
   playerTile($("gpX"),g.player_x,"x",g.status==="active"&&s.turn==="x");
   playerTile($("gpO"),g.player_o,"o",g.status==="active"&&s.turn==="o");
@@ -5347,7 +5475,12 @@ function paintGame(prev){
   }
   $("gameStatus").textContent=statusText; $("gameStatus").classList.toggle("good",!!(st.turn||st.won));
   const board=$("board"); board.innerHTML="";
-  if(isKC){
+  if(isMC){
+    board.className="mcboard-wrap"; board.removeAttribute("role"); board.setAttribute("aria-label","Mancala board"); board.append(mcBoardEl(g));
+    show($("kcChainBar"),false);
+    if(prev&&JSON.stringify(prev.state?.last)!==JSON.stringify(g.state.last)&&g.state.last) mcAnimate(g,prev);
+    if(g.status==="active"&&g.state.turn===me&&g.state.last?.extra&&g.state.last.by===me) $("gameStatus").textContent="Extra turn! Go again 🎉";
+  } else if(isKC){
     board.className="kcboard-wrap"; board.append(kcBoardEl(g));
     if(prev&&!kcPreview) kcAnimateMove(g,prev);
     show($("kcChainBar"),kcChaining);
@@ -5424,6 +5557,15 @@ const GAME_RULES={
            "The <b>first player with no cards left wins</b>.",
            "Nobody can see your cards but you. If someone goes quiet for 2 minutes on their turn, anyone can <b>skip</b> them."],
     tip:"Save your 8s for when you're stuck. They can get you out of anything."},
+  mancala:{name:"Mancala",emoji:"🟤",players:"2 players",goal:"Have the most stones in your store when the game ends.",
+    steps:["Each side has <b>6 pits</b> with 4 stones in each. Your pits are the bottom row, and <b>your store</b> is the big pit on your right.",
+           "On your turn, tap one of <b>your pits</b>. Its stones are picked up and dropped <b>one at a time</b> into the next pits, counter-clockwise.",
+           "Stones go into <b>your store</b> as they pass it, but <b>skip your opponent's store</b>. They do drop into your opponent's pits.",
+           "If your <b>last stone lands in your store</b>, you get an <b>extra turn</b>.",
+           "If your last stone lands in an <b>empty pit on your side</b>, you <b>capture</b> it plus all the stones in the pit directly across, and they go into your store.",
+           "When either player's six pits are all empty, the game ends. The other player moves their leftover stones into their own store.",
+           "<b>Most stones in your store wins.</b> A tie is a draw."],
+    tip:"Count stones before you tap: landing the last one in your store gives you another turn, and you can chain them."},
   liarsdice:{name:"Liar's Dice",emoji:"🎲",players:"2–6 players",goal:"Be the last player with dice left.",
     steps:["Everyone starts with <b>5 dice</b> and rolls in secret. Only you can see yours.",
            "On your turn, <b>bid</b> on how many dice of one number are showing across <b>everyone's</b> dice, like \"four 5s\".",
@@ -7823,8 +7965,12 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.26e";
+const APP_VERSION="2026.09.26f";
 const CHANGELOG=[
+  {v:"2026.09.26f", title:"New game: Mancala 🟤", items:[
+    "🟤 Play Mancala, one of the oldest games in the world: ＋ → Games → Mancala.",
+    "🪨 Sow stones around the board, land in your store for an extra turn, and capture your opponent's stones. Most stones wins!",
+  ]},
   {v:"2026.09.26e", title:"Games come alive 🎬", items:[
     "👑 King's Court: pieces slide and hop across the board, captured pieces pop, and stepping into the Court sparkles. You can see your opponent's moves happen now.",
     "🎲 Liar's Dice: dice tumble when you roll, bids slam in, LIAR! stamps the table, and the reveal flips everyone's dice one by one.",
