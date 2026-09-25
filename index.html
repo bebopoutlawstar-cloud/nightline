@@ -1793,6 +1793,14 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .rccode{display:flex;flex-direction:column;align-items:center;gap:8px;border:3px solid var(--volt);box-shadow:5px 5px 0 var(--mag);padding:12px 14px;background:var(--night)}
 .rccode .fpsmall{align-self:center;justify-self:center}
 .rccode code{font-family:var(--tech);font-size:clamp(15px,4.6vw,21px);letter-spacing:.5px;white-space:nowrap;color:var(--volt);user-select:all}
+/* ===== backlog progress editor ===== */
+.bledit{background:none;border:none;padding:0;text-align:left;cursor:pointer;color:var(--cyan);text-decoration:underline dotted;text-underline-offset:3px;font:inherit;font-size:13px}
+.blpedit{display:grid;gap:8px;border:2px solid var(--cyan);padding:8px;margin-top:4px;background:rgba(0,240,255,.06)}
+.blprow{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.blpnum{width:64px!important;min-width:0;padding:6px 8px!important;font-size:16px!important;text-align:center}
+.blpof{font-family:var(--tech);font-size:11px;color:var(--muted)}
+.blquick .blbtn.add{margin-left:auto}
+.blprow:first-child>.blbtn{font-size:20px;min-width:40px;padding:2px 10px;line-height:1.2}
 </style>
 </head>
 <body>
@@ -7063,8 +7071,15 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.25d";
+const APP_VERSION="2026.09.25f";
 const CHANGELOG=[
+  {v:"2026.09.25f", title:"Faster backlog updates ⏱️", items:[
+    "⏱️ Tap \"Episode 6 / 26\" or \"12 hrs played\" on your backlog to jump ahead: type a number, use − / +, or tap +1, +5, +10.",
+    "📺 Anime with an unknown episode count? Fill in the total right there.",
+  ]},
+  {v:"2026.09.25e", title:"Cleaner backlogs 🎮", items:[
+    "🎮 On a friend's backlog, games and shows you already have no longer show an \"add\" button.",
+  ]},
   {v:"2026.09.25d", title:"Never get locked out 🛟", items:[
     "👤 Log in with your username now, not just your email. No more guessing which email you used.",
     "🛟 New: recovery codes. Make one in Profile → 🛟 Recovery code and save it. If you ever forget your password, your username + that code gets you back in, no email needed.",
@@ -7289,7 +7304,10 @@ function blCard(it){
   const cov=blCover(it); if(cov) c.append(cov);
   const mid=el("div","blmid"), top=el("div","bltop");
   top.append(el("span","bltype "+it.type,it.type==="anime"?"📺 ANIME":"🎮 GAME")); if(it.platform) top.append(el("span","blplat",it.platform));
-  mid.append(top, el("div","blname",it.title), el("div","blprog",blProgressText(it)), blStars(it.rating,blMine()?(r=>blUpdate(it,{rating:r})):null));
+  let prog;
+  if(blMine()){ prog=el("button","blprog bledit",blProgressText(it)+" ✎"); prog.type="button"; prog.setAttribute("aria-label",`Change progress for ${it.title}`); prog.onclick=()=>openProgressEditor(it,c); }
+  else prog=el("div","blprog",blProgressText(it));
+  mid.append(top, el("div","blname",it.title), prog, blStars(it.rating,blMine()?(r=>blUpdate(it,{rating:r})):null));
   if(blMine()){
     const row=el("div","blactions");
     const sel=document.createElement("select"); sel.className="blsel"; sel.setAttribute("aria-label","Status for "+it.title);
@@ -7300,7 +7318,7 @@ function blCard(it){
     row.append(sel,plus,share,del); mid.append(row);
   } else {
     mid.append(el("div","blstatus "+it.status,BL_STATUS[it.status]||it.status));
-    mid.append(blAddToMineButton(it));
+    if(!(myBl||[]).some(x=>blKey(x)===blKey(it))) mid.append(blAddToMineButton(it));   // you both have it: no button needed
   }
   c.append(mid); return c;
 }
@@ -7323,12 +7341,48 @@ function paintBlStatsOnly(){ if(blTab!=="library") return; const st=$("blBody").
   const anime=blItems.filter(i=>i.type==="anime"), games=blItems.filter(i=>i.type==="game");
   const nums=[blItems.length,blItems.filter(i=>i.status==="in-progress").length,blItems.filter(i=>i.status==="completed").length,anime.reduce((n,i)=>n+(+i.progress||0),0),games.reduce((n,i)=>n+(+i.progress||0),0)];
   st.querySelectorAll("b").forEach((b,i)=>b.textContent=String(nums[i])); }
+function blProgressPatch(it,progress,total){
+  total=total===undefined?it.total:total;
+  progress=Math.max(0,Math.min(Math.round(progress)||0, total||100000));
+  const patch={progress};
+  if(total!==it.total) patch.total=total;
+  if(progress>0&&it.status==="planned") patch.status="in-progress";
+  if(total&&progress>=total) patch.status="completed";
+  else if(it.status==="completed"&&total&&progress<total) patch.status="in-progress";   // rewound a finished show
+  return patch;
+}
 function blPlusOne(it){
   if(it.total&&it.progress>=it.total) return;
-  const patch={progress:it.progress+1};
-  if(it.status==="planned") patch.status="in-progress";
-  if(it.total&&patch.progress>=it.total) patch.status="completed";
-  blUpdate(it,patch);
+  blUpdate(it,blProgressPatch(it,it.progress+1));
+}
+/* Tap the progress line: − / + / type a number / +1 +5 +10 / set total episodes. Saves once on Done. */
+function openProgressEditor(it,card){
+  card.querySelector(".blpedit")?.remove();
+  const anime=it.type==="anime", unit=anime?"episode":"hour";
+  let prog=+it.progress||0, total=it.total||null;
+  const box=el("div","blpedit"); box.setAttribute("role","group"); box.setAttribute("aria-label",`Progress for ${it.title}`);
+  const minus=el("button","blbtn","−"), plus=el("button","blbtn","+"); minus.type=plus.type="button";
+  minus.setAttribute("aria-label",`One less ${unit}`); plus.setAttribute("aria-label",`One more ${unit}`);
+  const num=el("input","field blpnum"); num.type="number"; num.inputMode="numeric"; num.min="0"; num.value=prog; num.setAttribute("aria-label",anime?"Episodes watched":"Hours played");
+  const row=el("div","blprow"); row.append(minus,num);
+  let tot=null;
+  if(anime){ row.append(el("span","blpof","of")); tot=el("input","field blpnum"); tot.type="number"; tot.inputMode="numeric"; tot.min="1"; tot.placeholder="?"; tot.value=total||""; tot.setAttribute("aria-label","Total episodes"); row.append(tot); }
+  else row.append(el("span","blpof","hrs"));
+  row.append(plus);
+  const quick=el("div","blprow blquick");
+  [1,5,10].forEach(n=>{ const q=el("button","blbtn",`+${n}${anime?"":"h"}`); q.type="button"; q.setAttribute("aria-label",`Add ${n} ${unit}${n>1?"s":""}`); q.onclick=()=>set(prog+n); quick.append(q); });
+  const done=el("button","blbtn add","Done"); done.type="button"; quick.append(done);
+  const cap=()=>{ const t=tot&&+tot.value>0?Math.round(+tot.value):(anime?null:null); return t; };
+  function set(v){ const t=anime?cap():null; prog=Math.max(0,Math.min(Math.round(+v)||0,t||100000)); num.value=prog; minus.disabled=prog<=0; plus.disabled=!!(t&&prog>=t); }
+  minus.onclick=()=>set(prog-1); plus.onclick=()=>set(prog+1);
+  num.oninput=()=>{ prog=Math.max(0,Math.round(+num.value)||0); };
+  num.onblur=()=>set(num.value); if(tot) tot.onchange=()=>set(prog);
+  const save=()=>{ set(num.value); const t=anime?cap():it.total; box.remove(); const patch=blProgressPatch(it,prog,t); if(patch.progress!==it.progress||patch.total!==undefined||patch.status) blUpdate(it,patch); else paintBlList(); };
+  done.onclick=save;
+  box.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); save(); } if(e.key==="Escape"){ box.remove(); } });
+  box.append(row,quick); set(prog);
+  card.querySelector(".blmid").append(box);
+  setTimeout(()=>{ num.focus(); num.select(); },50);
 }
 function blCompleted(it){
   gainXP("backlogdone");
