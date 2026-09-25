@@ -1927,6 +1927,29 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .gp-icon.mc-icon i{display:block;aspect-ratio:1;border-radius:50%;background:#1d0f06;box-shadow:inset 0 0 0 3px var(--cyan)}
 .mcmini{display:flex;align-items:center;gap:4px;background:#4a2e1a;border-radius:10px;padding:4px 6px;font-family:var(--tech);font-size:9px;color:var(--white)}
 .mcmini-s{background:#1d0f06;border-radius:8px;padding:6px 4px;color:var(--volt)}.mcmini-row{white-space:pre;line-height:1.5;text-align:center}
+/* ===== BS ===== */
+.bsgame{width:100%;display:grid;gap:10px;position:relative}
+#bsHand{gap:4px;row-gap:12px}
+#bsHand .e8play{margin:0}   /* BS hands are big: no overlap, so every card is its own tap target */
+.bs-table{display:flex;align-items:center;justify-content:center;gap:22px}
+.bs-pile{position:relative;display:grid;place-items:center}
+.bs-pile .e8card{width:62px;height:88px;box-shadow:2px 2px 0 #07041a,4px 4px 0 var(--cyan),6px 6px 0 #07041a,8px 8px 0 var(--mag);transform:rotate(-5deg)}
+.bs-pile.empty .e8card{opacity:.25;box-shadow:none}
+.bs-pile b{position:absolute;bottom:-10px;right:-12px;font-family:var(--tech);font-size:13px;background:var(--night);color:var(--volt);border:2px solid var(--volt);padding:1px 7px}
+.bs-now{display:grid;justify-items:center;border:3px solid var(--volt);padding:4px 14px;box-shadow:4px 4px 0 var(--mag);transform:rotate(3deg);background:var(--night)}
+.bs-now span{font-family:var(--tech);font-size:10px;color:var(--cyan);letter-spacing:1px}.bs-now b{font-family:var(--num);font-size:40px;font-weight:400;color:var(--volt);line-height:1}
+.bs-claim{text-align:center;font-size:15px;color:var(--white);min-height:1.2em}
+.bs-call{background:#ff3b5c!important;color:var(--white)!important;font-size:22px!important}
+.bs-finish{border:2px solid var(--volt);padding:10px;text-align:center;display:grid;gap:8px;background:rgba(243,255,58,.06)}
+.bs-finish p{margin:0;color:var(--volt)}.bs-finish div{display:flex;gap:8px}.bs-finish .go{flex:1}
+.bs-revealcards{display:flex;gap:4px;flex-wrap:wrap}
+.bs-revealcards .e8card.fake{outline:3px solid #ff3b5c;outline-offset:1px;filter:saturate(1.2)}
+.e8play.real .e8card::after{content:"✓";position:absolute;top:-7px;right:-7px;font-size:11px;background:#2ee66b;color:#07041a;border-radius:50%;width:16px;height:16px;display:grid;place-items:center;font-family:var(--tech)}
+.e8play .e8card{position:relative}
+.bs-stamp.honest{color:#2ee66b;border-color:#2ee66b}
+.bs-gcicon{font-family:var(--num);font-size:22px!important;color:#ff3b5c;border:2px solid #ff3b5c;padding:2px 6px;transform:rotate(-8deg)}
+.gp-icon.bs-icon{position:relative;display:flex;align-items:center;justify-content:center}.gp-icon.bs-icon .e8card{transform:rotate(-10deg)}.gp-icon.bs-icon .e8card+.e8card{transform:rotate(10deg);margin-left:-14px}
+.gp-icon.bs-icon b{position:absolute;font-family:var(--num);font-weight:400;color:#ff3b5c;font-size:15px;transform:rotate(-12deg);text-shadow:1px 1px 0 var(--night)}
 </style>
 </head>
 <body>
@@ -2082,7 +2105,11 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
           <span class="gp-icon mc-icon" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
           <span class="gp-text"><b>Mancala</b><small class="gp-hint">Sow stones, capture, fill your store</small></span>
         </button>
-        <p class="rulelinks">📖 Rules: <button type="button" data-rules="tictactoe">Tic-tac-toe</button> · <button type="button" data-rules="kingscourt">King's Court</button> · <button type="button" data-rules="eights">Crazy Eights</button> · <button type="button" data-rules="liarsdice">Liar's Dice</button> · <button type="button" data-rules="mancala">Mancala</button></p>
+        <button type="button" class="gamepick" data-game="bs">
+          <span class="gp-icon bs-icon" aria-hidden="true"><span class="e8card sm back"></span><span class="e8card sm back"></span><b>BS!</b></span>
+          <span class="gp-text"><b>BS</b><small class="gp-hint">2–8 players · bluff your cards, call BS!</small></span>
+        </button>
+        <p class="rulelinks">📖 Rules: <button type="button" data-rules="tictactoe">Tic-tac-toe</button> · <button type="button" data-rules="kingscourt">King's Court</button> · <button type="button" data-rules="eights">Crazy Eights</button> · <button type="button" data-rules="liarsdice">Liar's Dice</button> · <button type="button" data-rules="mancala">Mancala</button> · <button type="button" data-rules="bs">BS</button></p>
         <p class="note">More games coming soon 👀</p>
       </div>
     </div>
@@ -2354,6 +2381,21 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
       </div>
       <div class="e8-actions"><button type="button" class="ghost hidden" id="ldSkip">Skip their turn</button></div>
       <button class="go hidden" type="button" id="ldStart">Roll the dice</button>
+    </div>
+    <div class="bsgame hidden" id="bsArea">
+      <div class="e8-players" id="bsPlayers"></div>
+      <div class="bs-table">
+        <div class="bs-pile" id="bsPile"><span class="e8card back"></span><b id="bsPileN">0</b></div>
+        <div class="bs-now"><span>NOW</span><b id="bsRank">A</b></div>
+      </div>
+      <div class="bs-claim" id="bsClaim" aria-live="polite"></div>
+      <button type="button" class="go bs-call hidden" id="bsCallBtn">BS!</button>
+      <div class="bs-finish hidden" id="bsFinish"><p id="bsFinishText"></p><div><button type="button" class="go bs-call" id="bsFinishCall">BS!</button><button type="button" class="go" id="bsAccept">Let them win</button></div></div>
+      <div class="ld-reveal hidden" id="bsReveal"></div>
+      <div class="e8-hand" id="bsHand" aria-label="Your hand"></div>
+      <button type="button" class="go hidden" id="bsPlayBtn">Play</button>
+      <div class="e8-actions"><button type="button" class="ghost hidden" id="bsSkip">Skip their turn</button></div>
+      <button class="go hidden" type="button" id="bsDeal">Deal cards</button>
     </div>
     <button class="go hidden" type="button" id="gameJoin">Join game</button>
     <button class="go hidden" type="button" id="gameRematch">Rematch 🔁</button>
@@ -3029,6 +3071,11 @@ const live = {
   async diceBid(id,qty,face){ must(await sb.rpc("dice_bid",{p_message:id,p_qty:qty,p_face:face})); },
   async diceCall(id){ must(await sb.rpc("dice_call",{p_message:id})); },
   async diceSkip(id){ must(await sb.rpc("dice_skip",{p_message:id})); },
+  async bsStart(id){ must(await sb.rpc("bs_start",{p_message:id})); },
+  async bsPlay(id,cards){ must(await sb.rpc("bs_play",{p_message:id,p_cards:cards})); },
+  async bsCall(id){ must(await sb.rpc("bs_call",{p_message:id})); },
+  async bsAccept(id){ must(await sb.rpc("bs_accept",{p_message:id})); },
+  async bsSkip(id){ must(await sb.rpc("bs_skip",{p_message:id})); },
   async createPoll(room,question,options,multi){ return must(await sb.rpc("create_poll",{p_room:room,p_question:question,p_options:options,p_multi:multi})); },
   async vote(id,idx){ must(await sb.rpc("vote_poll",{p_message:id,p_option:idx})); },
   async renameRoom(room,name){ must(await sb.rpc("rename_room",{p_room:room,p_name:name})); },
@@ -3208,9 +3255,55 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     g.state=rr.state; g.status=rr.done?"done":"active"; g.moves=(g.moves||0)+1; fire("game",JSON.parse(JSON.stringify(g)));
     if(g.status==="active"&&g.state.turn===bm) setTimeout(()=>mcDemoBot(g,human),1600);
   }
+  // ---- BS (demo mirror of the server rules) ----
+  const BSR=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+  function bsDemoDeal(g){
+    const deck=[]; for(const r of BSR) for(const su of ["S","H","D","C"]) deck.push(r+su);
+    for(let i=deck.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
+    const P=g.state.players, hands={}; P.forEach(u=>hands[u]=[]); deck.forEach((c,k)=>hands[P[k%P.length]].push(c));
+    demoE8[g.message_id]={hands,pile:[],lastCards:[]};
+    Object.assign(g.state,{counts:P.map(u=>hands[u].length),turn:Math.floor(Math.random()*P.length),rank:0,pile:0,last_play:null,finishing:null,reveal:null,winner:null,last:null});
+    g.status="active";
+  }
+  function bsDemoPlay(g,who,cards){
+    const st=g.state, d=demoE8[g.message_id], seat=st.players.indexOf(who), hand=d.hands[who];
+    if(g.status!=="active") throw new Error("This game isn't being played right now.");
+    if(seat!==st.turn) throw new Error("It's not your turn.");
+    if(st.finishing) throw new Error("Someone just played their last cards. Call BS or let them win first.");
+    if(!(cards.length>=1&&cards.length<=4)) throw new Error("Play 1 to 4 cards.");
+    const h=[...hand]; for(const c of cards){ const i=h.indexOf(c); if(i<0) throw new Error("You don't have those cards."); h.splice(i,1); }
+    d.hands[who]=h; d.lastCards=[...cards]; d.pile.push(...cards);
+    const claimed=st.rank; st.counts[seat]=h.length; st.last_play={by:who,n:cards.length,rank:claimed}; st.rank=(claimed+1)%13; st.pile+=cards.length;
+    st.turn=(seat+1)%st.players.length; st.finishing=h.length?null:who; st.last={by:who,played:cards.length,rank:claimed};
+    e8DemoAfter(g);
+  }
+  function bsDemoCall(g,who){
+    const st=g.state, d=demoE8[g.message_id], lp=st.last_play;
+    if(g.status!=="active") throw new Error("This game isn't being played right now.");
+    if(!lp) throw new Error("There's nothing to call right now.");
+    if(lp.by===who) throw new Error("You can't call BS on your own play.");
+    const liar=d.lastCards.some(c=>c.slice(0,-1)!==BSR[lp.rank]), loser=liar?lp.by:who, ls=st.players.indexOf(loser), took=d.pile.length;
+    d.hands[loser].push(...d.pile); st.counts[ls]+=took;
+    st.reveal={caller:who,by:lp.by,cards:[...d.lastCards],rank:lp.rank,liar,loser,took}; st.last={by:who,called:true,liar,loser};
+    d.pile=[]; d.lastCards=[]; st.pile=0; st.last_play=null;
+    const fin=st.finishing; st.finishing=null;
+    if(fin&&fin===lp.by&&!liar){ g.status="done"; st.winner=fin; }
+    e8DemoAfter(g);
+  }
+  function bsDemoBots(g){   // after anything happens: maybe a bot calls BS, then the bot whose turn it is plays
+    if(g.status!=="active") return; const st=g.state, d=demoE8[g.message_id], lp=st.last_play;
+    if(lp){ for(const u of st.players){ if(u===lp.by||u==="me") continue; const have=d.hands[u].filter(c=>c.slice(0,-1)===BSR[lp.rank]).length;
+      if(have+lp.n>4||Math.random()<(st.finishing?.6:.12)){ bsDemoCall(g,u); return; } } }
+    const who=st.players[st.turn]; if(who==="me") return;
+    if(st.finishing){ g.status="done"; st.winner=st.finishing; st.finishing=null; st.last_play=null; st.last={by:who,accepted:true}; e8DemoAfter(g); return; }
+    const h=d.hands[who], real=h.filter(c=>c.slice(0,-1)===BSR[st.rank]);
+    const cards=real.length&&Math.random()>.2?real.slice(0,1+Math.floor(Math.random()*real.length)):h.slice().sort(()=>Math.random()-.5).slice(0,Math.min(h.length,1+Math.floor(Math.random()*2)));
+    bsDemoPlay(g,who,cards);
+  }
   function e8DemoAfter(g){
     g.moves++; g.updated_at=iso(); const copy=JSON.parse(JSON.stringify(g)); setTimeout(()=>fire("game",copy),30);
     const who=g.state.players[g.state.turn];
+    if(g.type==="bs"){ if(g.status==="active") setTimeout(()=>bsDemoBots(g),1300); return; }
     if(g.status==="active"&&who!=="me") setTimeout(()=>g.type==="liarsdice"?ldDemoBot(g,who):e8DemoBot(g,who),900);
   }
   function e8DemoBot(g,who){
@@ -3246,8 +3339,8 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     async unpin(id){ const p=pins[id]; delete pins[id]; setTimeout(()=>fire("pin",{message_id:id},false),30); },
     async games(ids){ return ids.map(i=>games[i]).filter(Boolean).map(g=>JSON.parse(JSON.stringify(g))); },
     async createGame(room,type){
-      if(type==="eights"||type==="liarsdice"){
-        const r=rooms[room], m={id:nextId++,room,user_id:"me",kind:"game",text:type==="eights"?"Crazy Eights":"Liar's Dice",created_at:iso()}; r.msgs.push(m);
+      if(type==="eights"||type==="liarsdice"||type==="bs"){
+        const r=rooms[room], m={id:nextId++,room,user_id:"me",kind:"game",text:type==="eights"?"Crazy Eights":type==="bs"?"BS":"Liar's Dice",created_at:iso()}; r.msgs.push(m);
         games[m.id]={message_id:m.id,room,type,player_x:"me",player_o:null,status:"waiting",state:{players:["me"],host:"me"},moves:0,updated_at:iso()};
         ["vee","rook"].forEach((b,i)=>setTimeout(()=>{ const g=games[m.id]; if(g.status!=="waiting"||g.state.players.includes(b)) return; g.state.players.push(b); g.moves++; fire("game",JSON.parse(JSON.stringify(g))); },700+i*700));
         return m;
@@ -3259,7 +3352,7 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
       if(!other) setTimeout(()=>{ const g=games[m.id]; if(g.status!=="waiting") return; g.player_o=Object.keys(r.members).find(u=>u!=="me")||"rook"; g.status="active"; fire("game",JSON.parse(JSON.stringify(g))); if(type==="kingscourt"&&g.player_x!=="me") setTimeout(()=>kcBotTurn(m.id),900); },1500);
       return m;
     },
-    async joinGame(id){ const g=games[id]; if(g.type==="eights"||g.type==="liarsdice"){ if(g.status!=="waiting") throw new Error("This game already started."); if(!g.state.players.includes("me")) g.state.players.push("me"); g.moves++; setTimeout(()=>fire("game",JSON.parse(JSON.stringify(g))),30); return; } g.player_o="me"; g.status="active"; setTimeout(()=>fire("game",JSON.parse(JSON.stringify(g))),30); setTimeout(()=>demoBot(id),900); },
+    async joinGame(id){ const g=games[id]; if(g.type==="eights"||g.type==="liarsdice"||g.type==="bs"){ if(g.status!=="waiting") throw new Error("This game already started."); if(!g.state.players.includes("me")) g.state.players.push("me"); g.moves++; setTimeout(()=>fire("game",JSON.parse(JSON.stringify(g))),30); return; } g.player_o="me"; g.status="active"; setTimeout(()=>fire("game",JSON.parse(JSON.stringify(g))),30); setTimeout(()=>demoBot(id),900); },
     async playTicTacToe(id,cell){
       const g=games[id], mark=g.player_x==="me"?"x":"o";
       if(g.status!=="active"||g.state.turn!==mark||g.state.board[cell]) throw new Error("Not your turn.");
@@ -3281,7 +3374,12 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
       g.status=applied.done?"done":"active";
       setTimeout(()=>fire("game",JSON.parse(JSON.stringify(g))),30);
     },
-    async eightsHand(id){ return [...(demoE8[id]?.hands.me||[])]; },
+    async eightsHand(id){ return [...(demoE8[id]?.hands?.me||[])]; },
+    async bsStart(id){ const g=games[id]; if(g.state.host!=="me") throw new Error("Only the person who started the game can deal."); bsDemoDeal(g); e8DemoAfter(g); },
+    async bsPlay(id,cards){ bsDemoPlay(games[id],"me",cards); },
+    async bsCall(id){ bsDemoCall(games[id],"me"); },
+    async bsAccept(id){ const g=games[id], st=g.state; if(!st.finishing) throw new Error("Nobody is about to win yet."); g.status="done"; st.winner=st.finishing; st.finishing=null; st.last_play=null; e8DemoAfter(g); },
+    async bsSkip(id){ const g=games[id]; if(Date.now()-new Date(g.updated_at).getTime()<120000) throw new Error("Give them a couple of minutes first."); const st=g.state; st.last={by:"me",skipped:st.players[st.turn]}; st.turn=(st.turn+1)%st.players.length; e8DemoAfter(g); },
     async diceStart(id){ const g=games[id]; if(g.state.host!=="me") throw new Error("Only the person who started the game can roll."); ldDemoBegin(g); e8DemoAfter(g); },
     async diceBid(id,qty,face){ ldDemoMove(games[id],"me",{bid:[qty,face]}); },
     async diceCall(id){ ldDemoMove(games[id],"me",{call:true}); },
@@ -3292,9 +3390,9 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     async eightsPass(id){ e8DemoMove(games[id],"me",{pass:true}); },
     async eightsSkip(id){ const g=games[id]; if(Date.now()-new Date(g.updated_at).getTime()<120000) throw new Error("Give them a couple of minutes first."); const n=g.state.players.length; g.state.last={by:"me",skipped:g.state.players[g.state.turn]}; g.state.turn=(g.state.turn+1)%n; g.state.drew=false; e8DemoAfter(g); },
     async rematch(id){
-      if(games[id].type==="eights"||games[id].type==="liarsdice"){ const old=games[id], r=rooms[old.room]; const m={id:nextId++,room:old.room,user_id:"me",kind:"game",text:old.type==="eights"?"Crazy Eights":"Liar's Dice",created_at:iso()}; r.msgs.push(m);
+      if(games[id].type==="eights"||games[id].type==="liarsdice"||games[id].type==="bs"){ const old=games[id], r=rooms[old.room]; const m={id:nextId++,room:old.room,user_id:"me",kind:"game",text:old.type==="eights"?"Crazy Eights":old.type==="bs"?"BS":"Liar's Dice",created_at:iso()}; r.msgs.push(m);
         games[m.id]={message_id:m.id,room:old.room,type:old.type,player_x:"me",player_o:null,status:"waiting",state:{players:[...old.state.players],host:"me"},moves:0,updated_at:iso()};
-        if(old.type==="eights") e8DemoDeal(games[m.id]); else ldDemoBegin(games[m.id]); e8DemoAfter(games[m.id]); return m; }
+        if(old.type==="eights") e8DemoDeal(games[m.id]); else if(old.type==="bs") bsDemoDeal(games[m.id]); else ldDemoBegin(games[m.id]); e8DemoAfter(games[m.id]); return m; }
       const old=games[id], r=rooms[old.room], label=old.type==="kingscourt"?"King's Court":old.type==="mancala"?"Mancala":"Tic-tac-toe";
       const m={id:nextId++,room:old.room,user_id:"me",kind:"game",text:label,created_at:iso()}; r.msgs.push(m);
       const st0 = old.type==="kingscourt" ? {board:kcInitialBoard(),turn:"x",winner:null,line:[],first_x:false,first_o:false,last:[]} : old.type==="mancala" ? {board:[...MC_START],turn:"x",winner:null,line:[],last:null} : {board:Array(9).fill(""),turn:"x",winner:null,line:[]};
@@ -5428,6 +5526,7 @@ function gameCard(m){
   const g=gamesById.get(m.id);
   if(g?.type==="eights"||(!g&&m.text==="Crazy Eights")) return e8GameCard(m,g);
   if(g?.type==="liarsdice"||(!g&&m.text==="Liar's Dice")) return ldGameCard(m,g);
+  if(g?.type==="bs"||(!g&&m.text==="BS")) return bsGameCard(m,g);
   const card=el("div","gamecard");
   const isMC=g?.type==="mancala"||(!g&&m.text==="Mancala");
   const top=el("div","gc-top"); top.append(isMC?mcMini(g):g?.type==="kingscourt"?kcMiniBoard(g):miniGrid(g));
@@ -5455,9 +5554,10 @@ function playerTile(node,uid,mark,active){
 function paintGame(prev){
   const g=gamesById.get(openGameId); if(!g){ closeGame(); return; }
   paintGameRules(g);
-  const e8=g.type==="eights", ld=g.type==="liarsdice";
-  show($("e8Area"),e8); show($("ldArea"),ld); document.querySelector("#gameSheet .versus").classList.toggle("hidden",e8||ld); show($("board"),!e8&&!ld);
+  const e8=g.type==="eights", ld=g.type==="liarsdice", bs=g.type==="bs";
+  show($("e8Area"),e8); show($("ldArea"),ld); show($("bsArea"),bs); document.querySelector("#gameSheet .versus").classList.toggle("hidden",e8||ld||bs); show($("board"),!e8&&!ld&&!bs);
   if(e8){ paintEights(g,prev); return; }
+  if(bs){ paintBS(g,prev); return; }
   if(ld){ paintDice(g,prev); return; }
   const isKC=g.type==="kingscourt", isMC=g.type==="mancala";
   $("gameTitle").textContent=isKC?"King's Court":isMC?"Mancala":"Tic-tac-toe"; show($("gameSub"),isKC||isMC);
@@ -5517,7 +5617,7 @@ $("gameJoin").onclick=async()=>{
   const g=gamesById.get(openGameId); if(!g) return;
   $("gameJoin").disabled=true;
   try{ await api.joinGame(g.message_id); const before=JSON.parse(JSON.stringify(g));
-    if(g.type==="eights"||g.type==="liarsdice"){ if(!g.state.players.includes(user.id)) g.state.players.push(user.id); } else { g.player_o=user.id; g.status="active"; }
+    if(g.type==="eights"||g.type==="liarsdice"||g.type==="bs"){ if(!g.state.players.includes(user.id)) g.state.players.push(user.id); } else { g.player_o=user.id; g.status="active"; }
     paintGame(before); refreshMsg(g.message_id); }
   catch(err){ say("gameMsg","Couldn't join: "+err.message,true); }
   finally{ $("gameJoin").disabled=false; }
@@ -5557,6 +5657,15 @@ const GAME_RULES={
            "The <b>first player with no cards left wins</b>.",
            "Nobody can see your cards but you. If someone goes quiet for 2 minutes on their turn, anyone can <b>skip</b> them."],
     tip:"Save your 8s for when you're stuck. They can get you out of anything."},
+  bs:{name:"BS",emoji:"🃏",players:"2–8 players (best with 3+)",goal:"Be the first to get rid of all your cards. (Also called Cheat or I Doubt It.)",
+    steps:["The <b>whole deck is dealt out</b>, so everyone starts with lots of cards.",
+           "Ranks go <b>in order</b>: Aces, then 2s, 3s, and so on up to Kings, then back to Aces. The rank you have to play is shown in the middle.",
+           "On your turn, pick <b>1 to 4 cards</b> and play them <b>face down</b>, claiming they're all that rank. <b>You're allowed to lie.</b> (Cards that really match have a ✓.)",
+           "Until the next player plays, <b>anyone</b> can tap <b>BS!</b> to call you out. The cards are flipped over.",
+           "If <b>any</b> of them weren't what you claimed, <b>you</b> pick up the whole pile. If they were all real, the <b>caller</b> picks it up.",
+           "When someone plays their <b>last cards</b>, everyone gets a chance to call BS. If they lied, they pick up the pile and play on. If nobody calls, or they were honest, <b>they win</b>.",
+           "Someone gone quiet for 2 minutes on their turn? Anyone can <b>skip</b> them."],
+    tip:"If you're holding three 7s and someone claims to play two 7s… somebody's lying. 😏"},
   mancala:{name:"Mancala",emoji:"🟤",players:"2 players",goal:"Have the most stones in your store when the game ends.",
     steps:["Each side has <b>6 pits</b> with 4 stones in each. Your pits are the bottom row, and <b>your store</b> is the big pit on your right.",
            "On your turn, tap one of <b>your pits</b>. Its stones are picked up and dropped <b>one at a time</b> into the next pits, counter-clockwise.",
@@ -5652,7 +5761,7 @@ function e8GameCard(m,g){
   card.append(btn); return card;
 }
 let e8Busy=false, e8PendingEight=null;
-setInterval(()=>{ const g=gamesById.get(openGameId); if(g?.status==="active"&&!e8Busy){ if(g.type==="eights") paintEights(g); else if(g.type==="liarsdice") paintDice(g); } },20000);
+setInterval(()=>{ const g=gamesById.get(openGameId); if(g?.status==="active"&&!e8Busy){ if(g.type==="eights") paintEights(g); else if(g.type==="liarsdice") paintDice(g); else if(g.type==="bs") paintBS(g); } },20000);
 async function e8Act(fn){
   if(e8Busy) return; e8Busy=true; say("gameMsg","");
   const id=openGameId;
@@ -5891,6 +6000,113 @@ $("ldBidBtn").onclick=()=>{ const g=gamesById.get(openGameId); if(g) e8Act(()=>a
 $("ldLiarBtn").onclick=()=>{ const g=gamesById.get(openGameId); if(g) e8Act(()=>api.diceCall(g.message_id)); };
 $("ldSkip").onclick=()=>{ const g=gamesById.get(openGameId); if(g) e8Act(()=>api.diceSkip(g.message_id)); };
 $("ldStart").onclick=()=>{ const g=gamesById.get(openGameId); if(g) e8Act(()=>api.diceStart(g.message_id)); };
+
+/* ================= BS 🃏 =================
+   Bluffing card game for 2–8 players. Hands and the pile are private on the server; this shows the table,
+   lets you pick 1–4 cards to play face down, and handles BS! calls. */
+const BS_R=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+const BS_NAME=["Aces","2s","3s","4s","5s","6s","7s","8s","9s","10s","Jacks","Queens","Kings"];
+let bsSel=new Set(), bsSelFor=null, bsJustPlayed=[];
+function bsStatus(g){
+  const s=g.state, P=s.players||[], me=P.indexOf(user.id), host=s.host;
+  if(g.status==="waiting"){
+    if(me<0) return {text:`${nameOf(host)} wants to play! (${P.length}/8)`,turn:true};
+    return {text:host===user.id?`${P.length} player${P.length===1?"":"s"} in. Deal when everyone's here (3+ is best).`:`Waiting for ${nameOf(host)} to deal… (${P.length} in)`};
+  }
+  if(g.status==="done") return s.winner===user.id?{text:"You won! 🏆",won:true}:{text:`${nameOf(s.winner)} won 🏆`};
+  if(s.finishing) return s.finishing===user.id?{text:"You played your last cards! Waiting to see if anyone calls BS…"}:{text:`${nameOf(s.finishing)} is about to win!`,turn:P[s.turn]===user.id};
+  const up=P[s.turn];
+  if(up===user.id) return {text:`Your turn! Play 1–4 cards as ${BS_NAME[s.rank]}.`,turn:true};
+  return {text:`${nameOf(up)}'s turn (${BS_NAME[s.rank]})`};
+}
+function bsGameCard(m,g){
+  const card=el("div","gamecard e8gc"), top=el("div","gc-top");
+  top.append(el("span","e8-gcicon bs-gcicon","BS!"));
+  const info=el("div"); info.append(el("div","gc-title","🃏 BS"));
+  if(!g){ info.append(el("div","gc-status","Loading…")); top.append(info); card.append(top); return card; }
+  const st=bsStatus(g); info.append(el("div","gc-status"+(st.turn?" turn":""),st.text)); top.append(info); card.append(top);
+  const inIt=(g.state.players||[]).includes(user.id);
+  const label=g.status==="waiting"?(inIt?(g.state.host===user.id?"Open lobby":"Open game"):"Join game"):g.status==="done"?(inIt?"See results · Rematch":"See results"):(st.turn?"Play your turn":inIt?"Open game":"Watch game");
+  const btn=el("button","play"+(st.turn?" big":""),label); btn.type="button"; btn.onclick=e=>{ e.stopPropagation(); openGame(m.id); };
+  card.append(btn); return card;
+}
+async function paintBS(g,prev){
+  const s=g.state, P=s.players||[], me=P.indexOf(user.id), st=bsStatus(g), playing=g.status!=="waiting";
+  const myTurn=g.status==="active"&&P[s.turn]===user.id&&!s.finishing;
+  const animate=!!prev&&e8Motion()&&openGameId===g.message_id, before=animate?e8Snapshot():null;
+  if(before){ before.pile=$("bsPile").getBoundingClientRect(); before.chips=new Map([...$("bsPlayers").children].map(c=>[c.dataset.uid,c.getBoundingClientRect()])); before.hand=new Map([...$("bsHand").querySelectorAll(".e8play")].map(b=>[b.dataset.card,b.getBoundingClientRect()])); }
+  show($("kcChainBar"),false);
+  $("gameTitle").textContent="BS"; $("gameSub").textContent="Play cards face down, claim the rank, and bluff. Anyone can call BS!"; show($("gameSub"),g.status==="waiting");
+  $("gameStatus").textContent=st.text; $("gameStatus").classList.toggle("good",!!(st.turn||st.won));
+  const row=$("bsPlayers"); row.innerHTML="";
+  P.forEach((u,i)=>{ const chip=el("div","e8p"+(g.status==="active"&&i===s.turn&&!s.finishing?" turn":"")+(g.status==="done"&&u===s.winner?" won":"")+(s.finishing===u?" won":""));
+    chip.dataset.uid=u; const f=el("span","face"); paintFace(f,cache.get(u)); chip.append(f,el("span","pname",u===user.id?"You":nameOf(u)));
+    if(playing) chip.append(el("span","e8count",`🂠 ${s.counts?.[i]??"?"}`)); row.append(chip); });
+  show(document.querySelector("#bsArea .bs-table"),playing);
+  $("bsPileN").textContent=s.pile||0; $("bsPile").classList.toggle("empty",!s.pile);
+  $("bsRank").textContent=BS_R[s.rank||0];
+  // the last play (still open to a BS call until the next player plays)
+  const lp=s.last_play; $("bsClaim").textContent=lp?`${lp.by===user.id?"You":nameOf(lp.by)} played ${lp.n} card${lp.n>1?"s":""} as ${BS_NAME[lp.rank]}`:(playing&&g.status==="active"?"":"");
+  show($("bsCallBtn"),g.status==="active"&&!!lp&&lp.by!==user.id&&me>=0&&!s.finishing);
+  // someone played their last cards
+  const fin=s.finishing; show($("bsFinish"),g.status==="active"&&!!fin);
+  if(fin){ const canAccept=me>=0&&fin!==user.id&&(P[s.turn]===user.id||Date.now()-new Date(g.updated_at||Date.now()).getTime()>120000);
+    $("bsFinishText").textContent=fin===user.id?"You played your last cards! If nobody calls BS, you win.":`${nameOf(fin)} played their last card${lp?.n>1?"s":""}! Call BS, or let them win.`;
+    show($("bsFinishCall"),fin!==user.id&&me>=0); show($("bsAccept"),canAccept); }
+  // last reveal
+  const rv=s.reveal, rb=$("bsReveal"); show(rb,playing&&!!rv); rb.innerHTML="";
+  if(rv){ rb.append(el("p","ld-rline",`${rv.caller===user.id?"You":nameOf(rv.caller)} called BS on ${rv.by===user.id?"you":nameOf(rv.by)}: ${rv.liar?"caught lying! 🤥":"they were honest! 😇"} ${rv.loser===user.id?"You":nameOf(rv.loser)} picked up ${rv.took} card${rv.took===1?"":"s"}.`));
+    const w=el("div","bs-revealcards"); (rv.cards||[]).forEach(c=>{ const d=e8CardEl(c,{small:true}); if(e8Rank(c)!==BS_R[rv.rank]) d.classList.add("fake"); w.append(d); }); rb.append(w); }
+  // your hand: pick 1–4 cards
+  const hb=$("bsHand"); show(hb,playing&&me>=0);
+  const key=g.message_id+":"+g.moves; if(bsSelFor!==key&&!myTurn) bsSel.clear(); if(bsSelFor!==key) bsSelFor=key;
+  if(playing&&me>=0){
+    const cards=await e8Hand(g); if(openGameId!==g.message_id) return;
+    [...bsSel].forEach(c=>{ if(!cards.includes(c)) bsSel.delete(c); });
+    const sorted=[...cards].sort((a,b)=>BS_R.indexOf(e8Rank(a))-BS_R.indexOf(e8Rank(b))||"SHDC".indexOf(e8Suit(a))-"SHDC".indexOf(e8Suit(b)));
+    hb.innerHTML=""; const mid=(sorted.length-1)/2, big=sorted.length>14;
+    sorted.forEach((c,idx)=>{ const real=e8Rank(c)===BS_R[s.rank], sel=bsSel.has(c);
+      const b=el("button","e8play"+(sel?" can":"")+(real&&myTurn?" real":"")); b.type="button"; b.dataset.card=c;
+      b.style.setProperty("--r","0deg"); b.style.setProperty("--y","0px");
+      b.append(e8CardEl(c,{small:big})); b.setAttribute("aria-pressed",String(sel)); b.setAttribute("aria-label",e8CardName(c)+(real?", matches":"")+(sel?", selected":""));
+      b.disabled=!myTurn;
+      b.onclick=()=>{ if(bsSel.has(c)) bsSel.delete(c); else if(bsSel.size<4) bsSel.add(c); else { say("gameMsg","You can play up to 4 cards at a time."); return; } paintBS(gamesById.get(openGameId)); };
+      hb.append(b); });
+  }
+  show($("bsPlayBtn"),myTurn); $("bsPlayBtn").disabled=!bsSel.size||e8Busy;
+  $("bsPlayBtn").textContent=bsSel.size?`Play ${bsSel.size} as ${BS_NAME[s.rank]}`:`Pick 1–4 cards to play as ${BS_NAME[s.rank]}`;
+  const stale=g.status==="active"&&!s.finishing&&P[s.turn]!==user.id&&me>=0&&Date.now()-new Date(g.updated_at||Date.now()).getTime()>120000;
+  show($("bsSkip"),stale); if(stale) $("bsSkip").textContent=`Skip ${nameOf(P[s.turn])}'s turn`;
+  show($("bsDeal"),g.status==="waiting"&&s.host===user.id); $("bsDeal").disabled=P.length<2; $("bsDeal").textContent=P.length<2?"Waiting for players…":`Deal cards (${P.length} players)`;
+  show($("gameJoin"),g.status==="waiting"&&me<0&&P.length<8);
+  show($("gameRematch"),g.status==="done"&&me>=0);
+  if(before) bsAnimate(g,prev,before);
+  if(g.status==="done"&&prev&&prev.status!=="done"){ if(st.won){ gainXP("gamewin"); if(fxEnabled()) FX.play("confetti"); } if(navigator.vibrate) navigator.vibrate(st.won?[40,60,40]:60); }
+  else if(prev?.state&&prev.state.turn!==s.turn&&myTurn&&navigator.vibrate) navigator.vibrate(25);
+}
+function bsAnimate(g,prev,before){
+  const s=g.state, ps=prev.state||{}, pile=$("bsPile").getBoundingClientRect();
+  // someone played: face-down cards fly to the pile (yours from your hand, theirs from their picture)
+  if(s.last?.played&&JSON.stringify(s.last)!==JSON.stringify(ps.last)){
+    const by=s.last.by, n=s.last.played;
+    for(let k=0;k<n;k++) setTimeout(()=>e8Ghost(by===user.id?(before.hand.get(bsJustPlayed[k])||before.chips.get(by)):before.chips.get(by),pile,{back:true,dur:460}),k*90);
+    $("bsPile").animate([{transform:"scale(1)"},{transform:"scale(1.12) rotate(-3deg)"},{transform:"none"}],{duration:300,delay:380});
+  }
+  // BS was called: stamp, flip, and the pile flies to whoever lost
+  if(s.reveal&&JSON.stringify(s.reveal)!==JSON.stringify(ps.reveal)){
+    const rv=s.reveal, stamp=el("div","ld-stamp bs-stamp"+(rv.liar?"":" honest"),rv.liar?"LIAR!":"HONEST!"); $("bsArea").append(stamp);
+    stamp.animate([{transform:"translate(-50%,-50%) scale(3) rotate(-18deg)",opacity:0},{transform:"translate(-50%,-50%) scale(.9) rotate(-8deg)",opacity:1,offset:.25},{transform:"translate(-50%,-50%) scale(1) rotate(-8deg)",opacity:1,offset:.75},{transform:"translate(-50%,-50%) scale(1.1) rotate(-8deg)",opacity:0}],{duration:1300,easing:"ease-out"}).onfinish=()=>stamp.remove();
+    if(navigator.vibrate) navigator.vibrate([30,40,60]);
+    $("bsReveal").querySelectorAll(".e8card").forEach((d,k)=>d.animate([{transform:"rotateY(90deg)",opacity:0},{transform:"rotateY(0)",opacity:1}],{duration:280,delay:450+k*110,easing:"ease-out",fill:"backwards"}));
+    const to=[...$("bsPlayers").children].find(c=>c.dataset.uid===rv.loser)?.getBoundingClientRect();
+    for(let k=0;k<Math.min(6,rv.took);k++) setTimeout(()=>e8Ghost(before.pile||pile,to,{back:true,dur:560}),900+k*70);
+  }
+}
+$("bsPlayBtn").onclick=()=>{ const g=gamesById.get(openGameId); if(!g||!bsSel.size) return; const cards=[...bsSel]; bsJustPlayed=cards; bsSel.clear(); e8Act(()=>api.bsPlay(g.message_id,cards)); };
+[$("bsCallBtn"),$("bsFinishCall")].forEach(b=>b.onclick=()=>{ const g=gamesById.get(openGameId); if(g) e8Act(()=>api.bsCall(g.message_id)); });
+$("bsAccept").onclick=()=>{ const g=gamesById.get(openGameId); if(g) e8Act(()=>api.bsAccept(g.message_id)); };
+$("bsSkip").onclick=()=>{ const g=gamesById.get(openGameId); if(g) e8Act(()=>api.bsSkip(g.message_id)); };
+$("bsDeal").onclick=()=>{ const g=gamesById.get(openGameId); if(g) e8Act(()=>api.bsStart(g.message_id)); };
 
 /* ================= INSTALL HELPER ================= */
 const SHARE_ICON='<span class="ico" aria-label="Share icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 15V3M7 8l5-5 5 5M5 12v8h14v-8"/></svg></span>';
@@ -7965,8 +8181,12 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.26f";
+const APP_VERSION="2026.09.26g";
 const CHANGELOG=[
+  {v:"2026.09.26g", title:"New game: BS 🃏", items:[
+    "🃏 BS is here for big groups (2–8 players): ＋ → Games → BS.",
+    "🤥 Play cards face down and claim the rank. Lie if you want. Anyone can call BS! and whoever's wrong picks up the pile.",
+  ]},
   {v:"2026.09.26f", title:"New game: Mancala 🟤", items:[
     "🟤 Play Mancala, one of the oldest games in the world: ＋ → Games → Mancala.",
     "🪨 Sow stones around the board, land in your store for an extra turn, and capture your opponent's stones. Most stones wins!",
