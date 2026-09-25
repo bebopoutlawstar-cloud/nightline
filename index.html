@@ -1281,8 +1281,12 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
 /* front tabs & + tray tabs */
 .fronttabs{gap:0;transform:skewX(-10deg);margin:6px 0 8px;overflow:visible}
 .fronttabs .tab{font-family:var(--num);font-size:22px;letter-spacing:1px;text-transform:uppercase;border:none;background:transparent;color:var(--white);text-shadow:3px 3px 0 var(--night),4px 4px 0 var(--mag);padding:6px 4px}
-.fronttabs .tab[aria-selected="true"]{background:var(--white);color:var(--night);text-shadow:none;box-shadow:5px 5px 0 var(--mag);clip-path:polygon(0 8%,100% 0,97% 100%,3% 92%)}
-.tabbadge{transform:rotate(6deg) skewX(10deg)}
+.fronttabs .tab[aria-selected="true"]{background:transparent;color:var(--night);text-shadow:none;isolation:isolate}
+/* the slanted white shape + pink shadow live on layers BEHIND the tab, so the unread badge on top isn't cropped */
+.fronttabs .tab[aria-selected="true"]::before,.fronttabs .tab[aria-selected="true"]::after{content:"";position:absolute;inset:0;clip-path:polygon(0 8%,100% 0,97% 100%,3% 92%);pointer-events:none}
+.fronttabs .tab[aria-selected="true"]::before{background:var(--white);z-index:-1}
+.fronttabs .tab[aria-selected="true"]::after{background:var(--mag);transform:translate(5px,5px);z-index:-2}
+.tabbadge{transform:rotate(6deg) skewX(10deg);text-shadow:none}
 .tray-tabs .ghost{font-family:var(--num);font-size:16px;letter-spacing:1px;text-transform:uppercase;border:none;color:var(--white);text-shadow:2px 2px 0 var(--night);transform:skewX(-8deg)}
 .tray-tabs .ghost[aria-pressed="true"]{background:var(--white);color:var(--night);text-shadow:none;box-shadow:3px 3px 0 var(--mag);clip-path:polygon(0 8%,100% 0,97% 100%,3% 92%)}
 .tabs .tab{font-family:var(--num);font-size:20px;letter-spacing:1px;text-transform:uppercase;border:none;background:transparent;color:var(--white);text-shadow:3px 3px 0 var(--night),4px 4px 0 var(--mag);transform:skewX(-8deg)}
@@ -7104,8 +7108,11 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.25h";
+const APP_VERSION="2026.09.25i";
 const CHANGELOG=[
+  {v:"2026.09.25i", title:"Tidy tabs ✨", items:[
+    "✨ Fixed the unread count on the selected tab (Rooms / DMs / Friends) getting cut off at the top, and the counts on the other tabs looking blurry.",
+  ]},
   {v:"2026.09.25h", title:"Even steadier chats 🧱", items:[
     "📜 Loading older messages can no longer drop them into the wrong chat if you switch chats while it loads.",
     "🔥 Tap reactions as fast as you want: what you see is always what gets saved.",
