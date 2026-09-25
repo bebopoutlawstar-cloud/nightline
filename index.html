@@ -1950,6 +1950,13 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .bs-gcicon{font-family:var(--num);font-size:22px!important;color:#ff3b5c;border:2px solid #ff3b5c;padding:2px 6px;transform:rotate(-8deg)}
 .gp-icon.bs-icon{position:relative;display:flex;align-items:center;justify-content:center}.gp-icon.bs-icon .e8card{transform:rotate(-10deg)}.gp-icon.bs-icon .e8card+.e8card{transform:rotate(10deg);margin-left:-14px}
 .gp-icon.bs-icon b{position:absolute;font-family:var(--num);font-weight:400;color:#ff3b5c;font-size:15px;transform:rotate(-12deg);text-shadow:1px 1px 0 var(--night)}
+/* ===== pinned games ===== */
+.pinbar.gamepin .pinicon{filter:none}
+.pinbar.myturn{border-color:var(--volt)!important;box-shadow:0 0 0 1px var(--volt),0 0 14px rgba(243,255,58,.35)}
+.pinbar.myturn .pintext{color:var(--volt)}
+.pinbar.myturn .pinicon{animation:pinbounce 1.8s ease-in-out infinite}
+@keyframes pinbounce{0%,70%,100%{transform:none}80%{transform:translateY(-3px) rotate(-8deg)}90%{transform:translateY(0) rotate(6deg)}}
+@media (prefers-reduced-motion:reduce){.pinbar.myturn .pinicon{animation:none}}
 </style>
 </head>
 <body>
@@ -3523,6 +3530,10 @@ async function accountCall(body){
   if(!r.ok) throw new Error(data.error||"Something went wrong. Try again.");
   return data;
 }
+if(!sb){   // demo mode: mimic the server's auto-pin for new games
+  for(const k of ["createGame","rematch"]){ const orig=demo[k];
+    demo[k]=async(...a)=>{ const m=await orig(...a); setTimeout(()=>{ if(room===m.room&&!pins.has(m.id)){ pins.set(m.id,{room:m.room,message_id:m.id,pinned_by:null,auto:true,created_at:new Date().toISOString()}); paintPinBar(); } },60); return m; }; }
+}
 const api = sb ? live : (LIB_MISSING ? offlineApi : demo);
 $("modeNote").textContent = sb ? "" : LIB_MISSING ? "Can't reach NightLane right now. Check your connection; it'll load as soon as you're back online." : "Demo mode: no server connected, so accounts and friends are simulated.";
 
@@ -4051,7 +4062,10 @@ async function enterRoom(code,token){
       member:setMember,
       roomUpdated:r=>{ if(r.code!==room) return; setRoomName(r.name); if(r.background!==undefined) setRoomBackground(r.background); if(r.owner!==undefined) roomOwner=r.owner; if(r.disappear_seconds!==undefined){ disappear=+r.disappear_seconds||0; paintDisappear(); } },
       task:p=>{ if(p.eventType==="DELETE"){ tasks.delete(p.old.id); } else tasks.set(p.new.id,p.new); paintTasks(); },
-      game:g=>{ const prev=gamesById.get(g.message_id); gamesById.set(g.message_id,g); refreshMsg(g.message_id); if(openGameId===g.message_id) paintGame(prev); },
+      game:g=>{ const prev=gamesById.get(g.message_id); gamesById.set(g.message_id,g); refreshMsg(g.message_id); if(openGameId===g.message_id) paintGame(prev);
+        const wasPinned=pins.has(g.message_id);
+        if(!sb&&g.status==="done"&&pins.get(g.message_id)?.auto){ pins.delete(g.message_id); pinCursor=0; }   // the server does this itself
+        if(wasPinned) paintPinBar(); },
       vote:(v,added)=>{ const p=pollsById.get(v.message_id); if(!p) return; setVote(p,v,added); refreshMsg(v.message_id); },
       pin:async(p,added)=>{ if(added){ if(p.room&&p.room!==room) return; pins.set(p.message_id,p); await loadPinnedContext(); } else { if(!pins.has(p.message_id)) return; pins.delete(p.message_id); } pinCursor=0; paintPinBar(); if(!$("roomSheet").classList.contains("hidden")) paintPins(); },
       memberGone:uid=>{
@@ -4497,19 +4511,32 @@ $("bgCustom").addEventListener("change",e=>chooseBackground(e.target.value));
 async function loadPinnedContext(){
   const missing=[...pins.keys()].filter(id=>!byId.has(id)&&!contextById.has(id));
   for(const id of missing){ const m=await api.fetchMessage(id).catch(()=>null); if(m){ contextById.set(id,m); await ensureProfiles([m.user_id]); } else pins.delete(id); }
+  const games=[...pins.keys()].map(id=>byId.get(id)||contextById.get(id)).filter(m=>m?.kind==="game");
+  if(games.length){ await loadGames(games).catch(()=>{}); const ids=new Set(games.flatMap(m=>{ const g=gamesById.get(m.id); return g?[g.player_x,g.player_o,...(g.state?.players||[])]:[]; }).filter(Boolean)); if(ids.size) await ensureProfiles([...ids]).catch(()=>{}); }
 }
-function pinnedList(){ return [...pins.values()].sort((a,b)=>a.created_at<b.created_at?1:-1).map(p=>byId.get(p.message_id)||contextById.get(p.message_id)).filter(m=>m&&!blocked.has(m.user_id)); }
+// "whose turn / who won" for any game, for the pin bar
+function anyGameStatus(g){ return g.type==="eights"?e8Status(g):g.type==="liarsdice"?ldStatus(g):g.type==="bs"?bsStatus(g):gameStatusText(g); }
+const pinnedGameUp=m=>{ const g=m?.kind==="game"&&gamesById.get(m.id); return !!(g&&g.status!=="done"&&anyGameStatus(g).turn); };
+function pinnedList(){   // games waiting on you come first
+  return [...pins.values()].sort((a,b)=>a.created_at<b.created_at?1:-1).map(p=>byId.get(p.message_id)||contextById.get(p.message_id)).filter(m=>m&&!blocked.has(m.user_id))
+    .sort((a,b)=>(pinnedGameUp(b)?1:0)-(pinnedGameUp(a)?1:0));
+}
 function paintPinBar(){
   const list=pinnedList(); show($("pinBar"),list.length>0); if(!list.length) return;
   if(pinCursor>=list.length) pinCursor=0;
   const m=list[pinCursor]; const t=$("pinText"); t.textContent="";
-  t.append(el("b","",nameOf(m.user_id))); t.append(previewOf(m));
+  const g=m.kind==="game"&&gamesById.get(m.id);
+  $("pinBar").classList.toggle("gamepin",!!g); $("pinBar").classList.toggle("myturn",!!g&&pinnedGameUp(m));
+  $("pinBar").querySelector(".pinicon").textContent=g?"🎮":"📌";
+  if(g){ t.append(el("b","",(m.text||"Game")+" · ")); t.append(anyGameStatus(g).text); }
+  else { t.append(el("b","",nameOf(m.user_id))); t.append(previewOf(m)); }
   $("pinCount").textContent=list.length>1?`${pinCursor+1}/${list.length}`:"";
-  $("pinJump").setAttribute("aria-label",`Pinned message from ${nameOf(m.user_id)}. Tap to jump to it`);
+  $("pinJump").setAttribute("aria-label",g?`Pinned game: ${m.text}, ${anyGameStatus(g).text}. Tap to open it`:`Pinned message from ${nameOf(m.user_id)}. Tap to jump to it`);
 }
 $("pinJump").onclick=async()=>{
   const list=pinnedList(); if(!list.length) return;
   const m=list[pinCursor%list.length];
+  if(m.kind==="game"&&gamesById.has(m.id)){ openGame(m.id); if(list.length>1){ pinCursor=(pinCursor+1)%list.length; paintPinBar(); } return; }   // a pinned game opens straight away
   let tries=0; while(!elById.has(m.id)&&hasMore&&tries++<6) await loadOlder();
   if(elById.has(m.id)) jumpTo(m.id); else $("status").textContent="That pinned message is too far back to show.";
   if(list.length>1){ pinCursor=(pinCursor+1)%list.length; paintPinBar(); }
@@ -8181,8 +8208,12 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.26g";
+const APP_VERSION="2026.09.26h";
 const CHANGELOG=[
+  {v:"2026.09.26h", title:"Games stay on top 📌", items:[
+    "📌 Games in progress now pin themselves to the top of the chat, and unpin when they're over. No more scrolling up to find them.",
+    "🎮 Tap a pinned game to jump straight into it. Games waiting on you glow and show up first.",
+  ]},
   {v:"2026.09.26g", title:"New game: BS 🃏", items:[
     "🃏 BS is here for big groups (2–8 players): ＋ → Games → BS.",
     "🤥 Play cards face down and claim the rank. Lie if you want. Anyone can call BS! and whoever's wrong picks up the pile.",
