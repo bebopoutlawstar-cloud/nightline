@@ -1776,6 +1776,9 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .toast.missed-secret .ttext,.toast.long .ttext{-webkit-line-clamp:4}
 .toast .ttitle{white-space:normal;overflow-wrap:anywhere}
 .missed-actions button{min-width:0}
+/* ===== offline ===== */
+.offlinebar{display:flex;align-items:center;gap:8px;background:var(--night);border:2px solid #ffcf3d;box-shadow:4px 4px 0 var(--mag);padding:8px 12px;font-size:15px;color:var(--white);transform:rotate(-1deg)}
+.offlinebar span{flex:1;min-width:0}
 </style>
 </head>
 <body>
@@ -1792,6 +1795,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 <!-- ============ FRONT ============ -->
 <section class="screen front" id="front">
  <div class="front-inner">
+  <div class="offlinebar hidden" id="offlineBar" role="status">📡 <span id="offlineText">You're offline. Showing your saved chats.</span></div>
   <div class="installbar hidden" id="installBar" role="status">
     <span id="installBarText"></span>
     <button type="button" class="send" id="installBarHow">How</button>
@@ -2904,8 +2908,16 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     subscribe(_room,h){ H=h; h.status("Demo mode"); const stop=()=>{H=null}; stop.typing=()=>{}; return stop; }
   };
 })();
-const api = sb ? live : demo;
-$("modeNote").textContent = sb ? "" : "Demo mode: no server connected, so accounts and friends are simulated.";
+// The server library comes from a CDN. If it couldn't load (no signal on a cold start), use a stand-in that
+// just reports "offline" — NEVER demo mode, which would show a real user fake chats.
+const LIB_MISSING=!sb&&!!(SUPABASE_URL&&SUPABASE_ANON_KEY);
+const offlineApi=new Proxy({},{ get:(t,k)=>{
+  if(k==="onAuth"||String(k).startsWith("subscribe")) return ()=>()=>{};
+  if(k==="session") return async()=>null;
+  return ()=>{ const p=Promise.reject(new TypeError("Failed to fetch")); p.catch(()=>{}); return p; };
+}});
+const api = sb ? live : (LIB_MISSING ? offlineApi : demo);
+$("modeNote").textContent = sb ? "" : LIB_MISSING ? "Can't reach NightLine right now. Check your connection; it'll load as soon as you're back online." : "Demo mode: no server connected, so accounts and friends are simulated.";
 
 /* ================= STATE ================= */
 let user=null, meProfile=null, room="", roomName=null, roomOwner=null, unsub=null, pendingFile=null, replyTo=null, hasMore=false, menuMsg=null;
@@ -2960,14 +2972,22 @@ const nameOf = uid => (room && members.get(uid)?.nick) || cache.get(uid)?.userna
 
 async function refreshMe(){
   const [p]=await api.profiles([user.id]).catch(()=>[]);
-  meProfile=p||{id:user.id,username:user.user_metadata?.username||"you",avatar_url:null};
+  if(p) LS.set("nl-me-cache",JSON.stringify(p));
+  let cached=null; try{ cached=JSON.parse(LS.get("nl-me-cache")||"null"); }catch(e){}
+  meProfile=p||(cached&&cached.id===user.id?cached:null)||{id:user.id,username:user.user_metadata?.username||"you",avatar_url:null};
   cache.set(user.id,meProfile); paintMe(); applyTheme(meProfile.theme||savedTheme());
 }
 
 /* ================= AUTH ================= */
 function hideSplash(){
   const s=$("splash"); if(!s||s.classList.contains("gone")) return;
-  s.classList.add("gone"); setTimeout(()=>s.remove(),600);
+  s.classList.add("gone");
+}
+function showSplash(msg){   // the loading screen, brought back to cover sign-in while everything loads
+  const s=$("splash"); if(!s) return;
+  if(msg&&$("splashMsg")) $("splashMsg").textContent=msg;
+  s.classList.remove("gone");
+  clearTimeout(showSplash.t); showSplash.t=setTimeout(hideSplash,20000);   // never get stuck behind it
 }
 (function splashStars(){
   const cv=$("splashStars"); if(!cv) return; const ctx=cv.getContext("2d");
@@ -3002,18 +3022,16 @@ async function handleAuth(u){
     if(q.get("friend")){ try{ LS.set("nl-pending-friend",JSON.stringify({t:q.get("friend"),at:Date.now()})); }catch(e){} }
     return;
   }
-  await refreshMe();
-  await syncProgress();
+  if(offlineMode){ offlineMode=false; paintOffline(); }
+  await Promise.all([refreshMe(), syncProgress(), api.blocks().then(b=>{ blocked=new Set(b); }).catch(()=>{})]);
   if(!LS.ok&&!window.__lsWarned){ window.__lsWarned=true; setTimeout(()=>{
     const t=el("div","toast long"); const body=el("span","tbody");
     body.append(el("div","ttitle","⚠️ Your browser is blocking saved data"), el("div","ttext","Your progress still saves to your account, but settings reset each visit. Turn off Private Browsing or \"Block All Cookies\", or add NightLine to your Home Screen."));
     t.append(body); $("toasts").prepend(t); setTimeout(()=>{ t.classList.add("out"); setTimeout(()=>t.remove(),260); },10000); },3000); }
-  blocked=new Set(await api.blocks().catch(()=>[]));
-  await ensureProfiles([...blocked]);
   show($("authCard"),false); show($("roomCard"));
   try{ const last=LS.get("nl-room")||""; $("room").value=last.startsWith("dm-")?"":last; }catch(e){}
   $("front").classList.add("logged");
-  await loadContacts(); await loadInbox(); startPresence(); owlBack();
+  await Promise.all([ensureProfiles([...blocked]), loadContacts(), loadInbox()]); startPresence(); owlBack();
   await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));   // let the real front screen actually paint first
   hideSplash();
   maybeShowWhatsNew();
@@ -3054,13 +3072,16 @@ $("authCard").addEventListener("submit",async e=>{
   if(mode==="up" && !/^[A-Za-z0-9_]{3,20}$/.test(uname)) return say("authMsg","Username needs 3–20 letters, numbers, or underscores.",true);
   if(!/^\S+@\S+\.\S+$/.test(email)) return say("authMsg","Enter a valid email.",true);
   if(pass.length<6) return say("authMsg","Password needs at least 6 characters.",true);
+  if(navigator.onLine===false) return say("authMsg","You're offline. Connect to the internet to "+(mode==="in"?"log in.":"sign up."),true);
   $("authBtn").disabled=true; say("authMsg",mode==="in"?"Logging in…":"Creating account…");
+  showSplash(mode==="in"?"signing you in…":"setting up your account…");
   try{
     if(mode==="in") await api.signIn(email,pass);
-    else { const r=await api.signUp(uname,email,pass); if(r==="confirm"){ setMode("in"); say("authMsg","Check your email to confirm, then log in."); } }
+    else { const r=await api.signUp(uname,email,pass); if(r==="confirm"){ hideSplash(); setMode("in"); say("authMsg","Check your email to confirm, then log in."); } }
     $("pass").value="";
   }catch(err){
-    say("authMsg",/invalid login/i.test(err.message)?"Wrong email or password.":/already registered/i.test(err.message)?"That email already has an account. Log in instead.":err.message,true);
+    hideSplash();
+    say("authMsg",isNetworkError(err)?"Couldn't reach NightLine. Check your connection and try again.":/invalid login/i.test(err.message)?"Wrong email or password.":/already registered/i.test(err.message)?"That email already has an account. Log in instead.":err.message,true);
   }finally{ $("authBtn").disabled=false; }
 });
 
@@ -3082,11 +3103,17 @@ $("recoverForm").addEventListener("submit",async e=>{
 });
 
 /* ================= INBOX ================= */
+const inboxCacheKey=()=>"nl-inbox-cache-"+(user?.id||"");
 async function loadInbox(){
   if(!user) return;
-  let list=[]; try{ list=await api.myRooms(); }catch(e){}
+  let list=null;
+  if(navigator.onLine!==false&&!offlineMode){ try{ list=await api.myRooms(); LS.set(inboxCacheKey(),JSON.stringify(list.slice(0,80))); }catch(e){ list=null; } }
+  if(list===null){   // offline or failed: keep what's on screen, or the last saved copy, never wipe it to "No rooms"
+    if(inboxRows.length) list=inboxRows; else { try{ list=JSON.parse(LS.get(inboxCacheKey())||"[]"); }catch(e){ list=[]; } }
+    paintOffline();
+  }
   inboxRows=list;
-  if(list.some(r=>r.dm_user)) await ensureProfiles(list.map(r=>r.dm_user).filter(Boolean));
+  if(!isOffline()&&list.some(r=>r.dm_user)) await ensureProfiles(list.map(r=>r.dm_user).filter(Boolean));   // offline: use the names/pictures saved with the list
   const roomsBox=$("inbox"), dmBox=$("dmList"); roomsBox.innerHTML=""; dmBox.innerHTML="";
   const roomRows=list.filter(r=>!r.is_dm), dmRows=list.filter(r=>r.is_dm);
   show($("inboxWrap"),roomRows.length>0); show($("inboxEmpty"),!roomRows.length); show($("dmEmpty"),!dmRows.length);
@@ -3109,7 +3136,7 @@ async function loadInbox(){
     if(+r.unread>0) when.append(el("span","badge",r.unread>99?"99+":String(r.unread)));
     b.append(hash,info,when);
     b.setAttribute("aria-label",`${r.is_dm?"Private chat with "+(r.dm_name||"someone"):"Room "+(r.name||r.code)}${+r.unread?`, ${r.unread} unread`:""}`);
-    b.onclick=()=>{ $("room").value=r.code; enterRoom(r.code); };
+    b.onclick=()=>{ if(isOffline()){ offlineNotice(); return; } if(!r.is_dm) $("room").value=r.code; enterRoom(r.code); };
     box.append(b);
   }
 }
@@ -3271,10 +3298,13 @@ async function enterRoom(code,token){
   let result;
   try{ result=await api.joinRoom(target,token); if(seq!==enterSeq) return; }
   catch(err){
+    if(seq!==enterSeq) return;
     ["chat","roomSheet","msgMenu"].forEach(id=>show($(id),false)); show($("front")); show($("roomCard"));
+    $("jumpBtn").disabled=false;
+    if(isNetworkError(err)){ if($("room").value.startsWith("dm-")) $("room").value=""; say("roomMsg",""); offlineNotice(); paintOffline(); return; }
     show($("joinPanel")); $("joinToggle").setAttribute("aria-expanded","true"); $("joinToggle").textContent="✕";
     say("roomMsg", err.message==="private" ? "That room is private. Ask someone inside for an invite link." : "Couldn't join: "+err.message, true);
-    $("jumpBtn").disabled=false; return;
+    return;
   }
   $("jumpBtn").disabled=false; say("roomMsg","");
   if(unsub){unsub();unsub=null;}
@@ -6834,8 +6864,14 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.22k";
+const APP_VERSION="2026.09.22l";
 const CHANGELOG=[
+  {v:"2026.09.22l", title:"Works offline 📡", items:[
+    "📡 Opening NightLine with no signal (or in airplane mode) now shows your saved chats right away, instead of a long wait and a sign-in screen. It reconnects on its own when you're back.",
+    "🔐 No more getting signed out just because your phone was offline when your login needed renewing.",
+    "💬 Your chats list stays put when you lose signal, with a clear \"you're offline\" note instead of confusing errors.",
+    "⚡ Signing in is faster, and the loading screen now covers it until everything's ready.",
+  ]},
   {v:"2026.09.22k", title:"Rock-solid messaging 💬", items:[
     "🧭 Fixed messages from one chat briefly showing up in another if you switched chats quickly.",
     "📥 Coming back after a long time away now loads every message you missed, not just the last 50.",
@@ -6934,11 +6970,12 @@ function busyRightNow(){
   return !$("chat").classList.contains("hidden") || !!$("box").value.trim() || !!pendingFile || pendingImages.length>0 || !!rec
       || [...document.querySelectorAll(".overlay")].some(o=>!o.classList.contains("hidden"));
 }
-$("updateBar").onclick=()=>location.reload();
+async function safeReload(){ try{ if(sb) await Promise.race([sb.auth.getSession(),new Promise(r=>setTimeout(r,3000))]); }catch(e){} location.reload(); }
+$("updateBar").onclick=()=>safeReload();
 document.addEventListener("visibilitychange",()=>{
   if(document.hidden){ hiddenSince=Date.now(); return; }
   const away=hiddenSince?Date.now()-hiddenSince:0;
-  if(updateReady&&away>120000&&!busyRightNow()) return location.reload();
+  if(updateReady&&away>120000&&!busyRightNow()&&navigator.onLine!==false) return safeReload();
   checkForUpdate();
 });
 setInterval(()=>{ if(!document.hidden) checkForUpdate(); },5*60*1000);
@@ -7332,14 +7369,61 @@ function bootSequence(){
 bootSequence();
 
 /* ---------- boot ---------- */
+/* ================= OFFLINE ================= */
+let offlineMode=false;
+const isOffline=()=>navigator.onLine===false||offlineMode;
+function isNetworkError(err){ return navigator.onLine===false||/failed to fetch|networkerror|network request|load failed|fetch failed|internet/i.test(String(err?.message||err)); }
+function savedLoginUser(){
+  if(!SUPABASE_URL) return null;
+  try{ const k="sb-"+new URL(SUPABASE_URL).hostname.split(".")[0]+"-auth-token"; const s=JSON.parse(LS.get(k)||"null"); return s?.user||s?.currentSession?.user||null; }catch(e){ return null; }
+}
+function paintOffline(){
+  const off=isOffline(); show($("offlineBar"),off&&!!user);
+  if(off) $("offlineText").textContent=offlineMode&&navigator.onLine!==false?"Reconnecting… showing your saved chats.":"You're offline. Showing your saved chats.";
+}
+function offlineNotice(){
+  const t=el("div","toast"); const body=el("span","tbody");
+  body.append(el("div","ttitle","📡 You're offline"), el("div","ttext","Chats will open again as soon as you're back online."));
+  t.append(body); $("toasts").prepend(t); setTimeout(()=>{ t.classList.add("out"); setTimeout(()=>t.remove(),260); },3500);
+}
+function startOffline(saved,slow){   // show your saved chats right away; the real login takes over when the connection's back
+  if(user) return;
+  offlineMode=true; user=saved;
+  let cached=null; try{ cached=JSON.parse(LS.get("nl-me-cache")||"null"); }catch(e){}
+  meProfile=(cached&&cached.id===saved.id)?cached:{id:saved.id,username:saved.user_metadata?.username||"you",avatar_url:null};
+  cache.set(user.id,meProfile); paintMe(); applyTheme(meProfile.theme||savedTheme());
+  show($("authCard"),false); show($("roomCard")); $("front").classList.add("logged");
+  loadInbox(); paintOffline(); hideSplash();
+  try{ const t=LS.get("nl-front-tab"); if(["chats","dms","contacts"].includes(t)) setFrontTab(t); }catch(e){}
+}
+addEventListener("offline",()=>paintOffline());
+addEventListener("online",async()=>{
+  if(LIB_MISSING){ location.reload(); return; }   // the server library never loaded: start fresh now that we can fetch it
+  paintOffline();
+  if(offlineMode){ const u=await api.session().catch(()=>null); if(u){ authSeen=u.id; offlineMode=false; handleAuth(u); } else { offlineMode=false; authSeen=null; handleAuth(null); } }
+});
+
 setMode("in");
 api.onAuth((u,event)=>{
   if(event==="PASSWORD_RECOVERY"){ say("recMsg",""); show($("recover")); setTimeout(()=>$("newPass").focus(),50); }
   syncAuth(u);
 });
 let authSeen;
-function syncAuth(u){ const id=u?.id||null; if(id===authSeen) return; authSeen=id; handleAuth(u); }
-api.session().then(syncAuth);
+function syncAuth(u){
+  if(offlineMode){   // opened offline from a saved login: a real login result takes over; an offline "no session" doesn't kick you out
+    if(u){ authSeen=u.id; handleAuth(u); } else if(navigator.onLine!==false){ offlineMode=false; authSeen=null; handleAuth(null); }
+    return;
+  }
+  const id=u?.id||null; if(id===authSeen) return; authSeen=id; handleAuth(u);
+}
+(async()=>{
+  const saved=savedLoginUser();
+  if(saved&&(navigator.onLine===false||LIB_MISSING)) return startOffline(saved);
+  let done=false;
+  const slow=setTimeout(()=>{ if(!done&&saved&&!user) startOffline(saved,true); },4000);   // bad signal: don't sit on a blank screen
+  const u=await api.session().catch(()=>null); done=true; clearTimeout(slow);
+  syncAuth(u);
+})();
 </script>
 </body>
 </html>

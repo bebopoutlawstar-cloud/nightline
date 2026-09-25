@@ -1,11 +1,20 @@
-// NightLine service worker (v10): push notifications + fast repeat loads.
-const CACHE="nightline-v11";
+// NightLine service worker (v12): push notifications + fast repeat loads.
+const CACHE="nightline-v12";
+// Outside files the app needs to start: the server library (a fixed version, so it never changes) and the fonts.
+const LIB="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.0/dist/umd/supabase.min.js";
+const OUTSIDE=u=>u.hostname==="cdn.jsdelivr.net"||u.hostname==="fonts.googleapis.com"||u.hostname==="fonts.gstatic.com";
 const STATIC=["icon-192.png","icon-512.png","favicon.ico","manifest.json","badge-96.png"];
-self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(async c => { await c.addAll(STATIC).catch(()=>{}); try { const r = await fetch("./", { cache: "no-store" }); if (r.ok) await c.put("shell", r); } catch (e) {} }).then(()=>self.skipWaiting())); });
+self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(async c => { await c.addAll(STATIC).catch(()=>{}); try { const lr = await fetch(LIB, { mode: "cors" }); if (lr.ok) await c.put(LIB, lr); } catch (e) {} try { const r = await fetch("./", { cache: "no-store" }); if (r.ok) await c.put("shell", r); } catch (e) {} }).then(()=>self.skipWaiting())); });
 self.addEventListener("activate", e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())));
 self.addEventListener("fetch", e => {
   const req = e.request; if (req.method !== "GET") return;
-  const url = new URL(req.url); if (url.origin !== location.origin) return;
+  const url = new URL(req.url);
+  if (url.origin !== location.origin) {
+    if (!OUTSIDE(url)) return;
+    // library + fonts: use the saved copy (works offline), fetch and save it the first time
+    e.respondWith(caches.match(req, { ignoreVary: true }).then(hit => hit || fetch(req).then(r => { if (r.ok || r.type === "opaque") { const copy = r.clone(); caches.open(CACHE).then(c => c.put(req, copy)); } return r; })));
+    return;
+  }
   const isShell = req.mode === "navigate" || url.pathname.endsWith("/index.html") || url.pathname.endsWith("/");
   if (isShell) {
     // network first: always pick up your latest upload; fall back to the cached copy when offline
