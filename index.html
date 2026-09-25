@@ -1940,6 +1940,9 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .bs-now span{font-family:var(--tech);font-size:10px;color:var(--cyan);letter-spacing:1px}.bs-now b{font-family:var(--num);font-size:40px;font-weight:400;color:var(--volt);line-height:1}
 .bs-claim{text-align:center;font-size:15px;color:var(--white);min-height:1.2em}
 .bs-call{background:#ff3b5c!important;color:var(--white)!important;font-size:22px!important}
+.bs-call.ghosted{visibility:hidden}
+/* game screens grow downward from the top, so a new panel never shifts what's under your finger */
+#gameSheet{align-items:start!important;place-items:start center!important;align-content:start!important;padding-top:max(18px,env(safe-area-inset-top))}
 .bs-finish{border:2px solid var(--volt);padding:10px;text-align:center;display:grid;gap:8px;background:rgba(243,255,58,.06)}
 .bs-finish p{margin:0;color:var(--volt)}.bs-finish div{display:flex;gap:8px}.bs-finish .go{flex:1}
 .bs-revealcards{display:flex;gap:4px;flex-wrap:wrap}
@@ -2398,9 +2401,9 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
       <div class="bs-claim" id="bsClaim" aria-live="polite"></div>
       <button type="button" class="go bs-call hidden" id="bsCallBtn">BS!</button>
       <div class="bs-finish hidden" id="bsFinish"><p id="bsFinishText"></p><div><button type="button" class="go bs-call" id="bsFinishCall">BS!</button><button type="button" class="go" id="bsAccept">Let them win</button></div></div>
-      <div class="ld-reveal hidden" id="bsReveal"></div>
       <div class="e8-hand" id="bsHand" aria-label="Your hand"></div>
       <button type="button" class="go hidden" id="bsPlayBtn">Play</button>
+      <div class="ld-reveal hidden" id="bsReveal"></div>
       <div class="e8-actions"><button type="button" class="ghost hidden" id="bsSkip">Skip their turn</button></div>
       <button class="go hidden" type="button" id="bsDeal">Deal cards</button>
     </div>
@@ -6057,8 +6060,10 @@ function bsGameCard(m,g){
   const btn=el("button","play"+(st.turn?" big":""),label); btn.type="button"; btn.onclick=e=>{ e.stopPropagation(); openGame(m.id); };
   card.append(btn); return card;
 }
+let bsChangedAt=0;   // when the table last changed under you (a play, a BS call, a pickup)
 async function paintBS(g,prev){
   const s=g.state, P=s.players||[], me=P.indexOf(user.id), st=bsStatus(g), playing=g.status!=="waiting";
+  if(prev&&prev.moves!==g.moves) bsChangedAt=Date.now();
   const myTurn=g.status==="active"&&P[s.turn]===user.id&&!s.finishing;
   const animate=!!prev&&e8Motion()&&openGameId===g.message_id, before=animate?e8Snapshot():null;
   if(before){ before.pile=$("bsPile").getBoundingClientRect(); before.chips=new Map([...$("bsPlayers").children].map(c=>[c.dataset.uid,c.getBoundingClientRect()])); before.hand=new Map([...$("bsHand").querySelectorAll(".e8play")].map(b=>[b.dataset.card,b.getBoundingClientRect()])); }
@@ -6074,7 +6079,9 @@ async function paintBS(g,prev){
   $("bsRank").textContent=BS_R[s.rank||0];
   // the last play (still open to a BS call until the next player plays)
   const lp=s.last_play; $("bsClaim").textContent=lp?`${lp.by===user.id?"You":nameOf(lp.by)} played ${lp.n} card${lp.n>1?"s":""} as ${BS_NAME[lp.rank]}`:(playing&&g.status==="active"?"":"");
-  show($("bsCallBtn"),g.status==="active"&&!!lp&&lp.by!==user.id&&me>=0&&!s.finishing);
+  const canCall=g.status==="active"&&!!lp&&lp.by!==user.id&&me>=0&&!s.finishing;
+  show($("bsCallBtn"),g.status==="active"&&me>=0&&!s.finishing); $("bsCallBtn").classList.toggle("ghosted",!canCall); $("bsCallBtn").disabled=!canCall;
+  $("bsCallBtn").setAttribute("aria-hidden",String(!canCall));
   // someone played their last cards
   const fin=s.finishing; show($("bsFinish"),g.status==="active"&&!!fin);
   if(fin){ const canAccept=me>=0&&fin!==user.id&&(P[s.turn]===user.id||Date.now()-new Date(g.updated_at||Date.now()).getTime()>120000);
@@ -6129,7 +6136,9 @@ function bsAnimate(g,prev,before){
     for(let k=0;k<Math.min(6,rv.took);k++) setTimeout(()=>e8Ghost(before.pile||pile,to,{back:true,dur:560}),900+k*70);
   }
 }
-$("bsPlayBtn").onclick=()=>{ const g=gamesById.get(openGameId); if(!g||!bsSel.size) return; const cards=[...bsSel]; bsJustPlayed=cards; bsSel.clear(); e8Act(()=>api.bsPlay(g.message_id,cards)); };
+$("bsPlayBtn").onclick=()=>{ const g=gamesById.get(openGameId); if(!g||!bsSel.size) return;
+  if(Date.now()-bsChangedAt<750){ say("gameMsg","The table just changed. Check your cards, then tap Play again."); return; }   /* don't let a jumpy screen play cards for you */
+  const cards=[...bsSel]; bsJustPlayed=cards; bsSel.clear(); e8Act(()=>api.bsPlay(g.message_id,cards)); };
 [$("bsCallBtn"),$("bsFinishCall")].forEach(b=>b.onclick=()=>{ const g=gamesById.get(openGameId); if(g) e8Act(()=>api.bsCall(g.message_id)); });
 $("bsAccept").onclick=()=>{ const g=gamesById.get(openGameId); if(g) e8Act(()=>api.bsAccept(g.message_id)); };
 $("bsSkip").onclick=()=>{ const g=gamesById.get(openGameId); if(g) e8Act(()=>api.bsSkip(g.message_id)); };
@@ -8208,8 +8217,11 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.26h";
+const APP_VERSION="2026.09.26i";
 const CHANGELOG=[
+  {v:"2026.09.26i", title:"BS fix 🛠️", items:[
+    "🛠️ Fixed BS sometimes playing your picked cards by accident when someone else called BS while you were choosing. The table no longer jumps under your finger.",
+  ]},
   {v:"2026.09.26h", title:"Games stay on top 📌", items:[
     "📌 Games in progress now pin themselves to the top of the chat, and unpin when they're over. No more scrolling up to find them.",
     "🎮 Tap a pinned game to jump straight into it. Games waiting on you glow and show up first.",
