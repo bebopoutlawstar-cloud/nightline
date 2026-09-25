@@ -1840,6 +1840,17 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .e8play.can{transform:translateY(-8px)}.e8play.can .e8card{border-color:var(--cyan);box-shadow:3px 3px 0 var(--volt)}
 .e8play.cant{opacity:.45}.e8play:disabled{cursor:default}
 .e8-actions{display:flex;justify-content:center;gap:8px}
+/* ===== game rules ===== */
+.rulesbtn{background:none;border:none;color:var(--cyan);font-family:var(--tech);font-size:12px;letter-spacing:.5px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:2px 4px}
+.rulesbox{width:100%;text-align:left;border:2px solid var(--cyan);background:rgba(0,240,255,.05);padding:10px 12px;display:grid;gap:6px}
+.rules-head{font-family:var(--tech);font-size:12px;letter-spacing:.5px;color:var(--cyan)}
+.rules-goal{margin:0;font-size:16px;color:var(--volt)}
+.rules-steps{margin:0;padding-left:20px;display:grid;gap:5px;font-size:15px;line-height:1.35;color:var(--white)}
+.rules-steps b{color:var(--volt);font-weight:700}
+.rules-tip{margin:0;font-size:14px;color:var(--muted);font-style:italic}
+.rulelinks{margin:6px 0 0;font-size:13px;color:var(--muted);text-align:center}
+.rulelinks button{background:none;border:none;color:var(--cyan);text-decoration:underline;font:inherit;cursor:pointer;padding:2px}
+#rulesSheet .rulesbox{border:none;background:none;padding:0}
 </style>
 </head>
 <body>
@@ -1987,6 +1998,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
           <span class="gp-icon e8-icon" aria-hidden="true"><span class="e8card sm red"><b>8</b><i>♥</i></span><span class="e8card sm"><b>8</b><i>♠</i></span></span>
           <span class="gp-text"><b>Crazy Eights</b><small class="gp-hint">2–6 players · match suit or number · 8s are wild</small></span>
         </button>
+        <p class="rulelinks">📖 Rules: <button type="button" data-rules="tictactoe">Tic-tac-toe</button> · <button type="button" data-rules="kingscourt">King's Court</button> · <button type="button" data-rules="eights">Crazy Eights</button></p>
         <p class="note">More games coming soon 👀</p>
       </div>
     </div>
@@ -2222,7 +2234,9 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 <div class="overlay hidden" id="gameSheet" role="dialog" aria-modal="true" aria-labelledby="gameTitle">
   <div class="sheet gamesheet"><div class="sheetbody">
     <h2 id="gameTitle">Tic-tac-toe</h2>
-    <p class="sub hidden" id="gameSub">Every piece moves like a king. Land in the glowing Court and keep at least one piece there.</p>
+    <p class="sub hidden" id="gameSub">Pieces move one square up, down, left, or right. Get into the glowing Court and always keep a piece there.</p>
+    <button type="button" class="rulesbtn" id="gameRulesBtn" aria-expanded="false" aria-controls="gameRules">📖 How to play</button>
+    <div class="rulesbox hidden" id="gameRules"></div>
     <div class="versus">
       <div class="player" id="gpX"></div>
       <span class="vs">VS</span>
@@ -2341,6 +2355,15 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
       <p class="sub">Reading the cards…</p>
     </div>
     <button class="ghost" type="button" id="quizClose">Close</button>
+  </div></div>
+</div>
+
+<!-- ============ GAME RULES ============ -->
+<div class="overlay hidden" id="rulesSheet" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+  <div class="sheet"><div class="sheetbody">
+    <h2 id="rulesTitle">How to play</h2>
+    <div class="rulesbox" id="rulesBody"></div>
+    <button class="ghost" type="button" id="rulesClose">Got it</button>
   </div></div>
 </div>
 
@@ -4694,7 +4717,7 @@ $("lightbox").onclick=()=>show($("lightbox"),false);
 ["profile","roomSheet","msgMenu","pollSheet","summarySheet","calSheet","searchSheet","backlogSheet","blShareSheet","forgotSheet","rcSheet"].forEach(id=>$(id).addEventListener("click",e=>{ if(e.target.id===id) show($(id),false); }));
 addEventListener("keydown",e=>{
   if(e.key==="Escape") closeTray();
-  if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu","pollSheet","tray","themeSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","installSheet","habitsSheet","quizSheet","slSheet","newsSheet","backlogSheet","blShareSheet","recover","forgotSheet","rcSheet"].forEach(id=>{ const n=$(id); if(n) show(n,false); });
+  if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu","pollSheet","tray","themeSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","installSheet","habitsSheet","quizSheet","slSheet","newsSheet","backlogSheet","blShareSheet","recover","forgotSheet","rcSheet","rulesSheet"].forEach(id=>{ const n=$(id); if(n) show(n,false); });
   if(!$("lightbox").classList.contains("hidden")&&lbAlbum){ if(e.key==="ArrowLeft") lbStep(-1); if(e.key==="ArrowRight") lbStep(1); }
 });
 
@@ -5153,7 +5176,7 @@ function gameCard(m){
   return card;
 }
 let openGameId=null;
-function openGame(id){ openGameId=id; kcReset(); say("gameMsg",""); paintGame(); show($("gameSheet")); }
+function openGame(id){ rulesFor=null; openGameId=id; kcReset(); say("gameMsg",""); paintGame(); show($("gameSheet")); }
 function closeGame(){ openGameId=null; kcReset(); show($("gameSheet"),false); }
 $("gameClose").onclick=closeGame;
 $("gameSheet").addEventListener("click",e=>{ if(e.target.id==="gameSheet") closeGame(); });
@@ -5164,6 +5187,7 @@ function playerTile(node,uid,mark,active){
 }
 function paintGame(prev){
   const g=gamesById.get(openGameId); if(!g){ closeGame(); return; }
+  paintGameRules(g);
   const e8=g.type==="eights";
   show($("e8Area"),e8); document.querySelector("#gameSheet .versus").classList.toggle("hidden",e8); show($("board"),!e8);
   if(e8){ paintEights(g,prev); return; }
@@ -5229,6 +5253,55 @@ $("gameRematch").onclick=async()=>{
   catch(err){ say("gameMsg","Couldn't start a rematch: "+err.message,true); }
   finally{ $("gameRematch").disabled=false; }
 };
+
+/* ================= GAME RULES 📖 =================
+   Plain-language rules for every game. They open by themselves the first time you open a game type,
+   any time from "📖 How to play", and from the Rules links in the Games tray. */
+const GAME_RULES={
+  tictactoe:{name:"Tic-tac-toe",emoji:"❌⭕",players:"2 players",goal:"Get three of your marks in a row.",
+    steps:["One player is <b>X</b>, the other is <b>O</b>. X goes first.",
+           "Take turns tapping an empty square to put your mark there.",
+           "The first to get <b>3 in a row</b> (across, down, or diagonally) wins.",
+           "If all 9 squares fill up with no 3 in a row, it's a <b>draw</b>."],
+    tip:"Grab the middle square early. It's part of the most winning lines."},
+  kingscourt:{name:"King's Court",emoji:"👑",players:"2 players",goal:"Leave your opponent with no pieces in the Court.",
+    steps:["The glowing 4×4 square in the middle is <b>the Court</b>. Each player starts with 24 pieces around the edge.",
+           "Pieces move <b>one square up, down, left, or right</b>, never diagonally.",
+           "Your <b>first move</b> must be a simple step into the Court (no jumping yet).",
+           "<b>Jump</b> by hopping over a piece next to you onto the empty square just past it, in a straight line. Jump an opponent's piece to <b>capture</b> it; jumping your own just hops over.",
+           "You can <b>chain jumps</b> in one turn and change direction between hops. Tap <b>Done</b> when you're finished.",
+           "Once you're in, you must <b>always keep at least one piece in the Court</b>. A move that would empty it isn't allowed.",
+           "You <b>win</b> when your opponent has no pieces left in the Court (after their first move), or no pieces at all."],
+    tip:"Protect your Court pieces. Losing the last one is how games end."},
+  eights:{name:"Crazy Eights",emoji:"🃏",players:"2–6 players",goal:"Be the first to get rid of all your cards.",
+    steps:["Everyone gets <b>7 cards</b> (2 players) or <b>5 cards</b> (3–6 players). One card is flipped face up to start.",
+           "On your turn, play a card that matches the top card's <b>suit</b> (♠ ♥ ♦ ♣) or <b>number</b>. Playable cards lift up and glow.",
+           "<b>8s are wild.</b> Play one anytime and pick the suit the next player has to follow.",
+           "Can't play? Tap the deck to <b>draw one card</b>. Play it if you can, or tap <b>Pass</b>.",
+           "The <b>first player with no cards left wins</b>.",
+           "Nobody can see your cards but you. If someone goes quiet for 2 minutes on their turn, anyone can <b>skip</b> them."],
+    tip:"Save your 8s for when you're stuck. They can get you out of anything."}
+};
+function renderRules(box,type){
+  const r=GAME_RULES[type]; box.innerHTML=""; if(!r) return;
+  box.append(el("div","rules-head",`${r.emoji} ${r.name} · ${r.players}`), el("p","rules-goal","🎯 Goal: "+r.goal));
+  const ol=document.createElement("ol"); ol.className="rules-steps";
+  r.steps.forEach(t=>{ const li=document.createElement("li"); li.innerHTML=t; ol.append(li); });   // rule text is written by us, never by users
+  box.append(ol, el("p","rules-tip","💡 "+r.tip));
+}
+function openRulesSheet(type){ const r=GAME_RULES[type]; if(!r) return; $("rulesTitle").textContent=`How to play ${r.name}`; renderRules($("rulesBody"),type); show($("rulesSheet")); }
+$("rulesClose").onclick=()=>show($("rulesSheet"),false);
+$("rulesSheet").addEventListener("click",e=>{ if(e.target.id==="rulesSheet") show($("rulesSheet"),false); });
+document.querySelectorAll(".rulelinks [data-rules]").forEach(b=>b.onclick=e=>{ e.stopPropagation(); openRulesSheet(b.dataset.rules); });
+let rulesFor=null;   // which game's rules are in the game screen's box
+function paintGameRules(g){
+  const box=$("gameRules"), btn=$("gameRulesBtn");
+  if(rulesFor!==g.type){ rulesFor=g.type; renderRules(box,g.type);
+    let seen=false; try{ seen=LS.get("nl-rules-seen-"+g.type)==="1"; LS.set("nl-rules-seen-"+g.type,"1"); }catch(e){}
+    setRulesOpen(!seen); }   // first time you ever open this kind of game: show the rules
+}
+function setRulesOpen(on){ show($("gameRules"),on); $("gameRulesBtn").setAttribute("aria-expanded",String(on)); $("gameRulesBtn").textContent=on?"📖 Hide rules":"📖 How to play"; }
+$("gameRulesBtn").onclick=()=>setRulesOpen($("gameRules").classList.contains("hidden"));
 
 /* ================= CRAZY EIGHTS 🃏 =================
    Classic public-domain card game for 2–6 players. The server deals, keeps everyone's hand private,
@@ -7413,8 +7486,12 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.26a";
+const APP_VERSION="2026.09.26b";
 const CHANGELOG=[
+  {v:"2026.09.26b", title:"How to play 📖", items:[
+    "📖 Every game now has simple rules: tap \"📖 How to play\" on any game, or \"Rules\" in the Games tray.",
+    "👋 Opening a game you've never played? The rules pop up on their own.",
+  ]},
   {v:"2026.09.26a", title:"New game: Crazy Eights 🃏", items:[
     "🃏 Play Crazy Eights with 2–6 friends: ＋ → Games → Crazy Eights. Friends tap Join, then deal.",
     "🎴 Match the suit or number. 8s are wild. First to empty their hand wins!",
@@ -7936,7 +8013,7 @@ feed.addEventListener("click",e=>{
 /* ================= BACK BUTTON (Android / browser back) ================= */
 // Each chat or sheet you open adds a history step, so Back closes the top one instead of leaving the app.
 (function(){
-  const LAYERS=["chat","profile","roomSheet","msgMenu","themeSheet","pollSheet","installSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","lightbox","habitsSheet","quizSheet","slSheet","newsSheet","backlogSheet","blShareSheet","forgotSheet","rcSheet"];
+  const LAYERS=["chat","profile","roomSheet","msgMenu","themeSheet","pollSheet","installSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","lightbox","habitsSheet","quizSheet","slSheet","newsSheet","backlogSheet","blShareSheet","forgotSheet","rcSheet","rulesSheet"];
   const stack=[]; let popping=false, ignorePops=0, pendingBack=0, flushQueued=false;
   const isOpen=id=>!$(id).classList.contains("hidden");
   function queueBack(){
