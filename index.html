@@ -2160,6 +2160,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     <h2 id="installTitle">Install NightLane</h2>
     <p class="sub" id="installIntro"></p>
     <button class="go hidden" type="button" id="installNow">Install now</button>
+    <a class="go hidden" id="installChrome" href="#">Open in Chrome</a>
     <ol class="steps" id="installSteps"></ol>
     <div class="copyrow">
       <label for="installUrl" class="sr">NightLane link</label>
@@ -5059,7 +5060,7 @@ function detectBrowser(ua=navigator.userAgent){
     else { name="ios-other"; }            // Lion and other app browsers
   } else if(android){
     if(inApp||/; wv\)/.test(ua)) name="inapp";
-    else if(/SamsungBrowser/.test(ua)){ name="samsung"; canInstall=true; }
+    else if(/SamsungBrowser/.test(ua)){ name="samsung"; canInstall=false; }   // its installs trip Android's "built for an older version of Android" block (Samsung bug); Chrome installs cleanly
     else if(/EdgA/.test(ua)){ name="edge-android"; canInstall=true; }
     else if(/Firefox/.test(ua)){ name="firefox-android"; canInstall=true; }
     else if(/Chrome\//.test(ua)){ name="chrome-android"; canInstall=true; }
@@ -5081,7 +5082,7 @@ function paintInstallEntry(){
   if(stuck&&!dismissed){
     $("installBarText").textContent = BROWSER.ios
       ? "This browser can't add NightLane to your home screen, so notifications won't work here."
-      : "This browser can't install NightLane. Open it in Chrome to get the app.";
+      : BROWSER.name==="samsung" ? "Samsung Internet can't install NightLane safely. Open it in Chrome to get the app." : "This browser can't install NightLane. Open it in Chrome to get the app.";
     show($("installBar"));
   } else show($("installBar"),false);
 }
@@ -5089,7 +5090,7 @@ function openInstallSheet(){
   const url=location.origin+location.pathname; $("installUrl").value=url; say("installMsg","");
   const steps=$("installSteps"); steps.innerHTML="";
   const add=h=>{ const li=document.createElement("li"); const s=document.createElement("span"); s.innerHTML=h; li.append(s); steps.append(li); };
-  show($("installNow"),!!deferredInstall);
+  show($("installNow"),!!deferredInstall&&BROWSER.name!=="samsung"); show($("installChrome"),false);
   const B=BROWSER.name;
   if(B==="safari"){
     $("installIntro").textContent="You're in Safari, so you're all set.";
@@ -5115,10 +5116,18 @@ function openInstallSheet(){
     add(`Tap the ${DOTS_ICON} menu in the corner of your browser.`);
     add(`Tap <b>Install app</b> or <b>Add to Home screen</b>.`);
     add(`Open NightLane from your home screen, log in, and turn on <b>notifications</b> in your profile.`);
+  } else if(B==="samsung"){
+    $("installIntro").textContent="Samsung Internet has a bug that makes Android block NightLane with a scary \"older version of Android\" warning. Install from Chrome instead. No security settings to change.";
+    const host=location.host+location.pathname;
+    $("installChrome").href=`intent://${host}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(url)};end`;
+    show($("installChrome"));
+    add(`Tap <b>Open in Chrome</b> above. (No Chrome? Get it free from the Play Store, or copy the link below into it.)`);
+    add(`In Chrome, tap ${DOTS_ICON} → <b>Install app</b>.`);
+    add(`Already installed it from Samsung Internet? Remove that copy first, and <b>don't</b> turn off Play Protect for it.`);
   } else if(BROWSER.android){
     $("installIntro").textContent="This browser can't install NightLane. Chrome can.";
     add(`Tap <b>Copy</b> below to copy the NightLane link.`);
-    add(`Open <b>Chrome</b> (or Samsung Internet) and paste the link.`);
+    add(`Open <b>Chrome</b> and paste the link.`);
     add(`Tap ${DOTS_ICON} → <b>Install app</b> or <b>Add to Home screen</b>.`);
   } else {
     $("installIntro").textContent = BROWSER.canInstall ? "You can install NightLane on this computer." : "On a computer, Chrome or Edge can install NightLane.";
@@ -7071,8 +7080,11 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.25f";
+const APP_VERSION="2026.09.25g";
 const CHANGELOG=[
+  {v:"2026.09.25g", title:"Easier Android install 🤖", items:[
+    "🤖 Installing from Samsung Internet made Android show a scary \"older version of Android\" warning (a Samsung bug). NightLane now sends you to Chrome instead, where it installs cleanly. Never turn off Play Protect to install it.",
+  ]},
   {v:"2026.09.25f", title:"Faster backlog updates ⏱️", items:[
     "⏱️ Tap \"Episode 6 / 26\" or \"12 hrs played\" on your backlog to jump ahead: type a number, use − / +, or tap +1, +5, +10.",
     "📺 Anime with an unknown episode count? Fill in the total right there.",
