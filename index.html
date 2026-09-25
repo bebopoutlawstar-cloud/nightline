@@ -2043,6 +2043,16 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 @keyframes tvhand{to{opacity:.55;transform:translate(-50%,-50%) scale(2.2)}}
 .tv-cap{top:72%;font-size:clamp(20px,6vw,32px);font-family:var(--tech);letter-spacing:2px}
 @media (prefers-reduced-motion:reduce){.sxscene *{animation:none!important}}
+/* ===== secret cheat sheet ===== */
+.cheatbar{display:grid;grid-template-columns:1fr;gap:6px;width:100%}.cheatbar .field{width:100%!important;box-sizing:border-box}
+.cheatbar .ghost{justify-self:end;width:auto!important;white-space:nowrap;font-size:13px!important;padding:6px 12px!important;border:2px solid #3b2d80!important}.cheatbar .ghost.on{border-color:var(--volt)!important;color:var(--volt)}
+.cheatlist{width:100%;display:grid;gap:8px;max-height:58vh;overflow:auto;text-align:left;padding-right:2px}
+.cheat{border:2px solid #3b2d80;padding:8px 10px;display:grid;gap:4px;background:rgba(0,0,0,.2)}
+.cheat.got{border-color:#2ee66b55}
+.cheat-head{display:flex;align-items:center;gap:8px}.cheat-head b{flex:1;color:var(--white)}.cheat.got .cheat-head b{color:#2ee66b}
+.cheat-test{background:none;border:1px solid var(--cyan);color:var(--cyan);font-family:var(--tech);font-size:11px;padding:3px 8px;cursor:pointer}
+.cheat-how{font-family:var(--tech);font-size:13px;color:var(--volt);overflow-wrap:anywhere}
+.cheat-when,.cheat-hint,.cheat-unl{font-size:13px;color:var(--muted)}.cheat-unl{color:var(--mag)}
 </style>
 </head>
 <body>
@@ -2253,6 +2263,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     <button type="button" class="ghost" id="openNews">📰 What's new</button>
     <button type="button" class="ghost" id="openChangePass">🔑 Change password</button>
     <button type="button" class="ghost" id="openRecovery">🛟 Recovery code</button>
+    <button type="button" class="ghost hidden" id="openCheats">🗝️ Secret cheat sheet</button>
     <details class="proflist"><summary id="unlockSummary">🎁 Unlockables</summary><div class="unlockbox"><div id="unlockList"></div></div></details>
     <details class="proflist"><summary id="secretSummary">🔒 Secrets found: 0</summary><div class="secretbox">
       <div class="hintbox" id="hintBox"></div>
@@ -2596,6 +2607,18 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     <h2 id="rulesTitle">How to play</h2>
     <div class="rulesbox" id="rulesBody"></div>
     <button class="ghost" type="button" id="rulesClose">Got it</button>
+  </div></div>
+</div>
+
+<!-- ============ SECRET CHEAT SHEET (admins only) ============ -->
+<div class="overlay hidden" id="cheatSheet" role="dialog" aria-modal="true" aria-labelledby="cheatTitle">
+  <div class="sheet"><div class="sheetbody">
+    <h2 id="cheatTitle">Secret cheat sheet</h2>
+    <p class="sub" id="cheatCount"></p>
+    <div class="cheatbar"><label for="cheatSearch" class="sr">Search secrets</label><input class="field" id="cheatSearch" placeholder="Search secrets, phrases, hints…" autocomplete="off">
+      <button type="button" class="ghost" id="cheatFilter" aria-pressed="false">Not found yet</button></div>
+    <div class="cheatlist" id="cheatList"></div>
+    <button class="ghost" type="button" id="cheatClose">Close</button>
   </div></div>
 </div>
 
@@ -3087,6 +3110,7 @@ const live = {
   async accountRecover(username,code,password){ await accountCall({action:"recover",username,code,password}); },
   async createRecoveryCode(){ return must(await sb.rpc("create_recovery_code")); },
   async myRecoveryCodeDate(){ return must(await sb.rpc("my_recovery_code_date")); },
+  async isAdmin(){ return !!must(await sb.rpc("is_app_admin")); },
   async signOut(){ await sb.auth.signOut(); },
   async resetPassword(email){ must(await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname})); },
   async updatePassword(pw){ must(await sb.auth.updateUser({password:pw})); },
@@ -3420,6 +3444,7 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     async accountRecover(u,code,pw){ if(!/^nl-?demo/i.test(code.trim())) throw new Error("That username and recovery code don't match."); },
     async createRecoveryCode(){ demoRcDate=new Date().toISOString(); return "NL-DEMO-7K3Q-M9XF"; },
     async myRecoveryCodeDate(){ return demoRcDate; },
+    async isAdmin(){ return true; },
     async deleteAccount(){ user=null; listeners.forEach(f=>f(null,"SIGNED_OUT")); },
     async profiles(ids){ return ids.map(i=>people[i]).filter(Boolean); },
     async upload(_b,_u,blob){ await new Promise(r=>setTimeout(r,300)); return URL.createObjectURL(blob); },
@@ -3713,7 +3738,7 @@ async function handleAuth(u){
   user=u;
   const q=new URLSearchParams(location.search);
   if(!u){
-    myInviteTok=null; tellSwAuth(null); signedLinks.clear();
+    myInviteTok=null; tellSwAuth(null); signedLinks.clear(); isAdmin=false; show($("openCheats"),false);
     hideSplash();
     if(unsub){unsub();unsub=null;} if(unsubAll){unsubAll();unsubAll=null;} if(typeof stopPresence==="function") stopPresence();
     say("authMsg","");   // clear any leftover "Logging in…"
@@ -3748,7 +3773,7 @@ async function handleAuth(u){
   paintArcanaBadge();
   if(q.get("friend")){ const tok=q.get("friend"); history.replaceState(null,"",location.pathname); setTimeout(()=>handleFriendInvite(tok),400); }
   try{ const t=LS.get("nl-front-tab"); if(["chats","dms","contacts"].includes(t)) setFrontTab(t); }catch(e){}
-  celebrateMyBirthday(); seasonalCheck("login"); hintNudge(); dailyXP(); setTimeout(checkUnlocks,4000); setTimeout(recoveryNudge,9000);
+  celebrateMyBirthday(); seasonalCheck("login"); hintNudge(); dailyXP(); setTimeout(checkUnlocks,4000); setTimeout(recoveryNudge,9000); refreshAdmin();
   if(unsubAll) unsubAll();
   unsubAll=api.subscribeAll(onAnyMessage,onFriendAdded);
   clearBadge();
@@ -3841,6 +3866,68 @@ function toast(title,text,onTap){
   const body=el("span","tbody"); body.append(el("div","ttitle",title),el("div","ttext",text)); t.append(body);
   $("toasts").prepend(t); setTimeout(()=>{ if(t.isConnected){ t.classList.add("out"); setTimeout(()=>t.remove(),260); } },7000);
 }
+
+/* ---------- Secret cheat sheet (admins only; the server decides who's an admin) ----------
+   Built from the live secret list every time it opens, so new secrets show up by themselves. */
+let isAdmin=false;
+async function refreshAdmin(){ isAdmin=false; try{ isAdmin=await api.isAdmin(); }catch(e){} show($("openCheats"),isAdmin); }
+const GESTURE_HOW={
+  konami:"Swipe ↑ ↑ ↓ ↓ ← → ← → anywhere (arrow keys work on a computer), then double-tap the date stamp or the room name within 10 seconds.",
+  moonwink:"Tap the little icon on the date stamp 7 times within 3 seconds.",
+  shake:"Shake your phone while a chat is open. (iPhone asks for motion permission first.)",
+  combo:"Send 5 messages within 10 seconds.",
+  shiny:"Pure luck: about 1 in every 500 messages you send is shiny.",
+  lateowl:"Send a message between 3 and 5 AM.",
+  credits:"Press and hold the date stamp for about a second."
+};
+function secretPhrase(re){   // turn a trigger pattern into plain words; (brackets) mean that part is optional
+  let t=re.source;
+  t=t.replace(/\\\?/g,"\u2047").replace(/\\!/g,"!");                                   // escaped ? kept as a real question mark
+  t=t.replace(/\(\^\|\[\^a-z0-9\]\)|\(\^\|\[\^a-z\]\)|\(\[\^a-z0-9\]\|\$\)|\(\[\^a-z\]\|\$\)|\\b/g,"");   // word edges
+  t=t.replace(/\(\?![^)]*\)/g,"");                                                          // "not followed by…" checks
+  t=t.replace(/\^(\d+)\$/g,"$1 (on its own)").replace(/[\^$]/g,"");
+  t=t.replace(/\[- \]\??/g," ").replace(/\[(\w)(\w)\]/g,"$2");
+  t=t.replace(/\\s[+*]?/g," ").replace(/\(\?:/g,"(");
+  t=t.replace(/([ ,!-])\?/g,"$1").replace(/'\?/g,"'");
+  t=t.replace(/([a-z])\{2,\}/gi,"$1$1$1").replace(/\(([^()]*)\)\?/g,"($1)").replace(/([a-z0-9])\?/gi,"($1)");
+  t=t.replace(/\|/g," / ").replace(/\\/g,"").replace(/[+*]/g,"").replace(/\u2047/g,"?");
+  return t.replace(/\s+/g," ").replace(/\( /g,"(").trim();
+}
+function secretWhen(sec){
+  const w=String(sec.when||"");
+  if(/isDm/.test(w)) return "Only works in private chats (DMs).";
+  if(/getHours\(\)===0/.test(w)) return "Only works during the midnight hour (12:00–12:59 AM).";
+  return w?"Has a special condition.":"";
+}
+function paintCheats(){
+  const q=$("cheatSearch").value.trim().toLowerCase(), onlyMissing=$("cheatFilter").getAttribute("aria-pressed")==="true";
+  const found=new Set(foundSecrets()), box=$("cheatList"); box.innerHTML="";
+  $("cheatCount").textContent=`You've found ${SECRET_LIST.filter(x=>found.has(x.id)).length} of ${SECRET_LIST.length}. Only you can see this.`;
+  let shown=0;
+  SECRET_LIST.forEach(sec=>{
+    const how=sec.re?secretPhrase(sec.re):GESTURE_HOW[sec.id]||"A special gesture.";
+    const hint=HINTS[sec.id]||"", when=secretWhen(sec);
+    const unl=(typeof UNLOCKS!=="undefined"?UNLOCKS:[]).filter(u=>u.by?.secret===sec.id).map(u=>u.label);
+    if(onlyMissing&&found.has(sec.id)) return;
+    if(q&&!(sec.name+" "+sec.id+" "+how+" "+hint).toLowerCase().includes(q)) return;
+    shown++;
+    const row=el("div","cheat"+(found.has(sec.id)?" got":""));
+    const head=el("div","cheat-head"); head.append(el("b","",(found.has(sec.id)?"✓ ":"")+sec.name));
+    if(sec.play&&sec.re){ const t=el("button","cheat-test","▶ Test"); t.type="button"; t.setAttribute("aria-label",`Preview ${sec.name}`);
+      t.onclick=()=>{ show($("cheatSheet"),false); setTimeout(()=>{ try{ sec.play({id:0,user_id:user.id,room,kind:"text",text:how,created_at:new Date().toISOString()}); }catch(e){} },250); };
+      head.append(t); }
+    row.append(head, el("div","cheat-how",(sec.re?"Say: ":"How: ")+how));
+    if(when) row.append(el("div","cheat-when","⏰ "+when));
+    if(hint) row.append(el("div","cheat-hint","💡 "+hint));
+    if(unl.length) row.append(el("div","cheat-unl","🎁 Unlocks "+unl.join(", ")));
+    box.append(row);
+  });
+  if(!shown) box.append(el("p","note",onlyMissing&&!q?"You've found them all! 🏆":"No secrets match that."));
+}
+$("openCheats").onclick=()=>{ if(!isAdmin) return; show($("profile"),false); $("cheatSearch").value=""; paintCheats(); show($("cheatSheet")); };
+$("cheatSearch").addEventListener("input",paintCheats);
+$("cheatFilter").onclick=()=>{ const on=$("cheatFilter").getAttribute("aria-pressed")!=="true"; $("cheatFilter").setAttribute("aria-pressed",String(on)); $("cheatFilter").classList.toggle("on",on); paintCheats(); };
+$("cheatClose").onclick=()=>show($("cheatSheet"),false);
 
 /* ---------- Recovery code (Profile) ---------- */
 async function openRecovery(){
@@ -5193,7 +5280,7 @@ $("lightbox").onclick=()=>show($("lightbox"),false);
 ["profile","roomSheet","msgMenu","pollSheet","summarySheet","calSheet","searchSheet","backlogSheet","blShareSheet","forgotSheet","rcSheet"].forEach(id=>$(id).addEventListener("click",e=>{ if(e.target.id===id) show($(id),false); }));
 addEventListener("keydown",e=>{
   if(e.key==="Escape") closeTray();
-  if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu","pollSheet","tray","themeSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","installSheet","habitsSheet","quizSheet","slSheet","newsSheet","backlogSheet","blShareSheet","recover","forgotSheet","rcSheet","rulesSheet"].forEach(id=>{ const n=$(id); if(n) show(n,false); });
+  if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu","pollSheet","tray","themeSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","installSheet","habitsSheet","quizSheet","slSheet","newsSheet","backlogSheet","blShareSheet","recover","forgotSheet","rcSheet","rulesSheet","cheatSheet"].forEach(id=>{ const n=$(id); if(n) show(n,false); });
   if(!$("lightbox").classList.contains("hidden")&&lbAlbum){ if(e.key==="ArrowLeft") lbStep(-1); if(e.key==="ArrowRight") lbStep(1); }
 });
 
@@ -8406,7 +8493,7 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.26k";
+const APP_VERSION="2026.09.26l";
 const CHANGELOG=[
   {v:"2026.09.26k", title:"7 new secrets 👀", items:[
     "🎮 Seven new secrets are hiding in the chat: some for gamers who've been down in the tunnels, crossed blades, or cooked meat on a spit…",
@@ -8967,7 +9054,7 @@ feed.addEventListener("click",e=>{
 /* ================= BACK BUTTON (Android / browser back) ================= */
 // Each chat or sheet you open adds a history step, so Back closes the top one instead of leaving the app.
 (function(){
-  const LAYERS=["chat","profile","roomSheet","msgMenu","themeSheet","pollSheet","installSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","lightbox","habitsSheet","quizSheet","slSheet","newsSheet","backlogSheet","blShareSheet","forgotSheet","rcSheet","rulesSheet"];
+  const LAYERS=["chat","profile","roomSheet","msgMenu","themeSheet","pollSheet","installSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","lightbox","habitsSheet","quizSheet","slSheet","newsSheet","backlogSheet","blShareSheet","forgotSheet","rcSheet","rulesSheet","cheatSheet"];
   const stack=[]; let popping=false, ignorePops=0, pendingBack=0, flushQueued=false;
   const isOpen=id=>!$(id).classList.contains("hidden");
   function queueBack(){
