@@ -2003,6 +2003,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     <button type="button" class="ghost" id="openBacklog">🎮 Media Backlog</button>
     <button type="button" class="ghost" id="openHabits">🎯 Habits &amp; Stats</button>
     <button type="button" class="ghost" id="openQuiz">🃏 Who are you? (personality quiz)</button>
+    <p class="note" id="presenceDiag" aria-live="polite"></p>
     <button type="button" class="ghost" id="openNews">📰 What's new</button>
     <button type="button" class="ghost" id="openChangePass">🔑 Change password</button>
     <button type="button" class="ghost" id="openRecovery">🛟 Recovery code</button>
@@ -3456,7 +3457,7 @@ $("uiSoundBtn").onclick=()=>{ try{ LS.set("nl-uisound",uiSoundOn()?"off":"on"); 
 $("buzzBtn").onclick=()=>{ try{ LS.set("nl-buzz",buzzOn()?"off":"on"); }catch(e){} paintFxSettings(); if(buzzOn()) buzz("message"); };
 $("owlBtn").onclick=()=>{ try{ LS.set("nl-owl",owlOn()?"off":"on"); }catch(e){} if(!owlOn()) owlBack(); paintFxSettings();
   say("profMsg",owlOn()?"🦉 If you close the app with habits left, the Night Owl will DM you (evenings only, once a day).":"Night Owl reminders are off on this device."); };
-const openProfile=()=>{ say("profMsg",""); paintNotif(); paintBlocked(); paintFxSettings(); fillBirthdayPicker(); paintSecrets(); paintLangPicker(); paintDND(); paintArcanaBadge(); show($("profile")); $("closeProfile").focus({preventScroll:true}); };
+const openProfile=()=>{ say("profMsg",""); paintPresenceDiag(); paintNotif(); paintBlocked(); paintFxSettings(); fillBirthdayPicker(); paintSecrets(); paintLangPicker(); paintDND(); paintArcanaBadge(); show($("profile")); $("closeProfile").focus({preventScroll:true}); };
 function paintDND(){ const on=dndOn(); $("dndSwitch").classList.toggle("on",on); $("dndSwitch").setAttribute("aria-checked",String(on)); $("dndRow").classList.toggle("on",on); }
 $("dndSwitch").onclick=()=>{ setDND(!dndOn()); paintDND(); if(user) applyStatusDot($("meFace"),user.id,meProfile); };
 $("openProfile1").onclick=openProfile; $("openProfile2").onclick=openProfile; $("meFace").onclick=openProfile;
@@ -6527,22 +6528,52 @@ function markActive(){ lastActivityAt=Date.now(); if(document.hidden) return; if
 const computeIdle=()=>document.hidden||(Date.now()-lastActivityAt>IDLE_AFTER_MS);
 const myPresence=()=>({at:Date.now(),room:room||null,typing:!!(room&&$("box").value.trim()),dnd:dndOn(),idle:computeIdle()});
 function pushPresence(){ if(presenceCh) presenceCh.track(myPresence()).catch(()=>{}); }
+/* Online status. If the connection errors out or closes (network switch, screen lock, Android pausing the
+   app, an expired login), it used to stay dead silently: you'd look offline to everyone while your own dot
+   still showed. Now it heals itself: retries on errors, checks its health every 20s and whenever you come
+   back to the app, and re-announces you every minute in case the server forgot. */
+let presenceStatus="off", presenceRetry=null, presenceTicks=0, presenceFails=0, presenceListening=false;
+function presenceHealthy(){ let up=true; try{ up=sb.realtime.isConnected(); }catch(e){} return !!presenceCh&&presenceCh.state==="joined"&&up; }   // the channel can say "joined" while the connection under it is gone
+function schedulePresenceRestart(ms){ clearTimeout(presenceRetry); presenceRetry=setTimeout(restartPresence,ms); }
+async function restartPresence(){
+  if(!sb||!user||offlineMode||navigator.onLine===false) return;
+  try{ const {data}=await sb.auth.getSession(); if(data?.session?.access_token) sb.realtime.setAuth(data.session.access_token); }catch(e){}
+  if(presenceCh){ const old=presenceCh; presenceCh=null; try{ sb.removeChannel(old).catch(()=>{}); }catch(e){} }   // don't wait on a dead connection to say goodbye
+  startPresence();
+}
 function startPresence(){
   if(!sb||!user||presenceCh) return;
-  presenceCh=sb.channel("presence:all",{config:{presence:{key:user.id}}});
-  presenceCh.on("presence",{event:"sync"},()=>{ online.clear(); Object.entries(presenceCh.presenceState()).forEach(([id,arr])=>online.set(id,arr[arr.length-1]||{})); paintPresence(); })
-    .subscribe(async s=>{ if(s==="SUBSCRIBED") await presenceCh.track(myPresence()); });
+  const ch=presenceCh=sb.channel("presence:all",{config:{presence:{key:user.id}}});
+  ch.on("presence",{event:"sync"},()=>{ if(ch!==presenceCh) return; online.clear(); Object.entries(ch.presenceState()).forEach(([id,arr])=>online.set(id,arr[arr.length-1]||{})); paintPresence(); paintPresenceDiag(); })
+    .subscribe(async (st)=>{
+      if(ch!==presenceCh) return;
+      presenceStatus=st;
+      if(st==="SUBSCRIBED"){ presenceFails=0; await ch.track(myPresence()).catch(()=>{}); }
+      else if(st==="CHANNEL_ERROR"||st==="TIMED_OUT"||st==="CLOSED"){ presenceFails++; schedulePresenceRestart(Math.min(30000,2000*presenceFails)); }
+      paintPresenceDiag();
+    });
   const touch=()=>{ if(!document.hidden) api.touchSeen().catch(()=>{}); };
   touch(); clearInterval(presenceTimer); presenceTimer=setInterval(touch,90000);
   clearInterval(idleTimer); idleTimer=setInterval(()=>{
+    if(!presenceHealthy()&&!document.hidden&&presenceCh&&(presenceCh.state!=="joining"||!sb.realtime.isConnected())) schedulePresenceRestart(0);
+    else if(presenceHealthy()&&++presenceTicks%3===0) pushPresence();   // re-announce about once a minute
     const now=computeIdle(); if(!!online.get(user?.id)?.idle!==now) pushPresence();
     paintPresence();   // belt-and-suspenders: a status dot only repaints when someone's presence *changes*; if you
                         // opened a chat with someone whose status hadn't changed since, their dot could be stuck
                         // showing nothing until something did. This just re-checks everyone on-screen periodically.
   },20000);
-  document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ markActive(); touch(); } pushPresence(); });
+  if(!presenceListening){ presenceListening=true;   // add these once, not on every reconnect
+    document.addEventListener("visibilitychange",()=>{ if(!user||!presenceCh) return; if(!document.hidden){ markActive(); api.touchSeen().catch(()=>{}); if(!presenceHealthy()) schedulePresenceRestart(300); } pushPresence(); });
+    addEventListener("online",()=>{ if(user&&presenceCh&&!presenceHealthy()) schedulePresenceRestart(1000); });
+  }
 }
-function stopPresence(){ if(presenceCh){ sb.removeChannel(presenceCh); presenceCh=null; } clearInterval(presenceTimer); clearInterval(idleTimer); online.clear(); }
+function stopPresence(){ clearTimeout(presenceRetry); if(presenceCh){ const old=presenceCh; presenceCh=null; sb.removeChannel(old); } presenceStatus="off"; clearInterval(presenceTimer); clearInterval(idleTimer); online.clear(); }
+function paintPresenceDiag(){
+  const d=$("presenceDiag"); if(!d) return;
+  if(!sb){ d.textContent=""; return; }
+  const n=[...online.keys()].filter(id=>id!==user?.id).length;
+  d.textContent=presenceHealthy()?`🟢 Online status: connected · you can see ${n} other ${n===1?"person":"people"} online`:presenceCh?"🟡 Online status: reconnecting…":"⚪ Online status: not connected";
+}
 let demoPresenceOverride=false;   // tests can set this true to fully control isOnline/whereIs via the `online` Map
 const isOnline=uid=>online.has(uid)||(!sb&&!demoPresenceOverride&&["vee"].includes(uid));
 const whereIs=uid=>{ if(online.has(uid)) return online.get(uid); if(!sb&&!demoPresenceOverride) return uid==="vee"?{room:"5959",typing:false}:uid==="rook"?{room:null,typing:false}:null; return null; };
@@ -7152,8 +7183,12 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.25j";
+const APP_VERSION="2026.09.25k";
 const CHANGELOG=[
+  {v:"2026.09.25k", title:"Online dots fixed 🟢", items:[
+    "🟢 Fixed people sometimes looking offline to everyone after their connection hiccuped (switching Wi-Fi, locking the screen). Your online status now reconnects on its own.",
+    "🔎 Profile now shows whether your online status is connected, and how many people you can see online.",
+  ]},
   {v:"2026.09.25j", title:"Spoiler photos 🙈", items:[
     "🙈 Sending a photo that's a spoiler (or just not for everyone's eyes right away)? Flip \"Send as spoiler\" before sending. It shows pixelated until someone taps to see it.",
   ]},
