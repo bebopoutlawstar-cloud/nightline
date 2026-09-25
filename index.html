@@ -1973,6 +1973,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     <button type="button" class="ghost" id="openHabits">🎯 Habits &amp; Stats</button>
     <button type="button" class="ghost" id="openQuiz">🃏 Who are you? (personality quiz)</button>
     <button type="button" class="ghost" id="openNews">📰 What's new</button>
+    <button type="button" class="ghost" id="openChangePass">🔑 Change password</button>
     <details class="proflist"><summary id="unlockSummary">🎁 Unlockables</summary><div class="unlockbox"><div id="unlockList"></div></div></details>
     <details class="proflist"><summary id="secretSummary">🔒 Secrets found: 0</summary><div class="secretbox">
       <div class="hintbox" id="hintBox"></div>
@@ -3106,6 +3107,9 @@ $("forgot").onclick=async()=>{
   catch(err){ say("authMsg",/rate limit/i.test(err.message)?"Too many reset emails. Wait a bit and try again.":err.message,true); }
   finally{ $("forgot").disabled=false; }
 };
+// Change password while signed in (reuses the reset screen). Handy when reset emails can't be sent.
+$("openChangePass").onclick=()=>{ show($("profile"),false); say("recMsg",""); $("newPass").value=""; show($("recover")); setTimeout(()=>$("newPass").focus(),50); };
+$("recover").addEventListener("click",e=>{ if(e.target.id==="recover") show($("recover"),false); });
 $("recoverForm").addEventListener("submit",async e=>{
   e.preventDefault();
   const pw=$("newPass").value; if(pw.length<6) return say("recMsg","Password needs at least 6 characters.",true);
@@ -4351,7 +4355,7 @@ $("lightbox").onclick=()=>show($("lightbox"),false);
 ["profile","roomSheet","msgMenu","pollSheet","summarySheet","calSheet","searchSheet","backlogSheet","blShareSheet"].forEach(id=>$(id).addEventListener("click",e=>{ if(e.target.id===id) show($(id),false); }));
 addEventListener("keydown",e=>{
   if(e.key==="Escape") closeTray();
-  if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu","pollSheet","tray","themeSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","installSheet","habitsSheet","quizSheet","slSheet","newsSheet","backlogSheet","blShareSheet"].forEach(id=>{ const n=$(id); if(n) show(n,false); });
+  if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu","pollSheet","tray","themeSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","installSheet","habitsSheet","quizSheet","slSheet","newsSheet","backlogSheet","blShareSheet","recover"].forEach(id=>{ const n=$(id); if(n) show(n,false); });
   if(!$("lightbox").classList.contains("hidden")&&lbAlbum){ if(e.key==="ArrowLeft") lbStep(-1); if(e.key==="ArrowRight") lbStep(1); }
 });
 
@@ -6915,8 +6919,11 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.25b";
+const APP_VERSION="2026.09.25c";
 const CHANGELOG=[
+  {v:"2026.09.25c", title:"Change your password 🔑", items:[
+    "🔑 New: Profile → 🔑 Change password, so you can pick a new password any time you're signed in.",
+  ]},
   {v:"2026.09.25b", title:"Private photos & smoother scrolling 🔒", items:[
     "🔒 Photos, videos, and voice messages are now private to the chat they're sent in. Links don't work for anyone outside it, and deleting a message makes its file stop opening.",
     "📜 Reading older messages? New ones no longer yank you to the bottom. Tap the \"↓ new messages\" button when you're ready.",
