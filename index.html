@@ -1784,6 +1784,15 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 #sendForm{position:relative}
 /* while typing, camera + mic tuck away so the text box gets the room */
 .compose.typing #pickBtn,.compose.typing #micBtn{display:none}
+/* ===== forgot password + recovery code ===== */
+.fpblock{width:100%;border-top:2px dashed #3b2d80;padding-top:10px;display:grid;gap:8px;text-align:left}
+.fpblock h3{font-family:var(--tech);font-size:13px;letter-spacing:.5px;color:var(--cyan);margin:0}
+#forgotSheet label{font-family:var(--tech);font-size:12px;color:var(--cyan);text-align:left;width:100%}
+.fpsmall{font-size:15px!important;padding:8px 12px!important;justify-self:start}
+.fphint{font-size:18px;color:var(--volt);min-height:0;margin:0;overflow-wrap:anywhere}
+.rccode{display:flex;flex-direction:column;align-items:center;gap:8px;border:3px solid var(--volt);box-shadow:5px 5px 0 var(--mag);padding:12px 14px;background:var(--night)}
+.rccode .fpsmall{align-self:center;justify-self:center}
+.rccode code{font-family:var(--tech);font-size:clamp(15px,4.6vw,21px);letter-spacing:.5px;white-space:nowrap;color:var(--volt);user-select:all}
 </style>
 </head>
 <body>
@@ -1825,8 +1834,8 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
       <label for="uname">Username</label>
       <input class="field" id="uname" maxlength="20" autocomplete="username" placeholder="3–20 letters, numbers, _">
     </div>
-    <label for="email">Email</label>
-    <input class="field" id="email" type="email" autocomplete="email">
+    <label for="email" id="emailLabel">Email or username</label>
+    <input class="field" id="email" type="text" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false">
     <label for="pass">Password</label>
     <input class="field" id="pass" type="password" autocomplete="current-password" placeholder="At least 6 characters">
     <button type="button" class="linkbtn" id="forgot">Forgot password?</button>
@@ -1974,6 +1983,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     <button type="button" class="ghost" id="openQuiz">🃏 Who are you? (personality quiz)</button>
     <button type="button" class="ghost" id="openNews">📰 What's new</button>
     <button type="button" class="ghost" id="openChangePass">🔑 Change password</button>
+    <button type="button" class="ghost" id="openRecovery">🛟 Recovery code</button>
     <details class="proflist"><summary id="unlockSummary">🎁 Unlockables</summary><div class="unlockbox"><div id="unlockList"></div></div></details>
     <details class="proflist"><summary id="secretSummary">🔒 Secrets found: 0</summary><div class="secretbox">
       <div class="hintbox" id="hintBox"></div>
@@ -2264,6 +2274,48 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
       <p class="sub">Reading the cards…</p>
     </div>
     <button class="ghost" type="button" id="quizClose">Close</button>
+  </div></div>
+</div>
+
+<!-- ============ FORGOT PASSWORD ============ -->
+<div class="overlay hidden" id="forgotSheet" role="dialog" aria-modal="true" aria-labelledby="fpTitle">
+  <form class="sheet" id="fpForm" novalidate><div class="sheetbody">
+    <h2 id="fpTitle">Forgot password?</h2>
+    <label for="fpUser">Your username</label>
+    <input class="field" id="fpUser" maxlength="20" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="e.g. Bebop">
+    <div class="fpblock">
+      <h3>🛟 Use your recovery code</h3>
+      <label for="fpCode" class="sr">Recovery code</label>
+      <input class="field" id="fpCode" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="NL-XXXX-XXXX-XXXX">
+      <label for="fpPass" class="sr">New password</label>
+      <input class="field" id="fpPass" type="password" autocomplete="new-password" placeholder="New password (6+ characters)">
+      <button class="go" type="submit" id="fpGo">Reset &amp; log in</button>
+    </div>
+    <div class="fpblock">
+      <h3>📧 Which email did I use?</h3>
+      <button type="button" class="ghost fpsmall" id="fpHint">Show a hint</button>
+      <p class="fphint" id="fpHintOut"></p>
+    </div>
+    <div class="fpblock">
+      <h3>✉️ Email me a reset link</h3>
+      <button type="button" class="ghost fpsmall" id="fpEmail">Send reset email</button>
+    </div>
+    <p class="msgline" id="fpMsg" role="status"></p>
+    <p class="note">No recovery code? Ask whoever runs NightLane to reset your password for you.</p>
+    <button class="ghost" type="button" id="fpClose">Close</button>
+  </div></form>
+</div>
+
+<!-- ============ RECOVERY CODE ============ -->
+<div class="overlay hidden" id="rcSheet" role="dialog" aria-modal="true" aria-labelledby="rcTitle">
+  <div class="sheet"><div class="sheetbody">
+    <h2 id="rcTitle">Recovery code</h2>
+    <p class="sub" id="rcStatus"></p>
+    <div class="rccode hidden" id="rcCodeBox"><code id="rcCode"></code><button type="button" class="ghost fpsmall" id="rcCopy">Copy</button></div>
+    <p class="note" id="rcNote">If you ever forget your password, this code plus your username gets you back in. No email needed.</p>
+    <button class="go" type="button" id="rcMake">Make my recovery code</button>
+    <p class="msgline" id="rcMsg" role="status"></p>
+    <button class="ghost" type="button" id="rcClose">Close</button>
   </div></div>
 </div>
 
@@ -2593,7 +2645,15 @@ const live = {
     const data=must(await sb.auth.signUp({email,password,options:{data:{username},emailRedirectTo:location.origin+location.pathname}}));
     return data.session ? "in" : "confirm";
   },
-  async signIn(email,password){ must(await sb.auth.signInWithPassword({email,password})); },
+  async signIn(id,password){
+    if(id.includes("@")){ must(await sb.auth.signInWithPassword({email:id,password})); return; }
+    const s=await accountCall({action:"login",username:id,password});   // username: the server looks up the email and signs you in
+    must(await sb.auth.setSession({access_token:s.access_token,refresh_token:s.refresh_token}));
+  },
+  async accountHint(username){ return (await accountCall({action:"hint",username})).hint; },
+  async accountRecover(username,code,password){ await accountCall({action:"recover",username,code,password}); },
+  async createRecoveryCode(){ return must(await sb.rpc("create_recovery_code")); },
+  async myRecoveryCodeDate(){ return must(await sb.rpc("my_recovery_code_date")); },
   async signOut(){ await sb.auth.signOut(); },
   async resetPassword(email){ must(await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname})); },
   async updatePassword(pw){ must(await sb.auth.updateUser({password:pw})); },
@@ -2768,9 +2828,13 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     async session(){ return user; },
     onAuth(cb){ listeners.push(cb); },
     async signUp(username,email){ user={id:"me",email,user_metadata:{username}}; people.me={id:"me",username,avatar_url:null,invite_token:"demo-me"}; people.rook.last_seen=new Date(Date.now()-7*60000).toISOString(); listeners.forEach(f=>f(user,"SIGNED_IN")); return "in"; },
-    async signIn(email){ const n=email.split("@")[0]||"you"; user={id:"me",email,user_metadata:{username:n}}; people.me=people.me||{id:"me",username:n,avatar_url:null}; listeners.forEach(f=>f(user,"SIGNED_IN")); },
+    async signIn(email){ const n=email.includes("@")?(email.split("@")[0]||"you"):email; user={id:"me",email,user_metadata:{username:n}}; people.me=people.me||{id:"me",username:n,avatar_url:null}; listeners.forEach(f=>f(user,"SIGNED_IN")); },
     async signOut(){ user=null; listeners.forEach(f=>f(null,"SIGNED_OUT")); },
     async resetPassword(){}, async updatePassword(){},
+    async accountHint(u){ if(u.toLowerCase()!=="bebop") throw new Error("No NightLane account has that username."); return "b••••••r@g••••.com"; },
+    async accountRecover(u,code,pw){ if(!/^nl-?demo/i.test(code.trim())) throw new Error("That username and recovery code don't match."); },
+    async createRecoveryCode(){ demoRcDate=new Date().toISOString(); return "NL-DEMO-7K3Q-M9XF"; },
+    async myRecoveryCodeDate(){ return demoRcDate; },
     async deleteAccount(){ user=null; listeners.forEach(f=>f(null,"SIGNED_OUT")); },
     async profiles(ids){ return ids.map(i=>people[i]).filter(Boolean); },
     async upload(_b,_u,blob){ await new Promise(r=>setTimeout(r,300)); return URL.createObjectURL(blob); },
@@ -2927,6 +2991,15 @@ const offlineApi=new Proxy({},{ get:(t,k)=>{
   if(k==="session") return async()=>null;
   return ()=>{ const p=Promise.reject(new TypeError("Failed to fetch")); p.catch(()=>{}); return p; };
 }});
+let demoRcDate=null;
+// calls the "account" server function (username log-in, recovery codes, email hint) and turns its errors into plain messages
+async function accountCall(body){
+  const r=await fetch(SUPABASE_URL+"/functions/v1/account",{method:"POST",headers:{"Content-Type":"application/json",apikey:SUPABASE_ANON_KEY,Authorization:"Bearer "+SUPABASE_ANON_KEY},body:JSON.stringify(body)});
+  let data={}; try{ data=await r.json(); }catch(e){}
+  if(r.status===404&&!data.error) throw new Error("Username log-in isn't set up yet. Use your email for now.");
+  if(!r.ok) throw new Error(data.error||"Something went wrong. Try again.");
+  return data;
+}
 const api = sb ? live : (LIB_MISSING ? offlineApi : demo);
 $("modeNote").textContent = sb ? "" : LIB_MISSING ? "Can't reach NightLane right now. Check your connection; it'll load as soon as you're back online." : "Demo mode: no server connected, so accounts and friends are simulated.";
 
@@ -3055,7 +3128,7 @@ async function handleAuth(u){
   paintArcanaBadge();
   if(q.get("friend")){ const tok=q.get("friend"); history.replaceState(null,"",location.pathname); setTimeout(()=>handleFriendInvite(tok),400); }
   try{ const t=LS.get("nl-front-tab"); if(["chats","dms","contacts"].includes(t)) setFrontTab(t); }catch(e){}
-  celebrateMyBirthday(); seasonalCheck("login"); hintNudge(); dailyXP(); setTimeout(checkUnlocks,4000);
+  celebrateMyBirthday(); seasonalCheck("login"); hintNudge(); dailyXP(); setTimeout(checkUnlocks,4000); setTimeout(recoveryNudge,9000);
   if(unsubAll) unsubAll();
   unsubAll=api.subscribeAll(onAnyMessage,onFriendAdded);
   clearBadge();
@@ -3076,6 +3149,7 @@ function setMode(m){
   mode=m; $("tabIn").setAttribute("aria-selected",m==="in"); $("tabUp").setAttribute("aria-selected",m==="up");
   show($("unameWrap"),m==="up"); $("authBtn").textContent=m==="in"?"Log in":"Create account";
   $("pass").autocomplete=m==="in"?"current-password":"new-password"; show($("forgot"),m==="in");
+  $("emailLabel").textContent=m==="in"?"Email or username":"Email"; $("email").type=m==="in"?"text":"email"; $("email").autocomplete=m==="in"?"username":"email";
   if(!new URLSearchParams(location.search).get("join")) say("authMsg","");
 }
 $("tabIn").onclick=()=>setMode("in"); $("tabUp").onclick=()=>setMode("up");
@@ -3084,7 +3158,8 @@ $("authCard").addEventListener("submit",async e=>{
   e.preventDefault();
   const email=$("email").value.trim(), pass=$("pass").value, uname=$("uname").value.trim();
   if(mode==="up" && !/^[A-Za-z0-9_]{3,20}$/.test(uname)) return say("authMsg","Username needs 3–20 letters, numbers, or underscores.",true);
-  if(!/^\S+@\S+\.\S+$/.test(email)) return say("authMsg","Enter a valid email.",true);
+  if(mode==="up"||email.includes("@")){ if(!/^\S+@\S+\.\S+$/.test(email)) return say("authMsg","Enter a valid email.",true); }
+  else if(!/^[A-Za-z0-9_]{3,20}$/.test(email)) return say("authMsg","Enter your email or your NightLane username.",true);
   if(pass.length<6) return say("authMsg","Password needs at least 6 characters.",true);
   if(navigator.onLine===false) return say("authMsg","You're offline. Connect to the internet to "+(mode==="in"?"log in.":"sign up."),true);
   $("authBtn").disabled=true; say("authMsg",mode==="in"?"Logging in…":"Creating account…");
@@ -3099,14 +3174,83 @@ $("authCard").addEventListener("submit",async e=>{
   }finally{ $("authBtn").disabled=false; }
 });
 
-$("forgot").onclick=async()=>{
-  const email=$("email").value.trim();
-  if(!/^\S+@\S+\.\S+$/.test(email)) return say("authMsg","Type your email above first, then tap Forgot password.",true);
-  $("forgot").disabled=true; say("authMsg","Sending reset link…");
-  try{ await api.resetPassword(email); say("authMsg","If that email has an account, a reset link is on its way. Check spam too."); }
-  catch(err){ say("authMsg",/rate limit/i.test(err.message)?"Too many reset emails. Wait a bit and try again.":err.message,true); }
-  finally{ $("forgot").disabled=false; }
+/* ---------- Forgot password: recovery code, email hint, or reset email ---------- */
+$("forgot").onclick=()=>{
+  const id=$("email").value.trim();
+  $("fpUser").value=id&&!id.includes("@")?id:""; $("fpCode").value=""; $("fpPass").value=""; $("fpHintOut").textContent=""; say("fpMsg","");
+  show($("forgotSheet")); setTimeout(()=>($("fpUser").value?$("fpCode"):$("fpUser")).focus(),60);
 };
+const fpUsername=()=>{ const u=$("fpUser").value.trim(); if(!/^[A-Za-z0-9_]{3,20}$/.test(u)){ say("fpMsg","Type your NightLane username first.",true); $("fpUser").focus(); return null; } return u; };
+$("fpForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const u=fpUsername(); if(!u) return;
+  const code=$("fpCode").value.trim(), pw=$("fpPass").value;
+  if(code.replace(/[^A-Za-z0-9]/g,"").length<12) return say("fpMsg","Type your whole recovery code (NL-XXXX-XXXX-XXXX).",true);
+  if(pw.length<6) return say("fpMsg","New password needs at least 6 characters.",true);
+  if(navigator.onLine===false) return say("fpMsg","You're offline. Connect to the internet first.",true);
+  $("fpGo").disabled=true; say("fpMsg","Checking your code…");
+  try{
+    await api.accountRecover(u,code,pw);
+    say("fpMsg","Password reset! Logging you in…");
+    showSplash("signing you in…");
+    await api.signIn(u,pw);
+    show($("forgotSheet"),false);
+    setTimeout(()=>toast("🛟 You're back in","That recovery code is used up. Make a new one in Profile → 🛟 Recovery code."),2500);
+  }catch(err){ hideSplash(); say("fpMsg",err.message,true); }
+  finally{ $("fpGo").disabled=false; }
+});
+$("fpHint").onclick=async()=>{
+  const u=fpUsername(); if(!u) return;
+  $("fpHint").disabled=true; $("fpHintOut").textContent="Looking…";
+  try{ $("fpHintOut").textContent="Your account's email: "+await api.accountHint(u); say("fpMsg",""); }
+  catch(err){ $("fpHintOut").textContent=""; say("fpMsg",err.message,true); }
+  finally{ $("fpHint").disabled=false; }
+};
+$("fpEmail").onclick=async()=>{
+  const typed=$("email").value.trim();
+  const email=typed.includes("@")?typed:prompt("Type the email your account uses:","");
+  if(!email) return; if(!/^\S+@\S+\.\S+$/.test(email.trim())) return say("fpMsg","That doesn't look like an email.",true);
+  $("fpEmail").disabled=true; say("fpMsg","Sending reset link…");
+  try{ await api.resetPassword(email.trim()); say("fpMsg","If that email has an account, a reset link is on its way. Check spam too."); }
+  catch(err){ say("fpMsg",/not authorized/i.test(err.message)?"Reset emails aren't working yet. Use your recovery code, or ask whoever runs NightLane to reset it.":/rate limit/i.test(err.message)?"Too many reset emails. Wait a bit and try again.":err.message,true); }
+  finally{ $("fpEmail").disabled=false; }
+};
+$("fpClose").onclick=()=>show($("forgotSheet"),false);
+function toast(title,text,onTap){
+  const t=el(onTap?"button":"div","toast long"); if(onTap){ t.type="button"; t.onclick=()=>{ t.remove(); onTap(); }; }
+  const body=el("span","tbody"); body.append(el("div","ttitle",title),el("div","ttext",text)); t.append(body);
+  $("toasts").prepend(t); setTimeout(()=>{ if(t.isConnected){ t.classList.add("out"); setTimeout(()=>t.remove(),260); } },7000);
+}
+
+/* ---------- Recovery code (Profile) ---------- */
+async function openRecovery(){
+  show($("rcCodeBox"),false); say("rcMsg",""); $("rcStatus").textContent="Checking…"; show($("rcSheet"));
+  let when=null; try{ when=await api.myRecoveryCodeDate(); }catch(e){ $("rcStatus").textContent="Recovery codes aren't set up yet."; return; }
+  $("rcStatus").textContent=when?`✅ You have a recovery code (made ${new Date(when).toLocaleDateString([], {month:"short",day:"numeric",year:"numeric"})}).`:"You don't have a recovery code yet.";
+  $("rcMake").textContent=when?"Make a new code":"Make my recovery code";
+}
+$("openRecovery").onclick=()=>{ show($("profile"),false); openRecovery(); };
+$("rcMake").onclick=async()=>{
+  if($("rcMake").textContent.startsWith("Make a new")&&!confirm("Make a new recovery code? Your old one will stop working.")) return;
+  $("rcMake").disabled=true; say("rcMsg","");
+  try{
+    const code=await api.createRecoveryCode();
+    $("rcCode").textContent=code; show($("rcCodeBox"));
+    $("rcStatus").textContent="✅ Here's your recovery code. Save it now: screenshot it or put it in your notes. You won't see it again.";
+    $("rcMake").textContent="Make a new code";
+    try{ LS.set("nl-rc-nudged-"+user.id,"1"); }catch(e){}
+  }catch(err){ say("rcMsg","Couldn't make a code: "+err.message,true); }
+  finally{ $("rcMake").disabled=false; }
+};
+$("rcCopy").onclick=async()=>{ try{ await navigator.clipboard.writeText($("rcCode").textContent); say("rcMsg","Copied. Paste it somewhere safe."); }catch(e){ say("rcMsg","Long-press the code to copy it."); } };
+$("rcClose").onclick=()=>show($("rcSheet"),false);
+// one gentle nudge per account per device, a little after signing in
+async function recoveryNudge(){
+  if(!user||offlineMode) return; try{ if(LS.get("nl-rc-nudged-"+user.id)) return; }catch(e){ return; }
+  try{ if(await api.myRecoveryCodeDate()) { LS.set("nl-rc-nudged-"+user.id,"1"); return; } }catch(e){ return; }
+  LS.set("nl-rc-nudged-"+user.id,"1");
+  toast("🛟 Never get locked out","Make a recovery code so you can reset your password without email. Tap here.",openRecovery);
+}
 // Change password while signed in (reuses the reset screen). Handy when reset emails can't be sent.
 $("openChangePass").onclick=()=>{ show($("profile"),false); say("recMsg",""); $("newPass").value=""; show($("recover")); setTimeout(()=>$("newPass").focus(),50); };
 $("recover").addEventListener("click",e=>{ if(e.target.id==="recover") show($("recover"),false); });
@@ -4352,10 +4496,10 @@ function lbStep(d){ if(!lbAlbum) return; lbIndex=(lbIndex+d+lbAlbum.length)%lbAl
 $("lbPrev").onclick=e=>{ e.stopPropagation(); lbStep(-1); };
 $("lbNext").onclick=e=>{ e.stopPropagation(); lbStep(1); };
 $("lightbox").onclick=()=>show($("lightbox"),false);
-["profile","roomSheet","msgMenu","pollSheet","summarySheet","calSheet","searchSheet","backlogSheet","blShareSheet"].forEach(id=>$(id).addEventListener("click",e=>{ if(e.target.id===id) show($(id),false); }));
+["profile","roomSheet","msgMenu","pollSheet","summarySheet","calSheet","searchSheet","backlogSheet","blShareSheet","forgotSheet","rcSheet"].forEach(id=>$(id).addEventListener("click",e=>{ if(e.target.id===id) show($(id),false); }));
 addEventListener("keydown",e=>{
   if(e.key==="Escape") closeTray();
-  if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu","pollSheet","tray","themeSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","installSheet","habitsSheet","quizSheet","slSheet","newsSheet","backlogSheet","blShareSheet","recover"].forEach(id=>{ const n=$(id); if(n) show(n,false); });
+  if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu","pollSheet","tray","themeSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","installSheet","habitsSheet","quizSheet","slSheet","newsSheet","backlogSheet","blShareSheet","recover","forgotSheet","rcSheet"].forEach(id=>{ const n=$(id); if(n) show(n,false); });
   if(!$("lightbox").classList.contains("hidden")&&lbAlbum){ if(e.key==="ArrowLeft") lbStep(-1); if(e.key==="ArrowRight") lbStep(1); }
 });
 
@@ -6919,8 +7063,13 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.25c";
+const APP_VERSION="2026.09.25d";
 const CHANGELOG=[
+  {v:"2026.09.25d", title:"Never get locked out 🛟", items:[
+    "👤 Log in with your username now, not just your email. No more guessing which email you used.",
+    "🛟 New: recovery codes. Make one in Profile → 🛟 Recovery code and save it. If you ever forget your password, your username + that code gets you back in, no email needed.",
+    "📧 Forgot which email you signed up with? Forgot password? → Show a hint.",
+  ]},
   {v:"2026.09.25c", title:"Change your password 🔑", items:[
     "🔑 New: Profile → 🔑 Change password, so you can pick a new password any time you're signed in.",
   ]},
@@ -7368,7 +7517,7 @@ feed.addEventListener("click",e=>{
 /* ================= BACK BUTTON (Android / browser back) ================= */
 // Each chat or sheet you open adds a history step, so Back closes the top one instead of leaving the app.
 (function(){
-  const LAYERS=["chat","profile","roomSheet","msgMenu","themeSheet","pollSheet","installSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","lightbox","habitsSheet","quizSheet","slSheet","newsSheet","backlogSheet","blShareSheet"];
+  const LAYERS=["chat","profile","roomSheet","msgMenu","themeSheet","pollSheet","installSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","lightbox","habitsSheet","quizSheet","slSheet","newsSheet","backlogSheet","blShareSheet","forgotSheet","rcSheet"];
   const stack=[]; let popping=false, ignorePops=0, pendingBack=0, flushQueued=false;
   const isOpen=id=>!$(id).classList.contains("hidden");
   function queueBack(){
