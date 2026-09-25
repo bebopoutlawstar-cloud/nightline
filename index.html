@@ -2063,6 +2063,9 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .am-key{font-family:var(--tech);font-size:11px;color:var(--night);background:var(--cyan);padding:2px 7px}
 .am-sec{width:100%;text-align:left}.am-sec b{font-family:var(--tech);font-size:12px;color:var(--cyan);letter-spacing:.5px}.am-sec p{margin:3px 0 0;font-size:15px;line-height:1.4;color:var(--white)}
 .am-two{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.sl-meaning{width:100%;text-align:left;border-top:2px dashed #3b2d80;padding-top:10px;display:grid;gap:6px}
+.sl-meaning b{font-family:var(--tech);font-size:12px;color:var(--cyan);letter-spacing:.5px}
+.sl-meaning p{margin:0;font-size:15px;line-height:1.4;color:var(--white)}.sl-meaning .sl-grow{font-size:13px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -2720,6 +2723,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
       <div class="slbar"><i id="slFill"></i></div>
       <p class="sub" id="slText"></p>
     </div>
+    <div class="sl-meaning" id="slMeaning"></div>
     <button class="ghost" type="button" id="slClose">Close</button>
   </div></div>
 </div>
@@ -8467,6 +8471,31 @@ const ARCANA_MEANING={
     you:"A finisher. Well-rounded, and you see things all the way through.",
     good:"Seeing it through", watch:"Getting restless once you're done"}
 };
+/* What each Arcana means for a Social Bond: written about the friendship, not the person */
+const ARCANA_BOND={
+  Fool:"A bond built on adventure. You two are always up for something new, and the best stories start with \"wait, what if we…\"",
+  Magician:"You make things happen together. Put you two on a project and it actually gets done.",
+  Priestess:"You understand each other without saying much. Sometimes a look is enough.",
+  Empress:"A warm, comfy friendship. You look out for each other and make each other feel at home.",
+  Emperor:"Steady and dependable. You can count on each other, no matter what.",
+  Hierophant:"A bond built on shared traditions: inside jokes, rituals, and stuff only you two get.",
+  Lovers:"A deep connection you both keep choosing. Real, ride-or-die friendship.",
+  Chariot:"You push each other forward. Friendly competition, big goals, cheering each other on.",
+  Strength:"You're each other's calm. When one of you is struggling, the other steadies them.",
+  Hermit:"A quiet, thoughtful friendship. Long talks, deep thoughts, no small talk needed.",
+  Fortune:"A bond full of lucky timing. You always turn up in each other's lives at the right moment.",
+  Justice:"Honest and fair. You tell each other the truth, even when it's hard to hear.",
+  "Hanged Man":"Patient and forgiving. You can always see things from each other's side.",
+  Death:"A bond that's grown through big changes. You've watched each other become new people.",
+  Temperance:"Balanced and easy. You bring out each other's calm side.",
+  Devil:"An irresistible friendship. You bring out each other's wild side, maybe a little too well.",
+  Tower:"Chaotic in the best way. Things get shaken up whenever you two are together.",
+  Star:"Hopeful and uplifting. You make each other believe things will work out.",
+  Moon:"A bond with layers: secrets, dreams, and late-night thoughts you don't share with anyone else.",
+  Sun:"Pure good vibes. Every conversation leaves you both in a better mood.",
+  Judgement:"A friendship of second chances. You've forgiven each other and come back stronger.",
+  World:"An all-in friendship. You've been through it all together, and you're still here."
+};
 function openArcanaMeaning(arc,{whose="",mine=false}={}){
   const m=ARCANA_MEANING[arc]; if(!m) return;
   $("amTitle").textContent=whose?`${whose}'s Arcana`:"Your Arcana";
@@ -8618,6 +8647,12 @@ function openSocialLink(uid){
   $("slName").textContent=nameOf(uid);
   const pct=rank>=10?100:Math.round(100*into/need);
   $("slFill").style.width=pct+"%"; $("slText").textContent=rank>=10?"Bond maxed out.":`${into} / ${need} to next rank`;
+  // what this bond's card means for the friendship
+  const box=$("slMeaning"); box.innerHTML=""; const bm=ARCANA_BOND[row.arcana], am=ARCANA_MEANING[row.arcana];
+  if(bm){ box.append(el("b","","🤝 What your bond means"));
+    if(am){ const kw=el("div","am-keys"); am.keys.forEach(k=>kw.append(el("span","am-key",k))); box.append(kw); }
+    box.append(el("p","",bm), el("p","sl-grow",rank>=10?"🏆 This bond is maxed out. Legendary.":`📈 Grows as you two message each other in DMs.`)); }
+  show(box,!!bm);
   show($("slSheet"));
 }
 $("slClose").onclick=()=>show($("slSheet"),false);
@@ -8625,10 +8660,11 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.26m";
+const APP_VERSION="2026.09.26n";
 const CHANGELOG=[
-  {v:"2026.09.26m", title:"What's my Arcana mean? 🃏", items:[
+  {v:"2026.09.26n", title:"What's my Arcana mean? 🃏", items:[
     "🃏 Tap any Arcana, yours in Profile or a friend's on their card, to see what it means: what the card stands for in tarot, what it says about the person, their superpower, and their blind spot.",
+    "🤝 Your Social Bonds explain themselves too: open one to see what its card says about your friendship.",
   ]},
   {v:"2026.09.26k", title:"7 new secrets 👀", items:[
     "🎮 Seven new secrets are hiding in the chat: some for gamers who've been down in the tunnels, crossed blades, or cooked meat on a spit…",
