@@ -1858,7 +1858,7 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .die.sm i{width:88%;height:88%}
 .die.hot{border-color:var(--cyan);box-shadow:0 0 0 2px var(--cyan)}
 .gp-icon.ld-icon{font-size:30px;display:grid;place-items:center}
-.ldice{width:100%;display:grid;gap:10px}
+.ldice{width:100%;display:grid;gap:10px;position:relative}
 .e8p.out{opacity:.45}
 .ld-bid{display:flex;align-items:center;justify-content:center;gap:10px;min-height:48px;font-family:var(--tech)}
 .ld-bid .ld-who{font-size:13px;color:var(--muted)}.ld-bid .ld-q{font-family:var(--num);font-size:34px;color:var(--volt);font-weight:400}
@@ -1875,6 +1875,36 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .ld-face{background:none;border:2px solid transparent;padding:3px;cursor:pointer}.ld-face.on{border-color:var(--volt);box-shadow:0 0 10px rgba(243,255,58,.4)}
 .ld-actbtns{display:flex;gap:8px;width:100%}.ld-actbtns .go{flex:1;font-size:18px!important}
 .ld-liar{background:#ff3b5c!important;color:var(--white)!important}
+/* ===== Crazy Eights: card feel ===== */
+.e8-hand{flex-wrap:wrap;gap:0;row-gap:10px;padding:14px 6px 6px}
+.e8play{margin:0 -7px;transform:translateY(calc(var(--y,0px) + var(--lift,0px))) rotate(var(--r,0deg));transform-origin:50% 120%;transition:transform .18s cubic-bezier(.3,.8,.3,1.3)}
+.e8play{position:relative}
+.e8play.can{--lift:-12px;z-index:1}
+.e8play.cant{opacity:1!important}.e8play.cant .e8card{filter:brightness(.55) saturate(.5);box-shadow:2px 2px 0 #2a1b4a}
+.e8play.can:hover,.e8play.can:focus-visible{--lift:-20px;z-index:2}
+.e8play.can .e8card{animation:e8glow 1.6s ease-in-out infinite}
+@keyframes e8glow{50%{box-shadow:3px 3px 0 var(--volt),0 0 14px rgba(0,240,255,.55)}}
+.e8card{background:linear-gradient(160deg,#ffffff 0%,#eef1ff 60%,#dfe4ff 100%)}
+.e8card b{align-self:end}.e8card i{align-self:start}
+.e8-pile{position:relative;display:grid;place-items:center;min-width:70px;min-height:98px}
+.e8-pile.stack::before,.e8-pile.stack::after{content:"";position:absolute;width:66px;height:94px;border-radius:6px;background:#e9ecff;border:2px solid #07041a;left:50%;top:50%}
+.e8-pile.stack::before{transform:translate(-50%,-50%) rotate(9deg)}.e8-pile.stack::after{transform:translate(-46%,-52%) rotate(-14deg);background:#dfe3fb}
+.e8-pile .e8card{position:relative;z-index:1}
+.e8-deck .e8card.back{box-shadow:2px 2px 0 #07041a,4px 4px 0 var(--cyan),6px 6px 0 #07041a,8px 8px 0 var(--mag)}
+.e8-deck:not(:disabled) .e8card.back{animation:e8nudge 2.4s ease-in-out infinite}
+@keyframes e8nudge{0%,80%,100%{transform:none}86%{transform:rotate(-4deg) translateY(-3px)}92%{transform:rotate(3deg)}}
+.e8ghost{position:fixed;z-index:9999;pointer-events:none}
+.e8burst{position:absolute;left:50%;top:50%;z-index:3;font-size:64px;color:var(--white);text-shadow:0 0 18px var(--cyan),3px 3px 0 var(--mag);pointer-events:none}
+.e8burst.red{color:#ff5a78}
+@media (prefers-reduced-motion:reduce){.e8play.can .e8card,.e8-deck .e8card.back{animation:none}.e8play{transition:none}}
+/* ===== King's Court + Liar's Dice animation ===== */
+.kccell{position:relative}
+.kcgone{position:absolute;inset:0;margin:auto;pointer-events:none}
+.kccell.kcspark{animation:kcspark .8s ease-out}
+@keyframes kcspark{0%{box-shadow:inset 0 0 0 0 var(--volt)}40%{box-shadow:inset 0 0 0 4px var(--volt),0 0 18px var(--volt)}100%{box-shadow:inset 0 0 0 0 transparent}}
+.ld-stamp{position:absolute;left:50%;top:38%;z-index:5;font-family:var(--num);font-size:clamp(54px,18vw,86px);color:#ff3b5c;border:6px solid #ff3b5c;padding:2px 16px;background:rgba(7,4,26,.85);text-shadow:3px 3px 0 var(--night);box-shadow:6px 6px 0 var(--night);pointer-events:none;white-space:nowrap}
+.ld-reveal .die{backface-visibility:hidden}
+@media (prefers-reduced-motion:reduce){.kccell.kcspark{animation:none}}
 </style>
 </head>
 <body>
@@ -2626,6 +2656,31 @@ function kcBoardEl(g){
     board.append(cell);
   }
   return board;
+}
+/* King's Court animation: the piece slides (or hops, for jumps) along its path, captured pieces pop,
+   and stepping into the Court sparkles. Works for your moves and your opponent's. */
+function kcAnimateMove(g,prev){
+  const path=g.state.last||[], was=prev?.state?.last||[];
+  if(path.length<2||JSON.stringify(path)===JSON.stringify(was)||!e8Motion()) return;
+  const board=$("board").querySelector(".kcboard"); if(!board) return;
+  const cells=board.children, dest=path[path.length-1], piece=cells[dest]?.querySelector(".kcpc"); if(!piece) return;
+  const c=i=>{ const r=cells[i].getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2}; }, d=c(dest);
+  const jump=path.length>2||Math.abs(((path[0]/8)|0)-((path[1]/8)|0))+Math.abs(path[0]%8-path[1]%8)===2;
+  const frames=[], hops=path.length-1;
+  path.forEach((sq,k)=>{
+    const p=c(sq); frames.push({transform:`translate(${p.x-d.x}px,${p.y-d.y}px) scale(1)`,offset:k/hops});
+    if(jump&&k<hops){ const q=c(path[k+1]); frames.push({transform:`translate(${(p.x+q.x)/2-d.x}px,${(p.y+q.y)/2-d.y-18}px) scale(1.45)`,offset:(k+.5)/hops}); }
+  });
+  frames[frames.length-1]={transform:"translate(0,0) scale(1)",offset:1};
+  const per=jump?300:220;
+  piece.style.zIndex="3"; piece.animate(frames,{duration:per*hops,easing:"ease-in-out",fill:"backwards"}).onfinish=()=>piece.style.zIndex="";
+  // captured pieces: whatever of the opponent's disappeared (except the moving piece's start square)
+  const mover=prev.state.turn, opp=mover==="x"?"o":"x", pb=prev.state.board||[], nb=g.state.board||[];
+  let k=0;
+  pb.forEach((v,i)=>{ if(v===opp&&!nb[i]){ const ghost=el("span","kcpc "+opp+" kcgone"); cells[i].append(ghost);
+    ghost.animate([{transform:"scale(1)",opacity:1},{transform:"scale(1.7) rotate(25deg)",opacity:.9,offset:.35},{transform:"scale(0) rotate(90deg)",opacity:0}],{duration:520,delay:per*(++k)-120,easing:"ease-out",fill:"backwards"}).onfinish=()=>ghost.remove(); } });
+  // stepping into the Court from outside sparkles
+  if(kcInCourt(dest)&&!kcInCourt(path[0])){ setTimeout(()=>{ cells[dest].classList.add("kcspark"); setTimeout(()=>cells[dest]?.classList.remove("kcspark"),800); },per*hops); }
 }
 function kcTap(g,i){
   const s=g.state, me=myMark(g), board=kcPreview||s.board;
@@ -5294,6 +5349,7 @@ function paintGame(prev){
   const board=$("board"); board.innerHTML="";
   if(isKC){
     board.className="kcboard-wrap"; board.append(kcBoardEl(g));
+    if(prev&&!kcPreview) kcAnimateMove(g,prev);
     show($("kcChainBar"),kcChaining);
   } else {
     board.className="board"; board.removeAttribute("aria-label"); board.setAttribute("role","grid"); board.setAttribute("aria-label","Tic-tac-toe board");
@@ -5462,19 +5518,61 @@ async function e8Act(fn){
   catch(err){ say("gameMsg",isNetworkError(err)?"You're offline. Try again when you're back.":err.message,true); }
   finally{ e8Busy=false; }
 }
+/* ---- card animations: remember where everything was before a redraw, then fly cards from there ---- */
+const e8Motion=()=>!reducedMotion()&&typeof Element.prototype.animate==="function";
+function e8Snapshot(){
+  const r={hand:new Map(),chips:new Map()};
+  r.deck=$("e8Draw").querySelector(".e8card")?.getBoundingClientRect();
+  document.querySelectorAll("#e8Hand .e8play").forEach(b=>r.hand.set(b.dataset.card,b.getBoundingClientRect()));
+  document.querySelectorAll("#e8Players .e8p").forEach(c=>r.chips.set(c.dataset.uid,c.getBoundingClientRect()));
+  return r;
+}
+const e8Center=r=>({x:r.left+r.width/2,y:r.top+r.height/2});
+function e8FlyInto(node,from,{spin=-22,delay=0,dur=460,flip=false}={}){   // animate a real element from where `from` was to where it is now
+  if(!from||!from.width||!node) return; const to=node.getBoundingClientRect(); if(!to.width) return;
+  const a=e8Center(from), b=e8Center(to), sc=Math.max(.35,Math.min(1.4,from.width/to.width||1));
+  const base=getComputedStyle(node).transform; const end=base&&base!=="none"?base:"none";
+  node.animate([
+    {transform:`translate(${a.x-b.x}px,${a.y-b.y}px) rotate(${spin}deg) scale(${sc})${flip?" scaleX(.05)":""}`,opacity:.95},
+    ...(flip?[{transform:`translate(${(a.x-b.x)*.45}px,${(a.y-b.y)*.45}px) rotate(${spin/2}deg) scale(1.05) scaleX(1)`,offset:.5}]:[]),
+    {transform:`translate(0,-10px) rotate(0deg) scale(1.08)`,offset:.82},
+    {transform:end,opacity:1}
+  ],{duration:dur,delay,easing:"cubic-bezier(.2,.9,.3,1.15)",fill:"backwards"});
+}
+function e8Ghost(from,to,{back=true,card=null,dur=520}={}){   // a card that flies between two spots and disappears (e.g. a friend drawing)
+  if(!from||!to) return; const gh=e8CardEl(card||"AS",{back,small:true}); gh.classList.add("e8ghost"); document.body.append(gh);
+  const a=e8Center(from), b=e8Center(to); gh.style.left=(a.x-15)+"px"; gh.style.top=(a.y-21)+"px";
+  gh.animate([{transform:"rotate(-10deg) scale(1)",opacity:1},{transform:`translate(${b.x-a.x}px,${b.y-a.y}px) rotate(18deg) scale(.7)`,opacity:.2}],{duration:dur,easing:"cubic-bezier(.3,.7,.3,1)"}).onfinish=()=>gh.remove();
+}
+function e8SuitBurst(suit){
+  const pile=$("e8Top"); const b=el("span","e8burst"+("HD".includes(suit)?" red":""),E8_SUITS[suit]); pile.append(b);
+  b.animate([{transform:"translate(-50%,-50%) scale(.3) rotate(-30deg)",opacity:0},{transform:"translate(-50%,-50%) scale(1.5) rotate(8deg)",opacity:1,offset:.35},{transform:"translate(-50%,-50%) scale(2.4) rotate(0deg)",opacity:0}],{duration:900,easing:"ease-out"}).onfinish=()=>b.remove();
+}
+
 async function paintEights(g,prev){
   const s=g.state, P=s.players||[], me=e8Seat(g), st=e8Status(g), myTurn=g.status==="active"&&P[s.turn]===user.id;
+  const animate=!!prev&&e8Motion()&&openGameId===g.message_id;
+  const before=animate?e8Snapshot():null, oldCards=[...(e8Hands.get(g.message_id)?.cards||[])];
   show($("kcChainBar"),false);
   $("gameTitle").textContent="Crazy Eights"; $("gameSub").textContent="Match the suit or number. 8s are wild. First to empty their hand wins."; show($("gameSub"),g.status==="waiting");
   $("gameStatus").textContent=st.text; $("gameStatus").classList.toggle("good",!!(st.turn||st.won));
   const row=$("e8Players"); row.innerHTML="";
   P.forEach((u,i)=>{ const chip=el("div","e8p"+(g.status==="active"&&i===s.turn?" turn":"")+(g.status==="done"&&u===s.winner?" won":""));
+    chip.dataset.uid=u;
     const f=el("span","face"); paintFace(f,cache.get(u)); chip.append(f,el("span","pname",u===user.id?"You":nameOf(u)));
     if(g.status!=="waiting") chip.append(el("span","e8count",`🂠 ${s.counts?.[i]??"?"}`)); row.append(chip); });
   $("e8Last").textContent=g.status==="waiting"?"":e8LastText(g);
   const playing=g.status!=="waiting";
   show(document.querySelector("#e8Area .e8-table"),playing);
-  $("e8Top").innerHTML=""; if(playing&&s.top) $("e8Top").append(e8CardEl(s.top));
+  $("e8Top").innerHTML=""; $("e8Top").classList.toggle("stack",playing&&!!s.top); if(playing&&s.top) $("e8Top").append(e8CardEl(s.top));
+  // a new card on the pile: fly it in from whoever played it
+  if(before&&playing&&s.top&&s.top!==prev?.state?.top&&prev?.status==="active"){
+    const l=s.last||{}, from=(l.by===user.id&&before.hand.get(s.top))||before.chips.get(l.by)||before.deck;
+    e8FlyInto($("e8Top").firstChild,from,{spin:l.by===user.id?-28:24,dur:480});
+    if(e8Rank(s.top)==="8") setTimeout(()=>e8SuitBurst(s.suit),380);
+  }
+  // a friend drew: a face-down card slides from the deck to them
+  if(before&&s.last?.drew&&s.last.by!==user.id&&JSON.stringify(s.last)!==JSON.stringify(prev?.state?.last)) e8Ghost(before.deck,before.chips.get(s.last.by));
   $("e8Suit").textContent=playing&&s.suit?`${E8_SUITS[s.suit]} ${e8Rank(s.top)==="8"?E8_SUIT_NAME[s.suit]:""}`:""; $("e8Suit").className="e8-suit"+("HD".includes(s.suit||"")?" red":"");
   $("e8DeckN").textContent=playing?`Draw (${s.deck??0})`:""; $("e8Draw").disabled=!myTurn||!!s.drew||e8Busy;
   show($("e8Pass"),myTurn&&!!s.drew);
@@ -5491,11 +5589,19 @@ async function paintEights(g,prev){
     const order="SHDC", ranks=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
     const sorted=[...cards].sort((a,b)=>order.indexOf(e8Suit(a))-order.indexOf(e8Suit(b))||ranks.indexOf(e8Rank(a))-ranks.indexOf(e8Rank(b)));
     handBox.innerHTML="";
-    sorted.forEach(c=>{ const can=myTurn&&e8CanPlay(g,c), b=el("button","e8play"+(can?" can":myTurn?" cant":"")); b.type="button";
+    const mid=(sorted.length-1)/2;
+    sorted.forEach((c,idx)=>{ const can=myTurn&&e8CanPlay(g,c), b=el("button","e8play"+(can?" can":myTurn?" cant":"")); b.type="button";
+      b.dataset.card=c; b.style.setProperty("--r",((idx-mid)*Math.min(4,28/Math.max(1,sorted.length)))+"deg"); b.style.setProperty("--y",(Math.abs(idx-mid)*Math.min(2.2,14/Math.max(1,sorted.length)))+"px");
       b.append(e8CardEl(c)); b.setAttribute("aria-label",e8CardName(c)+(can?", playable":"")); b.disabled=!can;
       b.onclick=()=>{ if(e8Rank(c)==="8"){ e8PendingEight=c; show($("e8SuitPick")); return; } e8Act(()=>api.eightsPlay(g.message_id,c)); };
       handBox.append(b); });
     if(!cards.length&&g.status==="active") handBox.append(el("p","note","No cards?"));
+    // new cards in your hand fly out of the deck: the whole hand when it's dealt, one card when you draw
+    if(before||(e8Motion()&&prev&&prev.status==="waiting")){
+      const fresh=prev?.status==="waiting"||!oldCards.length?sorted:sorted.filter(c=>!oldCards.includes(c));
+      const deckR=(before?.deck?.width?before.deck:null)||$("e8Draw").querySelector(".e8card")?.getBoundingClientRect();   // the deck is hidden in the lobby, so use where it is now
+      if(fresh.length&&fresh.length<=10) fresh.forEach((c,k)=>{ const node=handBox.querySelector(`[data-card="${c}"]`); e8FlyInto(node,deckR,{spin:-35,delay:k*(fresh.length>1?110:0),dur:520,flip:true}); });
+    }
   }
   if(g.status==="done"&&prev&&prev.status!=="done"){
     if(st.won){ gainXP("gamewin"); if(fxEnabled()) FX.play("confetti"); }
@@ -5574,7 +5680,8 @@ async function paintDice(g,prev){
   }
   // your dice
   const mine=$("ldMine"); mine.innerHTML=""; show($("ldMineWrap"),g.status==="active"&&me>=0&&s.counts[me]>0);
-  if(g.status==="active"&&me>=0&&s.counts[me]>0){ const dice=await e8Hand(g); if(openGameId!==g.message_id) return; [...dice].sort().forEach(x=>mine.append(dieEl(x))); }
+  if(g.status==="active"&&me>=0&&s.counts[me]>0){ const dice=await e8Hand(g); if(openGameId!==g.message_id) return; [...dice].sort().forEach(x=>mine.append(dieEl(x)));
+    if(prev&&e8Motion()&&(prev.status==="waiting"||prev.state?.round!==s.round)) ldTumble(mine); }
   // controls
   show($("ldControls"),myTurn);
   if(myTurn){
@@ -5587,8 +5694,44 @@ async function paintDice(g,prev){
   show($("ldStart"),g.status==="waiting"&&s.host===user.id); $("ldStart").disabled=P.length<2; $("ldStart").textContent=P.length<2?"Waiting for players…":`Roll the dice (${P.length} players)`;
   show($("gameJoin"),g.status==="waiting"&&me<0&&P.length<6);
   show($("gameRematch"),g.status==="done"&&me>=0);
+  if(prev&&e8Motion()) ldAnimate(g,prev);
   if(g.status==="done"&&prev&&prev.status!=="done"){ if(st.won){ gainXP("gamewin"); if(fxEnabled()) FX.play("confetti"); } if(navigator.vibrate) navigator.vibrate(st.won?[40,60,40]:60); }
   else if(prev?.state&&(prev.state.turn!==s.turn||prev.state.round!==s.round)&&myTurn&&navigator.vibrate) navigator.vibrate(25);
+}
+/* Liar's Dice animation: dice tumble when a round starts, bids slam in, "LIAR!" stamps the table,
+   the reveal flips everyone's dice one by one, and the loser's die flies away. */
+function ldSetFace(d,face){ [...d.children].forEach((p,i)=>p.className=(LD_PIPS[face]||[]).includes(i)?"on":""); d.classList.toggle("wild",String(face)==="1"); }
+function ldTumble(box){
+  [...box.children].forEach((d,k)=>{
+    const final=d.getAttribute("aria-label").slice(-1); let n=0;
+    const t=setInterval(()=>{ ldSetFace(d,1+Math.floor(Math.random()*6)); if(++n>7+k){ clearInterval(t); ldSetFace(d,final); } },65);
+    d.animate([{transform:"translateY(-34px) rotate(-220deg) scale(.6)",opacity:.3},{transform:"translateY(6px) rotate(25deg) scale(1.1)",opacity:1,offset:.7},{transform:"none"}],{duration:560+k*65,easing:"cubic-bezier(.3,.8,.3,1.2)"});
+  });
+}
+function ldAnimate(g,prev){
+  const s=g.state, ps=prev.state||{};
+  // a new bid pops in
+  if(s.bid&&JSON.stringify(s.bid)!==JSON.stringify(ps.bid)){
+    const q=$("ldBid").querySelector(".ld-q"), d=$("ldBid").querySelector(".die");
+    q?.animate([{transform:"scale(.3)",opacity:0},{transform:"scale(1.35)",opacity:1,offset:.6},{transform:"scale(1)"}],{duration:380,easing:"ease-out"});
+    d?.animate([{transform:"rotate(-180deg) scale(.4)"},{transform:"rotate(12deg) scale(1.2)",offset:.7},{transform:"none"}],{duration:420,easing:"ease-out"});
+  }
+  // someone called Liar!
+  const rv=s.reveal, pr=ps.reveal;
+  if(rv&&JSON.stringify(rv)!==JSON.stringify(pr)){
+    const stamp=el("div","ld-stamp","LIAR!"); $("ldArea").append(stamp);
+    stamp.animate([{transform:"translate(-50%,-50%) scale(3) rotate(-18deg)",opacity:0},{transform:"translate(-50%,-50%) scale(.9) rotate(-8deg)",opacity:1,offset:.25},{transform:"translate(-50%,-50%) scale(1) rotate(-8deg)",opacity:1,offset:.75},{transform:"translate(-50%,-50%) scale(1.1) rotate(-8deg)",opacity:0}],{duration:1300,easing:"ease-out"}).onfinish=()=>stamp.remove();
+    if(navigator.vibrate) navigator.vibrate([30,40,60]);
+    $("ldReveal").querySelectorAll(".die").forEach((d,k)=>{
+      d.animate([{transform:"rotateY(90deg)",opacity:0},{transform:"rotateY(0deg)",opacity:1}],{duration:260,delay:500+k*70,easing:"ease-out",fill:"backwards"});
+      if(d.classList.contains("hot")) d.animate([{transform:"scale(1)"},{transform:"scale(1.3)"},{transform:"scale(1)"}],{duration:360,delay:500+k*70+260,easing:"ease-in-out"});
+    });
+    const seat=(s.players||[]).indexOf(rv.loser);
+    if(seat>=0){ setTimeout(()=>{ const chip=[...$("ldPlayers").children][seat]; if(!chip) return;   // look it up now: the row may have been redrawn
+      chip.animate([{transform:"translateX(0)"},{transform:"translateX(-7px)"},{transform:"translateX(7px)"},{transform:"translateX(-4px)"},{transform:"none"}],{duration:420});
+      const r=chip.getBoundingClientRect(), gd=dieEl(1+Math.floor(Math.random()*6),{small:true}); gd.classList.add("e8ghost"); gd.style.left=(r.right-30)+"px"; gd.style.top=(r.top+2)+"px"; document.body.append(gd);
+      gd.animate([{transform:"none",opacity:1},{transform:"translate(26px,-70px) rotate(300deg) scale(.6)",opacity:0}],{duration:800,easing:"cubic-bezier(.2,.7,.4,1)"}).onfinish=()=>gd.remove(); },900); }
+  }
 }
 function ldPaintControls(g){
   const total=ldTotal(g); ldDraft.qty=Math.max(1,Math.min(total,ldDraft.qty));
@@ -7680,8 +7823,16 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.26c";
+const APP_VERSION="2026.09.26e";
 const CHANGELOG=[
+  {v:"2026.09.26e", title:"Games come alive 🎬", items:[
+    "👑 King's Court: pieces slide and hop across the board, captured pieces pop, and stepping into the Court sparkles. You can see your opponent's moves happen now.",
+    "🎲 Liar's Dice: dice tumble when you roll, bids slam in, LIAR! stamps the table, and the reveal flips everyone's dice one by one.",
+  ]},
+  {v:"2026.09.26d", title:"Crazy Eights feels like cards 🃏", items:[
+    "🃏 Cards now fly out of the deck when they're dealt, zip to the pile when played, and slide into your hand when you draw.",
+    "✋ Your hand fans out like real cards, and playable ones lift and glow. Play an 8 and the new suit bursts onto the table.",
+  ]},
   {v:"2026.09.26c", title:"New game: Liar's Dice 🎲", items:[
     "🎲 Bluff your friends in Liar's Dice (2–6 players): ＋ → Games → Liar's Dice.",
     "🤥 Bid on everyone's hidden dice, 1s are wild, and call Liar! when you don't buy it. Last one with dice wins.",
