@@ -1851,6 +1851,30 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .rulelinks{margin:6px 0 0;font-size:13px;color:var(--muted);text-align:center}
 .rulelinks button{background:none;border:none;color:var(--cyan);text-decoration:underline;font:inherit;cursor:pointer;padding:2px}
 #rulesSheet .rulesbox{border:none;background:none;padding:0}
+/* ===== Liar's Dice ===== */
+.die{display:inline-grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);width:40px;height:40px;padding:5px;box-sizing:border-box;background:#f4f7ff;border:2px solid #07041a;border-radius:8px;box-shadow:3px 3px 0 var(--mag);gap:1px}
+.die i{display:block;border-radius:50%;margin:auto;width:70%;height:70%}.die i.on{background:#07041a}
+.die.wild{background:var(--volt)}.die.sm{width:26px;height:26px;padding:3px;border-radius:5px;box-shadow:2px 2px 0 var(--mag);gap:0}
+.die.sm i{width:88%;height:88%}
+.die.hot{border-color:var(--cyan);box-shadow:0 0 0 2px var(--cyan)}
+.gp-icon.ld-icon{font-size:30px;display:grid;place-items:center}
+.ldice{width:100%;display:grid;gap:10px}
+.e8p.out{opacity:.45}
+.ld-bid{display:flex;align-items:center;justify-content:center;gap:10px;min-height:48px;font-family:var(--tech)}
+.ld-bid .ld-who{font-size:13px;color:var(--muted)}.ld-bid .ld-q{font-family:var(--num);font-size:34px;color:var(--volt);font-weight:400}
+.ld-reveal{border:2px dashed #3b2d80;padding:8px 10px;display:grid;gap:6px;text-align:left}
+.ld-rline{margin:0;font-size:14px;color:var(--white)}
+.ld-rrow{display:flex;align-items:center;gap:8px}.ld-rname{font-size:12px;color:var(--muted);min-width:64px}
+.ld-dice{display:flex;flex-wrap:wrap;gap:4px}
+.ld-mine{display:grid;justify-items:center;gap:6px}.ld-label{font-family:var(--tech);font-size:11px;color:var(--cyan)}
+.ld-mine .ld-dice,.ld-mine #ldMine{display:flex;gap:6px;justify-content:center}
+.ld-controls{display:grid;gap:10px;justify-items:center;border-top:2px solid #3b2d80;padding-top:10px}
+.ld-qty{display:flex;align-items:center;gap:10px;font-family:var(--num)}.ld-qty b{font-size:30px;font-weight:400;color:var(--volt);min-width:30px;text-align:center}.ld-qty span{color:var(--muted)}
+.ld-qty .blbtn{font-size:20px;min-width:40px}
+.ld-faces{display:flex;gap:6px}
+.ld-face{background:none;border:2px solid transparent;padding:3px;cursor:pointer}.ld-face.on{border-color:var(--volt);box-shadow:0 0 10px rgba(243,255,58,.4)}
+.ld-actbtns{display:flex;gap:8px;width:100%}.ld-actbtns .go{flex:1;font-size:18px!important}
+.ld-liar{background:#ff3b5c!important;color:var(--white)!important}
 </style>
 </head>
 <body>
@@ -1998,7 +2022,11 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
           <span class="gp-icon e8-icon" aria-hidden="true"><span class="e8card sm red"><b>8</b><i>♥</i></span><span class="e8card sm"><b>8</b><i>♠</i></span></span>
           <span class="gp-text"><b>Crazy Eights</b><small class="gp-hint">2–6 players · match suit or number · 8s are wild</small></span>
         </button>
-        <p class="rulelinks">📖 Rules: <button type="button" data-rules="tictactoe">Tic-tac-toe</button> · <button type="button" data-rules="kingscourt">King's Court</button> · <button type="button" data-rules="eights">Crazy Eights</button></p>
+        <button type="button" class="gamepick" data-game="liarsdice">
+          <span class="gp-icon ld-icon" aria-hidden="true">🎲</span>
+          <span class="gp-text"><b>Liar's Dice</b><small class="gp-hint">2–6 players · bid, bluff, call Liar!</small></span>
+        </button>
+        <p class="rulelinks">📖 Rules: <button type="button" data-rules="tictactoe">Tic-tac-toe</button> · <button type="button" data-rules="kingscourt">King's Court</button> · <button type="button" data-rules="eights">Crazy Eights</button> · <button type="button" data-rules="liarsdice">Liar's Dice</button></p>
         <p class="note">More games coming soon 👀</p>
       </div>
     </div>
@@ -2257,6 +2285,19 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
       <div class="e8-hand" id="e8Hand" aria-label="Your hand"></div>
       <div class="e8-actions"><button type="button" class="ghost hidden" id="e8Pass">Pass</button><button type="button" class="ghost hidden" id="e8Skip">Skip their turn</button></div>
       <button class="go hidden" type="button" id="e8Deal">Deal cards</button>
+    </div>
+    <div class="ldice hidden" id="ldArea">
+      <div class="e8-players" id="ldPlayers"></div>
+      <div class="ld-bid" id="ldBid" aria-live="polite"></div>
+      <div class="ld-reveal hidden" id="ldReveal"></div>
+      <div class="ld-mine" id="ldMineWrap"><span class="ld-label">Your dice</span><div class="ld-dice" id="ldMine" aria-label="Your dice"></div></div>
+      <div class="ld-controls hidden" id="ldControls">
+        <div class="ld-qty"><button type="button" class="blbtn" id="ldMinus" aria-label="Fewer dice">−</button><b id="ldQty">1</b><span>×</span><button type="button" class="blbtn" id="ldPlus" aria-label="More dice">+</button></div>
+        <div class="ld-faces" id="ldFaces" role="radiogroup" aria-label="Which number"></div>
+        <div class="ld-actbtns"><button type="button" class="go" id="ldBidBtn">Bid</button><button type="button" class="go ld-liar" id="ldLiarBtn">Liar!</button></div>
+      </div>
+      <div class="e8-actions"><button type="button" class="ghost hidden" id="ldSkip">Skip their turn</button></div>
+      <button class="go hidden" type="button" id="ldStart">Roll the dice</button>
     </div>
     <button class="go hidden" type="button" id="gameJoin">Join game</button>
     <button class="go hidden" type="button" id="gameRematch">Rematch 🔁</button>
@@ -2816,6 +2857,10 @@ const live = {
   async eightsDraw(id){ return must(await sb.rpc("eights_draw",{p_message:id})); },
   async eightsPass(id){ must(await sb.rpc("eights_pass",{p_message:id})); },
   async eightsSkip(id){ must(await sb.rpc("eights_skip",{p_message:id})); },
+  async diceStart(id){ must(await sb.rpc("dice_start",{p_message:id})); },
+  async diceBid(id,qty,face){ must(await sb.rpc("dice_bid",{p_message:id,p_qty:qty,p_face:face})); },
+  async diceCall(id){ must(await sb.rpc("dice_call",{p_message:id})); },
+  async diceSkip(id){ must(await sb.rpc("dice_skip",{p_message:id})); },
   async createPoll(room,question,options,multi){ return must(await sb.rpc("create_poll",{p_room:room,p_question:question,p_options:options,p_multi:multi})); },
   async vote(id,idx){ must(await sb.rpc("vote_poll",{p_message:id,p_option:idx})); },
   async renameRoom(room,name){ must(await sb.rpc("rename_room",{p_room:room,p_name:name})); },
@@ -2955,10 +3000,45 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     }
     e8DemoAfter(g); return drawn;
   }
+  // ---- Liar's Dice (demo mirror of the server rules) ----
+  const ldRoll=n=>Array.from({length:n},()=>String(1+Math.floor(Math.random()*6)));
+  const ldNext=(st,from)=>{ const n=st.players.length; for(let i=1;i<=n;i++){ const s=(from+i)%n; if(st.counts[s]>0) return s; } return from; };
+  function ldNewRound(g,first){ const st=g.state, d=demoE8[g.message_id]; st.players.forEach((u,i)=>d.hands[u]=ldRoll(st.counts[i])); st.bid=null; st.turn=first; st.round=(st.round||0)+1; }
+  function ldDemoBegin(g){ const n=g.state.players.length; demoE8[g.message_id]={hands:{}}; Object.assign(g.state,{counts:Array(n).fill(5),round:0,reveal:null,winner:null,last:null}); ldNewRound(g,Math.floor(Math.random()*n)); g.status="active"; }
+  function ldDemoMove(g,who,act,by){
+    const st=g.state, P=st.players, seat=P.indexOf(who), d=demoE8[g.message_id];
+    if(g.status!=="active") throw new Error("This game isn't being played right now.");
+    if(!act.skip&&seat!==st.turn) throw new Error("It's not your turn.");
+    const endOrNext=(loserSeat)=>{ const alive=st.counts.filter(c=>c>0).length;
+      if(alive<=1){ g.status="done"; st.bid=null; st.winner=P[st.counts.findIndex(c=>c>0)]; } else ldNewRound(g,st.counts[loserSeat]>0?loserSeat:ldNext(st,loserSeat)); };
+    if(act.bid){ const [q,f]=act.bid, total=st.counts.reduce((a,b)=>a+b,0);
+      if(!(f>=2&&f<=6)) throw new Error("Bid on a number from 2 to 6 (1s are wild).");
+      if(!(q>=1&&q<=total)) throw new Error(`There are only ${total} dice on the table.`);
+      if(st.bid&&!(q>st.bid.qty||(q===st.bid.qty&&f>st.bid.face))) throw new Error("Your bid has to be higher: more dice, or the same number of dice with a higher face.");
+      st.bid={qty:q,face:f,by:who}; st.turn=ldNext(st,seat); st.last={by:who,qty:q,face:f};
+    } else if(act.call){
+      if(!st.bid) throw new Error("Nobody has bid yet, so there's nothing to call. Make the first bid.");
+      const dice={}; P.forEach((u,i)=>{ if(st.counts[i]>0) dice[u]=[...d.hands[u]]; });
+      const cnt=Object.values(dice).flat().filter(x=>x===String(st.bid.face)||x==="1").length;
+      const loser=cnt>=st.bid.qty?who:st.bid.by, ls=P.indexOf(loser); st.counts[ls]--;
+      st.reveal={dice,bid:{...st.bid},caller:who,loser,count:cnt}; st.last={by:who,called:true,loser}; endOrNext(ls);
+    } else if(act.skip){ st.counts[seat]--; st.reveal=null; st.last={by:by||"me",skipped:who}; endOrNext(seat); }
+    e8DemoAfter(g);
+  }
+  function ldDemoBot(g,who){
+    if(g.status!=="active"||g.state.players[g.state.turn]!==who) return;
+    const st=g.state, hand=demoE8[g.message_id].hands[who], total=st.counts.reduce((a,b)=>a+b,0);
+    const f=2+Math.floor(Math.random()*5), mine=hand.filter(x=>x===String(f)||x==="1").length, guess=mine+Math.round((total-hand.length)/3);
+    const b=st.bid;
+    if(b&&(b.qty>guess+1||b.qty>=total||Math.random()<.15)){ ldDemoMove(g,who,{call:true}); return; }
+    let q=!b?Math.max(1,Math.min(total,guess)):(f>b.face?b.qty:b.qty+1);
+    if(q>total){ ldDemoMove(g,who,{call:true}); return; }
+    ldDemoMove(g,who,{bid:[q,f]});
+  }
   function e8DemoAfter(g){
     g.moves++; g.updated_at=iso(); const copy=JSON.parse(JSON.stringify(g)); setTimeout(()=>fire("game",copy),30);
     const who=g.state.players[g.state.turn];
-    if(g.status==="active"&&who!=="me") setTimeout(()=>e8DemoBot(g,who),900);
+    if(g.status==="active"&&who!=="me") setTimeout(()=>g.type==="liarsdice"?ldDemoBot(g,who):e8DemoBot(g,who),900);
   }
   function e8DemoBot(g,who){
     if(g.status!=="active"||g.state.players[g.state.turn]!==who) return;
@@ -2993,9 +3073,9 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
     async unpin(id){ const p=pins[id]; delete pins[id]; setTimeout(()=>fire("pin",{message_id:id},false),30); },
     async games(ids){ return ids.map(i=>games[i]).filter(Boolean).map(g=>JSON.parse(JSON.stringify(g))); },
     async createGame(room,type){
-      if(type==="eights"){
-        const r=rooms[room], m={id:nextId++,room,user_id:"me",kind:"game",text:"Crazy Eights",created_at:iso()}; r.msgs.push(m);
-        games[m.id]={message_id:m.id,room,type:"eights",player_x:"me",player_o:null,status:"waiting",state:{players:["me"],host:"me"},moves:0,updated_at:iso()};
+      if(type==="eights"||type==="liarsdice"){
+        const r=rooms[room], m={id:nextId++,room,user_id:"me",kind:"game",text:type==="eights"?"Crazy Eights":"Liar's Dice",created_at:iso()}; r.msgs.push(m);
+        games[m.id]={message_id:m.id,room,type,player_x:"me",player_o:null,status:"waiting",state:{players:["me"],host:"me"},moves:0,updated_at:iso()};
         ["vee","rook"].forEach((b,i)=>setTimeout(()=>{ const g=games[m.id]; if(g.status!=="waiting"||g.state.players.includes(b)) return; g.state.players.push(b); g.moves++; fire("game",JSON.parse(JSON.stringify(g))); },700+i*700));
         return m;
       }
@@ -3006,7 +3086,7 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
       if(!other) setTimeout(()=>{ const g=games[m.id]; if(g.status!=="waiting") return; g.player_o=Object.keys(r.members).find(u=>u!=="me")||"rook"; g.status="active"; fire("game",JSON.parse(JSON.stringify(g))); if(type==="kingscourt"&&g.player_x!=="me") setTimeout(()=>kcBotTurn(m.id),900); },1500);
       return m;
     },
-    async joinGame(id){ const g=games[id]; if(g.type==="eights"){ if(g.status!=="waiting") throw new Error("This game already started."); if(!g.state.players.includes("me")) g.state.players.push("me"); g.moves++; setTimeout(()=>fire("game",JSON.parse(JSON.stringify(g))),30); return; } g.player_o="me"; g.status="active"; setTimeout(()=>fire("game",JSON.parse(JSON.stringify(g))),30); setTimeout(()=>demoBot(id),900); },
+    async joinGame(id){ const g=games[id]; if(g.type==="eights"||g.type==="liarsdice"){ if(g.status!=="waiting") throw new Error("This game already started."); if(!g.state.players.includes("me")) g.state.players.push("me"); g.moves++; setTimeout(()=>fire("game",JSON.parse(JSON.stringify(g))),30); return; } g.player_o="me"; g.status="active"; setTimeout(()=>fire("game",JSON.parse(JSON.stringify(g))),30); setTimeout(()=>demoBot(id),900); },
     async playTicTacToe(id,cell){
       const g=games[id], mark=g.player_x==="me"?"x":"o";
       if(g.status!=="active"||g.state.turn!==mark||g.state.board[cell]) throw new Error("Not your turn.");
@@ -3022,14 +3102,19 @@ const demo = (()=>{ // in-memory stand-in so the preview works without a server
       setTimeout(()=>fire("game",JSON.parse(JSON.stringify(g))),30);
     },
     async eightsHand(id){ return [...(demoE8[id]?.hands.me||[])]; },
+    async diceStart(id){ const g=games[id]; if(g.state.host!=="me") throw new Error("Only the person who started the game can roll."); ldDemoBegin(g); e8DemoAfter(g); },
+    async diceBid(id,qty,face){ ldDemoMove(games[id],"me",{bid:[qty,face]}); },
+    async diceCall(id){ ldDemoMove(games[id],"me",{call:true}); },
+    async diceSkip(id){ const g=games[id]; if(Date.now()-new Date(g.updated_at).getTime()<120000) throw new Error("Give them a couple of minutes first."); ldDemoMove(g,g.state.players[g.state.turn],{skip:true},"me"); },
     async eightsStart(id){ const g=games[id]; if(g.state.host!=="me") throw new Error("Only the person who started the game can deal."); e8DemoDeal(g); e8DemoAfter(g); },
     async eightsPlay(id,card,suit){ e8DemoMove(games[id],"me",{play:card,suit}); },
     async eightsDraw(id){ return e8DemoMove(games[id],"me",{draw:true}); },
     async eightsPass(id){ e8DemoMove(games[id],"me",{pass:true}); },
     async eightsSkip(id){ const g=games[id]; if(Date.now()-new Date(g.updated_at).getTime()<120000) throw new Error("Give them a couple of minutes first."); const n=g.state.players.length; g.state.last={by:"me",skipped:g.state.players[g.state.turn]}; g.state.turn=(g.state.turn+1)%n; g.state.drew=false; e8DemoAfter(g); },
     async rematch(id){
-      if(games[id].type==="eights"){ const old=games[id], r=rooms[old.room]; const m={id:nextId++,room:old.room,user_id:"me",kind:"game",text:"Crazy Eights",created_at:iso()}; r.msgs.push(m);
-        games[m.id]={message_id:m.id,room:old.room,type:"eights",player_x:"me",player_o:null,status:"waiting",state:{players:[...old.state.players],host:"me"},moves:0,updated_at:iso()}; e8DemoDeal(games[m.id]); e8DemoAfter(games[m.id]); return m; }
+      if(games[id].type==="eights"||games[id].type==="liarsdice"){ const old=games[id], r=rooms[old.room]; const m={id:nextId++,room:old.room,user_id:"me",kind:"game",text:old.type==="eights"?"Crazy Eights":"Liar's Dice",created_at:iso()}; r.msgs.push(m);
+        games[m.id]={message_id:m.id,room:old.room,type:old.type,player_x:"me",player_o:null,status:"waiting",state:{players:[...old.state.players],host:"me"},moves:0,updated_at:iso()};
+        if(old.type==="eights") e8DemoDeal(games[m.id]); else ldDemoBegin(games[m.id]); e8DemoAfter(games[m.id]); return m; }
       const old=games[id], r=rooms[old.room], label=old.type==="kingscourt"?"King's Court":"Tic-tac-toe";
       const m={id:nextId++,room:old.room,user_id:"me",kind:"game",text:label,created_at:iso()}; r.msgs.push(m);
       const st0 = old.type==="kingscourt" ? {board:kcInitialBoard(),turn:"x",winner:null,line:[],first_x:false,first_o:false,last:[]} : {board:Array(9).fill(""),turn:"x",winner:null,line:[]};
@@ -5162,6 +5247,7 @@ function kcMiniBoard(g){
 function gameCard(m){
   const g=gamesById.get(m.id);
   if(g?.type==="eights"||(!g&&m.text==="Crazy Eights")) return e8GameCard(m,g);
+  if(g?.type==="liarsdice"||(!g&&m.text==="Liar's Dice")) return ldGameCard(m,g);
   const card=el("div","gamecard");
   const top=el("div","gc-top"); top.append(g?.type==="kingscourt"?kcMiniBoard(g):miniGrid(g));
   const info=el("div"); info.append(el("div","gc-title",g?.type==="kingscourt"?"👑 KING'S COURT":"🎮 TIC-TAC-TOE"));
@@ -5188,9 +5274,10 @@ function playerTile(node,uid,mark,active){
 function paintGame(prev){
   const g=gamesById.get(openGameId); if(!g){ closeGame(); return; }
   paintGameRules(g);
-  const e8=g.type==="eights";
-  show($("e8Area"),e8); document.querySelector("#gameSheet .versus").classList.toggle("hidden",e8); show($("board"),!e8);
+  const e8=g.type==="eights", ld=g.type==="liarsdice";
+  show($("e8Area"),e8); show($("ldArea"),ld); document.querySelector("#gameSheet .versus").classList.toggle("hidden",e8||ld); show($("board"),!e8&&!ld);
   if(e8){ paintEights(g,prev); return; }
+  if(ld){ paintDice(g,prev); return; }
   const isKC=g.type==="kingscourt";
   $("gameTitle").textContent=isKC?"King's Court":"Tic-tac-toe"; show($("gameSub"),isKC);
   const s=g.state, st=gameStatusText(g), me=myMark(g);
@@ -5241,7 +5328,7 @@ $("gameJoin").onclick=async()=>{
   const g=gamesById.get(openGameId); if(!g) return;
   $("gameJoin").disabled=true;
   try{ await api.joinGame(g.message_id); const before=JSON.parse(JSON.stringify(g));
-    if(g.type==="eights"){ if(!g.state.players.includes(user.id)) g.state.players.push(user.id); } else { g.player_o=user.id; g.status="active"; }
+    if(g.type==="eights"||g.type==="liarsdice"){ if(!g.state.players.includes(user.id)) g.state.players.push(user.id); } else { g.player_o=user.id; g.status="active"; }
     paintGame(before); refreshMsg(g.message_id); }
   catch(err){ say("gameMsg","Couldn't join: "+err.message,true); }
   finally{ $("gameJoin").disabled=false; }
@@ -5280,7 +5367,17 @@ const GAME_RULES={
            "Can't play? Tap the deck to <b>draw one card</b>. Play it if you can, or tap <b>Pass</b>.",
            "The <b>first player with no cards left wins</b>.",
            "Nobody can see your cards but you. If someone goes quiet for 2 minutes on their turn, anyone can <b>skip</b> them."],
-    tip:"Save your 8s for when you're stuck. They can get you out of anything."}
+    tip:"Save your 8s for when you're stuck. They can get you out of anything."},
+  liarsdice:{name:"Liar's Dice",emoji:"🎲",players:"2–6 players",goal:"Be the last player with dice left.",
+    steps:["Everyone starts with <b>5 dice</b> and rolls in secret. Only you can see yours.",
+           "On your turn, <b>bid</b> on how many dice of one number are showing across <b>everyone's</b> dice, like \"four 5s\".",
+           "<b>1s are wild</b>: they count as every number. (So you bid on 2s through 6s.)",
+           "Each bid must go <b>higher</b>: more dice, or the same number of dice with a higher face.",
+           "Think the last bid is wrong? Call <b>Liar!</b> Everyone's dice are revealed and counted.",
+           "If there were fewer than the bid, the <b>bidder</b> loses a die. If there were at least that many, the <b>caller</b> loses one.",
+           "The loser starts the next round and everyone re-rolls. Lose all your dice and you're out. <b>Last one standing wins.</b>",
+           "Someone gone quiet for 2 minutes on their turn? Anyone can <b>skip</b> them, and they lose a die for stalling."],
+    tip:"Count your own dice first. If you have three 5s (1s included), \"four 5s\" is a pretty safe bid."}
 };
 function renderRules(box,type){
   const r=GAME_RULES[type]; box.innerHTML=""; if(!r) return;
@@ -5340,7 +5437,7 @@ function e8Status(g){
 }
 const e8Hands=new Map();   // message id -> {moves, cards}
 async function e8Hand(g){
-  if(e8Seat(g)<0||g.status==="waiting") return [];
+  if((g.state.players||[]).indexOf(user.id)<0||g.status==="waiting") return [];
   const hit=e8Hands.get(g.message_id); if(hit&&hit.moves===g.moves) return hit.cards;
   const cards=await api.eightsHand(g.message_id).catch(()=>hit?.cards||[]);
   e8Hands.set(g.message_id,{moves:g.moves,cards}); return cards;
@@ -5352,12 +5449,12 @@ function e8GameCard(m,g){
   if(!g){ info.append(el("div","gc-status","Loading…")); top.append(info); card.append(top); return card; }
   const st=e8Status(g); info.append(el("div","gc-status"+(st.turn?" turn":""),st.text)); top.append(info); card.append(top);
   const inIt=e8Seat(g)>=0;
-  const label=g.status==="waiting"?(inIt?(g.state.host===user.id?"Open lobby":"Open game"):"Join game"):g.status==="done"?(inIt?"See results · Rematch":"See results"):(st.turn?"Play your turn":"Watch game");
+  const label=g.status==="waiting"?(inIt?(g.state.host===user.id?"Open lobby":"Open game"):"Join game"):g.status==="done"?(inIt?"See results · Rematch":"See results"):(st.turn?"Play your turn":inIt?"Open game":"Watch game");
   const btn=el("button","play"+(st.turn?" big":""),label); btn.type="button"; btn.onclick=e=>{ e.stopPropagation(); openGame(m.id); };
   card.append(btn); return card;
 }
 let e8Busy=false, e8PendingEight=null;
-setInterval(()=>{ const g=gamesById.get(openGameId); if(g?.type==="eights"&&g.status==="active"&&!e8Busy) paintEights(g); },20000);
+setInterval(()=>{ const g=gamesById.get(openGameId); if(g?.status==="active"&&!e8Busy){ if(g.type==="eights") paintEights(g); else if(g.type==="liarsdice") paintDice(g); } },20000);
 async function e8Act(fn){
   if(e8Busy) return; e8Busy=true; say("gameMsg","");
   const id=openGameId;
@@ -5412,6 +5509,103 @@ $("e8Draw").onclick=()=>{ const g=gamesById.get(openGameId); if(g) e8Act(()=>api
 $("e8Pass").onclick=()=>{ const g=gamesById.get(openGameId); if(g) e8Act(()=>api.eightsPass(g.message_id)); };
 $("e8Skip").onclick=()=>{ const g=gamesById.get(openGameId); if(g) e8Act(()=>api.eightsSkip(g.message_id)); };
 $("e8Deal").onclick=()=>{ const g=gamesById.get(openGameId); if(g) e8Act(()=>api.eightsStart(g.message_id)); };
+
+/* ================= LIAR'S DICE 🎲 =================
+   Bluffing dice game for 2–6 players. Your dice are private (same table as card hands). The server checks
+   every bid and does the counting when someone calls Liar!. */
+const LD_PIPS={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
+function dieEl(face,{small=false,hot=false}={}){
+  const d=el("span","die"+(small?" sm":"")+(hot?" hot":"")+(String(face)==="1"?" wild":"")); d.setAttribute("aria-label",`die showing ${face}`);
+  for(let i=0;i<9;i++){ const p=el("i"); if((LD_PIPS[face]||[]).includes(i)) p.className="on"; d.append(p); }
+  return d;
+}
+const ldSeat=g=>(g.state.players||[]).indexOf(user.id);
+const ldTotal=g=>(g.state.counts||[]).reduce((a,b)=>a+b,0);
+function ldStatus(g){
+  const s=g.state, P=s.players||[], me=ldSeat(g), host=s.host;
+  if(g.status==="waiting"){
+    if(me<0) return {text:`${nameOf(host)} wants to play! (${P.length}/6)`,turn:true};
+    return {text:host===user.id?`${P.length} player${P.length===1?"":"s"} in. Roll when everyone's here.`:`Waiting for ${nameOf(host)} to roll… (${P.length} in)`};
+  }
+  if(g.status==="done") return s.winner===user.id?{text:"You won! 🏆",won:true}:{text:`${nameOf(s.winner)} won 🏆`};
+  const up=P[s.turn];
+  if(me>=0&&s.counts[me]===0) return {text:`You're out. ${nameOf(up)}'s turn`};
+  if(up===user.id) return {text:s.bid?"Your turn! Raise the bid or call Liar!":"Your turn! Make the opening bid.",turn:true};
+  return {text:`${nameOf(up)}'s turn`};
+}
+function ldGameCard(m,g){
+  const card=el("div","gamecard e8gc"), top=el("div","gc-top");
+  top.append(g?.state?.bid?dieEl(g.state.bid.face,{small:true}):el("span","e8-gcicon","🎲"));
+  const info=el("div"); info.append(el("div","gc-title","🎲 LIAR'S DICE"));
+  if(!g){ info.append(el("div","gc-status","Loading…")); top.append(info); card.append(top); return card; }
+  const st=ldStatus(g); info.append(el("div","gc-status"+(st.turn?" turn":""),st.text)); top.append(info); card.append(top);
+  const inIt=ldSeat(g)>=0;
+  const label=g.status==="waiting"?(inIt?(g.state.host===user.id?"Open lobby":"Open game"):"Join game"):g.status==="done"?(inIt?"See results · Rematch":"See results"):(st.turn?"Play your turn":inIt?"Open game":"Watch game");
+  const btn=el("button","play"+(st.turn?" big":""),label); btn.type="button"; btn.onclick=e=>{ e.stopPropagation(); openGame(m.id); };
+  card.append(btn); return card;
+}
+let ldDraft={qty:1,face:2,for:null};
+function ldMinRaise(g){ const b=g.state.bid; if(!b) return {qty:1,face:2}; return b.face<6?{qty:b.qty,face:b.face+1}:{qty:b.qty+1,face:2}; }
+const ldHigher=(g,q,f)=>{ const b=g.state.bid; return !b||q>b.qty||(q===b.qty&&f>b.face); };
+async function paintDice(g,prev){
+  const s=g.state, P=s.players||[], me=ldSeat(g), st=ldStatus(g), playing=g.status!=="waiting";
+  const myTurn=g.status==="active"&&P[s.turn]===user.id;
+  show($("kcChainBar"),false);
+  $("gameTitle").textContent="Liar's Dice"; $("gameSub").textContent="Bid on everyone's dice. 1s are wild. Call Liar! if you don't believe it."; show($("gameSub"),g.status==="waiting");
+  $("gameStatus").textContent=st.text; $("gameStatus").classList.toggle("good",!!(st.turn||st.won));
+  const row=$("ldPlayers"); row.innerHTML="";
+  P.forEach((u,i)=>{ const out=playing&&s.counts?.[i]===0;
+    const chip=el("div","e8p"+(g.status==="active"&&i===s.turn?" turn":"")+(g.status==="done"&&u===s.winner?" won":"")+(out?" out":""));
+    const f=el("span","face"); paintFace(f,cache.get(u)); chip.append(f,el("span","pname",u===user.id?"You":nameOf(u)));
+    if(playing) chip.append(el("span","e8count",out?"out":`🎲 ${s.counts?.[i]??"?"}`)); row.append(chip); });
+  // current bid
+  const bidBox=$("ldBid"); bidBox.innerHTML=""; show(bidBox,playing);
+  if(playing){
+    if(s.bid){ bidBox.append(el("span","ld-who",`${s.bid.by===user.id?"You":nameOf(s.bid.by)} bid`),el("b","ld-q",`${s.bid.qty} ×`),dieEl(s.bid.face)); }
+    else if(g.status==="active") bidBox.append(el("span","ld-who",`Round ${s.round}: no bids yet · ${ldTotal(g)} dice on the table`));
+  }
+  // last reveal (after a Liar! call)
+  const rv=s.reveal, rbox=$("ldReveal"); show(rbox,playing&&!!rv); rbox.innerHTML="";
+  if(rv){
+    const face=String(rv.bid.face), right=rv.count>=rv.bid.qty;
+    rbox.append(el("p","ld-rline",`${rv.caller===user.id?"You":nameOf(rv.caller)} called Liar! on ${rv.bid.by===user.id?"your":nameOf(rv.bid.by)+"'s"} ${rv.bid.qty} × ${face}s. There ${rv.count===1?"was":"were"} ${rv.count} (1s count). ${right?"The bid was right":"The bid was a lie"}, so ${rv.loser===user.id?"you lose":nameOf(rv.loser)+" loses"} a die.`));
+    Object.entries(rv.dice||{}).forEach(([u,ds])=>{ const r=el("div","ld-rrow"); r.append(el("span","ld-rname",u===user.id?"You":nameOf(u)));
+      const w=el("span","ld-dice"); ds.forEach(x=>w.append(dieEl(x,{small:true,hot:x===face||x==="1"}))); r.append(w); rbox.append(r); });
+  }
+  // your dice
+  const mine=$("ldMine"); mine.innerHTML=""; show($("ldMineWrap"),g.status==="active"&&me>=0&&s.counts[me]>0);
+  if(g.status==="active"&&me>=0&&s.counts[me]>0){ const dice=await e8Hand(g); if(openGameId!==g.message_id) return; [...dice].sort().forEach(x=>mine.append(dieEl(x))); }
+  // controls
+  show($("ldControls"),myTurn);
+  if(myTurn){
+    const key=g.message_id+":"+g.moves;
+    if(ldDraft.for!==key){ const m=ldMinRaise(g); ldDraft={...m,for:key}; }
+    ldPaintControls(g);
+  }
+  const stale=g.status==="active"&&!myTurn&&me>=0&&Date.now()-new Date(g.updated_at||Date.now()).getTime()>120000;
+  show($("ldSkip"),stale); if(stale) $("ldSkip").textContent=`Skip ${nameOf(P[s.turn])}'s turn`;
+  show($("ldStart"),g.status==="waiting"&&s.host===user.id); $("ldStart").disabled=P.length<2; $("ldStart").textContent=P.length<2?"Waiting for players…":`Roll the dice (${P.length} players)`;
+  show($("gameJoin"),g.status==="waiting"&&me<0&&P.length<6);
+  show($("gameRematch"),g.status==="done"&&me>=0);
+  if(g.status==="done"&&prev&&prev.status!=="done"){ if(st.won){ gainXP("gamewin"); if(fxEnabled()) FX.play("confetti"); } if(navigator.vibrate) navigator.vibrate(st.won?[40,60,40]:60); }
+  else if(prev?.state&&(prev.state.turn!==s.turn||prev.state.round!==s.round)&&myTurn&&navigator.vibrate) navigator.vibrate(25);
+}
+function ldPaintControls(g){
+  const total=ldTotal(g); ldDraft.qty=Math.max(1,Math.min(total,ldDraft.qty));
+  $("ldQty").textContent=ldDraft.qty; $("ldMinus").disabled=ldDraft.qty<=1; $("ldPlus").disabled=ldDraft.qty>=total;
+  const faces=$("ldFaces"); faces.innerHTML="";
+  for(let f=2;f<=6;f++){ const b=el("button","ld-face"+(ldDraft.face===f?" on":"")); b.type="button"; b.setAttribute("role","radio"); b.setAttribute("aria-checked",String(ldDraft.face===f)); b.setAttribute("aria-label",`${f}s`);
+    b.append(dieEl(f,{small:true})); b.onclick=()=>{ ldDraft.face=f; ldPaintControls(g); }; faces.append(b); }
+  const ok=ldHigher(g,ldDraft.qty,ldDraft.face);
+  $("ldBidBtn").disabled=!ok||e8Busy; $("ldBidBtn").textContent=ok?`Bid ${ldDraft.qty} × ${ldDraft.face}s`:"Bid higher than that";
+  show($("ldLiarBtn"),!!g.state.bid); $("ldLiarBtn").disabled=e8Busy;
+}
+$("ldMinus").onclick=()=>{ const g=gamesById.get(openGameId); if(g){ ldDraft.qty--; ldPaintControls(g); } };
+$("ldPlus").onclick=()=>{ const g=gamesById.get(openGameId); if(g){ ldDraft.qty++; ldPaintControls(g); } };
+$("ldBidBtn").onclick=()=>{ const g=gamesById.get(openGameId); if(g) e8Act(()=>api.diceBid(g.message_id,ldDraft.qty,ldDraft.face)); };
+$("ldLiarBtn").onclick=()=>{ const g=gamesById.get(openGameId); if(g) e8Act(()=>api.diceCall(g.message_id)); };
+$("ldSkip").onclick=()=>{ const g=gamesById.get(openGameId); if(g) e8Act(()=>api.diceSkip(g.message_id)); };
+$("ldStart").onclick=()=>{ const g=gamesById.get(openGameId); if(g) e8Act(()=>api.diceStart(g.message_id)); };
 
 /* ================= INSTALL HELPER ================= */
 const SHARE_ICON='<span class="ico" aria-label="Share icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 15V3M7 8l5-5 5 5M5 12v8h14v-8"/></svg></span>';
@@ -7486,8 +7680,12 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.26b";
+const APP_VERSION="2026.09.26c";
 const CHANGELOG=[
+  {v:"2026.09.26c", title:"New game: Liar's Dice 🎲", items:[
+    "🎲 Bluff your friends in Liar's Dice (2–6 players): ＋ → Games → Liar's Dice.",
+    "🤥 Bid on everyone's hidden dice, 1s are wild, and call Liar! when you don't buy it. Last one with dice wins.",
+  ]},
   {v:"2026.09.26b", title:"How to play 📖", items:[
     "📖 Every game now has simple rules: tap \"📖 How to play\" on any game, or \"Rules\" in the Games tray.",
     "👋 Opening a game you've never played? The rules pop up on their own.",
