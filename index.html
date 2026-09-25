@@ -3620,20 +3620,25 @@ function appendEl(m){
   if(m.user_id!==user.id && Date.now()-new Date(m.created_at)<15000){ sfx("receive"); buzz("chat"); }
 }
 
+let loadingOlder=false;
 async function loadOlder(){
-  if(!msgs.length) return;
+  if(!msgs.length||loadingOlder) return;
+  const code=room, seq=enterSeq, stillHere=()=>room===code&&enterSeq===seq;   // switched chats mid-load? drop it
+  loadingOlder=true;
   const btn=feed.querySelector(".older"); if(btn){ btn.disabled=true; btn.textContent="Loading…"; }
   try{
-    const older=await api.loadBefore(room,msgs[0].created_at);
+    const older=await api.loadBefore(code,msgs[0].created_at); if(!stillHere()) return;
     hasMore=older.length>=PAGE;
-    const fresh=older.filter(m=>!byId.has(m.id));
-    await ensureProfiles(fresh.map(m=>m.user_id));
-    (await api.reactions(fresh.map(m=>m.id)).catch(()=>[])).forEach(r=>setReaction(r,true));
-    await loadPolls(fresh); await loadGames(fresh);
+    const fresh=older.filter(m=>!byId.has(m.id)&&m.room===code);
+    await ensureProfiles(fresh.map(m=>m.user_id)); if(!stillHere()) return;
+    const rx=await api.reactions(fresh.map(m=>m.id)).catch(()=>[]); if(!stillHere()) return;
+    rx.forEach(r=>setReaction(r,true));
+    await loadPolls(fresh); await loadGames(fresh); if(!stillHere()) return;
     fresh.forEach(m=>{ byId.set(m.id,m); msgs.push(m); });
     msgs.sort((a,b)=>a.created_at<b.created_at?-1:1);
     renderAll(false);
-  }catch(e){ if(btn){ btn.disabled=false; btn.textContent="Couldn't load. Try again"; } }
+  }catch(e){ if(stillHere()&&btn){ btn.disabled=false; btn.textContent=isNetworkError(e)?"You're offline. Tap to try again":"Couldn't load. Try again"; } }
+  finally{ loadingOlder=false; }
 }
 
 function refreshMsg(id){
@@ -3729,11 +3734,30 @@ function jumpTo(id){
 }
 function repaintFaces(uid){ feed.querySelectorAll(`.face[data-uid="${CSS.escape(uid)}"]`).forEach(n=>paintFace(n,cache.get(uid))); }
 
-async function toggleReaction(m,emoji){
-  const has=reactionsById.get(m.id)?.get(emoji)?.has(user.id);
-  setReaction({message_id:m.id,user_id:user.id,emoji},!has); refreshMsg(m.id);   // instant feedback
-  try{ has ? await api.unreact(m.id,user.id,emoji) : (await api.react(m.id,room,emoji), gainXP("reaction")); }
-  catch(err){ setReaction({message_id:m.id,user_id:user.id,emoji},has); refreshMsg(m.id); $("status").textContent="Reaction didn't save."; }
+// Each tap flips what you SEE instantly. Saving happens one step at a time per message+emoji, so fast
+// double-taps can't reach the server out of order; whatever's on screen when you stop tapping is what sticks.
+const reactSync=new Map();   // "msgId|emoji" -> {want, saved, busy}
+function toggleReaction(m,emoji){
+  const k=m.id+"|"+emoji, mine=!!reactionsById.get(m.id)?.get(emoji)?.has(user.id);
+  const st=reactSync.get(k)||{saved:mine,busy:false}; st.want=!mine; reactSync.set(k,st);
+  setReaction({message_id:m.id,user_id:user.id,emoji},st.want); refreshMsg(m.id);
+  syncReaction(m,emoji,k);
+}
+async function syncReaction(m,emoji,k){
+  const st=reactSync.get(k); if(!st||st.busy) return;
+  st.busy=true;
+  try{
+    while(st.want!==st.saved){
+      const target=st.want;
+      if(target){ await api.react(m.id,m.room||room,emoji); gainXP("reaction"); } else await api.unreact(m.id,user.id,emoji);
+      st.saved=target;
+    }
+    reactSync.delete(k);
+  }catch(err){
+    reactSync.delete(k);
+    setReaction({message_id:m.id,user_id:user.id,emoji},st.saved); refreshMsg(m.id);   // show what actually saved
+    $("status").textContent=isNetworkError(err)?"You're offline, so that reaction didn't save.":"Reaction didn't save.";
+  }finally{ st.busy=false; }
 }
 
 /* ---------- message menu ---------- */
@@ -4772,7 +4796,7 @@ $("contactAdd").onclick=async()=>{
     if(isFriend(p.id)) throw new Error(`${p.username} is already your friend.`);
     await addFriend(p.id); $("contactName").value="";
     say("contactMsg",addedMe(p.id)?`You and ${p.username} are friends now 🤝`:`Added ${p.username} as a friend.`); loadContacts();
-  }catch(err){ say("contactMsg",err.message,true); }
+  }catch(err){ say("contactMsg",isNetworkError(err)?"You're offline. Try again when you're back.":err.message,true); }
   finally{ $("contactAdd").disabled=false; }
 };
 $("contactName").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); $("contactAdd").click(); } });
@@ -4783,7 +4807,7 @@ async function openDm(uid){
     await enterRoom(code);
   }catch(err){
     const msg=err.message==="not_connected"?`You can message ${name} once you share a room, or after they add you as a friend.`
-             :err.message==="cant_message"?`You can't message ${name}.`:"Couldn't open the chat: "+err.message;
+             :err.message==="cant_message"?`You can't message ${name}.`:isNetworkError(err)?"You're offline. Chats open again when you're back.":"Couldn't open the chat: "+err.message;
     if(!$("personSheet").classList.contains("hidden")) say("personMsg",msg,true);
     else if($("chat").classList.contains("hidden")) say("contactMsg",msg,true); else $("status").textContent=msg;
   }
@@ -7080,8 +7104,13 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.25g";
+const APP_VERSION="2026.09.25h";
 const CHANGELOG=[
+  {v:"2026.09.25h", title:"Even steadier chats 🧱", items:[
+    "📜 Loading older messages can no longer drop them into the wrong chat if you switch chats while it loads.",
+    "🔥 Tap reactions as fast as you want: what you see is always what gets saved.",
+    "📡 Clearer messages when you're offline while adding a friend, opening a DM, or reacting.",
+  ]},
   {v:"2026.09.25g", title:"Easier Android install 🤖", items:[
     "🤖 Installing from Samsung Internet made Android show a scary \"older version of Android\" warning (a Samsung bug). NightLane now sends you to Chrome instead, where it installs cleanly. Never turn off Play Protect to install it.",
   ]},
