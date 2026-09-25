@@ -1960,6 +1960,27 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .pinbar.myturn .pinicon{animation:pinbounce 1.8s ease-in-out infinite}
 @keyframes pinbounce{0%,70%,100%{transform:none}80%{transform:translateY(-3px) rotate(-8deg)}90%{transform:translateY(0) rotate(6deg)}}
 @media (prefers-reduced-motion:reduce){.pinbar.myturn .pinicon{animation:none}}
+/* ===== "War has changed" secret ===== */
+.war-film{position:fixed;inset:0;z-index:60;pointer-events:none;background:
+  radial-gradient(ellipse at center,transparent 45%,rgba(10,6,0,.85) 100%),
+  repeating-radial-gradient(circle at 17% 32%,rgba(255,240,200,.06) 0 1px,transparent 1px 3px);
+  backdrop-filter:sepia(.75) saturate(.55) contrast(1.15) brightness(.85);-webkit-backdrop-filter:sepia(.75) saturate(.55) contrast(1.15) brightness(.85);
+  animation:warin .6s ease-out both,warflick .18s steps(2) infinite;transition:opacity .8s}
+@keyframes warin{from{opacity:0}to{opacity:1}}
+@keyframes warflick{50%{filter:brightness(1.08)}}
+.war-hand{position:fixed;left:-4%;bottom:-2%;z-index:61;width:min(78vw,380px);pointer-events:none;animation:warhand 1s cubic-bezier(.2,.8,.3,1) both;transition:transform .8s,opacity .8s}
+.war-hand svg{width:100%;height:auto;display:block;filter:drop-shadow(6px 6px 0 rgba(0,0,0,.5))}
+@keyframes warhand{from{transform:translate(-30%,50%) rotate(12deg)}to{transform:none}}
+.war-ember{fill:#ff6a1a;animation:warember 1.6s ease-in-out .9s 2}
+@keyframes warember{0%,100%{fill:#ff6a1a;filter:none}40%{fill:#ffe08a;filter:drop-shadow(0 0 10px #ff8a2a) drop-shadow(0 0 22px #ff5a00)}}
+.war-smoke{position:fixed;left:min(66vw,318px);bottom:min(40vw,190px);z-index:61;width:34px;height:34px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(230,225,215,.55),rgba(230,225,215,0) 70%);opacity:0;animation:warsmoke 3.2s ease-out both}
+@keyframes warsmoke{0%{opacity:0;transform:translate(0,0) scale(.4)}15%{opacity:.9}100%{opacity:0;transform:translate(var(--dx,0),-55vh) scale(4.5) rotate(40deg)}}
+.war-cap{position:fixed;left:50%;top:28%;transform:translateX(-50%);z-index:62;pointer-events:none;white-space:nowrap;
+  font-family:var(--num);font-size:clamp(34px,10vw,64px);letter-spacing:3px;color:#efe6cf;text-transform:uppercase;
+  text-shadow:0 0 1px #000,3px 3px 0 #1a1208,0 0 18px rgba(0,0,0,.8);transition:opacity .8s}
+.war-film.out,.war-hand.out,.war-cap.out{opacity:0}.war-hand.out{transform:translate(-20%,30%)}
+@media (prefers-reduced-motion:reduce){.war-film{animation:none}.war-smoke{display:none}.war-hand{animation:none}}
 </style>
 </head>
 <body>
@@ -7866,6 +7887,36 @@ SECRET_LIST.splice(SECRET_LIST.findIndex(s=>s.id==="konami"),0,
   {id:"xen", name:"Xen's stash", re:/(^|[^a-z])xen([^a-z]|$)/i, when:()=>isDm, play:()=>QX.xen()}
 );
 Object.assign(HINTS,{ xen:"Say a certain little brother's name, but only in a private chat." });
+/* "War has changed": an old war-film look, a gloved hand takes a drag (the ember glows), smoke curls up,
+   and the line types itself out like a title card. The hand and cigarette are an original drawing. */
+QX.war=function(){
+  document.getElementById("warLayer")?.remove();
+  const layer=document.createElement("div"); layer.id="warLayer"; document.body.append(layer);   // its own layer, so other effects (like the secret-found celebration) can't wipe it mid-scene
+  const film=el("div","war-film"); layer.append(film);
+  const hand=document.createElement("div"); hand.className="war-hand";
+  hand.innerHTML=`<svg viewBox="0 0 220 200" aria-hidden="true">
+    <path d="M-10 200 L40 118 L92 104 L118 132 L70 200 Z" fill="#4a4f32" stroke="#07041a" stroke-width="5"/>
+    <path d="M40 118 L92 104 L98 116 L46 132 Z" fill="#383c25"/>
+    <path d="M86 108 C96 86 118 78 136 84 L150 96 C156 104 150 114 140 112 L128 110 L124 126 C118 142 100 148 90 136 Z" fill="#23201c" stroke="#07041a" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M132 86 C142 82 158 84 164 92 C168 98 162 104 154 102 L140 98 Z" fill="#c9926b" stroke="#07041a" stroke-width="4"/>
+    <path d="M140 110 C150 108 164 110 168 118 C170 124 164 128 156 126 L136 122 Z" fill="#c9926b" stroke="#07041a" stroke-width="4"/>
+    <rect x="146" y="95" width="62" height="11" rx="2" transform="rotate(-14 146 100)" fill="#f2efe6" stroke="#07041a" stroke-width="3"/>
+    <rect x="146" y="95" width="16" height="11" rx="2" transform="rotate(-14 146 100)" fill="#d9a441" stroke="#07041a" stroke-width="3"/>
+    <circle class="war-ember" cx="208" cy="85" r="6"/>
+  </svg>`;
+  layer.append(hand);
+  for(let i=0;i<7;i++){ const sm=el("div","war-smoke"); sm.style.animationDelay=(1.1+i*.32)+"s"; sm.style.setProperty("--dx",(Math.random()*60-20)+"px"); layer.append(sm); }
+  const cap=el("div","war-cap"); layer.append(cap);
+  const line="War has changed."; let k=0;
+  setTimeout(()=>{ const t=setInterval(()=>{ cap.textContent=line.slice(0,++k); if(k>=line.length) clearInterval(t); },85); },900);
+  if(navigator.vibrate) navigator.vibrate([20,80,20]);
+  setTimeout(()=>{ [film,hand,cap].forEach(n=>n.classList.add("out")); },4600);
+  setTimeout(()=>layer.remove(),5400);
+};
+SECRET_LIST.splice(SECRET_LIST.findIndex(s=>s.id==="konami"),0,
+  {id:"warchanged", name:"War has changed", re:/(^|[^a-z])war\s+has\s+changed([^a-z]|$)/i, play:()=>QX.war()}
+);
+Object.assign(HINTS,{ warchanged:"A tired old soldier sighs that the battlefield isn't what it used to be. Say what he says. (Three words.)" });
 Object.assign(HINTS,{ hifive:"Two open hands meet in the middle. Say it as one word or two." });
 
 /* ================= MISSED-SECRET PROMPT ================= */
@@ -8217,8 +8268,11 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.26i";
+const APP_VERSION="2026.09.26j";
 const CHANGELOG=[
+  {v:"2026.09.26j", title:"A new secret 🚬", items:[
+    "🎖️ There's a new secret hiding in the chat. Old soldiers might know the words…",
+  ]},
   {v:"2026.09.26i", title:"BS fix 🛠️", items:[
     "🛠️ Fixed BS sometimes playing your picked cards by accident when someone else called BS while you were choosing. The table no longer jumps under your finger.",
   ]},
