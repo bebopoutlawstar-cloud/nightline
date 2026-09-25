@@ -2053,6 +2053,16 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .cheat-test{background:none;border:1px solid var(--cyan);color:var(--cyan);font-family:var(--tech);font-size:11px;padding:3px 8px;cursor:pointer}
 .cheat-how{font-family:var(--tech);font-size:13px;color:var(--volt);overflow-wrap:anywhere}
 .cheat-when,.cheat-hint,.cheat-unl{font-size:13px;color:var(--muted)}.cheat-unl{color:var(--mag)}
+/* ===== Arcana meaning ===== */
+.ma-more{display:block;font-family:var(--tech);font-size:11px;color:var(--cyan);margin-top:4px;text-decoration:underline;text-underline-offset:3px}
+#personArcana[role=button]{cursor:pointer}
+.am-top{display:flex;gap:14px;align-items:center;width:100%;text-align:left}
+.am-art img{width:72px;height:auto;image-rendering:pixelated;border:3px solid var(--night);box-shadow:4px 4px 0 var(--mag);transform:rotate(-4deg);display:block}
+.am-name{font-family:var(--num);font-size:24px;color:var(--volt);line-height:1.1}
+.am-keys{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.am-key{font-family:var(--tech);font-size:11px;color:var(--night);background:var(--cyan);padding:2px 7px}
+.am-sec{width:100%;text-align:left}.am-sec b{font-family:var(--tech);font-size:12px;color:var(--cyan);letter-spacing:.5px}.am-sec p{margin:3px 0 0;font-size:15px;line-height:1.4;color:var(--white)}
+.am-two{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
 </style>
 </head>
 <body>
@@ -2607,6 +2617,19 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
     <h2 id="rulesTitle">How to play</h2>
     <div class="rulesbox" id="rulesBody"></div>
     <button class="ghost" type="button" id="rulesClose">Got it</button>
+  </div></div>
+</div>
+
+<!-- ============ ARCANA MEANING ============ -->
+<div class="overlay hidden" id="arcanaSheet" role="dialog" aria-modal="true" aria-labelledby="amTitle">
+  <div class="sheet"><div class="sheetbody">
+    <h2 id="amTitle">Your Arcana</h2>
+    <div class="am-top"><div class="am-art" id="amArt"></div><div><div class="am-name" id="amName"></div><div class="am-keys" id="amKeys"></div></div></div>
+    <div class="am-sec"><b>🔮 In tarot</b><p id="amTarot"></p></div>
+    <div class="am-sec"><b>🫵 As a person</b><p id="amYou"></p></div>
+    <div class="am-two"><div class="am-sec"><b>💪 Superpower</b><p id="amGood"></p></div><div class="am-sec"><b>⚠️ Watch out for</b><p id="amWatch"></p></div></div>
+    <button class="ghost hidden" type="button" id="amRetake">Retake the quiz</button>
+    <button class="go" type="button" id="amClose">Got it</button>
   </div></div>
 </div>
 
@@ -3866,6 +3889,10 @@ function toast(title,text,onTap){
   const body=el("span","tbody"); body.append(el("div","ttitle",title),el("div","ttext",text)); t.append(body);
   $("toasts").prepend(t); setTimeout(()=>{ if(t.isConnected){ t.classList.add("out"); setTimeout(()=>t.remove(),260); } },7000);
 }
+
+$("amClose").onclick=()=>show($("arcanaSheet"),false);
+$("amRetake").onclick=()=>{ show($("arcanaSheet"),false); openQuiz(); };
+$("arcanaSheet").addEventListener("click",e=>{ if(e.target.id==="arcanaSheet") show($("arcanaSheet"),false); });
 
 /* ---------- Secret cheat sheet (admins only; the server decides who's an admin) ----------
    Built from the live secret list every time it opens, so new secrets show up by themselves. */
@@ -5280,7 +5307,7 @@ $("lightbox").onclick=()=>show($("lightbox"),false);
 ["profile","roomSheet","msgMenu","pollSheet","summarySheet","calSheet","searchSheet","backlogSheet","blShareSheet","forgotSheet","rcSheet"].forEach(id=>$(id).addEventListener("click",e=>{ if(e.target.id===id) show($(id),false); }));
 addEventListener("keydown",e=>{
   if(e.key==="Escape") closeTray();
-  if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu","pollSheet","tray","themeSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","installSheet","habitsSheet","quizSheet","slSheet","newsSheet","backlogSheet","blShareSheet","recover","forgotSheet","rcSheet","rulesSheet","cheatSheet"].forEach(id=>{ const n=$(id); if(n) show(n,false); });
+  if(e.key==="Escape") ["lightbox","profile","roomSheet","msgMenu","pollSheet","tray","themeSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","installSheet","habitsSheet","quizSheet","slSheet","newsSheet","backlogSheet","blShareSheet","recover","forgotSheet","rcSheet","rulesSheet","cheatSheet","arcanaSheet"].forEach(id=>{ const n=$(id); if(n) show(n,false); });
   if(!$("lightbox").classList.contains("hidden")&&lbAlbum){ if(e.key==="ArrowLeft") lbStep(-1); if(e.key==="ArrowRight") lbStep(1); }
 });
 
@@ -5576,7 +5603,10 @@ function paintPerson(){
   $("personTag").textContent = f&&back?"🤝 You're friends": f?"✓ On your friends list": back?"👋 Added you as a friend":"";
   show($("personTag"),f||back);
   const pa=$("personArcana"); pa.innerHTML=""; show(pa,!!p.arcana);
-  if(p.arcana){ pa.append(el("span","ma-eyebrow",`🃏 ${p.username}'s Arcana`), el("span","ma-name",p.arcana)); if(ARCANA_FLAVOR[p.arcana]) pa.append(el("span","ta-flavor",ARCANA_FLAVOR[p.arcana])); }
+  if(p.arcana){ pa.append(el("span","ma-eyebrow",`🃏 ${p.username}'s Arcana`), el("span","ma-name",p.arcana)); if(ARCANA_FLAVOR[p.arcana]) pa.append(el("span","ta-flavor",ARCANA_FLAVOR[p.arcana]));
+    if(ARCANA_MEANING[p.arcana]){ pa.append(el("span","ma-more","What does it mean? ›")); pa.setAttribute("role","button"); pa.tabIndex=0; pa.setAttribute("aria-label",`${p.username}'s Arcana: ${p.arcana}. Tap to see what it means.`);
+      pa.onclick=()=>openArcanaMeaning(p.arcana,{whose:p.username}); pa.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); pa.onclick(); } }; } }
+  else { pa.onclick=null; pa.removeAttribute("role"); }
   $("personBacklog").textContent=`🎮 See ${p.username}'s backlog`;
   const bond=socialLinks.get(uid), pb=$("personBond"); show(pb,!!bond);
   if(bond){ const {rank}=rankFromXp(bond.xp); pb.textContent=`💫 Your Social Bond: ${bond.arcana} · Rank ${rank}`; pb.onclick=()=>{ show($("personSheet"),false); openSocialLink(uid); }; }
@@ -8346,6 +8376,107 @@ const ARCANA_FLAVOR={
   Judgement:"You're always one conversation away from starting over.",
   World:"You finish what you start, completely.",
 };
+/* What each Arcana means: traditional tarot meanings (public domain), written in plain words */
+const ARCANA_MEANING={
+  Fool:{n:"0",full:"The Fool",keys:["new beginnings","freedom","spontaneity"],
+    tarot:"The very first step of a journey: stepping into the unknown with an open heart and no map.",
+    you:"Adventurous and easygoing. You say yes to things, and you make every plan more fun.",
+    good:"Fearless curiosity", watch:"Leaping before you look"},
+  Magician:{n:"I",full:"The Magician",keys:["willpower","skill","making it happen"],
+    tarot:"Having every tool you need on the table, and the focus to use them. Ideas become real.",
+    you:"Resourceful and quick. When something needs doing, you're the one who figures it out.",
+    good:"Turning plans into action", watch:"Overpromising or showing off"},
+  Priestess:{n:"II",full:"The High Priestess",keys:["intuition","mystery","inner knowing"],
+    tarot:"The quiet keeper of secrets. Trust your gut and look beneath the surface.",
+    you:"Perceptive and private. You read people easily and notice what others miss.",
+    good:"A spooky-good intuition", watch:"Keeping too much to yourself"},
+  Empress:{n:"III",full:"The Empress",keys:["nurturing","abundance","comfort"],
+    tarot:"Growth, creativity, and care, like a garden in full bloom.",
+    you:"Warm and generous. You're the friend who makes sure everyone's fed and okay.",
+    good:"Making people feel cared for", watch:"Giving until you're running on empty"},
+  Emperor:{n:"IV",full:"The Emperor",keys:["structure","leadership","stability"],
+    tarot:"Order and authority: building solid foundations and protecting them.",
+    you:"Reliable and organized. When things get messy, you take charge.",
+    good:"Steady leadership", watch:"Being stubborn or controlling"},
+  Hierophant:{n:"V",full:"The Hierophant",keys:["tradition","belonging","guidance"],
+    tarot:"Shared beliefs and rituals, and learning from the people who came before you.",
+    you:"Loyal to your people and your traditions. You're the glue, and often the mentor.",
+    good:"Bringing people together", watch:"Resisting change"},
+  Lovers:{n:"VI",full:"The Lovers",keys:["connection","choices","harmony"],
+    tarot:"Deep bonds, and the choices that show who we really are.",
+    you:"Devoted. You invest in the people you care about and keep choosing them.",
+    good:"Loyalty that runs deep", watch:"Losing yourself in other people"},
+  Chariot:{n:"VII",full:"The Chariot",keys:["drive","determination","victory"],
+    tarot:"Charging forward by steering opposite forces with pure willpower.",
+    you:"Ambitious and competitive. Once you've got momentum, nothing slows you down.",
+    good:"Unstoppable determination", watch:"Bulldozing over people"},
+  Strength:{n:"VIII",full:"Strength",keys:["courage","patience","compassion"],
+    tarot:"Quiet inner strength: taming the lion with gentleness, not force.",
+    you:"Calm under pressure. Kind, but a lot tougher than people expect.",
+    good:"Resilience", watch:"Bottling up your feelings"},
+  Hermit:{n:"IX",full:"The Hermit",keys:["reflection","solitude","wisdom"],
+    tarot:"Stepping away from the noise to find your own light.",
+    you:"Thoughtful and independent. Your best ideas come when you're on your own.",
+    good:"Deep insight", watch:"Isolating yourself"},
+  Fortune:{n:"X",full:"Wheel of Fortune",keys:["change","luck","cycles"],
+    tarot:"Life's turning wheel: ups and downs, and learning to roll with them.",
+    you:"Adaptable and easygoing. Things tend to work out for you, somehow.",
+    good:"Rolling with whatever happens", watch:"Leaving everything to chance"},
+  Justice:{n:"XI",full:"Justice",keys:["fairness","truth","balance"],
+    tarot:"Cause and effect: weighing things honestly, and owning the results.",
+    you:"Principled. You'll stand up for someone even when it's awkward.",
+    good:"Honesty", watch:"Seeing everything in black and white"},
+  "Hanged Man":{n:"XII",full:"The Hanged Man",keys:["surrender","new perspective","patience"],
+    tarot:"Pausing and seeing the world upside down, so you finally understand it.",
+    you:"Patient and selfless, with a way of seeing things nobody else does.",
+    good:"Seeing what others miss", watch:"Waiting too long, or carrying everything alone"},
+  Death:{n:"XIII",full:"Death",keys:["endings","transformation","fresh starts"],
+    tarot:"Not literal death: one chapter closing so a new one can begin.",
+    you:"Brave about change. You're always growing into a new version of yourself.",
+    good:"Knowing when to let go", watch:"Burning bridges too fast"},
+  Temperance:{n:"XIV",full:"Temperance",keys:["balance","moderation","healing"],
+    tarot:"Blending opposites into something whole, with patience and a middle path.",
+    you:"The peacemaker. Level-headed when everyone else is losing it.",
+    good:"Finding balance", watch:"Avoiding conflict you actually need to have"},
+  Devil:{n:"XV",full:"The Devil",keys:["desire","temptation","attachment"],
+    tarot:"The things that hold us, like habits and attachments, and the power to break free.",
+    you:"Bold and magnetic. You know exactly what you want.",
+    good:"Confidence and passion", watch:"Getting stuck in bad habits"},
+  Tower:{n:"XVI",full:"The Tower",keys:["upheaval","revelation","sudden change"],
+    tarot:"A lightning strike that knocks down what wasn't built to last, so the truth can come through.",
+    you:"Unfiltered and honest. You shake things up when they've gotten stale.",
+    good:"Breaking bad patterns", watch:"Causing chaos just because"},
+  Star:{n:"XVII",full:"The Star",keys:["hope","inspiration","healing"],
+    tarot:"The calm after the storm: renewed hope and faith that things will get better.",
+    you:"Optimistic and inspiring. People feel better just talking to you.",
+    good:"Keeping hope alive", watch:"Head in the clouds"},
+  Moon:{n:"XVIII",full:"The Moon",keys:["dreams","intuition","the unknown"],
+    tarot:"Things aren't always what they seem: imagination, illusion, and hidden feelings.",
+    you:"Imaginative, creative, and a little mysterious. There's always more going on under the surface.",
+    good:"Creativity", watch:"Overthinking"},
+  Sun:{n:"XIX",full:"The Sun",keys:["joy","success","warmth"],
+    tarot:"Pure positivity and energy. Everything's bright and clear.",
+    you:"Upbeat, with the kind of energy that's contagious.",
+    good:"Lifting everyone's mood", watch:"Glossing over real problems"},
+  Judgement:{n:"XX",full:"Judgement",keys:["awakening","second chances","reflection"],
+    tarot:"A wake-up call: facing the past and rising into who you're meant to be.",
+    you:"Self-aware and forgiving. You believe in second chances, for others and yourself.",
+    good:"Growth", watch:"Being too hard on yourself"},
+  World:{n:"XXI",full:"The World",keys:["completion","wholeness","achievement"],
+    tarot:"The end of the journey: everything finally coming together.",
+    you:"A finisher. Well-rounded, and you see things all the way through.",
+    good:"Seeing it through", watch:"Getting restless once you're done"}
+};
+function openArcanaMeaning(arc,{whose="",mine=false}={}){
+  const m=ARCANA_MEANING[arc]; if(!m) return;
+  $("amTitle").textContent=whose?`${whose}'s Arcana`:"Your Arcana";
+  const art=$("amArt"); art.innerHTML=""; if(ARCANA_ART[arc]){ const im=document.createElement("img"); im.src=ARCANA_ART[arc]; im.alt=m.full+" tarot card"; art.append(im); }
+  $("amName").textContent=`${m.n} · ${m.full}`;
+  const kw=$("amKeys"); kw.innerHTML=""; m.keys.forEach(k=>kw.append(el("span","am-key",k)));
+  $("amTarot").textContent=m.tarot; $("amYou").textContent=m.you; $("amGood").textContent=m.good; $("amWatch").textContent=m.watch;
+  show($("amRetake"),mine);
+  show($("arcanaSheet"));
+}
 const quizChime=(notes)=>{ try{ const ac=window.__sxac||(window.__sxac=new (window.AudioContext||window.webkitAudioContext)()); notes.forEach(([f,at,len,type])=>{ const o=ac.createOscillator(), g=ac.createGain(); o.type=type||"sine"; o.frequency.value=f; g.gain.setValueAtTime(.0001,ac.currentTime+at); g.gain.exponentialRampToValueAtTime(.06,ac.currentTime+at+.02); g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+at+len); o.connect(g); g.connect(ac.destination); o.start(ac.currentTime+at); o.stop(ac.currentTime+at+len+.05); }); }catch(e){} };
 let quizAnswers=[], quizIdx=0;
 function paintQuiz(){
@@ -8415,8 +8546,9 @@ function paintArcanaBadge(){
   const arc=meProfile?.arcana;
   show(n,!!arc); if(!arc) return;
   n.innerHTML=""; n.append(el("span","ma-eyebrow","🃏 Your Arcana"), el("span","ma-name",arc));
-  n.setAttribute("aria-label","Your Arcana: "+arc+". Tap to retake the quiz.");
-  n.onclick=openQuiz;
+  n.append(el("span","ma-more","What does it mean? ›"));
+  n.setAttribute("aria-label","Your Arcana: "+arc+". Tap to see what it means.");
+  n.onclick=()=>{ show($("profile"),false); openArcanaMeaning(arc,{mine:true}); };
 }
 
 /* ================= SOCIAL BONDS ================= */
@@ -8493,8 +8625,11 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.26l";
+const APP_VERSION="2026.09.26m";
 const CHANGELOG=[
+  {v:"2026.09.26m", title:"What's my Arcana mean? 🃏", items:[
+    "🃏 Tap any Arcana, yours in Profile or a friend's on their card, to see what it means: what the card stands for in tarot, what it says about the person, their superpower, and their blind spot.",
+  ]},
   {v:"2026.09.26k", title:"7 new secrets 👀", items:[
     "🎮 Seven new secrets are hiding in the chat: some for gamers who've been down in the tunnels, crossed blades, or cooked meat on a spit…",
     "🩸 …and some for horror fans. Check the hints if you get stuck.",
@@ -9054,7 +9189,7 @@ feed.addEventListener("click",e=>{
 /* ================= BACK BUTTON (Android / browser back) ================= */
 // Each chat or sheet you open adds a history step, so Back closes the top one instead of leaving the app.
 (function(){
-  const LAYERS=["chat","profile","roomSheet","msgMenu","themeSheet","pollSheet","installSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","lightbox","habitsSheet","quizSheet","slSheet","newsSheet","backlogSheet","blShareSheet","forgotSheet","rcSheet","rulesSheet","cheatSheet"];
+  const LAYERS=["chat","profile","roomSheet","msgMenu","themeSheet","pollSheet","installSheet","gameSheet","personSheet","summarySheet","calSheet","searchSheet","lightbox","habitsSheet","quizSheet","slSheet","newsSheet","backlogSheet","blShareSheet","forgotSheet","rcSheet","rulesSheet","cheatSheet","arcanaSheet"];
   const stack=[]; let popping=false, ignorePops=0, pendingBack=0, flushQueued=false;
   const isOpen=id=>!$(id).classList.contains("hidden");
   function queueBack(){
