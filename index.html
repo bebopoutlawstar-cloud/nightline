@@ -1364,6 +1364,8 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .bubble{overflow:visible}
 .punct{position:absolute;top:-22px;right:-14px;font-family:var(--num);font-size:34px;line-height:1;color:var(--white);-webkit-text-stroke:2px var(--night);text-shadow:3px 3px 0 var(--night);transform:rotate(12deg);pointer-events:none;z-index:3;animation:punctpop .35s cubic-bezier(.2,1.6,.4,1) both}
 .msg.me .punct{right:-14px;left:auto;top:-22px;transform:rotate(12deg);color:var(--volt)}
+/* a message's ? / ! sits in the bubble; lift that message's column above the (framed) profile picture so the mark isn't hidden */
+.msg .col:has(> .bubble > .punct){z-index:3}   /* .col is its own layer (will-change for swipe-to-reply), so lift it, not just the bubble */
 .msg.me .punct.loud{top:-30px;right:-2px}
 .punct.loud{font-size:44px;top:-30px;color:var(--mag);-webkit-text-stroke:2px var(--night)}
 .msg.me .punct.loud{color:var(--volt)}
@@ -8706,8 +8708,11 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.26q";
+const APP_VERSION="2026.09.26r";
 const CHANGELOG=[
+  {v:"2026.09.26r", title:"Small fix ❓", items:[
+    "❓ The ? and ! marks on messages show in front of profile frames again.",
+  ]},
   {v:"2026.09.26q", title:"Unread count on the app icon 🔴", items:[
     "🔴 NightLane's icon now shows how many unread messages you have, on iPhone (Home Screen app) and computers.",
     "🤖 On Android, the icon shows a dot from your notifications. Samsung phones can show the number too: Settings → Notifications → App icon badges → Show with number.",
