@@ -2200,6 +2200,18 @@ body.theme-mochi .roomrow .rtime,body.theme-mochi .roomrow small,body.theme-moch
 body.theme-mochi .toast .ttitle{color:#e25d92!important}
 body.theme-mochi .go{background:#ffe3ee!important;color:#5b4636!important;border-color:#e25d92!important}
 body.theme-mochi .send{background:#ff8fb8!important}
+/* ===== yuri secret ===== */
+.yu-old{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);display:flex;gap:10px;white-space:nowrap;font-family:var(--num);font-size:clamp(24px,7.4vw,40px);color:#f4f7ff;text-shadow:3px 3px 0 #07041a;animation:sxcapin .4s ease-out both}
+.yu-w{display:inline-block;transition:transform .7s cubic-bezier(.3,.7,.3,1),opacity .7s}
+.yu-old.broken .yu-w{transform:translate(var(--dx),60vh) rotate(var(--r));opacity:0}
+.yu-lily{position:absolute;bottom:34%;width:min(15vw,64px);animation:yubloom .7s cubic-bezier(.2,1.5,.4,1) both,yudrift 3.6s ease-in-out .7s forwards}
+.yu-lily svg{width:100%;display:block;filter:drop-shadow(0 0 8px rgba(255,190,220,.9))}
+@keyframes yubloom{from{transform:scale(0) rotate(-40deg)}to{transform:scale(1) rotate(0)}}
+@keyframes yudrift{to{transform:translateY(-34vh) rotate(24deg);opacity:0}}
+.yu-cap{top:38%;color:#ffb3d4;text-shadow:3px 3px 0 #07041a,0 0 20px rgba(255,120,190,.7)}
+.yu-float{position:absolute;bottom:-8%;font-size:clamp(22px,6.6vw,36px);animation:yufloat 3s ease-out both}
+@keyframes yufloat{to{transform:translateY(-100vh) rotate(30deg);opacity:0}}
+@media (prefers-reduced-motion:reduce){.yu-old.broken .yu-w{transform:none;opacity:0}}
 </style>
 </head>
 <body>
@@ -8369,7 +8381,19 @@ QX.uwa=function(){
   if(!hasSecret("uwa")) setTimeout(()=>sxCap(L,"🍡 Mochi theme unlocked in Theme & colors","uwa-cap small"),1600);
   if(navigator.vibrate) navigator.vibrate([15,30,15]);
 };
+/* Yuri (百合, "lily"): the old line gets broken apart by blooming lilies, and the punchline takes its place */
+QX.yuri=function(){
+  const L=sxLayer("sxYuri",5600);
+  const lily=`<svg viewBox="0 0 60 60"><g stroke="#07041a" stroke-width="2" stroke-linejoin="round"><path d="M30 34 C22 20 22 8 30 2 C38 8 38 20 30 34Z" fill="#fff"/><path d="M30 34 C18 30 8 22 6 12 C16 12 26 20 30 34Z" fill="#fdf2f7"/><path d="M30 34 C42 30 52 22 54 12 C44 12 34 20 30 34Z" fill="#fdf2f7"/><path d="M30 34 C20 40 12 50 12 58 C22 54 28 44 30 34Z" fill="#fff"/><path d="M30 34 C40 40 48 50 48 58 C38 54 32 44 30 34Z" fill="#fff"/></g><circle cx="30" cy="32" r="3.5" fill="#ffcf5a"/></svg>`;
+  const old=el("div","yu-old"); "girls can't love girls".split(" ").forEach((w,i)=>{ const sp=el("span","yu-w",w); sp.style.setProperty("--dx",((i-1.5)*60)+"px"); sp.style.setProperty("--r",((i%2?1:-1)*(20+i*8))+"deg"); old.append(sp); });
+  L.append(old);
+  setTimeout(()=>{ for(let i=0;i<9;i++){ const f=el("div","yu-lily"); f.innerHTML=lily; f.style.left=(6+i*10.5)+"%"; f.style.animationDelay=(i*.07)+"s"; L.append(f); }
+    old.classList.add("broken"); if(navigator.vibrate) navigator.vibrate([20,30,40]); },1300);
+  setTimeout(()=>{ sxCap(L,"…yes they can 💕","yu-cap");
+    for(let i=0;i<12;i++){ const h=el("span","yu-float",i%3?"💕":"🌸"); h.style.left=(Math.random()*90+2)+"%"; h.style.animationDelay=(Math.random()*.8)+"s"; L.append(h); } },2100);
+};
 SECRET_LIST.splice(SECRET_LIST.findIndex(s=>s.id==="konami"),0,
+  {id:"yuri",       name:"Lilies",            re:/(^|[^a-z])yuri([^a-z]|$)|百合/i, play:()=>QX.yuri()},
   {id:"meguca",     name:"Suffering",         re:/(^|[^a-z])meguca([^a-z]|$)/i, play:()=>QX.meguca()},
   {id:"uwa",        name:"Uwa!!",             re:/(^|[^a-z])uwa+h?([^a-z]|$)|^\s*una+[!~.…]*\s*$/i, play:()=>QX.uwa()},
   {id:"ein",        name:"Data dog",          re:/(^|[^a-z])ein([^a-z]|$)/i, play:()=>QX.ein()},
@@ -8386,6 +8410,7 @@ SECRET_LIST.splice(SECRET_LIST.findIndex(s=>s.id==="konami"),0,
 );
 Object.assign(HINTS,{
   ein:"The smartest crew member on the Bebop is a corgi. Say his name.",
+  yuri:"The Japanese word for \"lily\" is also the name of a genre about girls in love. Say it.",
   meguca:"Contracting with a certain white creature turns out badly. Being a magical girl is… (say it the meme way).",
   uwa:"Tiny, round, and always a little overwhelmed. Make the little cry they make.",
   allrevealed:"A velvet-room host says the Arcana is the means by which… finish his line.",
@@ -8905,8 +8930,11 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.26t";
+const APP_VERSION="2026.09.26u";
 const CHANGELOG=[
+  {v:"2026.09.26u", title:"One more secret 🌸", items:[
+    "🌸 Another secret just bloomed in the chat…",
+  ]},
   {v:"2026.09.26t", title:"More secrets + a new theme 🍡", items:[
     "🔍 Two more secrets are hiding in the chat, one of them very cute.",
     "🍡 Find the cute one to unlock the soft, pastel Mochi theme.",
