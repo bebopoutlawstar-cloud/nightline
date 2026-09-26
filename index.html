@@ -2214,6 +2214,10 @@ body.theme-mochi .send{background:#ff8fb8!important}
 @keyframes yufloat{to{transform:translateY(-100vh) rotate(30deg);opacity:0}}
 @media (prefers-reduced-motion:reduce){.yu-old.broken .yu-w{transform:none;opacity:0}}
 .writer-cap{position:absolute;left:6%;right:6%;bottom:17%;text-align:center;font-family:Georgia,serif;font-style:italic;font-size:clamp(20px,6.4vw,34px);line-height:1.25;color:#d9c9a5;text-shadow:0 2px 8px #000;overflow-wrap:break-word;z-index:2}
+/* ===== flying kiss ===== */
+.kiss-fly{position:fixed;z-index:70;font-size:34px;pointer-events:none;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
+.kiss-heart{position:fixed;z-index:70;font-size:20px;pointer-events:none;animation:kissheart 1.1s ease-out both}
+@keyframes kissheart{0%{transform:translate(0,0) scale(.3);opacity:0}25%{opacity:1}100%{transform:translate(var(--x),-60px) scale(1.1);opacity:0}}
 </style>
 </head>
 <body>
@@ -5517,6 +5521,7 @@ $("notifBtn").onclick=async()=>{
 const FX_TRIGGERS=[
   {fx:"confetti", label:"Confetti",       words:["happy birthday","hbd","congrats","congratulations"], emoji:["🎉","🎂","🥳"]},
   {fx:"hearts",   label:"Neon hearts",    words:["love you","ily","luv u","love u"], emoji:["❤️","💖","😍","🥰","💕"]},
+  {fx:"kiss",     label:"Flying kiss",    words:["mwah","muah"], emoji:["😘","💋"]},
   {fx:"hype",     label:"Hype banner",    words:["let's go","lets go","gg","hype"], emoji:["🏆"]},
   {fx:"embers",   label:"Embers",         words:["lit"], emoji:["🔥"]},
   {fx:"laugh",    label:"Laugh stamps",   words:["lol","lmao","lmfao"], emoji:["😂","🤣"]},
@@ -5628,7 +5633,46 @@ function playFx(m,force){
   if(!force){ if(!fxEnabled()||document.hidden||fxPlayed.has(m.id)) return; if(Date.now()-new Date(m.created_at)>15000) return; }
   fxPlayed.add(m.id);
   if(s) playSecretFromMessage(m,s,force);
+  else if(t.fx==="kiss") playKiss(m);
   else FX.play(t.fx,{text:hypeText(m.text)});
+}
+/* 😘 "mwah": a kiss flies from the sender's picture to whoever it's for (the other person in a DM, the person being
+   replied to, or whoever spoke last), and that picture blushes. Kisses aimed at you land on your own picture up top. */
+function kissTarget(m){
+  if(m.reply_to&&byId.get(m.reply_to)&&byId.get(m.reply_to).user_id!==m.user_id) return byId.get(m.reply_to).user_id;
+  if(isDm) return m.user_id===user.id?dmUser:user.id;
+  const i=msgs.findIndex(x=>x.id===m.id);
+  for(let k=(i<0?msgs.length:i)-1;k>=0;k--){ const u=msgs[k].user_id; if(u&&u!==m.user_id&&!String(u).startsWith("00000000-0000-4000-a000")) return u; }
+  return null;
+}
+function faceOnScreen(uid){
+  if(uid===user.id){ const top=$("openProfile2"); if(top&&top.offsetParent) return top; }
+  const H=innerHeight;
+  const els=[...feed.querySelectorAll(".msg")].reverse();
+  for(const e of els){ const id=+e.dataset.id; const mm=byId.get(id); if(mm?.user_id!==uid) continue; const f=e.querySelector(".face"); if(!f) continue; const r=f.getBoundingClientRect(); if(r.bottom>0&&r.top<H) return f; }
+  return null;
+}
+function playKiss(m){
+  const to=kissTarget(m); if(!to) return;
+  const fromEl=elById.get(m.id)?.querySelector(".face")||(m.user_id===user.id?$("openProfile2"):null);
+  const toEl=faceOnScreen(to)||(to===user.id?$("openProfile2"):$("roomLabel"));   // not on screen? aim at the chat name up top
+  if(!fromEl||!toEl||fromEl===toEl) return;
+  const a=fromEl.getBoundingClientRect(), b=toEl.getBoundingClientRect();
+  const ax=a.left+a.width/2, ay=a.top+a.height/2, bx=b.left+b.width/2, by=b.top+b.height/2;
+  const k=el("div","kiss-fly","💋"); k.style.left=(ax-18)+"px"; k.style.top=(ay-18)+"px"; document.body.append(k);
+  const dx=bx-ax, dy=by-ay, lift=Math.min(160,Math.abs(dx)*.4+60);
+  const reduce=reducedMotion();
+  k.animate(reduce?[{opacity:0},{opacity:1},{opacity:0}]:[
+    {transform:"translate(0,0) scale(.4) rotate(-20deg)",opacity:0},
+    {transform:`translate(${dx*.1}px,${dy*.1-20}px) scale(1.3) rotate(0deg)`,opacity:1,offset:.12},
+    {transform:`translate(${dx*.5}px,${dy*.5-lift}px) scale(1.1) rotate(12deg)`,offset:.55},
+    {transform:`translate(${dx}px,${dy}px) scale(.8) rotate(-6deg)`,opacity:1,offset:.92},
+    {transform:`translate(${dx}px,${dy}px) scale(.2)`,opacity:0}],{duration:reduce?600:1300,easing:"cubic-bezier(.4,.1,.4,1)"}).onfinish=()=>{
+    k.remove();
+    toEl.animate([{filter:"none"},{filter:"drop-shadow(0 0 10px #ff5aa8) brightness(1.15) saturate(1.3)"},{filter:"none"}],{duration:900});
+    if(!reduce) for(let i=0;i<5;i++){ const h=el("div","kiss-heart",["💕","💗","💖"][i%3]); h.style.left=(bx-10)+"px"; h.style.top=(by-10)+"px"; h.style.setProperty("--x",((i-2)*22)+"px"); h.style.animationDelay=(i*.05)+"s"; document.body.append(h); setTimeout(()=>h.remove(),1300); }
+  };
+  if(navigator.vibrate) navigator.vibrate([15,40,25]);
 }
 
 /* ---------- keep the chat inside the visible area when the keyboard opens ---------- */
@@ -7486,6 +7530,7 @@ SECRET_LIST.splice(SECRET_LIST.findIndex(s=>s.id==="konami"),0,
 // "celebrate" joins the everyday confetti trigger (not a secret)
 FX_TRIGGERS.find(t=>t.fx==="confetti").words.push("celebrate","celebration","let's celebrate");
 FX_TRIGGERS.forEach(t=>t.re=new RegExp("(^|[^a-z0-9'])("+t.words.map(w=>w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|")+")(?=$|[^a-z0-9])","i"));
+FX_TRIGGERS.find(t=>t.fx==="kiss").re=/(^|[^a-z0-9'])m+(w+|u+w*)a+h+(?=$|[^a-z0-9])/i;   // mwah, mwahhh, muah, muwah, mmwaaah…
 
 /* ================= DAILY HINT ================= */
 const HINTS={
@@ -8932,8 +8977,11 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.26v";
+const APP_VERSION="2026.09.26w";
 const CHANGELOG=[
+  {v:"2026.09.26w", title:"Mwah 😘", items:[
+    "😘 Say \"mwah\" (or send 😘 / 💋) and a kiss flies from your picture to theirs. In a DM it goes to the other person; in a room, to whoever you're replying to (or whoever spoke last).",
+  ]},
   {v:"2026.09.26v", title:"Small fix ✍️", items:[
     "✍️ Fixed a couple of secret captions getting cut off on narrow phones.",
   ]},
