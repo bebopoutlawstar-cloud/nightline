@@ -972,7 +972,7 @@ html,body{overscroll-behavior:none}
 .rx-junesign span{display:inline-block;color:#fff;background:#d61f2c;padding:0 10px;transform:rotate(-3deg);font-size:1.25em}
 .rx-bags{font-size:30px;margin-top:10px;animation:qxbounce .6s ease-in-out 5}
 
-/* ===== Pip-Boy theme ===== */
+/* ===== Wasteland theme (unlocked by the "pip-boy" secret) ===== */
 body.theme-pipboy{--night:#061008;--deep:#0b1c0e;--white:#c9ffd8;--muted:#6fbf86;--red:#ff6b6b}
 body.theme-pipboy .app,body.theme-pipboy .sky{background:radial-gradient(circle at 50% 30%,#0f2a14,#061008 70%)!important}
 body.theme-pipboy .sky canvas{opacity:.25;filter:sepia(1) hue-rotate(60deg) saturate(3)}
@@ -1089,12 +1089,12 @@ body.theme-pipboy .compose,body.theme-pipboy .top{background:rgba(6,16,8,.92)!im
 @keyframes pgdraw{from{transform:translateY(60vh) rotate(-20deg)}}
 .pg-back,.pg-front{position:absolute;inset:0;border-radius:8px;backface-visibility:hidden;border:4px solid #3b2a12}
 .pg-back{background:radial-gradient(circle,#6b3a1a,#3b2210);display:grid;place-items:center;font-size:48px;color:#d9a441}
-.pg-front{background:#1f8a4c;transform:rotateY(180deg);padding:8px;display:grid;grid-template-rows:auto 1fr auto auto;gap:4px;color:#07041A;text-align:left}
-.pg-name{font-family:var(--tech);font-size:11px;font-weight:900;background:#e8f5e9;padding:3px 5px;border:2px solid #07041A}
-.pg-art{background:#c8e6c9;border:2px solid #07041A;display:grid;place-items:center}
+.pg-front{background:linear-gradient(160deg,#6a2fa0,#3d1766);transform:rotateY(180deg);padding:8px;display:grid;grid-template-rows:auto 1fr auto auto;gap:4px;color:#07041A;text-align:left}
+.pg-name{font-family:var(--tech);font-size:11px;font-weight:900;background:#fff6c8;padding:3px 5px;border:2px solid #07041A}
+.pg-art{background:radial-gradient(circle,#4b2378,#23103d);border:2px solid #07041A;display:grid;place-items:center}
 .pg-art svg{width:80%}
 .pg-type{font-size:10px;font-family:var(--tech)}
-.pg-text{font-size:12px;background:#e8f5e9;border:2px solid #07041A;padding:3px 5px}
+.pg-text{font-size:12px;background:#fff6c8;border:2px solid #07041A;padding:3px 5px}
 .pg-cap{color:#ffd84a;max-width:84vw}
 /* ===== yugioh ===== */
 .yg-wrap{position:absolute;inset:0;overflow:hidden;background:radial-gradient(circle at 50% 40%,rgba(255,216,74,.35),rgba(20,8,0,.85) 70%);animation:sxflash 4.2s ease both}
@@ -1286,7 +1286,7 @@ body.theme-gold .go,body.theme-gold .send{background:linear-gradient(135deg,#FFD
 .player{transform:none}
 /* subs/notes */
 .sheet .sub,.sheet .email,.sheet .sub.left{font-family:var(--body)}
-.sheet .msgline{font-family:var(--body)}
+.sheet .msgline{font-family:var(--body);min-height:auto;overflow-wrap:anywhere}   /* grow to fit long messages instead of spilling over the buttons below */
 @media (prefers-reduced-motion:reduce){.sheet,.fronttabs,.segmented,.tabs .tab{transform:none}}
 .sheet{max-height:calc(100dvh - 28px);width:min(100%,380px)}
 .sheetbody{max-height:calc(100dvh - 28px);padding:36px 24px 30px;box-sizing:border-box}
@@ -1416,9 +1416,13 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .re-herb{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);text-align:center;font-size:70px;animation:sxslam 2.2s cubic-bezier(.2,1.4,.4,1) both;filter:drop-shadow(0 0 16px #2ee66b)}
 .re-herb b{display:block;font-family:var(--num);font-size:28px;color:#2ee66b;text-shadow:3px 3px 0 #07041A;letter-spacing:2px}
 /* ===== danganronpa ===== */
-.dr-monokuma{position:absolute;left:50%;top:38%;width:min(50vw,190px);transform:translate(-50%,-50%);animation:sxslam 3s cubic-bezier(.2,1.4,.4,1) both}
-.dr-monokuma svg{width:100%;filter:drop-shadow(8px 8px 0 #ff1a3c)}
-.dr-monokuma.out{animation:none;opacity:0;transition:opacity .5s}
+.dr-coinwrap{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:14px;perspective:600px;transition:opacity .5s}
+.dr-coinwrap.out{opacity:0}
+.dr-coin{position:relative;width:min(40vw,150px);aspect-ratio:1;transform-style:preserve-3d;animation:drflip 2s cubic-bezier(.25,.6,.3,1) both}
+.dr-face{position:absolute;inset:0;border-radius:50%;display:grid;place-items:center;font-size:min(22vw,84px);backface-visibility:hidden;border:6px solid #07041A;box-shadow:inset 0 0 0 6px rgba(0,0,0,.15)}
+.dr-face.kind{background:radial-gradient(circle at 35% 30%,#fff,#d9dde8)}
+.dr-face.cruel{background:radial-gradient(circle at 35% 30%,#3a3a44,#07041A);transform:rotateY(180deg);box-shadow:0 0 30px #ff1a3c,inset 0 0 0 6px #ff1a3c}
+@keyframes drflip{0%{transform:translateY(40vh) rotateY(0)}45%{transform:translateY(-16vh) rotateY(1260deg)}100%{transform:translateY(0) rotateY(1620deg)}}
 .dr-cap{text-align:center;font-family:var(--tech);font-size:15px;color:#ff1a3c;margin-top:6px;letter-spacing:1px}
 .dr-trial{background:#0a0a0a!important;color:#fff!important;border-color:#ff1a3c!important;box-shadow:10px 10px 0 #ff1a3c!important;font-size:clamp(30px,10vw,64px)!important}
 .dr-nonstop{position:absolute;inset:0;overflow:hidden}
@@ -3078,7 +3082,7 @@ const THEMES={
   sunset: {label:"Sunset",       main:"#FF9A3D", accent:"#FF4FA3", hi:"#FFE45C"},
   mono:   {label:"Mono",         main:"#E8E8F0", accent:"#8A8AA8", hi:"#F3FF3A"},
   phantom:{label:"🎭 Phantom",   main:"#FF2E3F", accent:"#F4F7FF", hi:"#FF2E3F"},
-  pipboy: {label:"☢️ Pip-Boy",   main:"#5cff8a", accent:"#1f7a3a", hi:"#a7ffbf", body:"pipboy"},
+  pipboy: {label:"☢️ Wasteland", main:"#5cff8a", accent:"#1f7a3a", hi:"#a7ffbf", body:"pipboy"},
   redrum: {label:"🩸 Redrum",    main:"#ff1a1a", accent:"#7a0a0a", hi:"#ffdddd", body:"redrum"},
   lab:    {label:"⚗️ Lab",       main:"#ff9a3d", accent:"#7a3e10", hi:"#ffd08a", body:"lab"},
   tvworld:{label:"📺 TV World",  main:"#ffe34a", accent:"#8a7a1a", hi:"#fff7cf", body:"tvworld"},
@@ -3802,7 +3806,7 @@ async function handleAuth(u){
   user=u;
   const q=new URLSearchParams(location.search);
   if(!u){
-    myInviteTok=null; tellSwAuth(null); signedLinks.clear(); isAdmin=false; show($("openCheats"),false);
+    myInviteTok=null; tellSwAuth(null); signedLinks.clear(); isAdmin=false; show($("openCheats"),false); clearBadge();
     hideSplash();
     if(unsub){unsub();unsub=null;} if(unsubAll){unsubAll();unsubAll=null;} if(typeof stopPresence==="function") stopPresence();
     say("authMsg","");   // clear any leftover "Logging in…"
@@ -3839,8 +3843,7 @@ async function handleAuth(u){
   try{ const t=LS.get("nl-front-tab"); if(["chats","dms","contacts"].includes(t)) setFrontTab(t); }catch(e){}
   celebrateMyBirthday(); seasonalCheck("login"); hintNudge(); dailyXP(); setTimeout(checkUnlocks,4000); setTimeout(recoveryNudge,9000); refreshAdmin();
   if(unsubAll) unsubAll();
-  unsubAll=api.subscribeAll(onAnyMessage,onFriendAdded);
-  clearBadge();
+  unsubAll=api.subscribeAll(onAnyMessage,onFriendAdded);   // (the icon number is set when the chat list loads)
   let linked=q.get("room"), joinCode=q.get("join"), joinToken=q.get("t");
   if(joinCode||linked) history.replaceState(null,"",location.pathname);
   try{ const pf=JSON.parse(LS.get("nl-pending-friend")||"null"); LS.remove("nl-pending-friend"); if(pf&&Date.now()-pf.at<3*864e5&&!q.get("friend")) setTimeout(()=>handleFriendInvite(pf.t),600); }catch(e){}
@@ -4055,6 +4058,7 @@ async function loadInbox(){
   show($("inboxWrap"),roomRows.length>0); show($("inboxEmpty"),!roomRows.length); show($("dmEmpty"),!dmRows.length);
   const unreadOf=rows=>rows.filter(r=>r.notify!=="off").reduce((n,r)=>n+(+r.unread||0),0);
   setTabBadge("badgeRooms",unreadOf(roomRows)); setTabBadge("badgeDms",unreadOf(dmRows));
+  setIconBadge(unreadOf(roomRows)+unreadOf(dmRows));   // the number on the app icon
   for(const r of list){
     const box=r.is_dm?dmBox:roomsBox;
     const b=el("button","roomrow"); b.type="button";
@@ -5725,12 +5729,21 @@ async function onAnyMessage(m){
 let inboxTimer=null;
 function loadInboxSoon(){ clearTimeout(inboxTimer); inboxTimer=setTimeout(loadInbox,400); }
 
-function clearBadge(){ try{ navigator.clearAppBadge?.(); }catch(e){} }
+/* The number on the app icon = your real unread total (muted chats don't count). iPhone home-screen app and
+   installed desktop apps show the number; Android shows its own dot/count from notifications instead. */
+let iconUnread=0;
+function setIconBadge(n){
+  iconUnread=Math.max(0,n|0);
+  try{ if("setAppBadge" in navigator){ iconUnread>0?navigator.setAppBadge(iconUnread).catch(()=>{}):navigator.clearAppBadge().catch(()=>{}); } }catch(e){}
+  try{ const msg={type:"nl-unread",n:iconUnread}; navigator.serviceWorker?.controller?.postMessage(msg); }catch(e){}   // so new messages while closed add on top of the real number
+}
+function clearBadge(){ setIconBadge(0); }
 async function closeRoomNotifications(code){
-  clearBadge();
+  const row=(typeof inboxRows!=="undefined"?inboxRows:[]).find(r=>r.code===code);
+  if(row&&+row.unread>0&&row.notify!=="off"){ setIconBadge(iconUnread-(+row.unread)); row.unread=0; }   // you're reading this chat now
   try{ const reg=swReg||await navigator.serviceWorker?.getRegistration(); (await reg?.getNotifications({tag:"room-"+code})||[]).forEach(n=>n.close()); }catch(e){}
 }
-document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ clearBadge(); if(room) closeRoomNotifications(room); } });
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden&&user){ if(room) closeRoomNotifications(room); loadInboxSoon(); } });   // refresh the real count when you come back
 // the service worker asks which chat is on screen, so it only skips notifications for that one
 navigator.serviceWorker?.addEventListener("message",e=>{
   if(e.data?.type==="which-room"&&e.ports?.[0]) e.ports[0].postMessage({room: (!document.hidden&&!$("chat").classList.contains("hidden"))?room:null});
@@ -7422,7 +7435,7 @@ const RX=(()=>{
   const senderFaces=m=>[...feed.querySelectorAll(`.face[data-uid="${CSS.escape(m?.user_id||"")}"]`)];
   return {
     war(){ chatClass("rx-sepia",4600); const w=add("rx-war",`<div class="rx-dust"></div><div class="rx-wartext"><span>WAR.</span><span>WAR NEVER CHANGES.</span></div>`); later(()=>w.remove(),4600); },
-    pipboy(){ chatClass("rx-pip",4200); if(!hasSecret("pipboy")) later(()=>{ const c=add("sx-caption px-center","☢️ Pip-Boy theme unlocked in Theme & colors"); c.style.top="72%"; later(()=>c.remove(),2600); },2600); const p=add("rx-pipboy",`<div class="rx-pipframe"><div class="rx-piphead">STAT &nbsp; INV &nbsp; DATA &nbsp; MAP &nbsp; RADIO</div><div class="rx-pipbody"><div class="rx-boy">👍</div><div class="rx-piprows"><b>HP</b> 100/100<br><b>RAD</b> ▮▮▯▯▯<br><b>CAPS</b> 42<br><b>STATUS</b> feeling groovy</div></div></div>`); chime([[880,0,.08,"square"],[660,.1,.08,"square"]]); later(()=>p.remove(),4200); },
+    pipboy(){ chatClass("rx-pip",4200); if(!hasSecret("pipboy")) later(()=>{ const c=add("sx-caption px-center","☢️ Wasteland theme unlocked in Theme & colors"); c.style.top="72%"; later(()=>c.remove(),2600); },2600); const p=add("rx-pipboy",`<div class="rx-pipframe"><div class="rx-piphead">WASTELAND OS v2.0 &nbsp;·&nbsp; BOOT OK</div><div class="rx-pipbody"><div class="rx-boy">☢️</div><div class="rx-piprows"><b>HP</b> 100/100<br><b>RAD</b> ▮▮▯▯▯<br><b>CAPS</b> 42<br><b>STATUS</b> still kicking</div></div></div>`); chime([[880,0,.08,"square"],[660,.1,.08,"square"]]); later(()=>p.remove(),4200); },
     nuka(){ for(let i=0;i<30;i++){ const c=add("rx-cap","⭐"); c.style.left=R(2,96)+"%"; c.style.animationDelay=R(0,1.6)+"s"; c.style.setProperty("--r",R(-720,720)+"deg"); later(()=>c.remove(),3800); } chime([[523,0,.1],[659,.1,.1],[784,.2,.2]]); const cap=add("sx-caption px-center rx-nukacap","🧢 +30 caps"); later(()=>cap.remove(),1800); },
     fallguys(){
       const colors=["#ff4fa3","#ffd400","#3dd6ff","#7cff6b","#ff7a3d","#c78bff"];
@@ -7625,7 +7638,7 @@ QX.scaryMovie=function(){
 };
 QX.potOfGreed=function(){
   const layer=$("sfx"); const d=document.createElement("div"); d.className="pg-wrap";
-  d.innerHTML=`<div class="pg-card"><div class="pg-back"><span>✦</span></div><div class="pg-front"><div class="pg-name">POT OF GREED</div><div class="pg-art"><svg viewBox="0 0 100 100"><path d="M30 30 Q20 30 22 44 L26 80 Q28 92 50 92 Q72 92 74 80 L78 44 Q80 30 70 30Z" fill="#1f8a4c" stroke="#07041A" stroke-width="4"/><ellipse cx="50" cy="30" rx="22" ry="8" fill="#2fb36a" stroke="#07041A" stroke-width="4"/><circle cx="40" cy="52" r="5" fill="#fff"/><circle cx="60" cy="52" r="5" fill="#fff"/><circle cx="41" cy="53" r="2"/><circle cx="61" cy="53" r="2"/><path d="M36 68 Q50 82 64 68" stroke="#07041A" stroke-width="4" fill="none"/><path d="M38 68 L62 68 L60 74 L40 74Z" fill="#fff"/></svg></div><div class="pg-type">[ SPELL CARD ]</div><div class="pg-text">Draw 2 cards.</div></div></div><div class="sx-caption pg-cap">"Draw your last pathetic card!"</div>`;
+  d.innerHTML=`<div class="pg-card"><div class="pg-back"><span>✦</span></div><div class="pg-front"><div class="pg-name">JAR OF PLENTY</div><div class="pg-art"><svg viewBox="0 0 100 100"><path d="M34 34 Q24 36 26 50 L30 82 Q32 92 50 92 Q68 92 70 82 L74 50 Q76 36 66 34Z" fill="#d9a441" stroke="#07041A" stroke-width="4"/><rect x="34" y="24" width="32" height="12" rx="3" fill="#b07a2a" stroke="#07041A" stroke-width="4"/><path d="M30 58 Q50 66 70 58" fill="none" stroke="#07041A" stroke-width="3"/><path d="M50 8 L53 16 L61 16 L55 21 L57 29 L50 24 L43 29 L45 21 L39 16 L47 16Z" fill="#fff6c8" stroke="#07041A" stroke-width="2"/><circle cx="30" cy="16" r="3" fill="#fff6c8"/><circle cx="72" cy="12" r="2.5" fill="#fff6c8"/><circle cx="50" cy="74" r="7" fill="#fff6c8" stroke="#07041A" stroke-width="3"/></svg></div><div class="pg-type">✦ LUCKY CARD ✦</div><div class="pg-text">Draw 2 cards.</div></div></div><div class="sx-caption pg-cap">"Draw your last pathetic card!"</div>`;
   layer.append(d); setTimeout(()=>d.classList.add("flip"),900); setTimeout(()=>{ d.querySelector(".pg-cap").textContent="…what does it do again? 🤔"; },2400); setTimeout(()=>d.remove(),4600);
 };
 QX.yugioh=function(){
@@ -7635,7 +7648,7 @@ QX.yugioh=function(){
 };
 QX.console=function(kind){
   const layer=$("sfx"); const blue=kind==="ps"; const d=document.createElement("div"); d.className="cs-wrap "+(blue?"cs-blue":"cs-green");
-  d.innerHTML=`<div class="cs-glow"></div><div class="cs-logo">${blue?'<svg viewBox="0 0 120 40"><rect x="4" y="12" width="112" height="16" fill="none" stroke="#fff" stroke-width="3"/><rect x="52" y="4" width="16" height="32" fill="#fff"/></svg>':'<svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="26" fill="none" stroke="#fff" stroke-width="4"/><path d="M14 14 Q30 34 46 46 M46 14 Q30 34 14 46" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round"/></svg>'}</div><div class="cs-text">${blue?"powering on…":"powering on…"}</div>`;
+  d.innerHTML=`<div class="cs-glow"></div><div class="cs-logo">${blue?'<svg viewBox="0 0 120 40"><rect x="4" y="12" width="112" height="16" fill="none" stroke="#fff" stroke-width="3"/><rect x="52" y="4" width="16" height="32" fill="#fff"/></svg>':'<svg viewBox="0 0 80 50"><path d="M18 10 H62 Q76 10 78 28 Q80 46 68 46 Q60 46 54 36 H26 Q20 46 12 46 Q0 46 2 28 Q4 10 18 10Z" fill="none" stroke="#fff" stroke-width="4" stroke-linejoin="round"/><path d="M20 22 V32 M15 27 H25" stroke="#fff" stroke-width="4" stroke-linecap="round"/><circle cx="56" cy="23" r="3.5" fill="#fff"/><circle cx="63" cy="30" r="3.5" fill="#fff"/></svg>'}</div><div class="cs-text">${blue?"powering on…":"powering on…"}</div>`;
   layer.append(d);
   try{ const ac=window.__sxac||(window.__sxac=new (window.AudioContext||window.webkitAudioContext)()); const o=ac.createOscillator(), g=ac.createGain(); o.type="sine"; o.frequency.setValueAtTime(blue?180:220,ac.currentTime); o.frequency.exponentialRampToValueAtTime(blue?740:660,ac.currentTime+.9); g.gain.setValueAtTime(.0001,ac.currentTime); g.gain.exponentialRampToValueAtTime(.06,ac.currentTime+.2); g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+1.6); o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime+1.7); }catch(e){}
   setTimeout(()=>d.remove(),3600);
@@ -7670,7 +7683,7 @@ const UNLOCKS=[
   {id:"frame:guts",     type:"frame", label:"Blazing frame",        by:{stat:"guts",stat_n:12}},
   {id:"frame:bonded",   type:"frame", label:"Bonded frame",         by:{linkRank:5}},
   {id:"theme:phantom",  type:"theme", label:"🎭 Phantom theme",     by:{secret:"konami"}},
-  {id:"theme:pipboy",   type:"theme", label:"☢️ Pip-Boy theme",     by:{secret:"pipboy"}},
+  {id:"theme:pipboy",   type:"theme", label:"☢️ Wasteland theme",   by:{secret:"pipboy"}},
   {id:"theme:redrum",   type:"theme", label:"🩸 Redrum theme",      by:{secret:"redrum"}},
   {id:"theme:lab",      type:"theme", label:"⚗️ Future Gadget Lab", by:{secret:"elpsy"}},
   {id:"theme:tvworld",  type:"theme", label:"📺 TV World theme",    by:{secret:"shadow"}},
@@ -8033,14 +8046,10 @@ Object.assign(HINTS,{
   const later=(fn,ms)=>setTimeout(fn,ms), R=(a,b)=>a+Math.random()*(b-a);
   const chatClass=(cls,ms)=>{ const c=$("chat"); c.classList.remove(cls); void c.offsetWidth; c.classList.add(cls); later(()=>c.classList.remove(cls),ms); };
   const chime=(notes)=>{ try{ const ac=window.__sxac||(window.__sxac=new (window.AudioContext||window.webkitAudioContext)()); notes.forEach(([f,at,len,type])=>{ const o=ac.createOscillator(), g=ac.createGain(); o.type=type||"square"; o.frequency.value=f; g.gain.setValueAtTime(.0001,ac.currentTime+at); g.gain.exponentialRampToValueAtTime(.07,ac.currentTime+at+.02); g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+at+len); o.connect(g); g.connect(ac.destination); o.start(ac.currentTime+at); o.stop(ac.currentTime+at+len+.05); }); }catch(e){} };
-  QX.monokuma=function(){
-    const w=add("dr-monokuma",`<svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="92" fill="#fff" stroke="#07041A" stroke-width="6"/><path d="M100 8 A92 92 0 0 1 100 192 Z" fill="#07041A"/>
-      <circle cx="66" cy="88" r="16" fill="#fff" stroke="#07041A" stroke-width="4"/><circle cx="66" cy="88" r="6" fill="#07041A"/>
-      <circle cx="134" cy="88" r="18" fill="#ff1a3c" stroke="#07041A" stroke-width="4"/><path d="M134 74 L130 102 L138 102Z" fill="#07041A"/><circle cx="134" cy="88" r="5" fill="#07041A"/>
-      <path d="M60 128 Q100 152 140 128 Q100 146 60 128Z" fill="#07041A"/>
-      <path d="M40 40 Q55 5 75 35Z" fill="#fff" stroke="#07041A" stroke-width="4"/><path d="M160 40 Q145 5 125 35Z" fill="#07041A" stroke="#07041A" stroke-width="4"/></svg>
-      <div class="dr-cap">upupupu…</div>`);
-    chime([[1046,0,.08],[880,.08,.08],[1046,.16,.08],[1318,.3,.2]]); if(navigator.vibrate) navigator.vibrate([20,30,20,30,60]); later(()=>w.classList.add("out"),2400); later(()=>w.remove(),3000);
+  QX.monokuma=function(){   // "half kind, half cruel": an original two-faced coin flips and lands cruel side up
+    const w=add("dr-coinwrap",`<div class="dr-coin"><div class="dr-face kind">😇</div><div class="dr-face cruel">😈</div></div><div class="dr-cap">heh heh heh…</div>`);
+    chime([[1046,0,.08],[880,.08,.08],[1046,.16,.08],[1318,.3,.2]]); if(navigator.vibrate) navigator.vibrate([20,30,20,30,60]);
+    later(()=>w.classList.add("out"),2600); later(()=>w.remove(),3200);
   };
   QX.classTrial=function(){
     chatClass("qx-glitch",900);
@@ -8697,8 +8706,18 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.26o";
+const APP_VERSION="2026.09.26q";
 const CHANGELOG=[
+  {v:"2026.09.26q", title:"Unread count on the app icon 🔴", items:[
+    "🔴 NightLane's icon now shows how many unread messages you have, on iPhone (Home Screen app) and computers.",
+    "🤖 On Android, the icon shows a dot from your notifications. Samsung phones can show the number too: Settings → Notifications → App icon badges → Show with number.",
+    "🛠️ Fixed long messages in Profile (like after sending a test notification) spilling over the Log out button.",
+    "🙌 Thanks to jimmylikespie21 for the idea!",
+  ]},
+  {v:"2026.09.26p", title:"Fresh coat of paint 🎨", items:[
+    "🎨 A few older secrets got brand-new original artwork. Same words, new surprises.",
+    "☢️ The Pip-Boy theme is now called Wasteland. Same green glow, and if you were using it, you still are.",
+  ]},
   {v:"2026.09.26o", title:"Frames fixed ✨", items:[
     "🖼️ Profile frames actually show up now, and they all got an upgrade: neon glow, RGB glitch, real flames, calling-card layers, 8-bit pixels, shining gold, a rainbow Mythic, and more.",
     "🙌 Thanks to Han for the reminder!",

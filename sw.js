@@ -1,5 +1,5 @@
-// NightLane service worker (v14): push notifications + fast repeat loads.
-const CACHE="nightlane-v14";
+// NightLane service worker (v15): push notifications + fast repeat loads.
+const CACHE="nightlane-v15";
 // Outside files the app needs to start: the server library (a fixed version, so it never changes) and the fonts.
 const LIB="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.0/dist/umd/supabase.min.js";
 const OUTSIDE=u=>u.hostname==="cdn.jsdelivr.net"||u.hostname==="fonts.googleapis.com"||u.hostname==="fonts.gstatic.com";
@@ -12,6 +12,7 @@ self.addEventListener("activate", e => e.waitUntil(caches.keys().then(ks => Prom
 // the app retries with a short-lived private link.
 let AUTH = null;
 self.addEventListener("message", e => {
+  if (e.data && e.data.type === "nl-unread") { e.waitUntil(unreadStore(e.data.n).then(() => setBadge(e.data.n))); return; }
   if (e.data && e.data.type === "nl-auth") {
     AUTH = e.data.auth || null;
     caches.open(CACHE).then(c => AUTH ? c.put("__nl_auth", new Response(JSON.stringify(AUTH))) : c.delete("__nl_auth"));
@@ -66,12 +67,18 @@ function askWhichRoom(client) {
   });
 }
 
+// App-icon badge (iPhone home-screen app + installed desktop app; Android shows its own dot/count from notifications).
+// The app tells us the real unread total whenever it knows it; each new message while it's closed adds 1.
+async function unreadStore(n) {
+  const c = await caches.open(CACHE);
+  if (n === undefined) { const r = await c.match("__nl_unread"); return r ? (+(await r.text()) || 0) : 0; }
+  await c.put("__nl_unread", new Response(String(Math.max(0, n|0))));
+}
+async function setBadge(n) {
+  try { if (n > 0) await self.navigator.setAppBadge?.(n); else await self.navigator.clearAppBadge?.(); } catch (e) {}
+}
 async function updateBadge() {
-  try {
-    const all = await self.registration.getNotifications();
-    const total = all.reduce((n, x) => n + (x.data?.count || 1), 0);
-    if (total > 0) await self.navigator.setAppBadge?.(total); else await self.navigator.clearAppBadge?.();
-  } catch (e) {}
+  try { const n = (await unreadStore()) + 1; await unreadStore(n); await setBadge(n); } catch (e) {}
 }
 
 self.addEventListener("push", event => {
