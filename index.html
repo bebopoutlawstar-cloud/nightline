@@ -2218,6 +2218,44 @@ body.theme-mochi .send{background:#ff8fb8!important}
 .kiss-fly{position:fixed;z-index:70;font-size:34px;pointer-events:none;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
 .kiss-heart{position:fixed;z-index:70;font-size:20px;pointer-events:none;animation:kissheart 1.1s ease-out both}
 @keyframes kissheart{0%{transform:translate(0,0) scale(.3);opacity:0}25%{opacity:1}100%{transform:translate(var(--x),-60px) scale(1.1);opacity:0}}
+/* ===== Gurren Lagann secret ===== */
+.sxscene.gl-sky{background:linear-gradient(#1c6fd6,#58a8f0 55%,#bfe3ff);animation:rdsky .6s ease both}
+.gl-cloud{position:absolute;left:-40%;width:60%;height:12%;border-radius:50px;background:rgba(255,255,255,.85);filter:blur(3px);animation:glcloud 5s linear infinite}
+@keyframes glcloud{to{transform:translateX(180vw)}}
+.gl-drill{position:absolute;left:50%;bottom:-40%;width:min(26vw,110px);transform:translateX(-50%);filter:drop-shadow(0 0 18px #3dff8a) drop-shadow(0 0 40px #3dff8a);animation:glrise 2s cubic-bezier(.5,0,.3,1) both}
+.gl-drill svg{width:100%;display:block}
+.gl-spiral{animation:glspin .25s linear infinite}
+@keyframes glspin{to{transform:translateY(16px)}}
+@keyframes glrise{0%{bottom:-40%}70%{bottom:40%}100%{bottom:120%}}
+.gl-flash{position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,#fff,rgba(255,255,255,.6) 25%,transparent 60%);animation:fhflash .9s ease-out both}
+.gl-beam{position:absolute;left:50%;top:-10%;width:14px;height:160vh;background:linear-gradient(transparent,#fff 20%,#fff 80%,transparent);box-shadow:0 0 30px #fff,0 0 60px #bfe3ff;transform-origin:50% 0;transform:rotate(var(--a)) scaleY(0);animation:glbeam .5s ease-out forwards}
+@keyframes glbeam{to{transform:rotate(var(--a)) scaleY(1)}}
+.gl-cap{top:34%;color:#fff;font-size:clamp(24px,7.2vw,40px);text-shadow:3px 3px 0 #07041a,0 0 18px #1c6fd6}
+@media (prefers-reduced-motion:reduce){.gl-drill{animation:none;bottom:30%}}
+/* ===== more Gurren Lagann ===== */
+.gl-speed{position:absolute;inset:-20%;background:repeating-conic-gradient(from 0deg at 50% 45%,rgba(255,255,255,.55) 0 1.5deg,transparent 1.5deg 9deg);-webkit-mask:radial-gradient(circle at 50% 45%,transparent 22%,#000 60%);mask:radial-gradient(circle at 50% 45%,transparent 22%,#000 60%);animation:glspeed .5s linear infinite;pointer-events:none}
+@keyframes glspeed{to{transform:rotate(6deg)}}
+.gl-flame{position:absolute;bottom:-4%;font-size:clamp(36px,11vw,60px);animation:glflame .9s ease-out both}
+@keyframes glflame{0%{transform:translateY(40px) scale(.5);opacity:0}40%{opacity:1}100%{transform:translateY(-22vh) scale(1.5);opacity:0}}
+.gl-slam{top:40%;color:#fff;font-size:clamp(28px,8.6vw,52px);text-shadow:3px 3px 0 #e8552d,6px 6px 0 #07041a;animation:glslam .45s cubic-bezier(.2,1.6,.4,1) both;font-style:italic}
+@keyframes glslam{from{transform:translateX(-50%) scale(2.6) rotate(-8deg);opacity:0}to{transform:translateX(-50%) scale(1) rotate(-4deg);opacity:1}}
+.gl-spiral-big{position:absolute;left:50%;top:44%;width:130vmax;height:130vmax;transform:translate(-50%,-50%);border-radius:50%;background:repeating-conic-gradient(from 0deg,#3dff8a 0 10deg,transparent 10deg 30deg);-webkit-mask:radial-gradient(circle,#000 8%,transparent 60%);mask:radial-gradient(circle,#000 8%,transparent 60%);opacity:.55;animation:glwhirl 1.2s linear infinite}
+@keyframes glwhirl{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.gl-reason{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) rotate(-3deg);font-family:var(--num);font-size:clamp(30px,10vw,54px);color:#07041a;background:#c9d3dc;border:5px solid #07041a;padding:8px 20px;box-shadow:6px 6px 0 #e8552d;transition:transform .6s cubic-bezier(.3,.1,.3,1),opacity .6s}
+.gl-reason.gone{transform:translate(160%,-160%) rotate(260deg);opacity:0}
+.gl-boot{position:absolute;left:4%;top:48%;font-size:clamp(60px,18vw,100px);transform:scaleX(-1);animation:glboot .9s cubic-bezier(.6,0,.4,1.4) both}
+@keyframes glboot{0%{left:-30%}70%{left:22%}100%{left:10%}}
+#chat.gl-charge{animation:glcharge 1.4s cubic-bezier(.5,0,.5,1) both}
+@keyframes glcharge{0%{transform:none}80%{transform:rotate(-8deg) scale(.95);filter:brightness(1.3) hue-rotate(40deg)}100%{transform:none}}
+.gl-drill.gl-giga{bottom:auto;top:-60%;width:min(60vw,260px);animation:glgiga .8s cubic-bezier(.6,0,.4,1) both;transform:translateX(-50%) rotate(180deg)}
+@keyframes glgiga{0%{top:-60%}100%{top:20%}}
+.gl-half{position:absolute;top:0;bottom:0;width:52%;background:linear-gradient(90deg,#e8552d,#ff9a3a);border:6px solid #07041a;animation:glhalfL .65s cubic-bezier(.7,0,.3,1) both}
+.gl-half.left{left:0;clip-path:polygon(0 0,100% 0,85% 50%,100% 100%,0 100%)}
+.gl-half.right{right:0;background:linear-gradient(90deg,#3d7bff,#1c4fd6);clip-path:polygon(0 0,100% 0,100% 100%,0 100%,15% 50%);animation-name:glhalfR}
+@keyframes glhalfL{from{transform:translateX(-100%)}to{transform:none}}@keyframes glhalfR{from{transform:translateX(100%)}to{transform:none}}
+.gl-shock{position:absolute;left:50%;top:50%;width:20px;height:20px;border:6px solid #fff;border-radius:50%;transform:translate(-50%,-50%);animation:glshock .6s ease-out both}
+@keyframes glshock{to{width:160vmax;height:160vmax;opacity:0;border-width:2px}}
+@media (prefers-reduced-motion:reduce){#chat.gl-charge{animation:none}.gl-speed,.gl-spiral-big{animation:none}}
 </style>
 </head>
 <body>
@@ -8439,7 +8477,60 @@ QX.yuri=function(){
   setTimeout(()=>{ sxCap(L,"…yes they can 💕","yu-cap");
     for(let i=0;i<12;i++){ const h=el("span","yu-float",i%3?"💕":"🌸"); h.style.left=(Math.random()*90+2)+"%"; h.style.animationDelay=(Math.random()*.8)+"s"; L.append(h); } },2100);
 };
+/* Gurren Lagann: a spiral drill rises through a blue sky and pierces the heavens (original drawing) */
+QX.believe=function(line){
+  line=line||"Believe in the you that believes in yourself.";
+  const L=sxLayer("sxBelieve",6400); L.classList.add("gl-sky");
+  for(let i=0;i<4;i++){ const c=el("div","gl-cloud"); c.style.top=(12+i*18)+"%"; c.style.animationDelay=(-i*1.3)+"s"; L.append(c); }
+  const d=el("div","gl-drill"); d.innerHTML=`<svg viewBox="0 0 80 160"><defs><clipPath id="glCone"><path d="M40 2 L74 150 L6 150Z"/></clipPath></defs>
+    <path d="M40 2 L74 150 L6 150Z" fill="#c9d3dc" stroke="#07041a" stroke-width="4"/>
+    <g clip-path="url(#glCone)" class="gl-spiral">${[...Array(12)].map((_,i)=>`<path d="M-20 ${i*16} L100 ${i*16-40}" stroke="#6b7c8a" stroke-width="6"/>`).join("")}</g>
+    <path d="M40 2 L74 150 L6 150Z" fill="none" stroke="#07041a" stroke-width="4"/><rect x="2" y="148" width="76" height="12" rx="3" fill="#e8552d" stroke="#07041a" stroke-width="4"/></svg>`;
+  L.append(d);
+  setTimeout(()=>{ L.append(el("div","gl-flash")); ["-28deg","22deg"].forEach(a=>{ const b=el("div","gl-beam"); b.style.setProperty("--a",a); L.append(b); });
+    document.body.animate([{transform:"none"},{transform:"translate(-8px,6px)"},{transform:"translate(7px,-5px)"},{transform:"none"}],{duration:420}); if(navigator.vibrate) navigator.vibrate([40,30,80]);
+    const cap=sxCap(L,"","gl-cap"); let k=0;
+    const iv=setInterval(()=>{ cap.textContent=line.slice(0,++k); if(k>=line.length) clearInterval(iv); },45); },2000);
+};
+/* ===== more Gurren Lagann (original visuals) ===== */
+function glSpeedLines(L){ const sl=el("div","gl-speed"); L.append(sl); return sl; }
+QX.justwho=function(){
+  const L=sxLayer("sxJustWho",4800); glSpeedLines(L);
+  for(let i=0;i<14;i++){ const f=el("span","gl-flame","🔥"); f.style.left=(i*7.5)+"%"; f.style.animationDelay=(i%4*.08)+"s"; L.append(f); }
+  setTimeout(()=>{ const c=sxCap(L,"JUST WHO THE HELL DO YOU THINK I AM?!","gl-slam"); document.body.animate([{transform:"none"},{transform:"translate(-10px,7px) rotate(-.6deg)"},{transform:"translate(9px,-6px)"},{transform:"translate(-5px,3px)"},{transform:"none"}],{duration:500}); if(navigator.vibrate) navigator.vibrate([60,40,120]); },500);
+};
+QX.rowrow=function(){
+  const L=sxLayer("sxRowRow",5200); L.classList.add("dim");
+  const sp=el("div","gl-spiral-big"); L.append(sp);
+  [0,1,2,3].forEach(i=>setTimeout(()=>{ document.body.animate([{transform:"scale(1)"},{transform:"scale(1.025)"},{transform:"scale(1)"}],{duration:260}); sp.animate([{filter:"brightness(1)"},{filter:"brightness(1.8)"},{filter:"brightness(1)"}],{duration:300}); if(navigator.vibrate) navigator.vibrate(35); },500+i*520));
+  setTimeout(()=>sxCap(L,"🔥 FIGHT! 🔥","gl-slam"),2700);
+};
+QX.kickreason=function(){
+  const L=sxLayer("sxKick",4800);
+  const blk=el("div","gl-reason","REASON"); L.append(blk);
+  const boot=el("div","gl-boot","👢"); L.append(boot);
+  setTimeout(()=>{ blk.classList.add("gone"); if(navigator.vibrate) navigator.vibrate(70); },900);
+  setTimeout(()=>{ glSpeedLines(L); sxCap(L,"DO THE IMPOSSIBLE!","gl-slam"); },1500);
+};
+QX.gigadrill=function(){
+  const c=$("chat"); c.classList.remove("gl-charge"); void c.offsetWidth; c.classList.add("gl-charge"); setTimeout(()=>c.classList.remove("gl-charge"),1500);
+  const L=sxLayer("sxGiga",5000);
+  setTimeout(()=>{ const d=el("div","gl-drill gl-giga"); d.innerHTML=`<svg viewBox="0 0 80 160"><defs><clipPath id="glCone2"><path d="M40 2 L74 150 L6 150Z"/></clipPath></defs><path d="M40 2 L74 150 L6 150Z" fill="#c9d3dc" stroke="#07041a" stroke-width="4"/><g clip-path="url(#glCone2)" class="gl-spiral">${[...Array(12)].map((_,i)=>`<path d="M-20 ${i*16} L100 ${i*16-40}" stroke="#6b7c8a" stroke-width="6"/>`).join("")}</g><rect x="2" y="148" width="76" height="12" rx="3" fill="#e8552d" stroke="#07041a" stroke-width="4"/></svg>`; L.append(d); },1300);
+  setTimeout(()=>{ L.append(el("div","gl-flash")); glSpeedLines(L); sxCap(L,"GIGA DRILL BREAK!!","gl-slam"); document.body.animate([{transform:"none"},{transform:"translate(-12px,8px)"},{transform:"translate(10px,-8px)"},{transform:"translate(-6px,4px)"},{transform:"none"}],{duration:550}); if(navigator.vibrate) navigator.vibrate([80,40,160]); },2100);
+};
+QX.gattai=function(){
+  const L=sxLayer("sxGattai",3800);
+  const a=el("div","gl-half left"), b=el("div","gl-half right"); L.append(a,b);
+  setTimeout(()=>{ L.append(el("div","gl-shock")); L.append(el("div","gl-flash")); sxCap(L,"GATTAI!","gl-slam"); document.body.animate([{transform:"none"},{transform:"translate(0,8px)"},{transform:"none"}],{duration:300}); if(navigator.vibrate) navigator.vibrate([30,20,90]); },650);
+};
 SECRET_LIST.splice(SECRET_LIST.findIndex(s=>s.id==="konami"),0,
+  {id:"justwho",    name:"Who the hell",       re:/just who the (hell|heck) do (you|ya|u) think (i am|i'm)/i, play:()=>QX.justwho()},
+  {id:"rowrow",     name:"Row, row",           re:/row,?\s*row,?\s*fight the power/i, play:()=>QX.rowrow()},
+  {id:"kickreason", name:"Do the impossible",  re:/kick reason to the curb|do the impossible/i, play:()=>QX.kickreason()},
+  {id:"gigadrill",  name:"Giga Drill Break",   re:/giga drill break/i, play:()=>QX.gigadrill()},
+  {id:"gattai",     name:"Gattai!",            re:/(^|[^a-z])gattai([^a-z]|$)/i, play:()=>QX.gattai()},
+  {id:"pierce",     name:"Pierce the heavens", re:/pierce the heavens/i, play:()=>QX.believe("PIERCE THE HEAVENS!!")},
+  {id:"believe",    name:"Believe in yourself", re:/believe in the you that believes in yourself|believe in the me that believes in you/i, play:()=>QX.believe()},
   {id:"yuri",       name:"Lilies",            re:/(^|[^a-z])yuri([^a-z]|$)|百合/i, play:()=>QX.yuri()},
   {id:"meguca",     name:"Suffering",         re:/(^|[^a-z])meguca([^a-z]|$)/i, play:()=>QX.meguca()},
   {id:"uwa",        name:"Uwa!!",             re:/(^|[^a-z])uwa+h?([^a-z]|$)|^\s*una+[!~.…]*\s*$/i, play:()=>QX.uwa()},
@@ -8457,6 +8548,13 @@ SECRET_LIST.splice(SECRET_LIST.findIndex(s=>s.id==="konami"),0,
 );
 Object.assign(HINTS,{
   ein:"The smartest crew member on the Bebop is a corgi. Say his name.",
+  justwho:"A big brother in shades yells a question that's really an answer: just who the hell…?",
+  rowrow:"The battle chant from a certain drill anime's hype song. Row, row…",
+  kickreason:"The team's motto says to kick something to the curb and do the impossible.",
+  gigadrill:"The finishing move. Giga… what?",
+  gattai:"The Japanese word robots shout when they combine.",
+  pierce:"Your drill is the drill that will… (three words).",
+  believe:"A big brother with a drill says: don't believe in me, and don't believe in yourself… believe in the you that… (finish it).",
   yuri:"The Japanese word for \"lily\" is also the name of a genre about girls in love. Say it.",
   meguca:"Contracting with a certain white creature turns out badly. Being a magical girl is… (say it the meme way).",
   uwa:"Tiny, round, and always a little overwhelmed. Make the little cry they make.",
@@ -8977,8 +9075,11 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.26w";
+const APP_VERSION="2026.09.26x";
 const CHANGELOG=[
+  {v:"2026.09.26x", title:"Spiral power 🌀", items:[
+    "🌀 Seven new secrets are hiding in the chat. Kick reason to the curb, believe in yourself, and you might find them all…",
+  ]},
   {v:"2026.09.26w", title:"Mwah 😘", items:[
     "😘 Say \"mwah\" (or send 😘 / 💋) and a kiss flies from your picture to theirs. In a DM it goes to the other person; in a room, to whoever you're replying to (or whoever spoke last).",
   ]},
