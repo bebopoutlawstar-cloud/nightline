@@ -1133,18 +1133,8 @@ body.theme-pipboy .compose,body.theme-pipboy .top{background:rgba(6,16,8,.92)!im
 .framepick .face{width:40px;height:40px;font-size:18px;display:block}
 .framelabel{white-space:normal;text-align:center;line-height:1.2;max-width:100%;word-break:break-word}
 /* frames */
-.face[class*="frame-"] .fi{outline-offset:2px}
-.face.frame-neon .fi{box-shadow:0 0 0 3px var(--cyan),0 0 14px 4px var(--cyan)}
-.face.frame-glitch .fi{box-shadow:-3px 0 0 var(--cyan),3px 0 0 var(--mag);animation:frglitch 3s steps(2,end) infinite}
 @keyframes frglitch{0%,90%,100%{transform:none}92%{transform:translate(-2px,1px) skewX(6deg)}95%{transform:translate(2px,-1px)}}
-.face.frame-flame::before{content:"";position:absolute;inset:-6px;z-index:-1;background:conic-gradient(from 0deg,#ff3d00,#ffb300,#ff3d00,#ffea00,#ff3d00);clip-path:polygon(10% 0,100% 8%,90% 100%,0 92%);filter:blur(3px);animation:frspin 2s linear infinite}
 @keyframes frspin{to{transform:rotate(360deg)}}
-.face.frame-phantom .fi{box-shadow:0 0 0 3px #FF2E3F,0 0 0 6px #07041A,0 0 0 8px #F4F7FF}
-.face.frame-pixel .fi{box-shadow:0 0 0 3px #fff,0 0 0 6px #07041A;image-rendering:pixelated;clip-path:polygon(0 12%,12% 12%,12% 0,88% 0,88% 12%,100% 12%,100% 88%,88% 88%,88% 100%,12% 100%,12% 88%,0 88%)}
-.face.frame-gold .fi{box-shadow:0 0 0 3px #FFD86B,0 0 16px 4px rgba(255,216,107,.7)}
-.face.frame-gold::after{content:"👑";position:absolute;left:50%;top:-.8em;transform:translateX(-50%);font-size:max(12px,.55em);z-index:3;filter:drop-shadow(0 0 4px #FFD86B)}
-.face.frame-mythic::before{content:"";position:absolute;inset:-5px;z-index:-1;background:conic-gradient(#ff0055,#ffaa00,#aaff00,#00ffaa,#00aaff,#aa00ff,#ff0055);clip-path:polygon(10% 0,100% 8%,90% 100%,0 92%);animation:frspin 3s linear infinite;filter:saturate(1.4)}
-.face.frame-mythic .fi{box-shadow:0 0 12px 3px rgba(255,255,255,.6)}
 .mini-faces .face::before,.mini-faces .face::after,.face.sm::after{display:none}
 /* new themes */
 body.theme-redrum{--night:#0a0102;--deep:#1c0508;--white:#ffe9e9;--muted:#b06a6a}
@@ -1666,8 +1656,6 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .sl-rankt{font-family:var(--num);font-size:clamp(32px,11vw,52px);color:var(--volt)}
 .sl-arcana{font-family:var(--num);font-size:clamp(20px,7vw,30px);color:#fff;margin-top:2px}
 .sl-sub{font-family:var(--tech);font-size:13px;color:var(--cyan);margin-top:4px}
-.face.frame-guts .fi{box-shadow:0 0 0 3px #ff7a1a,0 0 14px 4px rgba(255,122,26,.7)}
-.face.frame-bonded .fi{box-shadow:0 0 0 3px #ff5aa8,0 0 14px 4px rgba(255,90,168,.7)}
 /* ===== full-screen Arcana reveal ===== */
 .arcana-reveal{position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,rgba(60,20,90,.55),rgba(7,4,26,.94));animation:sxfadein .3s ease both;perspective:1000px}
 /* the drop-in entrance and the flip must NOT both animate `transform` on the same element —
@@ -2066,6 +2054,55 @@ body.desktop .deskdate .blink{animation:sxblink 1s steps(1) infinite}
 .sl-meaning{width:100%;text-align:left;border-top:2px dashed #3b2d80;padding-top:10px;display:grid;gap:6px}
 .sl-meaning b{font-family:var(--tech);font-size:12px;color:var(--cyan);letter-spacing:.5px}
 .sl-meaning p{margin:0;font-size:15px;line-height:1.4;color:var(--white)}.sl-meaning .sl-grow{font-size:13px;color:var(--muted)}
+/* ===== Profile frames =====
+   The picture itself (.fi) is cropped to the slanted card shape, and that crop cuts off anything drawn on it,
+   so frames live on the outer .face: ::before is the border ring, ::after is an extra (flames, badges, ghosts). */
+.face[class*="frame-"]{isolation:isolate}
+.face[class*="frame-"] .fi{z-index:1}
+.face[class*="frame-"]::before{content:"";position:absolute;inset:calc(-1 * max(3px,7%));z-index:0;clip-path:polygon(10% 0,100% 8%,90% 100%,0 92%);background:var(--fr,#fff);pointer-events:none}
+.face[class*="frame-"]::after{pointer-events:none}
+/* neon ring */
+.face.frame-neon{--fr:var(--cyan);animation:frneon 2.2s ease-in-out infinite}
+@keyframes frneon{0%,100%{filter:drop-shadow(0 0 3px var(--cyan))}50%{filter:drop-shadow(0 0 9px var(--cyan)) drop-shadow(0 0 3px #fff)}}
+/* glitch */
+.face.frame-glitch{--fr:linear-gradient(90deg,var(--cyan),var(--mag))}
+.face.frame-glitch::after{content:"";position:absolute;inset:calc(-1 * max(3px,7%));z-index:-1;clip-path:polygon(10% 0,100% 8%,90% 100%,0 92%);background:var(--mag);opacity:.7;animation:frghost 2.6s steps(1,end) infinite}
+.face.frame-glitch .fi{animation:frglitch 3s steps(2,end) infinite}
+@keyframes frghost{0%{transform:translate(3px,-2px)}20%{transform:translate(-3px,2px);background:var(--cyan)}40%{transform:translate(2px,2px)}60%{transform:translate(-2px,-3px);background:var(--mag)}80%{transform:translate(4px,0)}}
+@keyframes frglitch{0%,90%,100%{transform:none}92%{transform:translate(-2px,1px) skewX(6deg)}95%{transform:translate(2px,-1px)}}
+/* flame */
+.face.frame-flame{--fr:linear-gradient(0deg,#ff2a00,#ff7a00,#ffd000,#ff7a00,#ff2a00);filter:drop-shadow(0 0 5px #ff6a00)}
+.face.frame-flame::before{background-size:100% 300%;animation:frfire 1.2s linear infinite}
+.face.frame-flame::after{content:"";position:absolute;left:4%;right:4%;top:-38%;height:55%;z-index:-1;background:radial-gradient(ellipse at 30% 100%,#ffb300 0 30%,transparent 60%),radial-gradient(ellipse at 70% 100%,#ff5a00 0 30%,transparent 62%),radial-gradient(ellipse at 50% 100%,#ffe066 0 22%,transparent 55%);filter:blur(2px);transform-origin:50% 100%;animation:frlick .5s ease-in-out infinite alternate}
+@keyframes frfire{to{background-position:0 -300%}}
+@keyframes frlick{from{transform:scaleY(.8) skewX(-4deg)}to{transform:scaleY(1.15) skewX(4deg)}}
+/* phantom (calling card) */
+.face.frame-phantom{--fr:#FF2E3F;filter:drop-shadow(3px 3px 0 #07041a)}
+.face.frame-phantom::after{content:"";position:absolute;inset:calc(-1 * max(6px,14%));z-index:-1;clip-path:polygon(8% 2%,100% 0,92% 100%,0 96%);background:linear-gradient(135deg,#F4F7FF 0 48%,#07041a 48% 52%,#F4F7FF 52%);transform:rotate(-4deg)}
+/* pixel */
+.face.frame-pixel{--fr:repeating-conic-gradient(#fff 0 25%,#07041a 0 50%) 0 0/8px 8px}
+.face.frame-pixel::before{clip-path:polygon(0 12%,12% 12%,12% 0,88% 0,88% 12%,100% 12%,100% 88%,88% 88%,88% 100%,12% 100%,12% 88%,0 88%)}
+.face.frame-pixel .fi{image-rendering:pixelated;clip-path:polygon(0 12%,12% 12%,12% 0,88% 0,88% 12%,100% 12%,100% 88%,88% 88%,88% 100%,12% 100%,12% 88%,0 88%)}
+/* gold crown */
+.face.frame-gold{--fr:linear-gradient(110deg,#b8860b 0%,#ffd86b 35%,#fff6c8 50%,#ffd86b 65%,#b8860b 100%);filter:drop-shadow(0 0 6px rgba(255,216,107,.8))}
+.face.frame-gold::before{background-size:250% 100%;animation:frshine 2.4s linear infinite}
+.face.frame-gold::after{content:"👑";position:absolute;left:50%;top:-.8em;transform:translateX(-50%) rotate(-8deg);font-size:max(12px,.55em);z-index:3;filter:drop-shadow(0 0 4px #FFD86B)}
+@keyframes frshine{from{background-position:100% 0}to{background-position:-150% 0}}
+/* mythic */
+.face.frame-mythic{--fr:conic-gradient(#ff0055,#ffaa00,#aaff00,#00ffaa,#00aaff,#aa00ff,#ff0055);filter:drop-shadow(0 0 5px rgba(255,255,255,.7))}
+.face.frame-mythic::before{animation:frmyth 3s linear infinite}   /* only the border shifts color, never the picture */
+.face.frame-mythic::after{content:"✨";position:absolute;right:-.35em;top:-.45em;font-size:max(11px,.45em);z-index:3;animation:frtwinkle 1.6s ease-in-out infinite}
+@keyframes frmyth{from{filter:hue-rotate(0deg)}to{filter:hue-rotate(360deg)}}
+@keyframes frtwinkle{0%,100%{transform:scale(.6) rotate(0);opacity:.5}50%{transform:scale(1.15) rotate(20deg);opacity:1}}
+/* blazing (guts) */
+.face.frame-guts{--fr:linear-gradient(160deg,#ffcf3a,#ff7a1a 45%,#c81e00);animation:frember 1.4s ease-in-out infinite}
+.face.frame-guts::after{content:"🔥";position:absolute;right:-.35em;bottom:-.35em;font-size:max(11px,.45em);z-index:3}
+@keyframes frember{0%,100%{filter:drop-shadow(0 0 3px #ff7a1a)}50%{filter:drop-shadow(0 0 10px #ff4a00)}}
+/* bonded */
+.face.frame-bonded{--fr:linear-gradient(135deg,#ff9ccc,#ff5aa8 50%,#d9267a);filter:drop-shadow(0 0 5px rgba(255,90,168,.7))}
+.face.frame-bonded::after{content:"💞";position:absolute;right:-.35em;top:-.4em;font-size:max(11px,.45em);z-index:3;animation:frbeat 1.2s ease-in-out infinite}
+@keyframes frbeat{0%,100%{transform:scale(1)}15%{transform:scale(1.25)}30%{transform:scale(1)}45%{transform:scale(1.18)}}
+@media (prefers-reduced-motion:reduce){.face[class*="frame-"],.face[class*="frame-"]::before,.face[class*="frame-"]::after,.face[class*="frame-"] .fi{animation:none!important}}
 </style>
 </head>
 <body>
@@ -8660,8 +8697,12 @@ $("slClose").onclick=()=>show($("slSheet"),false);
 /* ================= WHAT'S NEW =================
    HOW TO SHIP AN UPDATE: bump APP_VERSION and add a new entry at the TOP of CHANGELOG.
    Everyone who opens the app afterwards sees every entry they haven't seen yet, once. */
-const APP_VERSION="2026.09.26n";
+const APP_VERSION="2026.09.26o";
 const CHANGELOG=[
+  {v:"2026.09.26o", title:"Frames fixed ✨", items:[
+    "🖼️ Profile frames actually show up now, and they all got an upgrade: neon glow, RGB glitch, real flames, calling-card layers, 8-bit pixels, shining gold, a rainbow Mythic, and more.",
+    "🙌 Thanks to Han for the reminder!",
+  ]},
   {v:"2026.09.26n", title:"What's my Arcana mean? 🃏", items:[
     "🃏 Tap any Arcana, yours in Profile or a friend's on their card, to see what it means: what the card stands for in tarot, what it says about the person, their superpower, and their blind spot.",
     "🤝 Your Social Bonds explain themselves too: open one to see what its card says about your friendship.",
